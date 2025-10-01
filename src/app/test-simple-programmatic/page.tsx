@@ -13,7 +13,7 @@ export default function TestSimpleProgrammaticPage() {
           <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
             <Link href="/" className="hover:text-red-600">Home</Link>
             <span>/</span>
-            <a href="/breweries" className="hover:text-red-600">Breweries</a>
+            <Link href="/city" className="hover:text-red-600">Breweries</Link>
             <span>/</span>
             <span className="text-gray-900 font-medium">Baltimore</span>
           </nav>
@@ -90,12 +90,12 @@ export default function TestSimpleProgrammaticPage() {
                       </div>
                     </div>
                     <div className="ml-4">
-                      <a
+                      <Link
                         href="/breweries/test-brewery-1"
                         className="inline-flex items-center justify-center rounded-md font-medium transition-colors h-8 px-3 text-sm bg-red-600 text-white hover:bg-red-700"
                       >
                         View Details
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -132,12 +132,12 @@ export default function TestSimpleProgrammaticPage() {
                       </div>
                     </div>
                     <div className="ml-4">
-                      <a
+                      <Link
                         href="/breweries/test-brewery-2"
                         className="inline-flex items-center justify-center rounded-md font-medium transition-colors h-8 px-3 text-sm bg-red-600 text-white hover:bg-red-700"
                       >
                         View Details
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -163,20 +163,20 @@ export default function TestSimpleProgrammaticPage() {
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Related Pages</h3>
               <div className="space-y-3">
-                <a
-                  href="/breweries/annapolis"
+                <Link
+                  href="/city/annapolis/breweries"
                   className="block p-3 rounded-lg border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-colors"
                 >
                   <div className="font-medium text-gray-900">Breweries in Annapolis</div>
                   <div className="text-sm text-gray-600 mt-1">Discover breweries in Annapolis, MD</div>
-                </a>
-                <a
-                  href="/breweries/microbrewery"
+                </Link>
+                <Link
+                  href="/type/microbrewery"
                   className="block p-3 rounded-lg border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-colors"
                 >
                   <div className="font-medium text-gray-900">Microbreweries in Maryland</div>
                   <div className="text-sm text-gray-600 mt-1">Explore microbreweries across Maryland</div>
-                </a>
+                </Link>
               </div>
             </div>
           </div>

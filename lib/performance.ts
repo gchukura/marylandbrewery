@@ -22,13 +22,17 @@ export function createIntersectionObserver(
   return () => observer.disconnect();
 }
 
-// Prefetch a list of routes (client-side). Use sparingly for common nav.
-export async function prefetchRoutes(paths: string[]) {
-  if (typeof window === 'undefined') return;
-  try {
-    const { prefetch } = await import('next/navigation');
-    paths.forEach((p) => {
-      try { prefetch(p); } catch {}
-    });
-  } catch {}
+// Prefetch a list of routes by injecting <link rel="prefetch"> tags (App Router safe)
+export function prefetchRoutes(paths: string[]) {
+  if (typeof document === 'undefined') return;
+  for (const p of paths) {
+    try {
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = p;
+      // Best-effort hint; some browsers support as=document for navigations
+      link.as = 'document' as any;
+      document.head.appendChild(link);
+    } catch {}
+  }
 }

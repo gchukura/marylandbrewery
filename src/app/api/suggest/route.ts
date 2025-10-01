@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getProcessedBreweryData } from '@/lib/brewery-data';
+import { getProcessedBreweryData } from '../../../../lib/brewery-data';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);

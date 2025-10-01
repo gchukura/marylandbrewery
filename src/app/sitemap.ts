@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
-import { getProcessedBreweryData, getAllCities } from '../lib/brewery-data';
-import { slugify } from '@/lib/data-utils';
+import { getProcessedBreweryData, getAllCities } from '../../lib/brewery-data';
+import { slugify } from '../../lib/data-utils';
 
 const BASE_URL = 'https://marylandbrewery.com';
 const AMENITY_SLUGS = [

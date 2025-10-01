@@ -224,11 +224,29 @@ export async function getBreweryDataFromSheets(): Promise<Brewery[]> {
       throw new Error('No data found in Google Sheets');
     }
 
+    // Get headers and create column index map
+    const headers = rows[0];
+    const columnIndex = (headerName: string) => {
+      const index = headers.findIndex((header: any) => 
+        header?.toString().toLowerCase().includes(headerName.toLowerCase())
+      );
+      return index >= 0 ? index : -1;
+    };
+
     // Skip header row and process data
     const dataRows = rows.slice(1);
     const breweries: Brewery[] = [];
 
     console.log(`Processing ${dataRows.length} brewery records...`);
+    console.log('Column mapping:', {
+      id: columnIndex('id'),
+      name: columnIndex('name'),
+      phone: columnIndex('phone'),
+      latitude: columnIndex('latitude'),
+      longitude: columnIndex('longitude'),
+      website: columnIndex('website'),
+      amenities: columnIndex('amenities'),
+    });
 
     for (let i = 0; i < dataRows.length; i++) {
       try {
@@ -237,53 +255,59 @@ export async function getBreweryDataFromSheets(): Promise<Brewery[]> {
         // Skip empty rows
         if (!row[0] || row[0].toString().trim() === '') continue;
 
-        // Parse coordinates correctly (latitude is column 10, longitude is column 11)
-        const latitude = row[10] ? parseFloat(row[10].toString()) : 0;
-        const longitude = row[11] ? parseFloat(row[11].toString()) : 0;
+        // Helper function to get column value safely
+        const getColumn = (headerName: string) => {
+          const index = columnIndex(headerName);
+          return index >= 0 ? row[index] : undefined;
+        };
+
+        // Parse coordinates using dynamic lookup
+        const latitude = getColumn('latitude') ? parseFloat(getColumn('latitude').toString()) : 0;
+        const longitude = getColumn('longitude') ? parseFloat(getColumn('longitude').toString()) : 0;
         
         const brewery: Brewery = {
           // Core identification
-          id: row[0]?.toString().trim() || `brewery-${i}`,
-          name: row[1]?.toString().trim() || 'Unknown Brewery',
-          slug: generateSlug(row[1]?.toString().trim() || 'unknown-brewery'),
-          description: row[2]?.toString().trim() || undefined,
-          type: parseBreweryType(row[3]),
+          id: getColumn('id')?.toString().trim() || `brewery-${i}`,
+          name: getColumn('name')?.toString().trim() || 'Unknown Brewery',
+          slug: generateSlug(getColumn('name')?.toString().trim() || 'unknown-brewery'),
+          description: getColumn('description')?.toString().trim() || undefined,
+          type: parseBreweryType(getColumn('type')),
           
           // Location information
-          street: row[4]?.toString().trim() || '',
-          city: row[5]?.toString().trim() || '',
-          state: row[6]?.toString().trim() || 'MD',
-          zip: row[7]?.toString().trim() || '',
-          county: row[8]?.toString().trim() || '',
+          street: getColumn('street')?.toString().trim() || '',
+          city: getColumn('city')?.toString().trim() || '',
+          state: getColumn('state')?.toString().trim() || 'MD',
+          zip: getColumn('zip')?.toString().trim() || '',
+          county: getColumn('county')?.toString().trim() || '',
           latitude: latitude,
           longitude: longitude,
           
           // Contact information
-          phone: row[9]?.toString().trim() || undefined,
-          website: row[12]?.toString().trim() || undefined,
-          socialMedia: parseSocialMedia(row[13]),
+          phone: getColumn('phone')?.toString().trim() || undefined,
+          website: getColumn('website')?.toString().trim() || undefined,
+          socialMedia: parseSocialMedia(getColumn('facebook') || getColumn('instagram') || getColumn('twitter')),
           
-          // Operating hours (columns 15-21: sunday through saturday)
+          // Operating hours (will be empty for now, can be enhanced later)
           hours: {
-            sunday: row[15]?.toString().trim() || undefined,
-            monday: row[16]?.toString().trim() || undefined,
-            tuesday: row[17]?.toString().trim() || undefined,
-            wednesday: row[18]?.toString().trim() || undefined,
-            thursday: row[19]?.toString().trim() || undefined,
-            friday: row[20]?.toString().trim() || undefined,
-            saturday: row[21]?.toString().trim() || undefined,
+            sunday: undefined,
+            monday: undefined,
+            tuesday: undefined,
+            wednesday: undefined,
+            thursday: undefined,
+            friday: undefined,
+            saturday: undefined,
           },
           
-          // Features and amenities (column 22)
-          amenities: parseCommaSeparated(row[22]),
-          allowsVisitors: parseBoolean(row[23]),
-          offersTours: parseBoolean(row[24]),
-          beerToGo: parseBoolean(row[25]),
-          hasMerch: parseBoolean(row[26]),
-          memberships: parseMemberships(row[27]),
+          // Features and amenities
+          amenities: parseCommaSeparated(getColumn('amenities')),
+          allowsVisitors: parseBoolean(getColumn('allows_visitors')),
+          offersTours: parseBoolean(getColumn('offers_tours')),
+          beerToGo: parseBoolean(getColumn('beer_to_go')),
+          hasMerch: parseBoolean(getColumn('has_merch')),
+          memberships: parseMemberships(getColumn('memberships')),
           
           // Metadata
-          openedDate: row[28]?.toString().trim() || undefined,
+          openedDate: getColumn('opened_date')?.toString().trim() || undefined,
           lastUpdated: new Date().toISOString(),
         };
 

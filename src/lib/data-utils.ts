@@ -3,7 +3,7 @@
  * Utility functions for data processing, formatting, and calculations
  */
 
-import { Brewery, OperatingHours } from '../types/brewery';
+import { Brewery } from '../types/brewery';
 
 /**
  * Convert string to URL-friendly slug
@@ -36,7 +36,8 @@ export function isOpenNow(brewery: Brewery): boolean {
   const currentTime = formatTime(now);
   
   const hours = brewery.hours;
-  const todayHours = hours[currentDay as keyof OperatingHours];
+  if (!hours) return false;
+  const todayHours = hours[currentDay as keyof typeof hours];
   
   if (!todayHours || todayHours.toLowerCase().includes('closed')) {
     return false;
@@ -54,7 +55,8 @@ export function isOpenNow(brewery: Brewery): boolean {
  */
 export function isOpenOnDay(brewery: Brewery, dayName: string): boolean {
   const hours = brewery.hours;
-  const dayHours = hours[dayName.toLowerCase() as keyof OperatingHours];
+  if (!hours) return false;
+  const dayHours = hours[dayName.toLowerCase() as keyof typeof hours];
   
   if (!dayHours || dayHours.toLowerCase().includes('closed')) {
     return false;
@@ -72,7 +74,8 @@ export function getNextOpeningTime(brewery: Brewery): { day: string; time: strin
   const currentDay = now.getDay();
   
   // Check today first
-  const todayHours = brewery.hours[days[currentDay] as keyof OperatingHours];
+  if (!brewery.hours) return null;
+  const todayHours = brewery.hours[days[currentDay] as keyof typeof brewery.hours];
   if (todayHours && !todayHours.toLowerCase().includes('closed')) {
     const timeRange = parseTimeRange(todayHours);
     if (timeRange && isTimeInRange(formatTime(now), timeRange.open, timeRange.close)) {
@@ -84,7 +87,7 @@ export function getNextOpeningTime(brewery: Brewery): { day: string; time: strin
   for (let i = 1; i <= 7; i++) {
     const nextDayIndex = (currentDay + i) % 7;
     const nextDay = days[nextDayIndex];
-    const nextDayHours = brewery.hours[nextDay as keyof OperatingHours];
+    const nextDayHours = brewery.hours[nextDay as keyof typeof brewery.hours];
     
     if (nextDayHours && !nextDayHours.toLowerCase().includes('closed')) {
       const timeRange = parseTimeRange(nextDayHours);
@@ -316,17 +319,17 @@ export function filterBreweries(
     }
     
     // County filter
-    if (filters.county && brewery.county.toLowerCase() !== filters.county.toLowerCase()) {
+    if (filters.county && (brewery as any).county?.toLowerCase() !== filters.county.toLowerCase()) {
       return false;
     }
     
     // Type filter
-    if (filters.type && brewery.type.toLowerCase() !== filters.type.toLowerCase()) {
+    if (filters.type && (brewery as any).type?.toLowerCase() !== filters.type.toLowerCase()) {
       return false;
     }
     
     // Amenity filter
-    if (filters.amenity && !brewery.amenities.some(amenity => 
+    if (filters.amenity && !(brewery as any).amenities?.some((amenity: string) => 
       amenity.toLowerCase().includes(filters.amenity!.toLowerCase())
     )) {
       return false;
@@ -348,19 +351,19 @@ export function filterBreweries(
     }
     
     // Feature filters
-    if (filters.allowsVisitors !== undefined && brewery.allowsVisitors !== filters.allowsVisitors) {
+    if (filters.allowsVisitors !== undefined && (brewery as any).allowsVisitors !== filters.allowsVisitors) {
       return false;
     }
     
-    if (filters.offersTours !== undefined && brewery.offersTours !== filters.offersTours) {
+    if (filters.offersTours !== undefined && (brewery as any).offersTours !== filters.offersTours) {
       return false;
     }
     
-    if (filters.beerToGo !== undefined && brewery.beerToGo !== filters.beerToGo) {
+    if (filters.beerToGo !== undefined && (brewery as any).beerToGo !== filters.beerToGo) {
       return false;
     }
     
-    if (filters.hasMerch !== undefined && brewery.hasMerch !== filters.hasMerch) {
+    if (filters.hasMerch !== undefined && (brewery as any).hasMerch !== filters.hasMerch) {
       return false;
     }
     

@@ -3,7 +3,7 @@
  * Types for page templates, filtering, and content management
  */
 
-import { Brewery, ProcessedBreweryData, BreweryType, MarylandCounty, Amenity } from './brewery';
+import { Brewery } from './brewery';
 import { PageMeta, BreadcrumbItem, RelatedPage } from './seo';
 
 /**
@@ -12,7 +12,7 @@ import { PageMeta, BreadcrumbItem, RelatedPage } from './seo';
 export interface PageTemplateProps {
   // Core data
   breweries: Brewery[];
-  processedData: ProcessedBreweryData;
+  processedData: any; // TODO: Define proper type
   
   // SEO and metadata
   meta: PageMeta;
@@ -64,28 +64,28 @@ export interface CityPageProps extends PageTemplateProps {
  * County listing page props
  */
 export interface CountyPageProps extends PageTemplateProps {
-  county: MarylandCounty;
+  county: string;
   breweriesInCounty: Brewery[];
   citiesInCounty: string[];
-  nearbyCounties: MarylandCounty[];
+  nearbyCounties: string[];
 }
 
 /**
  * Amenity listing page props
  */
 export interface AmenityPageProps extends PageTemplateProps {
-  amenity: Amenity;
+  amenity: string;
   breweriesWithAmenity: Brewery[];
-  relatedAmenities: Amenity[];
+  relatedAmenities: string[];
 }
 
 /**
  * Type listing page props
  */
 export interface TypePageProps extends PageTemplateProps {
-  type: BreweryType;
+  type: string;
   breweriesOfType: Brewery[];
-  relatedTypes: BreweryType[];
+  relatedTypes: string[];
 }
 
 /**
@@ -106,7 +106,7 @@ export interface SearchPageProps extends PageTemplateProps {
 export interface FilterState {
   // Location filters
   city?: string;
-  county?: MarylandCounty;
+  county?: string;
   state?: string;
   zipCode?: string;
   radius?: number; // in miles
@@ -114,10 +114,10 @@ export interface FilterState {
   centerLng?: number;
   
   // Brewery type filters
-  types: BreweryType[];
+  types: string[];
   
   // Amenity filters
-  amenities: Amenity[];
+  amenities: string[];
   
   // Feature filters
   features: {
@@ -265,10 +265,10 @@ export interface ContentManager {
 export interface ContentGenerator {
   // Page generation
   generateBreweryPages: (breweries: Brewery[]) => Promise<BreweryPageProps[]>;
-  generateCityPages: (cities: string[], processedData: ProcessedBreweryData) => Promise<CityPageProps[]>;
-  generateCountyPages: (counties: MarylandCounty[], processedData: ProcessedBreweryData) => Promise<CountyPageProps[]>;
-  generateAmenityPages: (amenities: Amenity[], processedData: ProcessedBreweryData) => Promise<AmenityPageProps[]>;
-  generateTypePages: (types: BreweryType[], processedData: ProcessedBreweryData) => Promise<TypePageProps[]>;
+  generateCityPages: (cities: string[], processedData: any) => Promise<CityPageProps[]>;
+  generateCountyPages: (counties: string[], processedData: any) => Promise<CountyPageProps[]>;
+  generateAmenityPages: (amenities: string[], processedData: any) => Promise<AmenityPageProps[]>;
+  generateTypePages: (types: string[], processedData: any) => Promise<TypePageProps[]>;
   
   // Content optimization
   optimizeContent: (content: string, keywords: string[]) => string;

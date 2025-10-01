@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Maryland flag subtle background (5% opacity) */
+.@layer utilities {
+  .bg-md-flag {
+    background-image: url('/md-flag.svg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.05;
+  }
+}
+
+@layer components {
+  /* Card styles */
+  .card {
+    @apply bg-white rounded-card shadow-card border border-gray-100 p-card-padding; 
+  }
+  .card-hover:hover {
+    @apply shadow-card-hover;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center font-medium rounded-btn px-4 py-2 transition-colors;
+  }
+  .btn-primary-gold {
+    @apply btn bg-md-gold text-md-black hover:bg-yellow-400;
+  }
+  .btn-secondary-red {
+    @apply btn bg-md-red text-white hover:bg-red-600;
+  }
+  .btn-outline {
+    @apply btn border border-gray-300 text-gray-800 hover:bg-gray-50;
+  }
+
+  /* Status badges */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold;
+  }
+  .badge-open {
+    @apply badge bg-status-open/10 text-status-open border border-status-open/20;
+  }
+  .badge-closed {
+    @apply badge bg-status-closed/10 text-status-closed border border-status-closed/20;
+  }
+  .badge-coming {
+    @apply badge bg-status-coming/10 text-status-coming border border-status-coming/20;
+  }
+
+  /* Loading skeleton */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+  .skeleton-line {
+    @apply h-4 bg-gray-200 rounded w-full;
+  }
+}

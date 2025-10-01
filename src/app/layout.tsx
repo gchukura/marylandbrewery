@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import "./globals.css";
+import "@/styles/design-system.css";
 
 // Revalidate every hour for ISR
 export const revalidate = 3600;

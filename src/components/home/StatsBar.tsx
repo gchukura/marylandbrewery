@@ -1,18 +1,22 @@
-import HeroSection from '@/components/home/HeroSection';
+import React from 'react';
 import PageContainer from '@/components/layout/PageContainer';
-import { getProcessedBreweryData } from '../../lib/brewery-data';
+import StatsBarClient from './StatsBarClient';
+import { getProcessedBreweryData } from '../../../lib/brewery-data';
 
-export default async function HomePage() {
+async function getStats() {
   const processed = await getProcessedBreweryData();
   const total = processed.breweries.length;
   const counties = processed.counties?.length || new Set(processed.breweries.map(b => (b as any).county)).size;
   const cities = processed.cities?.length || new Set(processed.breweries.map(b => b.city)).size;
+  return { total, counties, cities };
+}
 
+export default async function StatsBar() {
+  const { total, counties, cities } = await getStats();
   return (
-    <div className="space-y-section-y">
-      <HeroSection stats={{ total, counties, cities }} />
+    <div className="w-full">
       <PageContainer>
-        {/* Additional homepage sections can go here using SectionHeader/GridContainer */}
+        <StatsBarClient total={total} counties={counties} cities={cities} />
       </PageContainer>
     </div>
   );

@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { getAllCities, getProcessedBreweryData } from '../../../lib/brewery-data';
 import { slugify } from '@/lib/data-utils';
+import PageContainer from '@/components/layout/PageContainer';
+import SectionHeader from '@/components/layout/SectionHeader';
+import GridContainer from '@/components/layout/GridContainer';
 
 const REGIONS: Record<string, string[]> = {
   'Western Maryland': ['Cumberland', 'Hagerstown', 'Frederick'],
@@ -39,31 +42,31 @@ export default async function CitiesIndexPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold mb-6">Maryland Cities with Breweries</h1>
-      <p className="text-gray-600 mb-8">Browse all cities in Maryland with breweries. Click a city to see all breweries in that area.</p>
+    <PageContainer>
+      <SectionHeader
+        title="Maryland Cities with Breweries"
+        subtitle="Browse all cities in Maryland with brewery counts."
+      />
 
       <div className="space-y-10">
         {Object.entries(grouped).map(([region, list]) => (
           <section key={region}>
-            <h2 className="text-2xl font-semibold mb-4">{region}</h2>
+            <h3 className="text-h3 font-semibold mb-4">{region}</h3>
             {list.length === 0 ? (
               <p className="text-gray-500">No cities in this region.</p>
             ) : (
-              <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <GridContainer>
                 {list.map(({ city, count }) => (
-                  <li key={city} className="border rounded-md p-4 hover:shadow transition">
-                    <Link href={`/city/${slugify(city)}/breweries`} className="flex items-center justify-between">
-                      <span className="font-medium">{city}</span>
-                      <span className="text-sm text-gray-600">{count}</span>
-                    </Link>
-                  </li>
+                  <Link key={city} href={`/city/${slugify(city)}/breweries`} className="card card-hover flex items-center justify-between">
+                    <span className="font-medium text-gray-900">{city}</span>
+                    <span className="text-sm text-gray-600">{count}</span>
+                  </Link>
                 ))}
-              </ul>
+              </GridContainer>
             )}
           </section>
         ))}
       </div>
-    </div>
+    </PageContainer>
   );
 }

@@ -28,6 +28,7 @@ export default function MapboxMap({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<any>(null);
   const markers = useRef<any[]>([]);
+  const mapboxRef = useRef<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -38,6 +39,7 @@ export default function MapboxMap({
       try {
         // Dynamically import mapbox-gl
         const mapboxgl = (await import('mapbox-gl')).default;
+        mapboxRef.current = mapboxgl;
         
         // Set access token
         mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
@@ -77,7 +79,9 @@ export default function MapboxMap({
   }, []);
 
   const addBreweryMarkers = () => {
-    if (!map.current || !isLoaded) return;
+    if (!map.current || !isLoaded || !mapboxRef.current) return;
+
+    const mapboxgl = mapboxRef.current;
 
     // Clear existing markers
     markers.current.forEach(marker => marker.remove());
@@ -107,7 +111,7 @@ export default function MapboxMap({
         el.innerHTML = '🍺';
 
         // Create popup
-        const popup = new (window as any).mapboxgl.Popup({
+        const popup = new mapboxgl.Popup({
           offset: 25,
           closeButton: true,
           closeOnClick: false,
@@ -119,7 +123,7 @@ export default function MapboxMap({
             ${brewery.phone ? `<p class="text-xs text-blue-600 mt-1">${brewery.phone}</p>` : ''}
             <div class="mt-2">
               <a 
-                href="/breweries/${(brewery as any).slug || brewery.id}" 
+                href="/breweries/${(brewery as any).slug || brewery.id}"
                 class="inline-block bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700 transition-colors"
               >
                 View Details
@@ -129,7 +133,7 @@ export default function MapboxMap({
         `);
 
         // Create marker
-        const marker = new (window as any).mapboxgl.Marker(el)
+        const marker = new mapboxgl.Marker(el)
           .setLngLat([brewery.longitude, brewery.latitude])
           .setPopup(popup)
           .addTo(map.current);
@@ -147,7 +151,7 @@ export default function MapboxMap({
 
     // Fit map to show all breweries if no center is specified
     if (!center && breweries.length > 0) {
-      const bounds = new (window as any).mapboxgl.LngLatBounds();
+      const bounds = new mapboxgl.LngLatBounds();
       breweries.forEach(brewery => {
         if (brewery.latitude && brewery.longitude) {
           bounds.extend([brewery.longitude, brewery.latitude]);

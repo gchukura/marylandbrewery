@@ -20,15 +20,41 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Get brewery data from Google Sheets
     const breweries = await getAllBreweryData();
     
+    // Transform data to match frontend expectations
+    const transformedBreweries = breweries.map(brewery => ({
+      id: brewery.id,
+      name: brewery.name,
+      address: brewery.street,
+      city: brewery.city,
+      state: brewery.state,
+      zipCode: brewery.zip,
+      county: brewery.county, // Add county field
+      type: brewery.type, // Add type field
+      phone: brewery.phone,
+      website: brewery.website?.startsWith('http') ? brewery.website : `https://${brewery.website}`,
+      email: undefined, // Not in Google Sheets
+      description: brewery.description,
+      latitude: brewery.latitude,
+      longitude: brewery.longitude,
+      established: brewery.openedDate,
+      hours: brewery.hours,
+      features: brewery.amenities,
+      socialMedia: brewery.socialMedia,
+      images: [], // Not in Google Sheets
+      isActive: true, // Assume all are active
+      createdAt: brewery.lastUpdated,
+      updatedAt: brewery.lastUpdated,
+    }));
+    
     // Apply filters
-    let filteredBreweries = breweries.filter((brewery) => {
+    let filteredBreweries = transformedBreweries.filter((brewery) => {
       if (city && brewery.city.toLowerCase() !== city.toLowerCase()) return false;
-      if (county && brewery.county.toLowerCase() !== county.toLowerCase()) return false;
-      if (type && brewery.type.toLowerCase() !== type.toLowerCase()) return false;
-      if (amenity && !brewery.amenities.some(a => a.toLowerCase().includes(amenity.toLowerCase()))) return false;
+      if (county && brewery.county?.toLowerCase() !== county.toLowerCase()) return false;
+      if (type && brewery.type?.toLowerCase() !== type.toLowerCase()) return false;
+      if (amenity && !brewery.features?.some(a => a.toLowerCase().includes(amenity.toLowerCase()))) return false;
       if (search && !brewery.name.toLowerCase().includes(search.toLowerCase()) && 
           !brewery.city.toLowerCase().includes(search.toLowerCase()) &&
-          !brewery.county.toLowerCase().includes(search.toLowerCase())) return false;
+          !brewery.county?.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
 
@@ -55,7 +81,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const endIndex = startIndex + limit;
     const paginatedBreweries = filteredBreweries.slice(startIndex, endIndex);
 
-    const response: ApiResponse<PaginatedResponse<typeof breweries[0]>> = {
+    const response: ApiResponse<PaginatedResponse<typeof transformedBreweries[0]>> = {
       success: true,
       data: {
         data: paginatedBreweries,

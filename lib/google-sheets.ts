@@ -136,20 +136,6 @@ function parseSocialMedia(socialMediaString: string | undefined): SocialMedia {
   return socialMedia;
 }
 
-/**
- * Parse operating hours from individual day columns
- */
-function parseOperatingHours(row: any[]): OperatingHours {
-  return {
-    sunday: row[15]?.toString().trim() || undefined,
-    monday: row[16]?.toString().trim() || undefined,
-    tuesday: row[17]?.toString().trim() || undefined,
-    wednesday: row[18]?.toString().trim() || undefined,
-    thursday: row[19]?.toString().trim() || undefined,
-    friday: row[20]?.toString().trim() || undefined,
-    saturday: row[21]?.toString().trim() || undefined,
-  };
-}
 
 /**
  * Parse memberships from comma-separated string
@@ -168,12 +154,17 @@ function parseMemberships(membershipsString: string | undefined): Membership[] {
 }
 
 /**
- * Parse boolean values from string
+ * Parse boolean values from string with more comprehensive checking
  */
 function parseBoolean(value: string | undefined): boolean {
   if (!value) return false;
   const lowerValue = value.toLowerCase().trim();
-  return lowerValue === 'true' || lowerValue === 'yes' || lowerValue === '1';
+  return lowerValue === 'true' || 
+         lowerValue === 'yes' || 
+         lowerValue === '1' || 
+         lowerValue === 'y' ||
+         lowerValue === 'on' ||
+         lowerValue === 'enabled';
 }
 
 /**
@@ -205,15 +196,6 @@ function parseBreweryType(typeString: string | undefined): BreweryType {
   }
 }
 
-/**
- * Parse coordinates from string
- */
-function parseCoordinates(latString: string | undefined, lngString: string | undefined): { latitude: number; longitude: number } {
-  const latitude = latString ? parseFloat(latString) : 0;
-  const longitude = lngString ? parseFloat(lngString) : 0;
-  
-  return { latitude, longitude };
-}
 
 /**
  * Main function to fetch brewery data from Google Sheets
@@ -255,7 +237,9 @@ export async function getBreweryDataFromSheets(): Promise<Brewery[]> {
         // Skip empty rows
         if (!row[0] || row[0].toString().trim() === '') continue;
 
-        const coordinates = parseCoordinates(row[10], row[11]);
+        // Parse coordinates correctly (latitude is column 10, longitude is column 11)
+        const latitude = row[10] ? parseFloat(row[10].toString()) : 0;
+        const longitude = row[11] ? parseFloat(row[11].toString()) : 0;
         
         const brewery: Brewery = {
           // Core identification
@@ -271,18 +255,26 @@ export async function getBreweryDataFromSheets(): Promise<Brewery[]> {
           state: row[6]?.toString().trim() || 'MD',
           zip: row[7]?.toString().trim() || '',
           county: row[8]?.toString().trim() || '',
-          latitude: coordinates.latitude,
-          longitude: coordinates.longitude,
+          latitude: latitude,
+          longitude: longitude,
           
           // Contact information
           phone: row[9]?.toString().trim() || undefined,
           website: row[12]?.toString().trim() || undefined,
           socialMedia: parseSocialMedia(row[13]),
           
-          // Operating hours
-          hours: parseOperatingHours(row),
+          // Operating hours (columns 15-21: sunday through saturday)
+          hours: {
+            sunday: row[15]?.toString().trim() || undefined,
+            monday: row[16]?.toString().trim() || undefined,
+            tuesday: row[17]?.toString().trim() || undefined,
+            wednesday: row[18]?.toString().trim() || undefined,
+            thursday: row[19]?.toString().trim() || undefined,
+            friday: row[20]?.toString().trim() || undefined,
+            saturday: row[21]?.toString().trim() || undefined,
+          },
           
-          // Features and amenities
+          // Features and amenities (column 22)
           amenities: parseCommaSeparated(row[22]),
           allowsVisitors: parseBoolean(row[23]),
           offersTours: parseBoolean(row[24]),

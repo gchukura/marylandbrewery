@@ -190,7 +190,8 @@ export function generateCityDescription(
   breweryCount: number,
   breweries: Brewery[]
 ): string {
-  const cityData = CITY_LANDMARKS[city.toLowerCase()] || {
+  const cityKey = city.toLowerCase() as keyof typeof CITY_LANDMARKS;
+  const cityData = CITY_LANDMARKS[cityKey] || {
     neighborhoods: ['downtown area'],
     landmarks: ['local attractions'],
     economic_facts: ['vibrant community']

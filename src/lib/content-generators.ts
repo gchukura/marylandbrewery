@@ -165,7 +165,8 @@ export function generateCityIntroText(
   breweryCount: number,
   stats: { totalBreweries: number; totalCounties: number; totalTypes: number }
 ): string {
-  const landmarks = MARYLAND_LANDMARKS[city.toLowerCase().replace(/\s+/g, '_')] || [];
+  const cityKey = city.toLowerCase().replace(/\s+/g, '_') as keyof typeof MARYLAND_LANDMARKS;
+  const landmarks = MARYLAND_LANDMARKS[cityKey] || [];
   const landmark = landmarks[Math.floor(Math.random() * landmarks.length)] || 'downtown area';
   
   const cityVariations = {

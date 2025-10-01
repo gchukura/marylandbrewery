@@ -5,7 +5,7 @@
 
 "use client";
 
-import { NextSeo } from 'next-seo';
+// Removed NextSeo to avoid SSR context issues; use page metadata instead
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -111,23 +111,7 @@ export default function SimpleProgrammaticPageTemplate({
 
   return (
     <>
-      <NextSeo
-        title={title}
-        description={metaDescription}
-        canonical={`https://marylandbrewery.com${typeof window !== 'undefined' ? window.location.pathname : ''}`}
-        openGraph={{
-          title,
-          description: metaDescription,
-          type: 'website',
-          url: `https://marylandbrewery.com${typeof window !== 'undefined' ? window.location.pathname : ''}`,
-        }}
-        additionalMetaTags={[
-          {
-            name: 'robots',
-            content: 'index, follow',
-          },
-        ]}
-      />
+      {/* SEO removed; handled at route via generateMetadata */}
 
       {/* Structured Data */}
       <script

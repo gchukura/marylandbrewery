@@ -3,6 +3,8 @@
  * Handles clustering, markers, and interactive features
  */
 
+"use client";
+
 import { useEffect, useRef, useState } from 'react';
 import { Brewery } from '@/types/brewery';
 

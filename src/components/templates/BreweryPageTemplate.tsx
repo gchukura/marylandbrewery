@@ -3,8 +3,10 @@
  * Displays comprehensive brewery information with dynamic status and nearby breweries
  */
 
+"use client";
+
 import { NextSeo } from 'next-seo';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -62,6 +64,11 @@ export default function BreweryPageTemplate({
   relatedPages,
 }: BreweryPageTemplateProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'hours' | 'amenities'>('overview');
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   
   const breweryStatus = getBreweryStatus(brewery);
   const isOpen = isOpenNow(brewery);
@@ -500,13 +507,19 @@ export default function BreweryPageTemplate({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <MapboxMap
-                    breweries={[brewery]}
-                    height="300px"
-                    showClusters={false}
-                    center={[brewery.longitude, brewery.latitude]}
-                    zoom={15}
-                  />
+                  {isClient ? (
+                    <MapboxMap
+                      breweries={[brewery]}
+                      height="300px"
+                      showClusters={false}
+                      center={[brewery.longitude, brewery.latitude]}
+                      zoom={15}
+                    />
+                  ) : (
+                    <div className="h-72 bg-gray-200 rounded-lg flex items-center justify-center">
+                      <div className="text-gray-500">Loading map...</div>
+                    </div>
+                  )}
                   <div className="mt-4 p-3 bg-gray-50 rounded-lg">
                     <p className="text-sm text-gray-600">
                       {(brewery as any).street || 'Address not available'}<br />

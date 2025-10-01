@@ -3,8 +3,10 @@
  * Used for brewery listings by city, county, type, amenity, etc.
  */
 
+"use client";
+
 import { NextSeo } from 'next-seo';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -72,6 +74,11 @@ export default function ProgrammaticPageTemplate({
 }: ProgrammaticPageTemplateProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'name' | 'distance' | 'opened'>('name');
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Generate structured data based on page type
   const generateStructuredData = () => {
@@ -432,11 +439,17 @@ export default function ProgrammaticPageTemplate({
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <MapboxMap
-                      breweries={breweries}
-                      height="400px"
-                      showClusters={true}
-                    />
+                    {isClient ? (
+                      <MapboxMap
+                        breweries={breweries}
+                        height="400px"
+                        showClusters={true}
+                      />
+                    ) : (
+                      <div className="h-96 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <div className="text-gray-500">Loading map...</div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}

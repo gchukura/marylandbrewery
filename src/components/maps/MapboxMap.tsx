@@ -5,6 +5,7 @@
 
 "use client";
 
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect, useRef, useState } from 'react';
 import { Brewery } from '@/types/brewery';
 
@@ -30,47 +31,51 @@ export default function MapboxMap({
   const markers = useRef<any[]>([]);
   const mapboxRef = useRef<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only load on client side
     if (typeof window === 'undefined') return;
 
     const loadMap = async () => {
       try {
-        // Dynamically import mapbox-gl
+        const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+        if (!token) {
+          setErrorMsg('Map is unavailable: missing Mapbox token.');
+          return;
+        }
+
         const mapboxgl = (await import('mapbox-gl')).default;
         mapboxRef.current = mapboxgl;
-        
-        // Set access token
-        mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
+        if (mapboxgl.supported && !mapboxgl.supported()) {
+          setErrorMsg('Map is unavailable: browser not supported.');
+          return;
+        }
+
+        mapboxgl.accessToken = token;
         if (!mapContainer.current) return;
 
-        // Initialize map
         map.current = new mapboxgl.Map({
           container: mapContainer.current,
           style: 'mapbox://styles/mapbox/streets-v12',
-          center: center || [-76.6413, 39.0458], // Center of Maryland
+          center: center || [-76.6413, 39.0458],
           zoom: zoom,
         });
 
-        // Add navigation controls
         map.current.addControl(new mapboxgl.NavigationControl());
 
-        // Wait for map to load
         map.current.on('load', () => {
           setIsLoaded(true);
           addBreweryMarkers();
         });
-
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error loading Mapbox:', error);
+        setErrorMsg('Map failed to load. Please try again later.');
       }
     };
 
     loadMap();
 
-    // Cleanup
     return () => {
       if (map.current) {
         map.current.remove();
@@ -80,17 +85,13 @@ export default function MapboxMap({
 
   const addBreweryMarkers = () => {
     if (!map.current || !isLoaded || !mapboxRef.current) return;
-
     const mapboxgl = mapboxRef.current;
 
-    // Clear existing markers
     markers.current.forEach(marker => marker.remove());
     markers.current = [];
 
-    // Add markers for each brewery
     breweries.forEach((brewery) => {
       if (brewery.latitude && brewery.longitude) {
-        // Create custom marker element
         const el = document.createElement('div');
         el.className = 'brewery-marker';
         el.style.cssText = `
@@ -110,7 +111,6 @@ export default function MapboxMap({
         `;
         el.innerHTML = '🍺';
 
-        // Create popup
         const popup = new mapboxgl.Popup({
           offset: 25,
           closeButton: true,
@@ -132,24 +132,19 @@ export default function MapboxMap({
           </div>
         `);
 
-        // Create marker
         const marker = new mapboxgl.Marker(el)
           .setLngLat([brewery.longitude, brewery.latitude])
           .setPopup(popup)
           .addTo(map.current);
 
-        // Add click handler
         el.addEventListener('click', () => {
-          if (onBreweryClick) {
-            onBreweryClick(brewery);
-          }
+          if (onBreweryClick) onBreweryClick(brewery);
         });
 
         markers.current.push(marker);
       }
     });
 
-    // Fit map to show all breweries if no center is specified
     if (!center && breweries.length > 0) {
       const bounds = new mapboxgl.LngLatBounds();
       breweries.forEach(brewery => {
@@ -161,12 +156,15 @@ export default function MapboxMap({
     }
   };
 
-  // Update markers when breweries change
-  useEffect(() => {
-    if (isLoaded) {
-      addBreweryMarkers();
-    }
-  }, [breweries, isLoaded]);
+  if (errorMsg) {
+    return (
+      <div className="w-full" style={{ height }}>
+        <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center text-sm text-gray-600 px-4">
+          {errorMsg}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">

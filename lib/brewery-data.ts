@@ -14,7 +14,7 @@ import {
   Amenity,
   COMMON_AMENITIES,
   MARYLAND_COUNTIES
-} from '@/types/brewery';
+} from '../types/brewery';
 
 /**
  * Cached function to get all brewery data from Google Sheets

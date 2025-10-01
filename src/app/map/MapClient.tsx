@@ -3,7 +3,13 @@
 import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 
-const MapboxMap = dynamic(() => import('@/components/maps/MapboxMap'), { ssr: false });
+const MapFallback = () => (
+  <div className="h-full w-full bg-gray-200 rounded-lg flex items-center justify-center">
+    <div className="text-gray-500 text-sm">Loading map...</div>
+  </div>
+);
+
+const MapboxMap = dynamic(() => import('@/components/maps/MapboxMap'), { ssr: false, loading: () => <MapFallback /> });
 
 export default function MapClient({ breweries }: { breweries: any[] }) {
   const [city, setCity] = useState('');
@@ -14,10 +20,14 @@ export default function MapClient({ breweries }: { breweries: any[] }) {
     const a = amenity.trim().toLowerCase();
     return breweries.filter((b) => {
       const cityOk = c ? b.city?.toLowerCase().includes(c) : true;
-      const amenityOk = a ? ((b.amenities || b.features || []).some((x: string) => x.toLowerCase().includes(a))) : true;
+      const amenityList: string[] = (b.amenities || b.features || []) as string[];
+      const amenityOk = a ? amenityList.some((x) => x?.toLowerCase().includes(a)) : true;
       return cityOk && amenityOk;
     });
   }, [breweries, city, amenity]);
+
+  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  const tokenMissing = !token || token.trim() === '';
 
   return (
     <div className="fixed inset-0 flex flex-col">
@@ -39,7 +49,13 @@ export default function MapClient({ breweries }: { breweries: any[] }) {
         <div className="text-sm text-gray-600 ml-2">Showing {filtered.length} breweries</div>
       </div>
       <div className="flex-1">
-        <MapboxMap breweries={filtered as any} height="100%" />
+        {tokenMissing ? (
+          <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center text-sm text-gray-600 px-4">
+            Map is unavailable: missing Mapbox token. Set NEXT_PUBLIC_MAPBOX_TOKEN and redeploy.
+          </div>
+        ) : (
+          <MapboxMap breweries={filtered as any} height="100%" />
+        )}
       </div>
     </div>
   );

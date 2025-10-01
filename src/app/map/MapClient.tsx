@@ -30,8 +30,8 @@ export default function MapClient({ breweries }: { breweries: any[] }) {
   const tokenMissing = !token || token.trim() === '';
 
   return (
-    <div className="fixed inset-0 flex flex-col">
-      <div className="p-3 bg-white border-b flex items-center gap-2 z-10">
+    <div className="flex flex-col h-full">
+      <div className="p-3 bg-white border-b flex items-center gap-2">
         <input
           type="text"
           placeholder="Filter by city..."
@@ -48,7 +48,7 @@ export default function MapClient({ breweries }: { breweries: any[] }) {
         />
         <div className="text-sm text-gray-600 ml-2">Showing {filtered.length} breweries</div>
       </div>
-      <div className="flex-1">
+      <div className="flex-1 min-h-[400px]">
         {tokenMissing ? (
           <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center text-sm text-gray-600 px-4">
             Map is unavailable: missing Mapbox token. Set NEXT_PUBLIC_MAPBOX_TOKEN and redeploy.

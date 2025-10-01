@@ -2,6 +2,8 @@
  * Ultra-simple test page without any complex components
  */
 
+import Link from 'next/link';
+
 export default function TestSimpleProgrammaticPage() {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -9,7 +11,7 @@ export default function TestSimpleProgrammaticPage() {
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-6">
           <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
-            <a href="/" className="hover:text-red-600">Home</a>
+            <Link href="/" className="hover:text-red-600">Home</Link>
             <span>/</span>
             <a href="/breweries" className="hover:text-red-600">Breweries</a>
             <span>/</span>

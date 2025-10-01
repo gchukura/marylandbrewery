@@ -47,7 +47,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }));
     
     // Apply filters
-    let filteredBreweries = transformedBreweries.filter((brewery) => {
+    const filteredBreweries = transformedBreweries.filter((brewery) => {
       if (city && brewery.city.toLowerCase() !== city.toLowerCase()) return false;
       if (county && brewery.county?.toLowerCase() !== county.toLowerCase()) return false;
       if (type && brewery.type?.toLowerCase() !== type.toLowerCase()) return false;

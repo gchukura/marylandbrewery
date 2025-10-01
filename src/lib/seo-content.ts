@@ -141,44 +141,44 @@ const AMENITY_SEO_DATA = {
   'Food': {
     value_proposition: 'Complete dining experience with expertly paired craft beer',
     seo_keywords: ['brewpub', 'gastropub', 'craft food', 'beer and food pairing', 'restaurant brewery'],
-    target_audience: 'food enthusiasts', 'date night', 'family dining', 'culinary experiences',
-    economic_impact: 'increased revenue per customer', 'longer visit duration', 'repeat business'
+    target_audience: ['food enthusiasts', 'date night', 'family dining', 'culinary experiences'],
+    economic_impact: ['increased revenue per customer', 'longer visit duration', 'repeat business']
   },
   'Outdoor Seating': {
     value_proposition: 'Fresh air and natural ambiance enhance the craft beer experience',
     seo_keywords: ['patio', 'beer garden', 'outdoor dining', 'al fresco', 'seasonal seating'],
-    target_audience: 'outdoor enthusiasts', 'dog owners', 'families', 'social groups',
-    economic_impact: 'seasonal revenue boost', 'weather-dependent business', 'expanded capacity'
+    target_audience: ['outdoor enthusiasts', 'dog owners', 'families', 'social groups'],
+    economic_impact: ['seasonal revenue boost', 'weather-dependent business', 'expanded capacity']
   },
   'Live Music': {
     value_proposition: 'Entertainment and craft beer create memorable experiences',
     seo_keywords: ['live entertainment', 'music venue', 'concerts', 'entertainment', 'nightlife'],
-    target_audience: 'music lovers', 'entertainment seekers', 'social groups', 'date night',
-    economic_impact: 'increased foot traffic', 'premium pricing', 'event-driven revenue'
+    target_audience: ['music lovers', 'entertainment seekers', 'social groups', 'date night'],
+    economic_impact: ['increased foot traffic', 'premium pricing', 'event-driven revenue']
   },
   'Tours': {
     value_proposition: 'Educational experiences deepen appreciation for craft beer',
     seo_keywords: ['brewery tours', 'educational', 'behind the scenes', 'brewing process', 'learning'],
-    target_audience: 'beer enthusiasts', 'tourists', 'groups', 'educational groups',
-    economic_impact: 'premium experience pricing', 'group bookings', 'educational tourism'
+    target_audience: ['beer enthusiasts', 'tourists', 'groups', 'educational groups'],
+    economic_impact: ['premium experience pricing', 'group bookings', 'educational tourism']
   },
   'Pet Friendly': {
     value_proposition: 'Inclusive experiences for pet owners and their companions',
     seo_keywords: ['dog friendly', 'pet friendly', 'family friendly', 'pets welcome', 'animal friendly'],
-    target_audience: 'pet owners', 'families', 'outdoor enthusiasts', 'community groups',
-    economic_impact: 'expanded customer base', 'community engagement', 'loyalty building'
+    target_audience: ['pet owners', 'families', 'outdoor enthusiasts', 'community groups'],
+    economic_impact: ['expanded customer base', 'community engagement', 'loyalty building']
   },
   'WiFi': {
     value_proposition: 'Remote work flexibility meets craft beer culture',
     seo_keywords: ['remote work', 'WiFi', 'laptop friendly', 'work space', 'digital nomad'],
-    target_audience: 'remote workers', 'digital nomads', 'students', 'professionals',
-    economic_impact: 'extended visit duration', 'off-peak business', 'loyalty programs'
+    target_audience: ['remote workers', 'digital nomads', 'students', 'professionals'],
+    economic_impact: ['extended visit duration', 'off-peak business', 'loyalty programs']
   },
   'Parking': {
     value_proposition: 'Convenient access removes barriers to craft beer enjoyment',
     seo_keywords: ['free parking', 'parking available', 'easy access', 'convenient', 'accessible'],
-    target_audience: 'drivers', 'families', 'accessibility needs', 'convenience seekers',
-    economic_impact: 'increased accessibility', 'customer satisfaction', 'competitive advantage'
+    target_audience: ['drivers', 'families', 'accessibility needs', 'convenience seekers'],
+    economic_impact: ['increased accessibility', 'customer satisfaction', 'competitive advantage']
   }
 };
 
@@ -217,7 +217,8 @@ export function generateCountyEconomicImpact(
   breweryCount: number,
   totalBreweries: number
 ): string {
-  const countyData = COUNTY_ECONOMIC_DATA[county] || {
+  const countyKey = county as keyof typeof COUNTY_ECONOMIC_DATA;
+  const countyData = COUNTY_ECONOMIC_DATA[countyKey] || {
     population: 'diverse population',
     gdp: 'significant economic output',
     industries: ['diverse industries'],
@@ -239,11 +240,12 @@ export function generateAmenityValueProposition(
   breweryCount: number,
   percentage: number
 ): string {
-  const amenityData = AMENITY_SEO_DATA[amenity] || {
+  const amenityKey = amenity as keyof typeof AMENITY_SEO_DATA;
+  const amenityData = AMENITY_SEO_DATA[amenityKey] || {
     value_proposition: 'enhanced experience',
     seo_keywords: ['special features'],
-    target_audience: 'visitors',
-    economic_impact: 'business growth'
+    target_audience: ['visitors'],
+    economic_impact: ['business growth']
   };
 
   const percentageText = percentage > 50 ? 'majority' : percentage > 25 ? 'significant portion' : 'growing number';

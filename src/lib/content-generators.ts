@@ -165,11 +165,11 @@ export function generateCityIntroText(
   breweryCount: number,
   stats: { totalBreweries: number; totalCounties: number; totalTypes: number }
 ): string {
-  const cityKey = city.toLowerCase().replace(/\s+/g, '_') as keyof typeof MARYLAND_LANDMARKS;
-  const landmarks = MARYLAND_LANDMARKS[cityKey] || [];
+  const landmarksKey = city.toLowerCase().replace(/\s+/g, '_') as keyof typeof MARYLAND_LANDMARKS;
+  const landmarks = MARYLAND_LANDMARKS[landmarksKey] || [];
   const landmark = landmarks[Math.floor(Math.random() * landmarks.length)] || 'downtown area';
   
-  const cityVariations = {
+  const cityVariations: Record<string, string[]> = {
     baltimore: [
       `Discover Baltimore's thriving craft beer scene in the heart of Maryland's largest city.`,
       `Explore Baltimore's historic neighborhoods through their local breweries and craft beer culture.`,
@@ -187,7 +187,9 @@ export function generateCityIntroText(
     ]
   };
 
-  const baseIntro = cityVariations[city.toLowerCase()]?.[Math.floor(Math.random() * cityVariations[city.toLowerCase()]?.length || 1)] || 
+  const cityKey = city.toLowerCase();
+  const variations = cityVariations[cityKey] || [];
+  const baseIntro = variations[Math.floor(Math.random() * variations.length)] || 
     `Discover ${city}'s vibrant craft beer scene and local brewing culture.`;
 
   const breweryText = breweryCount === 1 
@@ -207,7 +209,8 @@ export function generateCountyIntroText(
   breweryCount: number,
   stats: { totalBreweries: number; totalCounties: number; totalTypes: number }
 ): string {
-  const countyData = MARYLAND_COUNTIES[county] || {
+  const countyKey = county as keyof typeof MARYLAND_COUNTIES;
+  const countyData = MARYLAND_COUNTIES[countyKey] || {
     population: 'diverse',
     economic_impact: 'vibrant',
     landmarks: [],
@@ -233,7 +236,8 @@ export function generateAmenityIntroText(
   breweryCount: number,
   percentage: number
 ): string {
-  const amenityData = AMENITY_DESCRIPTIONS[amenity] || {
+  const amenityKey = amenity as keyof typeof AMENITY_DESCRIPTIONS;
+  const amenityData = AMENITY_DESCRIPTIONS[amenityKey] || {
     value_prop: 'enhanced experience',
     keywords: ['special features']
   };
@@ -259,10 +263,12 @@ export function generateComboIntroText(
   amenity: string,
   count: number
 ): string {
-  const landmarks = MARYLAND_LANDMARKS[city.toLowerCase().replace(/\s+/g, '_')] || [];
+  const landmarksKey = city.toLowerCase().replace(/\s+/g, '_') as keyof typeof MARYLAND_LANDMARKS;
+  const landmarks = MARYLAND_LANDMARKS[landmarksKey] || [];
   const landmark = landmarks[Math.floor(Math.random() * landmarks.length)] || 'downtown area';
   
-  const amenityData = AMENITY_DESCRIPTIONS[amenity] || {
+  const amenityKey = amenity as keyof typeof AMENITY_DESCRIPTIONS;
+  const amenityData = AMENITY_DESCRIPTIONS[amenityKey] || {
     value_prop: 'enhanced experience',
     keywords: ['special features']
   };
@@ -303,7 +309,8 @@ export function generateLocalInsights(
     ]
   };
 
-  const cityInsights = historicalInsights[city.toLowerCase()] || [
+  const cityKey = city.toLowerCase() as keyof typeof historicalInsights;
+  const cityInsights = historicalInsights[cityKey] || [
     `${city}'s unique character and community spirit are reflected in its local breweries.`,
     `The city's location and demographics create opportunities for diverse brewing styles.`,
     `Local breweries contribute to ${city}'s economic development and community identity.`
@@ -333,13 +340,16 @@ export function getSeasonalInfo(): { season: string; themes: string[]; activitie
   const now = new Date();
   const month = now.getMonth() + 1; // 1-12
   
-  let season: string;
+  let season: 'spring' | 'summer' | 'fall' | 'winter';
   if (month >= 3 && month <= 5) season = 'spring';
   else if (month >= 6 && month <= 8) season = 'summer';
   else if (month >= 9 && month <= 11) season = 'fall';
   else season = 'winter';
   
-  return SEASONAL_CONTENT[season];
+  return {
+    season,
+    ...SEASONAL_CONTENT[season]
+  };
 }
 
 /**

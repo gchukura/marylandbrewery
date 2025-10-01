@@ -10,21 +10,17 @@ const nextConfig = {
     // your project has type errors.
     ignoreBuildErrors: false,
   },
-  experimental: {
-    // Enable Turbopack for faster builds
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+  // Turbopack configuration (moved from experimental)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },
   // Optimize for static generation
   output: 'standalone',
-  // Enable ISR
-  revalidate: 3600,
   // Image optimization
   images: {
     domains: ['images.unsplash.com', 'via.placeholder.com'],

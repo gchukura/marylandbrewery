@@ -5,7 +5,7 @@
 
 "use client";
 
-import { NextSeo } from 'next-seo';
+// import { NextSeo } from 'next-seo'; // Removed - using Next.js built-in SEO
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -128,24 +128,7 @@ export default function SimpleBreweryPageTemplate({
 
   return (
     <>
-      <NextSeo
-        title={title}
-        description={metaDescription}
-        canonical={`https://marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`}
-        openGraph={{
-          title,
-          description: metaDescription,
-          type: 'business.business',
-          url: `https://marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`,
-          site_name: 'Maryland Brewery Directory',
-        }}
-        additionalMetaTags={[
-          {
-            name: 'robots',
-            content: 'index, follow',
-          },
-        ]}
-      />
+      {/* SEO is handled by Next.js app router metadata */}
 
       {/* Structured Data */}
       <script

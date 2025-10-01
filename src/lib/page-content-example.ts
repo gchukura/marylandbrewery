@@ -40,7 +40,7 @@ export function generateBaltimoreCityPage(breweries: any[], stats: any) {
   
   // Generate seasonal content
   const seasonalInfo = getSeasonalInfo();
-  const seasonalContent = generateSeasonalContent(seasonalInfo.season, 'city', city);
+  const seasonalContent = generateSeasonalContent(seasonalInfo.season as 'spring' | 'summer' | 'fall' | 'winter', 'city', city);
   
   // Generate meta description
   const metaDescription = generateMetaDescription('city', {
@@ -241,8 +241,8 @@ export function generateBreweryPage(brewery: any, nearbyBreweries: any[]) {
 }
 
 // Example: Batch generate content for multiple pages
-export function generateBatchContent(breweries: any[], stats: any) {
-  const pages = [];
+export function generateBatchContent(breweries: any[], stats: any): any[] {
+  const pages: any[] = [];
   
   // Generate city pages
   const cities = [...new Set(breweries.map(b => b.city))];

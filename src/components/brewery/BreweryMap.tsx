@@ -74,17 +74,17 @@ export default function BreweryMap({ breweries, height = '500px' }: BreweryMapPr
         map.addLayer(clusterCountLayer as any);
         map.addLayer(unclusteredPointLayer as any);
 
-        // Cluster click zoom
-        map.on('click', (e: any) => {
-          const features = map.queryRenderedFeatures(e.point, {
-            layers: [clusterLayer.id],
-          });
-          const cluster = features[0];
-          if (!cluster) return;
+        // Cluster click zoom - bind to cluster layer and guard properties
+        map.on('click', clusterLayer.id, (e: any) => {
+          const f = e.features?.[0];
+          if (!f || !f.properties) return;
+          const clusterId = f.properties.cluster_id;
+          if (clusterId === undefined || clusterId === null) return;
           const source = map.getSource('breweries') as any;
-          source.getClusterExpansionZoom(cluster.properties.cluster_id, (err: any, zoom: number) => {
+          source.getClusterExpansionZoom(clusterId, (err: any, zoom: number) => {
             if (err) return;
-            map.easeTo({ center: cluster.geometry.coordinates, zoom });
+            const coords = (f.geometry as any).coordinates;
+            map.easeTo({ center: coords, zoom });
           });
         });
 
@@ -104,7 +104,7 @@ export default function BreweryMap({ breweries, height = '500px' }: BreweryMapPr
               </div>
             </div>
           `;
-          new mapboxgl.Popup().setLngLat(f.geometry.coordinates).setHTML(html).addTo(map);
+          new mapboxgl.Popup().setLngLat((f.geometry as any).coordinates).setHTML(html).addTo(map);
         });
 
         map.on('mouseenter', unclusteredPointLayer.id, () => {

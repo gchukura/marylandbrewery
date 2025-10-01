@@ -11,30 +11,30 @@ import MobileMenu from './MobileMenu';
 const NAVIGATION_ITEMS = [
   {
     label: 'Cities',
-    href: '/cities',
+    href: '/city',
     children: [
-      { label: 'Baltimore', href: '/breweries/baltimore' },
-      { label: 'Annapolis', href: '/breweries/annapolis' },
-      { label: 'Frederick', href: '/breweries/frederick' },
-      { label: 'Rockville', href: '/breweries/rockville' },
-      { label: 'Columbia', href: '/breweries/columbia' },
-      { label: 'Silver Spring', href: '/breweries/silver-spring' },
-      { label: 'Towson', href: '/breweries/towson' },
-      { label: 'Gaithersburg', href: '/breweries/gaithersburg' },
+      { label: 'Baltimore', href: '/city/baltimore/breweries' },
+      { label: 'Annapolis', href: '/city/annapolis/breweries' },
+      { label: 'Frederick', href: '/city/frederick/breweries' },
+      { label: 'Rockville', href: '/city/rockville/breweries' },
+      { label: 'Columbia', href: '/city/columbia/breweries' },
+      { label: 'Silver Spring', href: '/city/silver-spring/breweries' },
+      { label: 'Towson', href: '/city/towson/breweries' },
+      { label: 'Gaithersburg', href: '/city/gaithersburg/breweries' },
     ]
   },
   {
     label: 'Counties',
-    href: '/counties',
+    href: '/county',
     children: [
-      { label: 'Baltimore City', href: '/breweries/county/baltimore-city' },
-      { label: 'Anne Arundel', href: '/breweries/county/anne-arundel' },
-      { label: 'Montgomery', href: '/breweries/county/montgomery' },
-      { label: 'Prince George\'s', href: '/breweries/county/prince-georges' },
-      { label: 'Howard', href: '/breweries/county/howard' },
-      { label: 'Frederick', href: '/breweries/county/frederick' },
-      { label: 'Baltimore County', href: '/breweries/county/baltimore-county' },
-      { label: 'Carroll', href: '/breweries/county/carroll' },
+      { label: 'Baltimore City', href: '/county/baltimore-city/breweries' },
+      { label: 'Anne Arundel', href: '/county/anne-arundel/breweries' },
+      { label: 'Montgomery', href: '/county/montgomery/breweries' },
+      { label: 'Prince George\'s', href: '/county/prince-georges/breweries' },
+      { label: 'Howard', href: '/county/howard/breweries' },
+      { label: 'Frederick', href: '/county/frederick/breweries' },
+      { label: 'Baltimore County', href: '/county/baltimore/breweries' },
+      { label: 'Carroll', href: '/county/carroll/breweries' },
     ]
   },
   {
@@ -66,12 +66,13 @@ const NAVIGATION_ITEMS = [
 // Priority routes for prefetching
 const PRIORITY_ROUTES = [
   '/',
-  '/breweries',
-  '/breweries/baltimore',
-  '/breweries/annapolis',
-  '/breweries/frederick',
-  '/breweries/rockville',
-  '/breweries/columbia'
+  '/city',
+  '/county',
+  '/city/baltimore/breweries',
+  '/city/annapolis/breweries',
+  '/city/frederick/breweries',
+  '/city/rockville/breweries',
+  '/city/columbia/breweries'
 ];
 
 export default function Header() {

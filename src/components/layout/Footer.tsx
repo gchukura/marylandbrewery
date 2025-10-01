@@ -8,25 +8,25 @@ import { MapPin, Phone, Mail, Facebook, Instagram, Twitter, Beer } from 'lucide-
 
 // Static data for server-side rendering
 const TOP_CITIES = [
-  { name: 'Baltimore', href: '/breweries/baltimore', count: '15+' },
-  { name: 'Annapolis', href: '/breweries/annapolis', count: '8+' },
-  { name: 'Frederick', href: '/breweries/frederick', count: '6+' },
-  { name: 'Rockville', href: '/breweries/rockville', count: '5+' },
-  { name: 'Columbia', href: '/breweries/columbia', count: '4+' },
-  { name: 'Silver Spring', href: '/breweries/silver-spring', count: '4+' },
-  { name: 'Towson', href: '/breweries/towson', count: '3+' },
-  { name: 'Gaithersburg', href: '/breweries/gaithersburg', count: '3+' },
+  { name: 'Baltimore', href: '/city/baltimore/breweries', count: '15+' },
+  { name: 'Annapolis', href: '/city/annapolis/breweries', count: '8+' },
+  { name: 'Frederick', href: '/city/frederick/breweries', count: '6+' },
+  { name: 'Rockville', href: '/city/rockville/breweries', count: '5+' },
+  { name: 'Columbia', href: '/city/columbia/breweries', count: '4+' },
+  { name: 'Silver Spring', href: '/city/silver-spring/breweries', count: '4+' },
+  { name: 'Towson', href: '/city/towson/breweries', count: '3+' },
+  { name: 'Gaithersburg', href: '/city/gaithersburg/breweries', count: '3+' },
 ];
 
 const TOP_COUNTIES = [
-  { name: 'Baltimore City', href: '/breweries/county/baltimore-city', count: '15+' },
-  { name: 'Anne Arundel', href: '/breweries/county/anne-arundel', count: '8+' },
-  { name: 'Montgomery', href: '/breweries/county/montgomery', count: '12+' },
-  { name: 'Prince George\'s', href: '/breweries/county/prince-georges', count: '6+' },
-  { name: 'Howard', href: '/breweries/county/howard', count: '5+' },
-  { name: 'Frederick', href: '/breweries/county/frederick', count: '6+' },
-  { name: 'Baltimore County', href: '/breweries/county/baltimore-county', count: '8+' },
-  { name: 'Carroll', href: '/breweries/county/carroll', count: '3+' },
+  { name: 'Baltimore City', href: '/county/baltimore-city/breweries', count: '15+' },
+  { name: 'Anne Arundel', href: '/county/anne-arundel/breweries', count: '8+' },
+  { name: 'Montgomery', href: '/county/montgomery/breweries', count: '12+' },
+  { name: 'Prince George\'s', href: '/county/prince-georges/breweries', count: '6+' },
+  { name: 'Howard', href: '/county/howard/breweries', count: '5+' },
+  { name: 'Frederick', href: '/county/frederick/breweries', count: '6+' },
+  { name: 'Baltimore County', href: '/county/baltimore/breweries', count: '8+' },
+  { name: 'Carroll', href: '/county/carroll/breweries', count: '3+' },
 ];
 
 const FEATURES = [

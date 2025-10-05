@@ -45,13 +45,14 @@ export const clusterCountLayer = {
 
 export const unclusteredPointLayer = {
   id: UNCLUSTERED_POINT_LAYER_ID,
-  type: 'circle',
+  type: 'symbol',
   source: 'breweries',
   filter: ['!', ['has', 'point_count']],
-  paint: {
-    'circle-color': MARYLAND_RED,
-    'circle-radius': 6,
-    'circle-stroke-width': 2,
-    'circle-stroke-color': '#ffffff',
+  layout: {
+    // Use Mapbox sprite beer icon; falls back to default if missing in style
+    'icon-image': ['coalesce', ['image', 'beer-15'], 'beer-15'],
+    'icon-size': 1.2,
+    'icon-allow-overlap': true,
+    'icon-ignore-placement': true,
   },
 } as const;

@@ -54,7 +54,8 @@ export default function BreweryMap({
         // Ensure initial view is tightly focused on Maryland
         if (MARYLAND_BOUNDS) {
           try {
-            map.fitBounds(MARYLAND_BOUNDS as any, { padding: 40, maxZoom: 9 });
+            // Match /map default view behavior
+            map.fitBounds(MARYLAND_BOUNDS as any, { padding: 40, maxZoom: 10 });
           } catch {}
         }
         // GeoJSON from breweries

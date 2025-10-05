@@ -501,17 +501,20 @@ export default function SimpleBreweryPageTemplate({
                           <div className="flex items-center gap-2">
                             <Utensils className="h-4 w-4 text-red-600" />
                             <span className="text-gray-700">
-                              {brewery.food.split(',').map((foodItem: string, index: number) => (
-                                <span key={index}>
-                                  <Link 
-                                    href={`/breweries/amenity/${foodItem.trim().toLowerCase().replace(/\s+/g, '-')}`}
-                                    className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                                  >
-                                    {foodItem.trim()}
-                                  </Link>
-                                  {index < brewery.food.split(',').length - 1 && ', '}
-                                </span>
-                              ))}
+                              {brewery.food.split(',').map((foodItem: string, index: number) => {
+                                const foodItems = brewery.food?.split(',') || [];
+                                return (
+                                  <span key={index}>
+                                    <Link 
+                                      href={`/breweries/amenity/${foodItem.trim().toLowerCase().replace(/\s+/g, '-')}`}
+                                      className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                                    >
+                                      {foodItem.trim()}
+                                    </Link>
+                                    {index < foodItems.length - 1 && ', '}
+                                  </span>
+                                );
+                              })}
                             </span>
                           </div>
                         )}

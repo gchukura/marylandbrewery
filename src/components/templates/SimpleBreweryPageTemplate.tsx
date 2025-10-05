@@ -218,7 +218,7 @@ export default function SimpleBreweryPageTemplate({
                       <img 
                         src={brewery.logo} 
                         alt={`${brewery.name} logo`}
-                        className="h-20 w-20 object-contain rounded-lg"
+                        className="h-32 w-32 object-contain rounded-lg"
                       />
                     )}
                     <h1 className="text-4xl font-bold text-gray-900">{brewery.name}</h1>
@@ -501,12 +501,17 @@ export default function SimpleBreweryPageTemplate({
                           <div className="flex items-center gap-2">
                             <Utensils className="h-4 w-4 text-red-600" />
                             <span className="text-gray-700">
-                              <Link 
-                                href="/breweries/amenity/food"
-                                className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                              >
-                                Food
-                              </Link>: {brewery.food}
+                              {brewery.food.split(',').map((foodItem: string, index: number) => (
+                                <span key={index}>
+                                  <Link 
+                                    href={`/breweries/amenity/${foodItem.trim().toLowerCase().replace(/\s+/g, '-')}`}
+                                    className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                                  >
+                                    {foodItem.trim()}
+                                  </Link>
+                                  {index < brewery.food.split(',').length - 1 && ', '}
+                                </span>
+                              ))}
                             </span>
                           </div>
                         )}
@@ -519,7 +524,7 @@ export default function SimpleBreweryPageTemplate({
                                 className="text-red-600 hover:text-red-800 hover:underline font-medium"
                               >
                                 Other Drinks
-                              </Link>: {brewery.otherDrinks}
+                              </Link>
                             </span>
                           </div>
                         )}
@@ -532,7 +537,7 @@ export default function SimpleBreweryPageTemplate({
                                 className="text-red-600 hover:text-red-800 hover:underline font-medium"
                               >
                                 Parking
-                              </Link>: {brewery.parking}
+                              </Link>
                             </span>
                           </div>
                         )}

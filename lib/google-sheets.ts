@@ -377,7 +377,7 @@ export async function getBreweryDataFromSheets(): Promise<Brewery[]> {
           offersTours: parseBoolean(getColumn('offers_tours')),
           beerToGo: parseBoolean(getColumn('beer_to_go')),
           hasMerch: parseBoolean(getColumn('has_merch')),
-          memberships: parseMemberships(getColumn('memberships_comma-seperated')),
+          memberships: parseMemberships(getColumn('memberships')),
           
           // Additional fields from Google Sheets
           food: getColumn('food')?.toString().trim() || undefined,

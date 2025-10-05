@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from 'react';
-import type { Brewery } from '../../../types/brewery';
+import type { Brewery } from '@/types/brewery';
 import {
   MAPBOX_STYLE,
   MARYLAND_CENTER,

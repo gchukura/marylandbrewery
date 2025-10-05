@@ -1,5 +1,5 @@
 import React from 'react';
-import { Brewery } from '../../../types/brewery';
+import { Brewery } from '@/types/brewery';
 import BreweryTable from './BreweryTable';
 import BreweryMapWrapper from '../brewery/BreweryMapWrapper';
 

@@ -8,7 +8,7 @@ import { Clock } from 'lucide-react';
 interface BreweryHoursProps {
   hours: {
     [key: string]: string | undefined;
-  };
+  } | any;
   showCurrentDayOnly?: boolean;
   className?: string;
 }

@@ -12,7 +12,12 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: { type: string } }): Promise<Metadata> {
   const processed = await getProcessedBreweryData();
   const typeKey = params.type.toLowerCase();
-  const breweries = processed.breweries.filter((b) => (b as any).type?.toLowerCase() === typeKey);
+  const breweries = processed.breweries.filter((b) => {
+    if (Array.isArray(b.type)) {
+      return b.type.some(type => type.toLowerCase() === typeKey);
+    }
+    return b.type?.toLowerCase() === typeKey;
+  });
   const title = `${deslugify(params.type)} Breweries - ${breweries.length} in Maryland`;
   const description = `Explore ${breweries.length} ${deslugify(params.type).toLowerCase()} breweries across Maryland, including top cities and notable venues.`;
   return {
@@ -31,7 +36,12 @@ export async function generateMetadata({ params }: { params: { type: string } })
 export default async function TypePage({ params }: { params: { type: string } }) {
   const processed = await getProcessedBreweryData();
   const typeKey = params.type.toLowerCase();
-  const breweries = processed.breweries.filter((b) => (b as any).type?.toLowerCase() === typeKey);
+  const breweries = processed.breweries.filter((b) => {
+    if (Array.isArray(b.type)) {
+      return b.type.some(type => type.toLowerCase() === typeKey);
+    }
+    return b.type?.toLowerCase() === typeKey;
+  });
 
   // Top cities by this type
   const cityCounts = new Map<string, number>();

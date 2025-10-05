@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { Brewery } from '../../../types/brewery';
+import { Brewery } from '@/types/brewery';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -52,7 +52,14 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
   }, [breweries]);
 
   const uniqueTypes = useMemo(() => {
-    const types = new Set(breweries.map(b => b.type));
+    const types = new Set<string>();
+    breweries.forEach(b => {
+      if (Array.isArray(b.type)) {
+        b.type.forEach(type => types.add(type));
+      } else {
+        types.add(b.type);
+      }
+    });
     return ['all', ...Array.from(types).sort()];
   }, [breweries]);
 
@@ -109,8 +116,8 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
           bValue = b.city;
           break;
         case 'type':
-          aValue = a.type;
-          bValue = b.type;
+          aValue = Array.isArray(a.type) ? a.type.join(', ') : a.type;
+          bValue = Array.isArray(b.type) ? b.type.join(', ') : b.type;
           break;
         default:
           aValue = a.name;

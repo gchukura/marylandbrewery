@@ -6,7 +6,10 @@ import { ApiResponse, PaginatedResponse } from '@/types/api';
 
 interface UseBreweriesOptions {
   filters?: BreweryFilters;
-  sort?: BrewerySortOptions;
+  sort?: {
+    field: BrewerySortOptions;
+    direction: 'asc' | 'desc';
+  };
   page?: number;
   limit?: number;
 }
@@ -33,11 +36,8 @@ export function useBreweries(options: UseBreweriesOptions = {}): UseBreweriesRet
       const params = new URLSearchParams();
       
       if (options.filters?.city) params.append('city', options.filters.city);
-      if (options.filters?.features?.length) {
-        options.filters.features.forEach(feature => params.append('features', feature));
-      }
-      if (options.filters?.isActive !== undefined) {
-        params.append('isActive', options.filters.isActive.toString());
+      if (options.filters?.amenity) {
+        params.append('amenity', options.filters.amenity);
       }
       if (options.filters?.search) params.append('search', options.filters.search);
       if (options.sort?.field) params.append('sortField', options.sort.field);

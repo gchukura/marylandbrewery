@@ -3,7 +3,7 @@
  * Utility functions for data processing, formatting, and calculations
  */
 
-import { Brewery } from '../types/brewery';
+import { Brewery } from '@/types/brewery';
 
 /**
  * Convert string to URL-friendly slug

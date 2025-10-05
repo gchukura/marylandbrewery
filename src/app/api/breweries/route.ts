@@ -50,7 +50,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const filteredBreweries = transformedBreweries.filter((brewery) => {
       if (city && brewery.city.toLowerCase() !== city.toLowerCase()) return false;
       if (county && brewery.county?.toLowerCase() !== county.toLowerCase()) return false;
-      if (type && brewery.type?.toLowerCase() !== type.toLowerCase()) return false;
+      if (type) {
+        const breweryType = Array.isArray(brewery.type) ? brewery.type.join(', ') : brewery.type;
+        if (breweryType?.toLowerCase() !== type.toLowerCase()) return false;
+      }
       if (amenity && !brewery.features?.some(a => a.toLowerCase().includes(amenity.toLowerCase()))) return false;
       if (search && !brewery.name.toLowerCase().includes(search.toLowerCase()) && 
           !brewery.city.toLowerCase().includes(search.toLowerCase()) &&

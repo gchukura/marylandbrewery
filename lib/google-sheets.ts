@@ -4,7 +4,7 @@
  */
 
 import { google } from 'googleapis';
-import { Brewery, BreweryType, Membership, SocialMedia, OperatingHours } from '../types/brewery';
+import { Brewery, BreweryType, Membership, SocialMedia, OperatingHours } from '../src/types/brewery';
 
 // Connection pooling for API client reuse
 let sheetsClient: any = null;

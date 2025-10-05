@@ -243,3 +243,19 @@ export type Amenity = typeof COMMON_AMENITIES[number];
  * Type for Maryland county values
  */
 export type MarylandCounty = typeof MARYLAND_COUNTIES[number];
+
+/**
+ * Brewery filter options
+ */
+export interface BreweryFilters {
+  city?: string;
+  county?: string;
+  type?: string;
+  amenity?: string;
+  search?: string;
+}
+
+/**
+ * Brewery sort options
+ */
+export type BrewerySortOptions = 'name' | 'city' | 'type' | 'distance';

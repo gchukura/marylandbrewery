@@ -14,7 +14,7 @@ import {
   Amenity,
   COMMON_AMENITIES,
   MARYLAND_COUNTIES
-} from '../types/brewery';
+} from '../src/types/brewery';
 
 /**
  * Cached function to get all brewery data from Google Sheets
@@ -98,7 +98,11 @@ export async function processBreweryData(breweries: Brewery[]): Promise<Processe
       byType.set(typeKey, []);
     }
     byType.get(typeKey)!.push(brewery);
-    typeSet.add(brewery.type);
+    if (Array.isArray(brewery.type)) {
+      brewery.type.forEach(type => typeSet.add(type));
+    } else {
+      typeSet.add(brewery.type);
+    }
     
     // Group by amenities
     brewery.amenities.forEach(amenity => {
@@ -161,8 +165,13 @@ function calculateSiteStatistics(
   
   breweries.forEach(brewery => {
     // Count by type
-    const type = brewery.type;
-    breweriesByType[type] = (breweriesByType[type] || 0) + 1;
+    if (Array.isArray(brewery.type)) {
+      brewery.type.forEach(type => {
+        breweriesByType[type] = (breweriesByType[type] || 0) + 1;
+      });
+    } else {
+      breweriesByType[brewery.type] = (breweriesByType[brewery.type] || 0) + 1;
+    }
     
     // Count by county
     const county = brewery.county;

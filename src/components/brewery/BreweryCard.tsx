@@ -50,7 +50,7 @@ export default function BreweryCard({
   })();
 
   // Format address
-  const fullAddress = `${brewery.address}, ${brewery.city}, ${brewery.state} ${brewery.zipCode}`;
+  const fullAddress = `${brewery.street}, ${brewery.city}, ${brewery.state} ${brewery.zip}`;
 
   return (
     <Card className={`h-full border border-gray-200 hover:border-red-300 hover:shadow-lg transition-all duration-200 ${className}`}>
@@ -93,9 +93,9 @@ export default function BreweryCard({
         )}
 
         {/* Amenities */}
-        {showAmenities && brewery.features && brewery.features.length > 0 && (
+        {showAmenities && brewery.amenities && brewery.amenities.length > 0 && (
           <div className="mb-3">
-            <AmenityIcons amenities={brewery.features} />
+            <AmenityIcons amenities={brewery.amenities} />
           </div>
         )}
 

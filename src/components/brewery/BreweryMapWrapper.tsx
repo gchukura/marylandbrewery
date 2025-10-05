@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from 'next/dynamic';
-import type { Brewery } from '../../../types/brewery';
+import type { Brewery } from '@/types/brewery';
 
 function MapSkeleton() {
   return (

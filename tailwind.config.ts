@@ -19,6 +19,9 @@ const config: Config = {
         background: 'var(--background)',
         foreground: 'var(--foreground)',
       },
+      backgroundImage: {
+        'md-flag': "url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRTAzQTNFLiI+PC9yZWN0Pgo8cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iMjAiIGZpbGw9IiNFQUFBMDAiPjwvcmVjdD4KPHBhdGggZD0iTTAgMEwyMCAyMEw0MCAwWiIgZmlsbD0iI0UwM0EzRSIvPgo8cGF0aCBkPSJNMCA0MEwyMCAyMEw0MCA0MFoiIGZpbGw9IiNFQUFBMDAiLz4KPC9zdmc+')",
+      },
       fontSize: {
         display: ['3rem', { lineHeight: '1.1', letterSpacing: '-0.01em' }],
         h1: ['2rem', { lineHeight: '1.2', letterSpacing: '-0.005em' }],

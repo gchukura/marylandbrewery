@@ -5,6 +5,7 @@
 
 import Link from 'next/link';
 import { MapPin, Phone, Mail, Facebook, Instagram, Twitter, Beer } from 'lucide-react';
+import Logo from '../ui/Logo';
 
 // Static data for server-side rendering
 const TOP_CITIES = [
@@ -62,166 +63,26 @@ const getCurrentDate = () => {
 };
 
 export default function Footer() {
-  const currentDate = getCurrentDate();
-
   return (
-    <footer className="bg-gray-900 text-white">
-      {/* Main Footer Content */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer className="bg-black text-white">
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
           {/* Brand Section */}
-          <div className="lg:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <Beer className="h-8 w-8 text-red-400" />
-              <h3 className="text-xl font-bold text-white">Maryland Brewery Directory</h3>
-            </div>
-            <p className="text-gray-300 mb-4 text-sm leading-relaxed">
-              Discover Maryland's vibrant craft beer scene. From Baltimore's historic breweries to Annapolis' waterfront taprooms, explore the best breweries across the Old Line State.
-            </p>
-            <div className="flex items-center gap-2 text-sm text-gray-400">
-              <MapPin className="h-4 w-4" />
-              <span>All 24 Maryland Counties</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
-              <span>📅</span>
-              <span>Data updated: {currentDate}</span>
-            </div>
+          <div className="mb-6">
+            <Logo showText={true} className="justify-center" />
           </div>
 
-          {/* Top Cities */}
-          <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Top Cities</h4>
-            <ul className="space-y-2">
-              {TOP_CITIES.map((city) => (
-                <li key={city.href}>
-                  <Link
-                    href={city.href}
-                    className="text-gray-300 hover:text-red-400 transition-colors text-sm flex items-center justify-between group"
-                  >
-                    <span>{city.name}</span>
-                    <span className="text-xs text-gray-500 group-hover:text-red-400">
-                      {city.count}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* No footer links for ultra-minimal layout */}
+          <div className="mb-6" />
 
-          {/* Top Counties */}
-          <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Counties</h4>
-            <ul className="space-y-2">
-              {TOP_COUNTIES.map((county) => (
-                <li key={county.href}>
-                  <Link
-                    href={county.href}
-                    className="text-gray-300 hover:text-red-400 transition-colors text-sm flex items-center justify-between group"
-                  >
-                    <span>{county.name}</span>
-                    <span className="text-xs text-gray-500 group-hover:text-red-400">
-                      {county.count}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Features & Types */}
-          <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Features</h4>
-            <ul className="space-y-2 mb-6">
-              {FEATURES.map((feature) => (
-                <li key={feature.href}>
-                  <Link
-                    href={feature.href}
-                    className="text-gray-300 hover:text-red-400 transition-colors text-sm"
-                  >
-                    {feature.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            
-            <h4 className="text-lg font-semibold text-white mb-4">Brewery Types</h4>
-            <ul className="space-y-2">
-              {BREWERY_TYPES.map((type) => (
-                <li key={type.href}>
-                  <Link
-                    href={type.href}
-                    className="text-gray-300 hover:text-red-400 transition-colors text-sm"
-                  >
-                    {type.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Social Media & Contact */}
-      <div className="border-t border-gray-800">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            {/* Social Links */}
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-400">Follow us:</span>
-              {SOCIAL_LINKS.map((social) => {
-                const Icon = social.icon;
-                return (
-                  <a
-                    key={social.name}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-red-400 transition-colors"
-                    aria-label={social.name}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </a>
-                );
-              })}
-            </div>
-
-            {/* Contact Info */}
-            <div className="flex items-center gap-4 text-sm text-gray-400">
-              <div className="flex items-center gap-1">
-                <Mail className="h-4 w-4" />
-                <span>info@marylandbrewery.com</span>
-              </div>
+          {/* Bottom Bar */}
+          <div className="border-t border-gray-700 pt-4">
+            <div className="text-sm text-gray-400">
+              <p>© 2024 Maryland Brewery Directory • Supporting Local Breweries</p>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Bottom Bar */}
-      <div className="bg-red-600 text-white py-3">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
-            <div className="flex items-center gap-4">
-              <span>© 2024 Maryland Brewery Directory</span>
-              <span className="hidden md:inline">•</span>
-              <span>Supporting Maryland's Craft Beer Community</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link href="/about" className="hover:text-yellow-300 transition-colors">
-                About
-              </Link>
-              <Link href="/contact" className="hover:text-yellow-300 transition-colors">
-                Contact
-              </Link>
-              <Link href="/privacy" className="hover:text-yellow-300 transition-colors">
-                Privacy
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Maryland Flag Colors Bottom Border */}
-      <div className="h-1 bg-gradient-to-r from-red-600 via-yellow-400 to-red-600"></div>
     </footer>
   );
 }

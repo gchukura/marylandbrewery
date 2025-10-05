@@ -1,28 +1,46 @@
 "use client";
 
+import React from 'react';
 import CountUp from './CountUp';
 
-export default function StatsBarClient({ total, counties, cities }: { total: number; counties: number; cities: number }) {
-  const cards = [
-    { label: 'Total Active Breweries', value: total },
-    { label: 'Counties Covered (of 24)', value: counties },
-    { label: 'Cities with Breweries', value: cities },
-  ];
+interface StatsBarClientProps {
+  totalBreweries: number;
+  activeBreweries: number;
+  microbreweries: number;
+  brewpubs: number;
+}
 
+export default function StatsBarClient({ totalBreweries, activeBreweries, microbreweries, brewpubs }: StatsBarClientProps) {
   return (
-    <div className="overflow-x-auto">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 min-w-full">
-        {cards.map((c) => (
-          <div key={c.label} className="relative card card-hover">
-            <div className="absolute inset-0 bg-md-flag pointer-events-none" />
-            <div className="relative">
-              <div className="text-display font-extrabold text-md-red">
-                <CountUp value={c.value} />
-              </div>
-              <div className="mt-1 text-small text-gray-600">{c.label}</div>
+    <div className="bg-gray-100 py-8">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          {/* Active Breweries Box */}
+          <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+            <div className="text-4xl font-bold text-md-red mb-2">
+              <CountUp end={activeBreweries} />
             </div>
+            <div className="text-gray-600">Active Breweries</div>
           </div>
-        ))}
+
+          {/* Microbreweries Box */}
+          <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+            <div className="text-4xl font-bold text-md-gold mb-2">
+              <CountUp end={microbreweries} />
+            </div>
+            <div className="text-gray-600">Microbreweries</div>
+          </div>
+
+          {/* Brewpubs Box */}
+          <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+            <div className="text-4xl font-bold text-black mb-2">
+              <CountUp end={brewpubs} />
+            </div>
+            <div className="text-gray-600">Brewpubs</div>
+          </div>
+          
+        </div>
       </div>
     </div>
   );

@@ -31,11 +31,11 @@ export async function generateMetadata({ params }: { params: { amenity: string }
   return {
     title,
     description,
-    alternates: { canonical: `/breweries/${params.amenity}` },
+    alternates: { canonical: `/amenities/${params.amenity}` },
     openGraph: {
       title,
       description,
-      url: `https://marylandbrewery.com/breweries/${params.amenity}`,
+      url: `https://marylandbrewery.com/amenities/${params.amenity}`,
       type: 'website',
     },
   };
@@ -68,7 +68,7 @@ export default async function AmenityPage({ params }: { params: { amenity: strin
   // Related amenities: pick a few others
   const related = AMENITY_SLUGS.filter((a) => a !== params.amenity)
     .slice(0, 6)
-    .map((a) => ({ title: `${normalizeAmenityLabel(a)} Breweries`, url: `/breweries/${a}`, type: 'amenity' }));
+    .map((a) => ({ title: `${normalizeAmenityLabel(a)} Breweries`, url: `/amenities/${a}`, type: 'amenity' }));
 
   const stats = {
     title: `${label} Availability`,
@@ -87,7 +87,7 @@ export default async function AmenityPage({ params }: { params: { amenity: strin
   const breadcrumbs = [
     { name: 'Home', url: '/', position: 1, isActive: false },
     { name: 'Breweries', url: '/breweries', position: 2, isActive: false },
-    { name: label, url: `/breweries/${params.amenity}`, position: 3, isActive: true },
+    { name: label, url: `/amenities/${params.amenity}`, position: 3, isActive: true },
   ];
 
   return (

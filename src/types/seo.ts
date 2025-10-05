@@ -36,7 +36,7 @@ export interface PageMeta {
   ogTitle?: string;
   ogDescription?: string;
   ogImage?: string;
-  ogType?: 'website' | 'article' | 'business.business';
+  ogType?: 'website' | 'article';
   ogUrl?: string;
   
   // Twitter Card tags

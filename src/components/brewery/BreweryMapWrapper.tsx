@@ -1,5 +1,7 @@
+"use client";
+
 import dynamic from 'next/dynamic';
-import type { Brewery } from '@/types/brewery';
+import type { Brewery } from '../../../types/brewery';
 
 function MapSkeleton() {
   return (
@@ -15,8 +17,25 @@ const Map = dynamic(() => import('./BreweryMap'), {
 interface BreweryMapWrapperProps {
   breweries: Brewery[];
   height?: string;
+  center?: [number, number];
+  zoom?: number;
+  showClustering?: boolean;
 }
 
-export default function BreweryMapWrapper({ breweries, height }: BreweryMapWrapperProps) {
-  return <Map breweries={breweries} height={height} />;
+export default function BreweryMapWrapper({ 
+  breweries, 
+  height, 
+  center, 
+  zoom = 7, 
+  showClustering = true 
+}: BreweryMapWrapperProps) {
+  return (
+    <Map 
+      breweries={breweries} 
+      height={height} 
+      center={center}
+      zoom={zoom}
+      showClustering={showClustering}
+    />
+  );
 }

@@ -4,7 +4,7 @@
  */
 
 import { unstable_cache } from 'next/cache';
-import { getBreweryDataFromSheets } from './google-sheets';
+import { getBreweryDataFromSheets, getBeerDataFromSheets } from './google-sheets';
 import { 
   Brewery, 
   ProcessedBreweryData, 
@@ -23,12 +23,21 @@ import {
 export const getAllBreweryData = unstable_cache(
   async (): Promise<Brewery[]> => {
     console.log('Fetching brewery data from Google Sheets (build-time cache)...');
-    return await getBreweryDataFromSheets();
+    const [breweries, beerData] = await Promise.all([
+      getBreweryDataFromSheets(),
+      getBeerDataFromSheets()
+    ]);
+    
+    // Attach beer data to breweries
+    return breweries.map(brewery => ({
+      ...brewery,
+      beers: beerData[brewery.id] || []
+    }));
   },
   ['brewery-data'], // Cache key
   {
     tags: ['brewery-data'],
-    revalidate: false, // Only revalidate on build
+    revalidate: 60, // Revalidate every 60 seconds in development
   }
 );
 
@@ -82,7 +91,9 @@ export async function processBreweryData(breweries: Brewery[]): Promise<Processe
     }
     
     // Group by type
-    const typeKey = brewery.type.toLowerCase();
+    const typeKey = Array.isArray(brewery.type) 
+      ? brewery.type.join(', ').toLowerCase()
+      : brewery.type.toLowerCase();
     if (!byType.has(typeKey)) {
       byType.set(typeKey, []);
     }
@@ -222,7 +233,7 @@ export const getBreweriesByCity = unstable_cache(
   ['breweries-by-city'],
   {
     tags: ['brewery-data'],
-    revalidate: false,
+    revalidate: 60,
   }
 );
 
@@ -238,7 +249,7 @@ export const getBreweriesByCounty = unstable_cache(
   ['breweries-by-county'],
   {
     tags: ['brewery-data'],
-    revalidate: false,
+    revalidate: 60,
   }
 );
 
@@ -254,7 +265,7 @@ export const getBreweriesByType = unstable_cache(
   ['breweries-by-type'],
   {
     tags: ['brewery-data'],
-    revalidate: false,
+    revalidate: 60,
   }
 );
 
@@ -270,7 +281,7 @@ export const getBreweriesByAmenity = unstable_cache(
   ['breweries-by-amenity'],
   {
     tags: ['brewery-data'],
-    revalidate: false,
+    revalidate: 60,
   }
 );
 
@@ -285,7 +296,7 @@ export const getAllCities = unstable_cache(
   ['all-cities'],
   {
     tags: ['brewery-data'],
-    revalidate: false,
+    revalidate: 60,
   }
 );
 
@@ -300,7 +311,7 @@ export const getAllCounties = unstable_cache(
   ['all-counties'],
   {
     tags: ['brewery-data'],
-    revalidate: false,
+    revalidate: 60,
   }
 );
 
@@ -315,7 +326,7 @@ export const getAllAmenities = unstable_cache(
   ['all-amenities'],
   {
     tags: ['brewery-data'],
-    revalidate: false,
+    revalidate: 60,
   }
 );
 
@@ -330,7 +341,7 @@ export const getAllTypes = unstable_cache(
   ['all-types'],
   {
     tags: ['brewery-data'],
-    revalidate: false,
+    revalidate: 60,
   }
 );
 
@@ -345,7 +356,7 @@ export const getSiteStatistics = unstable_cache(
   ['site-statistics'],
   {
     tags: ['brewery-data'],
-    revalidate: false,
+    revalidate: 60,
   }
 );
 
@@ -370,7 +381,7 @@ export const searchBreweries = unstable_cache(
   ['search-breweries'],
   {
     tags: ['brewery-data'],
-    revalidate: false,
+    revalidate: 60,
   }
 );
 
@@ -396,7 +407,7 @@ export const getNearbyBreweries = unstable_cache(
   ['nearby-breweries'],
   {
     tags: ['brewery-data'],
-    revalidate: false,
+    revalidate: 60,
   }
 );
 

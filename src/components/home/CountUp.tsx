@@ -3,18 +3,18 @@
 import { useEffect, useState } from 'react';
 
 interface CountUpProps {
-  value: number;
+  end: number;
   durationMs?: number;
   className?: string;
 }
 
-export default function CountUp({ value, durationMs = 1200, className = '' }: CountUpProps) {
+export default function CountUp({ end, durationMs = 1200, className = '' }: CountUpProps) {
   const [display, setDisplay] = useState(0);
 
   useEffect(() => {
     const start = performance.now();
     const from = 0;
-    const to = Math.max(0, Math.floor(value));
+    const to = Math.max(0, Math.floor(end));
 
     let raf = 0;
     const step = (t: number) => {
@@ -28,7 +28,7 @@ export default function CountUp({ value, durationMs = 1200, className = '' }: Co
 
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [value, durationMs]);
+  }, [end, durationMs]);
 
   return <span className={className}>{display.toLocaleString()}</span>;
 }

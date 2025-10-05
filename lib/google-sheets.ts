@@ -168,32 +168,27 @@ function parseBoolean(value: string | undefined): boolean {
 }
 
 /**
- * Parse brewery type from string
+ * Parse brewery type from string (supports comma-separated values)
  */
-function parseBreweryType(typeString: string | undefined): BreweryType {
-  if (!typeString) return BreweryType.MICROBREWERY;
+function parseBreweryType(typeString: string | undefined): string | string[] {
+  if (!typeString) return 'Microbrewery';
   
-  const type = typeString.toLowerCase().trim();
-  switch (type) {
-    case 'microbrewery':
-    case 'micro':
-      return BreweryType.MICROBREWERY;
-    case 'brewpub':
-    case 'brew pub':
-      return BreweryType.BREWPUB;
-    case 'taproom':
-    case 'tap room':
-      return BreweryType.TAPROOM;
-    case 'production':
-      return BreweryType.PRODUCTION;
-    case 'nano':
-    case 'nanobrewery':
-      return BreweryType.NANO;
-    case 'regional':
-      return BreweryType.REGIONAL;
-    default:
-      return BreweryType.MICROBREWERY;
+  // Split by comma and clean up each type
+  const types = typeString.split(',').map(type => {
+    const trimmed = type.trim();
+    // Capitalize each word
+    return trimmed.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(' ');
+  });
+  
+  // If only one type, return as string
+  if (types.length === 1) {
+    return types[0];
   }
+  
+  // Return array of types
+  return types;
 }
 
 
@@ -201,6 +196,80 @@ function parseBreweryType(typeString: string | undefined): BreweryType {
  * Main function to fetch brewery data from Google Sheets
  * Optimized for Vercel with timeout handling and retry logic
  */
+/**
+ * Format ABV to preserve decimal values without % sign
+ */
+function formatABV(abv: string): string {
+  if (!abv) return '';
+  
+  // Remove any existing % sign
+  const cleanABV = abv.replace('%', '').trim();
+  
+  // Try to parse as number and format to preserve decimals
+  const num = parseFloat(cleanABV);
+  if (!isNaN(num)) {
+    // Always show at least one decimal place to preserve values like 6.0
+    return num.toFixed(1);
+  }
+  
+  // If not a number, return cleaned value
+  return cleanABV;
+}
+
+/**
+ * Fetch beer data from the "Beers" sheet
+ */
+export async function getBeerDataFromSheets(): Promise<Record<string, any[]>> {
+  try {
+    const { sheetsClient } = await initializeSheetsClient();
+    const sheetId = process.env.GOOGLE_SHEET_ID!;
+
+    // Fetch data from the "Beers" sheet
+    const response = await withRetry(async () => {
+      return await sheetsClient.spreadsheets.values.get({
+        spreadsheetId: sheetId,
+        range: 'Beers!A:E', // brewery_id, beer_name, beer_style, beer_abv, beer_availability
+        valueRenderOption: 'UNFORMATTED_VALUE',
+        dateTimeRenderOption: 'FORMATTED_STRING',
+      });
+    });
+
+    const rows = response.data.values;
+    if (!rows || rows.length < 2) {
+      return {};
+    }
+
+    const headers = rows[0];
+    const beerData: Record<string, any[]> = {};
+
+    // Process each beer row
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row || row.length === 0) continue;
+
+      const breweryId = row[0]?.toString().trim();
+      if (!breweryId) continue;
+
+      const beer = {
+        name: row[1]?.toString().trim() || '',
+        style: row[2]?.toString().trim() || '',
+        abv: formatABV(row[3]?.toString().trim() || ''),
+        availability: row[4]?.toString().trim() || '',
+      };
+
+      if (!beerData[breweryId]) {
+        beerData[breweryId] = [];
+      }
+      beerData[breweryId].push(beer);
+    }
+
+    return beerData;
+  } catch (error) {
+    console.error('Error fetching beer data from Google Sheets:', error);
+    return {};
+  }
+}
+
 export async function getBreweryDataFromSheets(): Promise<Brewery[]> {
   const startTime = Date.now();
   console.log('Starting Google Sheets data fetch...');
@@ -213,7 +282,7 @@ export async function getBreweryDataFromSheets(): Promise<Brewery[]> {
     const response = await withRetry(async () => {
       return await sheetsClient.spreadsheets.values.get({
         spreadsheetId: sheetId,
-        range: 'A:Z', // Get all columns
+        range: 'A:AK', // Get all columns up to AK
         valueRenderOption: 'UNFORMATTED_VALUE',
         dateTimeRenderOption: 'FORMATTED_STRING',
       });
@@ -228,7 +297,7 @@ export async function getBreweryDataFromSheets(): Promise<Brewery[]> {
     const headers = rows[0];
     const columnIndex = (headerName: string) => {
       const index = headers.findIndex((header: any) => 
-        header?.toString().toLowerCase().includes(headerName.toLowerCase())
+        header?.toString().trim().toLowerCase() === headerName.toLowerCase()
       );
       return index >= 0 ? index : -1;
     };
@@ -238,15 +307,6 @@ export async function getBreweryDataFromSheets(): Promise<Brewery[]> {
     const breweries: Brewery[] = [];
 
     console.log(`Processing ${dataRows.length} brewery records...`);
-    console.log('Column mapping:', {
-      id: columnIndex('id'),
-      name: columnIndex('name'),
-      phone: columnIndex('phone'),
-      latitude: columnIndex('latitude'),
-      longitude: columnIndex('longitude'),
-      website: columnIndex('website'),
-      amenities: columnIndex('amenities'),
-    });
 
     for (let i = 0; i < dataRows.length; i++) {
       try {
@@ -265,6 +325,14 @@ export async function getBreweryDataFromSheets(): Promise<Brewery[]> {
         const latitude = getColumn('latitude') ? parseFloat(getColumn('latitude').toString()) : 0;
         const longitude = getColumn('longitude') ? parseFloat(getColumn('longitude').toString()) : 0;
         
+        // Create raw data object for debugging
+        const rawData: Record<string, any> = {};
+        headers.forEach((header: string, index: number) => {
+          if (header) {
+            rawData[header.trim()] = row[index];
+          }
+        });
+
         const brewery: Brewery = {
           // Core identification
           id: getColumn('id')?.toString().trim() || `brewery-${i}`,
@@ -285,17 +353,22 @@ export async function getBreweryDataFromSheets(): Promise<Brewery[]> {
           // Contact information
           phone: getColumn('phone')?.toString().trim() || undefined,
           website: getColumn('website')?.toString().trim() || undefined,
-          socialMedia: parseSocialMedia(getColumn('facebook') || getColumn('instagram') || getColumn('twitter')),
+          socialMedia: {
+            facebook: getColumn('facebook')?.toString().trim() || undefined,
+            instagram: getColumn('instagram')?.toString().trim() || undefined,
+            twitter: getColumn('twitter')?.toString().trim() || undefined,
+            untappd: getColumn('untappd')?.toString().trim() || undefined,
+          },
           
-          // Operating hours (will be empty for now, can be enhanced later)
+          // Operating hours from individual day columns
           hours: {
-            sunday: undefined,
-            monday: undefined,
-            tuesday: undefined,
-            wednesday: undefined,
-            thursday: undefined,
-            friday: undefined,
-            saturday: undefined,
+            sunday: getColumn('hours_sunday')?.toString().trim() || undefined,
+            monday: getColumn('hours_monday')?.toString().trim() || undefined,
+            tuesday: getColumn('hours_tuesday')?.toString().trim() || undefined,
+            wednesday: getColumn('hours_wednesday')?.toString().trim() || undefined,
+            thursday: getColumn('hours_thursday')?.toString().trim() || undefined,
+            friday: getColumn('hours_friday')?.toString().trim() || undefined,
+            saturday: getColumn('hours_saturday')?.toString().trim() || undefined,
           },
           
           // Features and amenities
@@ -304,11 +377,28 @@ export async function getBreweryDataFromSheets(): Promise<Brewery[]> {
           offersTours: parseBoolean(getColumn('offers_tours')),
           beerToGo: parseBoolean(getColumn('beer_to_go')),
           hasMerch: parseBoolean(getColumn('has_merch')),
-          memberships: parseMemberships(getColumn('memberships')),
+          memberships: parseMemberships(getColumn('memberships_comma-seperated')),
+          
+          // Additional fields from Google Sheets
+          food: getColumn('food')?.toString().trim() || undefined,
+          otherDrinks: getColumn('other_drinks')?.toString().trim() || undefined,
+          parking: getColumn('parking')?.toString().trim() || undefined,
+          dogFriendly: parseBoolean(getColumn('dog_friendly')),
+          outdoorSeating: parseBoolean(getColumn('outdoor_seating')),
+          logo: getColumn('logo')?.toString().trim() || undefined,
+          
+          // Additional fields (add your new columns here)
+          featured: parseBoolean(getColumn('featured')),
+          specialEvents: parseCommaSeparated(getColumn('special_events')),
+          awards: parseCommaSeparated(getColumn('awards')),
+          certifications: parseCommaSeparated(getColumn('certifications')),
           
           // Metadata
           openedDate: getColumn('opened_date')?.toString().trim() || undefined,
           lastUpdated: new Date().toISOString(),
+          
+          // Raw data for debugging
+          rawData: rawData,
         };
 
         breweries.push(brewery);

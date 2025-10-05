@@ -17,6 +17,7 @@ interface MapboxMapProps {
   center?: [number, number];
   zoom?: number;
   onBreweryClick?: (brewery: Brewery) => void;
+  autoOpenPopup?: boolean;
 }
 
 export default function MapboxMap({
@@ -26,6 +27,7 @@ export default function MapboxMap({
   center,
   zoom = 10,
   onBreweryClick,
+  autoOpenPopup = false,
 }: MapboxMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<any>(null);
@@ -218,6 +220,18 @@ export default function MapboxMap({
         markers.current.push(marker);
       }
     });
+
+    // Auto-open popup for the first brewery if autoOpenPopup is true
+    if (autoOpenPopup && markers.current.length > 0) {
+      // Small delay to ensure map is fully rendered
+      setTimeout(() => {
+        try {
+          markers.current[0].togglePopup();
+        } catch (error) {
+          console.log('Could not auto-open popup:', error);
+        }
+      }, 500);
+    }
 
     if (!center && breweries.length > 0) {
       const bounds = new mapboxRef.current.LngLatBounds();

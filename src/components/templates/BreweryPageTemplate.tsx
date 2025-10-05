@@ -135,7 +135,7 @@ export default function BreweryPageTemplate({
         openGraph={{
           title,
           description: metaDescription,
-          type: 'business.business',
+          type: 'website',
           url: `https://marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`,
           siteName: 'Maryland Brewery Directory',
           images: [

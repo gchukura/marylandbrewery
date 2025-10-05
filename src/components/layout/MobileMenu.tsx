@@ -62,7 +62,7 @@ export default function MobileMenu({ navigationItems }: MobileMenuProps) {
           />
           
           {/* Menu Panel */}
-          <div className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-xl">
+          <div className="absolute right-0 top-0 h-full w-72 max-w-[80vw] bg-white shadow-xl">
             <div className="flex flex-col h-full">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -78,23 +78,23 @@ export default function MobileMenu({ navigationItems }: MobileMenuProps) {
 
               {/* Navigation Items */}
               <div className="flex-1 overflow-y-auto">
-                <nav className="p-4 space-y-2">
+                <nav className="p-4 space-y-2 text-right">
                   {/* Home Link */}
                   <Link
                     href="/"
                     onClick={closeMenu}
-                    className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors font-medium"
+                    className="block px-3 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors font-medium"
                   >
-                    🏠 Home
+                    Home
                   </Link>
 
                   {/* All Breweries Link */}
                   <Link
                     href="/breweries"
                     onClick={closeMenu}
-                    className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors font-medium"
+                    className="block px-3 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors font-medium"
                   >
-                    🍺 All Breweries
+                    All Breweries
                   </Link>
 
                   {/* Navigation Items with Dropdowns */}
@@ -104,7 +104,7 @@ export default function MobileMenu({ navigationItems }: MobileMenuProps) {
                         onClick={() => toggleExpanded(item.label)}
                         className="w-full flex items-center justify-between px-3 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors font-medium"
                       >
-                        <span>{item.label}</span>
+                        <span className="ml-auto">{item.label}</span>
                         {item.children && (
                           expandedItems.has(item.label) ? 
                             <ChevronDown className="h-4 w-4" /> : 
@@ -114,13 +114,13 @@ export default function MobileMenu({ navigationItems }: MobileMenuProps) {
                       
                       {/* Dropdown Items */}
                       {item.children && expandedItems.has(item.label) && (
-                        <div className="ml-4 mt-1 space-y-1">
+                        <div className="mr-4 mt-1 space-y-1">
                           {item.children.map((child) => (
                             <Link
                               key={child.href}
                               href={child.href}
                               onClick={closeMenu}
-                              className="block px-3 py-2 text-sm text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+                              className="block px-3 py-2 text-sm text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors text-right"
                             >
                               {child.label}
                             </Link>
@@ -130,14 +130,7 @@ export default function MobileMenu({ navigationItems }: MobileMenuProps) {
                     </div>
                   ))}
 
-                  {/* Search Link */}
-                  <Link
-                    href="/search"
-                    onClick={closeMenu}
-                    className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors font-medium"
-                  >
-                    🔍 Search Breweries
-                  </Link>
+                  {/* No search link on mobile to match simplified header */}
                 </nav>
               </div>
 

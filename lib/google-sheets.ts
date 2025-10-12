@@ -39,7 +39,10 @@ async function initializeSheetsClient() {
     authClient = new google.auth.JWT({
       email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
       key: privateKey,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+      scopes: [
+        'https://www.googleapis.com/auth/spreadsheets.readonly',
+        'https://www.googleapis.com/auth/spreadsheets'
+      ],
     });
 
     // Initialize sheets client with timeout
@@ -462,6 +465,72 @@ export async function getSheetMetadata() {
     };
   } catch (error) {
     console.error('Failed to get sheet metadata:', error);
+    throw error;
+  }
+}
+
+/**
+ * Check if email already exists in newsletter subscribers
+ */
+export async function checkEmailExists(email: string): Promise<boolean> {
+  try {
+    const { sheetsClient } = await initializeSheetsClient();
+    const sheetId = process.env.GOOGLE_SHEET_ID!;
+    
+    // Get all emails from the Newsletter sheet
+    const response = await sheetsClient.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: 'Newsletter!A:A', // Column A contains emails
+      valueRenderOption: 'UNFORMATTED_VALUE',
+    });
+    
+    const emails = response.data.values?.flat() || [];
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    return emails.some(existingEmail => 
+      existingEmail?.toString().toLowerCase().trim() === normalizedEmail
+    );
+  } catch (error) {
+    console.error('Error checking email existence:', error);
+    return false; // If check fails, allow the signup (fail open)
+  }
+}
+
+/**
+ * Add newsletter subscriber to Google Sheets
+ */
+export async function addNewsletterSubscriber(email: string, metadata: any = {}) {
+  try {
+    // Check if email already exists
+    const emailExists = await checkEmailExists(email);
+    if (emailExists) {
+      return { success: false, error: 'Email already subscribed' };
+    }
+    
+    const { sheetsClient } = await initializeSheetsClient();
+    const sheetId = process.env.GOOGLE_SHEET_ID!;
+    
+    const values = [
+      [
+        email.toLowerCase().trim(), // Normalize email
+        new Date().toISOString(),
+        metadata.ipAddress || '',
+        metadata.userAgent || '',
+        metadata.source || 'newsletter'
+      ]
+    ];
+    
+    await sheetsClient.spreadsheets.values.append({
+      spreadsheetId: sheetId,
+      range: 'Newsletter!A:E',
+      valueInputOption: 'RAW',
+      insertDataOption: 'INSERT_ROWS',
+      resource: { values }
+    });
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to add newsletter subscriber:', error);
     throw error;
   }
 }

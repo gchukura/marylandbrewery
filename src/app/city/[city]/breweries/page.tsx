@@ -1,5 +1,8 @@
 import { Metadata } from 'next';
 import SimpleProgrammaticPageTemplate from '@/components/templates/SimpleProgrammaticPageTemplate';
+import MapboxMap from '@/components/maps/MapboxMap';
+import CityStatsBar from '@/components/city/CityStatsBar';
+import BreweryTable from '@/components/home/BreweryTable';
 import { getAllCities, getProcessedBreweryData } from '../../../../../lib/brewery-data';
 import { slugify, deslugify, isOpenNow } from '@/lib/data-utils';
 import { generateCityIntroText } from '@/lib/content-generators';
@@ -97,20 +100,50 @@ export default async function CityBreweriesPage({ params }: { params: { city: st
   const stats = computeCityStats(breweries);
 
   return (
-    <SimpleProgrammaticPageTemplate
-      title={`${cityName} Breweries - ${breweries.length} Craft Breweries in ${cityName}, MD`}
-      metaDescription={`Discover ${breweries.length} breweries in ${cityName}, Maryland. Explore local brewpubs, taprooms, and craft beer destinations.`}
-      h1={`Breweries in ${cityName}`}
-      introText={introText}
-      breweries={breweries as any}
-      stats={stats}
-      breadcrumbs={breadcrumbs as any}
-      relatedPages={nearby as any}
-      pageType="city"
-      showMap={true}
-      showStats={true}
-      showRelatedPages={true}
-      currentFilters={{ city: cityName }}
-    />
+    <>
+      <SimpleProgrammaticPageTemplate
+        title={`${cityName} Breweries - ${breweries.length} Craft Breweries in ${cityName}, MD`}
+        metaDescription={`Discover ${breweries.length} breweries in ${cityName}, Maryland. Explore local brewpubs, taprooms, and craft beer destinations.`}
+        h1={`Breweries in ${cityName}`}
+        introText={introText}
+        breweries={breweries as any}
+        stats={stats}
+        breadcrumbs={breadcrumbs as any}
+        relatedPages={nearby as any}
+        pageType="city"
+        showMap={false}
+        showStats={false}
+        showRelatedPages={true}
+        currentFilters={{ city: cityName }}
+      />
+
+      {/* City-specific stats */}
+      <CityStatsBar
+        totalBreweries={breweries.length}
+        activeBreweries={breweries.filter(b => (b as any).allowsVisitors).length}
+        microbreweries={breweries.filter(b => (b as any).type === 'Microbrewery' || (b as any).type === 'microbrewery').length}
+        brewpubs={breweries.filter(b => (b as any).type === 'Brewpub' || (b as any).type === 'brewpub').length}
+      />
+
+      {/* Map + Table section mirroring homepage */}
+      <section className="bg-gray-50 py-12">
+        <div className="container mx-auto px-4">
+          <div className="space-y-12">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Interactive Map</h3>
+              <div className="h-96 rounded-lg overflow-hidden border border-gray-200">
+                <MapboxMap breweries={breweries as any} height="100%" showClusters={true} zoom={10} />
+              </div>
+            </div>
+
+            {/* Brewery Table (same module used on homepage) */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Brewery Directory</h3>
+              <BreweryTable breweries={breweries as any} />
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

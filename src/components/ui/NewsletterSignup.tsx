@@ -6,13 +6,36 @@ import { Mail } from 'lucide-react';
 export default function NewsletterSignup() {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the email to your backend
-    console.log('Newsletter signup:', email);
-    setIsSubscribed(true);
-    setEmail('');
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setIsSubscribed(true);
+        setEmail('');
+      } else if (response.status === 409) {
+        setError(data.message || 'You are already subscribed!');
+      } else {
+        setError(data.error || 'Subscription failed. Please try again.');
+      }
+    } catch (error) {
+      setError('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isSubscribed) {
@@ -43,6 +66,12 @@ export default function NewsletterSignup() {
           </div>
           
           <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+            
             <div className="flex gap-4">
               <div className="flex-1 relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-black" />
@@ -53,13 +82,15 @@ export default function NewsletterSignup() {
                   placeholder="Enter your email address"
                   className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-black text-black placeholder-black/70 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                   required
+                  disabled={isLoading}
                 />
               </div>
               <button
                 type="submit"
-                className="bg-black hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                disabled={isLoading}
+                className="bg-black hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Subscribe
+                {isLoading ? 'Subscribing...' : 'Subscribe'}
               </button>
             </div>
           </form>

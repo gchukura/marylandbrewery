@@ -4,6 +4,8 @@ import { slugify } from '@/lib/data-utils';
 import PageContainer from '@/components/layout/PageContainer';
 import SectionHeader from '@/components/layout/SectionHeader';
 import GridContainer from '@/components/layout/GridContainer';
+import MapboxMap from '@/components/maps/MapboxMap';
+import StatsBar from '@/components/home/StatsBar';
 
 const REGIONS: Record<string, string[]> = {
   'Western Maryland': ['Cumberland', 'Hagerstown', 'Frederick'],
@@ -47,6 +49,21 @@ export default async function CitiesIndexPage() {
         title="Maryland Cities with Breweries"
         subtitle="Browse all cities in Maryland with brewery counts."
       />
+
+      {/* Statewide stats to mirror homepage counter */}
+      <StatsBar />
+
+      {/* Interactive Map mirroring homepage styling */}
+      <section className="bg-gray-50 py-12">
+        <div className="container mx-auto px-4">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Interactive Map</h3>
+            <div className="h-96 rounded-lg overflow-hidden border border-gray-200">
+              <MapboxMap breweries={processed.breweries as any} height="100%" showClusters={true} zoom={10} />
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div className="space-y-10">
         {Object.entries(grouped).map(([region, list]) => (

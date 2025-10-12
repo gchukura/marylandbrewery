@@ -487,7 +487,7 @@ export async function checkEmailExists(email: string): Promise<boolean> {
     const emails = response.data.values?.flat() || [];
     const normalizedEmail = email.toLowerCase().trim();
     
-    return emails.some(existingEmail => 
+    return emails.some((existingEmail: any) => 
       existingEmail?.toString().toLowerCase().trim() === normalizedEmail
     );
   } catch (error) {

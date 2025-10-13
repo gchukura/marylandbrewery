@@ -79,50 +79,55 @@ const PRIORITY_ROUTES = [
 export default function Header() {
   return (
     <header className="bg-red-600 shadow-lg">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link 
-            href="/" 
-            className="hover:opacity-90 transition-opacity"
-            prefetch={true}
-          >
-            <Logo showText={true} />
-          </Link>
+      {/* Top Row - Logo Section */}
+      <div className="bg-red-600" style={{ height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', maxHeight: '120px', overflow: 'hidden' }}>
+        <Link 
+          href="/" 
+          className="hover:opacity-90 transition-opacity"
+          prefetch={true}
+        >
+          <Logo showText={true} />
+        </Link>
+      </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-6 ml-auto">
-            {NAVIGATION_ITEMS.map((item) => (
-              <div key={item.label} className="relative group">
-                <Link
-                  href={item.href}
-                  className="flex items-center gap-1 text-white hover:text-yellow-300 transition-colors py-2 font-bold"
-                >
-                  {item.label}
-                </Link>
-                
-                {/* Dropdown */}
-                <div className="absolute top-full left-0 w-64 bg-white shadow-xl border border-gray-200 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <div className="py-2">
-                    {item.children.map((child) => (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
-                        prefetch={PRIORITY_ROUTES.includes(child.href)}
-                      >
-                        {child.label}
-                      </Link>
-                    ))}
+      {/* Bottom Row - Navigation Menu */}
+      <div className="bg-red-700 shadow-lg">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center h-16">
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center space-x-8">
+              {NAVIGATION_ITEMS.map((item) => (
+                <div key={item.label} className="relative group">
+                  <Link
+                    href={item.href}
+                    className="flex items-center gap-1 text-white hover:text-yellow-300 transition-colors py-2 font-bold text-lg"
+                  >
+                    {item.label}
+                  </Link>
+                  
+                  {/* Dropdown */}
+                  <div className="absolute top-full left-0 w-64 bg-white shadow-xl border border-gray-200 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <div className="py-2">
+                      {item.children.map((child) => (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                          prefetch={PRIORITY_ROUTES.includes(child.href)}
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </nav>
+              ))}
+            </nav>
 
-          {/* Mobile Menu */}
-          <div className="flex items-center gap-4">
-            <MobileMenu navigationItems={NAVIGATION_ITEMS} />
+            {/* Mobile Menu */}
+            <div className="flex items-center gap-4 lg:hidden">
+              <MobileMenu navigationItems={NAVIGATION_ITEMS} />
+            </div>
           </div>
         </div>
       </div>

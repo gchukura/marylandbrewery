@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 
 interface LogoProps {
   className?: string;
@@ -9,14 +8,11 @@ interface LogoProps {
 export default function Logo({ className = "", showText = true }: LogoProps) {
   return (
     <div className={`flex items-center ${className}`}>
-      {/* Logo Image - with transparent background */}
-      <Image
-        src="/logo-transparent.png"
+      {/* Logo Image */}
+      <img
+        src="/logo.png"
         alt="MarylandBrewery.com"
-        width={200}
-        height={60}
-        className="h-12 w-auto"
-        priority
+        style={{ height: '300px', width: 'auto' }}
       />
     </div>
   );

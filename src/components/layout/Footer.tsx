@@ -64,22 +64,22 @@ const getCurrentDate = () => {
 
 export default function Footer() {
   return (
-    <footer className="bg-black text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          {/* Brand Section */}
-          <div className="mb-6">
-            <Logo showText={true} className="justify-center" />
+    <footer className="bg-black text-white" style={{ height: '250px', maxHeight: '250px', overflow: 'hidden' }}>
+      <div className="container mx-auto px-4" style={{ height: '100%', display: 'flex', alignItems: 'center' }}>
+        <div className="flex items-center justify-between w-full">
+          {/* Left Section - Copyright */}
+          <div className="text-base">
+            <p>© 2025 MarylandBrewery.com</p>
           </div>
 
-          {/* No footer links for ultra-minimal layout */}
-          <div className="mb-6" />
+          {/* Center Section - Logo */}
+          <div className="flex items-center">
+            <Logo showText={true} />
+          </div>
 
-          {/* Bottom Bar */}
-          <div className="border-t border-gray-700 pt-4">
-            <div className="text-sm text-gray-400">
-              <p>© 2024 Maryland Brewery Directory • Supporting Local Breweries</p>
-            </div>
+          {/* Right Section - All Rights Reserved */}
+          <div className="text-base">
+            <p>All rights reserved.</p>
           </div>
         </div>
       </div>

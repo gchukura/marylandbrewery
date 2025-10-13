@@ -46,7 +46,7 @@ export default function MobileMenu({ navigationItems }: MobileMenuProps) {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden p-2 text-gray-600 hover:text-red-600 transition-colors"
+        className="lg:hidden p-2 text-white hover:text-yellow-300 transition-colors"
         aria-label="Toggle mobile menu"
       >
         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}

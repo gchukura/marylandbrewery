@@ -1,0 +1,12 @@
+# 16x16 PNG Favicon Specifications:
+# - Size: 16x16 pixels
+# - Format: PNG with transparent background
+# - Content: Beer mug with Maryland flag pattern
+# - Colors: Black outline, Maryland flag pattern on mug body, white foam
+# - Background: Transparent
+# 
+# To create this file:
+# 1. Take your beer mug image
+# 2. Remove the red background (make transparent)
+# 3. Resize to exactly 16x16 pixels
+# 4. Save as PNG with transparency

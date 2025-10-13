@@ -108,17 +108,7 @@ export default function RootLayout({
           }}
         />
         {/* Ahrefs Analytics */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              var ahrefs_analytics_script = document.createElement('script');
-              ahrefs_analytics_script.async = true;
-              ahrefs_analytics_script.src = 'https://analytics.ahrefs.com/analytics.js';
-              ahrefs_analytics_script.setAttribute('data-key', 'feHAts9QQBm4W+I9itRXzg');
-              document.getElementsByTagName('head')[0].appendChild(ahrefs_analytics_script);
-            `,
-          }}
-        />
+        <script src="https://analytics.ahrefs.com/analytics.js" data-key="feHAts9QQBm4W+I9itRXzg" async></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="icon" href="/favicon.ico" sizes="any" />

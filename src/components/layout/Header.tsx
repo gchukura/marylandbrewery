@@ -61,6 +61,11 @@ const NAVIGATION_ITEMS = [
       { label: 'Production', href: '/breweries/type/production' },
       { label: 'Nano', href: '/breweries/type/nano' },
     ]
+  },
+  {
+    label: 'Contact',
+    href: '/contact',
+    children: []
   }
 ];
 

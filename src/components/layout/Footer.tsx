@@ -77,9 +77,11 @@ export default function Footer() {
             <Logo showText={true} />
           </div>
 
-          {/* Right Section - All Rights Reserved */}
+          {/* Right Section - All Rights Reserved + Contact */}
           <div className="text-base">
-            <p>All rights reserved.</p>
+            <p>
+              All rights reserved. <Link href="/contact" className="underline hover:text-red-300">Contact us</Link>
+            </p>
           </div>
         </div>
       </div>

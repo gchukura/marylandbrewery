@@ -62,10 +62,16 @@ export const supabase = new Proxy({} as SupabaseClient, {
 }) as SupabaseClient;
 
 // Admin client for server-side operations (uses service role key) - lazy loaded via getter
-export const supabaseAdmin = new Proxy({} as SupabaseClient | null, {
+export const supabaseAdmin = new Proxy({} as SupabaseClient, {
   get(_target, prop) {
     const client = getSupabaseAdminClient();
-    if (!client) return null;
+    if (!client) {
+      // Return a no-op function or null for methods
+      if (typeof prop === 'string' && prop in {}) {
+        return () => null;
+      }
+      return null;
+    }
     const value = client[prop as keyof SupabaseClient];
     // If it's a function, bind it to the client
     if (typeof value === 'function') {

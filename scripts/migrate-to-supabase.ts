@@ -30,9 +30,18 @@ import { supabaseAdmin, DatabaseBrewery, DatabaseBeer } from '../lib/supabase';
 import { Brewery } from '../src/types/brewery';
 
 // Check if admin client is available (this will trigger lazy initialization)
-if (!supabaseAdmin || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for migration. Please set it in .env.local');
 }
+
+// Get admin client - we know it exists because we checked the env var
+const adminClient = supabaseAdmin;
+if (!adminClient) {
+  throw new Error('Failed to initialize Supabase admin client. Check your SUPABASE_SERVICE_ROLE_KEY.');
+}
+
+// Type assertion: we've verified adminClient is not null above
+const client = adminClient as NonNullable<typeof adminClient>;
 
 /**
  * Convert Brewery to DatabaseBrewery format
@@ -57,7 +66,7 @@ function breweryToDbBrewery(brewery: Brewery): DatabaseBrewery {
     // Contact
     phone: brewery.phone,
     website: brewery.website,
-    social_media: brewery.socialMedia || {},
+    social_media: (brewery.socialMedia || {}) as Record<string, string>,
     
     // Hours
     hours: brewery.hours || {},
@@ -106,8 +115,8 @@ async function migrate() {
 
     // Step 2: Clear existing data (optional - comment out if you want to keep existing data)
     console.log('🗑️  Step 2: Clearing existing data in Supabase...');
-    const { error: deleteBeersError } = await supabaseAdmin.from('beers').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    const { error: deleteBreweriesError } = await supabaseAdmin.from('breweries').delete().neq('id', 'temp');
+    const { error: deleteBeersError } = await client.from('beers').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    const { error: deleteBreweriesError } = await client.from('breweries').delete().neq('id', 'temp');
     
     if (deleteBeersError && deleteBeersError.code !== 'PGRST116') {
       console.warn(`   ⚠️  Warning clearing beers: ${deleteBeersError.message}`);
@@ -127,7 +136,7 @@ async function migrate() {
     
     for (let i = 0; i < dbBreweries.length; i += batchSize) {
       const batch = dbBreweries.slice(i, i + batchSize);
-      const { error } = await supabaseAdmin
+      const { error } = await client
         .from('breweries')
         .upsert(batch, { onConflict: 'id' });
       
@@ -162,7 +171,7 @@ async function migrate() {
       let beerInsertedCount = 0;
       for (let i = 0; i < dbBeers.length; i += batchSize) {
         const batch = dbBeers.slice(i, i + batchSize);
-        const { error } = await supabaseAdmin
+        const { error } = await client
           .from('beers')
           .insert(batch);
         
@@ -182,11 +191,11 @@ async function migrate() {
 
     // Step 5: Verify migration
     console.log('✅ Step 5: Verifying migration...');
-    const { count: breweryCount } = await supabaseAdmin
+    const { count: breweryCount } = await client
       .from('breweries')
       .select('*', { count: 'exact', head: true });
     
-    const { count: beerCount } = await supabaseAdmin
+    const { count: beerCount } = await client
       .from('beers')
       .select('*', { count: 'exact', head: true });
     

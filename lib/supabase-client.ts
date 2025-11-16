@@ -87,7 +87,7 @@ function breweryToDbBrewery(brewery: Brewery): DatabaseBrewery {
     // Contact
     phone: brewery.phone,
     website: brewery.website,
-    social_media: brewery.socialMedia,
+    social_media: brewery.socialMedia as Record<string, string>,
     
     // Hours
     hours: brewery.hours,
@@ -421,14 +421,21 @@ export async function getNearbyBreweries(
     const radiusMeters = radiusMiles * 1609.34;
 
     // Use PostGIS if available, otherwise fetch all and filter client-side
-    const { data, error } = await supabase.rpc('get_nearby_breweries', {
-      lat: latitude,
-      lng: longitude,
-      radius_meters: radiusMeters,
-    }).catch(() => {
-      // Fallback: fetch all breweries and filter client-side
-      return supabase.from('breweries').select('*');
-    });
+    let data: DatabaseBrewery[] | null = null;
+    let error: any = null;
+    
+    try {
+      const result = await supabase.rpc('get_nearby_breweries', {
+        lat: latitude,
+        lng: longitude,
+        radius_meters: radiusMeters,
+      });
+      data = result.data;
+      error = result.error;
+    } catch (rpcError) {
+      // RPC function doesn't exist, fall through to client-side filtering
+      error = rpcError;
+    }
 
     if (error) {
       // If RPC doesn't exist, fetch all and filter client-side

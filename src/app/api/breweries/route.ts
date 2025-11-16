@@ -17,7 +17,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');
 
-    // Get brewery data from Google Sheets
+    // Get brewery data from Supabase
     const breweries = await getAllBreweryData();
     
     // Transform data to match frontend expectations

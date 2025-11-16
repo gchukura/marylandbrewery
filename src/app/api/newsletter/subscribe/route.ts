@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { addNewsletterSubscriber } from '../../../../../lib/google-sheets';
+import { addNewsletterSubscriber } from '../../../../../lib/supabase-client';
 import { isValidEmail } from '@/lib/utils';
 
 export async function POST(request: NextRequest) {

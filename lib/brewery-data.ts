@@ -4,7 +4,7 @@
  */
 
 import { unstable_cache } from 'next/cache';
-import { getBreweryDataFromSheets, getBeerDataFromSheets } from './google-sheets';
+import { getBreweryDataFromSupabase } from './supabase-client';
 import { 
   Brewery, 
   ProcessedBreweryData, 
@@ -17,22 +17,15 @@ import {
 } from '../src/types/brewery';
 
 /**
- * Cached function to get all brewery data from Google Sheets
+ * Cached function to get all brewery data from Supabase
  * This fetches once per build and caches for the entire build process
  */
 export const getAllBreweryData = unstable_cache(
   async (): Promise<Brewery[]> => {
-    console.log('Fetching brewery data from Google Sheets (build-time cache)...');
-    const [breweries, beerData] = await Promise.all([
-      getBreweryDataFromSheets(),
-      getBeerDataFromSheets()
-    ]);
-    
-    // Attach beer data to breweries
-    return breweries.map(brewery => ({
-      ...brewery,
-      beers: beerData[brewery.id] || []
-    }));
+    console.log('Fetching brewery data from Supabase (build-time cache)...');
+    // getBreweryDataFromSupabase already includes beers, so we don't need to fetch separately
+    const breweries = await getBreweryDataFromSupabase();
+    return breweries;
   },
   ['brewery-data'], // Cache key
   {

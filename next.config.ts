@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   experimental: {
     staticGenerationRetryCount: 3,
-    largePageDataBytes: 128 * 1024 * 1024, // 128MB
+    largePageDataBytes: 512 * 1024, // 512KB (default is 128KB, but allow for larger pages)
   },
   images: {
     domains: [

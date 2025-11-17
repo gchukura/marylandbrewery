@@ -8,36 +8,7 @@ const AMENITY_SLUGS = [
   'games', 'wifi', 'parking', 'private-events', 'tours', 'tastings', 'merchandise', 'growlers', 'crowlers'
 ] as const;
 
-function chunkArray<T>(arr: T[], size: number): T[][] {
-  const out: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-  return out;
-}
-
-export async function generateSitemaps() {
-  const processed = await getProcessedBreweryData();
-
-  const cities = await getAllCities();
-  const amenities = AMENITY_SLUGS as readonly string[];
-
-  const cityCount = cities.length;
-  const amenityCount = amenities.length;
-  const comboCount = cityCount * amenityCount;
-
-  const breweriesCount = processed.breweries.length;
-  const counties = Array.from(new Set(processed.breweries.map((b) => (b as any).county).filter(Boolean)));
-
-  // Estimate total URL count
-  const typeCount = 5; // microbrewery, brewpub, taproom, production, nano
-  const total = 1 /*home*/ +
-    cityCount + counties.length + breweriesCount + typeCount + amenityCount + comboCount +
-    1 /*map*/ + 1 /*open-now*/ + 7 /*open/[day]*/ + 1 /*contact*/ + 1 /*city index*/ + 1 /*county index*/;
-
-  const chunkTotal = Math.ceil(total / 50000) || 1;
-  return Array.from({ length: chunkTotal }).map((_, i) => ({ id: String(i) }));
-}
-
-export default async function sitemap({ id }: { id?: string }): Promise<MetadataRoute.Sitemap> {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const processed = await getProcessedBreweryData();
   const cities = await getAllCities();
   const amenities = AMENITY_SLUGS as readonly string[];
@@ -99,8 +70,5 @@ export default async function sitemap({ id }: { id?: string }): Promise<Metadata
     }
   }
 
-  // Chunk at 50k per part
-  const chunks = chunkArray(urls, 50000);
-  const index = id ? Math.max(0, Math.min(Number(id) || 0, chunks.length - 1)) : 0;
-  return chunks[index] || [];
+  return urls;
 }

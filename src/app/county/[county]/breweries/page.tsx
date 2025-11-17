@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: { county: string } 
     openGraph: {
       title,
       description,
-      url: `https://marylandbrewery.com/county/${params.county}/breweries`,
+      url: `https://www.marylandbrewery.com/county/${params.county}/breweries`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [

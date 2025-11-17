@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: { params: { day: string } }):
     openGraph: {
       title: `Breweries Open on ${day} - Maryland Brewery Directory`,
       description: `Find ${list.length} Maryland breweries open on ${day}. Complete list of breweries with hours for ${day}.`,
-      url: `https://marylandbrewery.com/open/${params.day}`,
+      url: `https://www.marylandbrewery.com/open/${params.day}`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [

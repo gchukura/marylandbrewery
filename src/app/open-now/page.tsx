@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Breweries Open Now - Maryland Brewery Directory',
     description: 'Find Maryland breweries currently open. Real-time list of breweries open now across the state.',
-    url: 'https://marylandbrewery.com/open-now',
+    url: 'https://www.marylandbrewery.com/open-now',
     siteName: 'Maryland Brewery Directory',
     type: 'website',
     images: [

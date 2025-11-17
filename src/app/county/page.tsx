@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Maryland Counties with Breweries - Browse by County',
     description: 'Browse all 24 Maryland counties with breweries. Find breweries by county across Maryland.',
-    url: 'https://marylandbrewery.com/county',
+    url: 'https://www.marylandbrewery.com/county',
     siteName: 'Maryland Brewery Directory',
     type: 'website',
     images: [

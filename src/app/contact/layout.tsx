@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Contact Us - Maryland Brewery Directory',
     description: 'Contact Maryland Brewery Directory. Send us questions, suggestions, or brewery information updates.',
-    url: 'https://marylandbrewery.com/contact',
+    url: 'https://www.marylandbrewery.com/contact',
     siteName: 'Maryland Brewery Directory',
     type: 'website',
     images: [

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Interactive Brewery Map - Maryland Brewery Directory',
     description: 'Interactive map of all Maryland breweries. Find breweries near you and explore the craft beer scene across the state.',
-    url: 'https://marylandbrewery.com/map',
+    url: 'https://www.marylandbrewery.com/map',
     siteName: 'Maryland Brewery Directory',
     type: 'website',
     images: [

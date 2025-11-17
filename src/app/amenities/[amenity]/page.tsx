@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: { amenity: string }
     openGraph: {
       title,
       description,
-      url: `https://marylandbrewery.com/amenities/${params.amenity}`,
+      url: `https://www.marylandbrewery.com/amenities/${params.amenity}`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [

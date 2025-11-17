@@ -41,11 +41,11 @@ export async function generateMetadata({ params }: BreweryPageProps) {
       title,
       description,
       type: 'website',
-      url: `https://marylandbrewery.com/breweries/${params.slug}`,
+      url: `https://www.marylandbrewery.com/breweries/${params.slug}`,
       siteName: 'Maryland Brewery Directory',
       images: [
         {
-          url: `https://marylandbrewery.com/api/og?title=${encodeURIComponent(brewery.name)}&location=${encodeURIComponent(brewery.city)}`,
+          url: `https://www.marylandbrewery.com/api/og?title=${encodeURIComponent(brewery.name)}&location=${encodeURIComponent(brewery.city)}`,
           width: 1200,
           height: 630,
           alt: `${brewery.name} - Maryland Brewery`,
@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: BreweryPageProps) {
       card: 'summary_large_image',
       title,
       description,
-      images: [`https://marylandbrewery.com/api/og?title=${encodeURIComponent(brewery.name)}&location=${encodeURIComponent(brewery.city)}`],
+      images: [`https://www.marylandbrewery.com/api/og?title=${encodeURIComponent(brewery.name)}&location=${encodeURIComponent(brewery.city)}`],
     },
   };
 }

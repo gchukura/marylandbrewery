@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Maryland Cities with Breweries - Browse by City',
     description: 'Browse all Maryland cities with breweries. Find breweries by city across the Old Line State.',
-    url: 'https://marylandbrewery.com/city',
+    url: 'https://www.marylandbrewery.com/city',
     siteName: 'Maryland Brewery Directory',
     type: 'website',
     images: [

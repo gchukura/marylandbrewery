@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: { type: string } })
     openGraph: {
       title,
       description,
-      url: `https://marylandbrewery.com/type/${params.type}`,
+      url: `https://www.marylandbrewery.com/type/${params.type}`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [

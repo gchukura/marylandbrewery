@@ -33,14 +33,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://marylandbrewery.com"),
+  metadataBase: new URL("https://www.marylandbrewery.com"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://marylandbrewery.com",
+    url: "https://www.marylandbrewery.com",
     siteName: "Maryland Brewery Directory",
     title: "Maryland Brewery Directory | Craft Breweries Across Maryland",
     description: "Discover the best craft breweries across Maryland. Find breweries, events, and more in the Old Line State.",

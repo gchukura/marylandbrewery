@@ -55,7 +55,7 @@ const client = adminClient as NonNullable<typeof adminClient>;
 /**
  * Build search query from brewery data (for Places API)
  */
-function buildSearchQuery(brewery: DatabaseBrewery): string {
+function buildSearchQuery(brewery: { name?: string | null; city?: string | null; state?: string | null }): string {
   const parts: string[] = [];
   
   // Add brewery name first (most important for Places API)
@@ -77,7 +77,7 @@ function buildSearchQuery(brewery: DatabaseBrewery): string {
 /**
  * Build address string from brewery data (for Geocoding API fallback)
  */
-function buildAddress(brewery: DatabaseBrewery): string {
+function buildAddress(brewery: { name?: string | null; street?: string | null; city?: string | null; state?: string | null; zip?: string | null }): string {
   const parts: string[] = [];
   
   // Add brewery name for better accuracy
@@ -193,7 +193,7 @@ async function geocodeAddress(address: string): Promise<{ lat: number; lng: numb
 /**
  * Geocode with retry logic - tries Places API first, then Geocoding API
  */
-async function geocodeBrewery(brewery: DatabaseBrewery, retries = 2): Promise<{ lat: number; lng: number } | null> {
+async function geocodeBrewery(brewery: { name?: string | null; street?: string | null; city?: string | null; state?: string | null; zip?: string | null }, retries = 2): Promise<{ lat: number; lng: number } | null> {
   const query = buildSearchQuery(brewery);
   const address = buildAddress(brewery);
   

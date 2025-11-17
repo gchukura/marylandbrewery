@@ -1,10 +1,7 @@
 import { Metadata } from 'next';
-import Link from 'next/link';
 import { getProcessedBreweryData } from '../../../lib/brewery-data';
 import { slugify } from '@/lib/data-utils';
-import PageContainer from '@/components/layout/PageContainer';
-import SectionHeader from '@/components/layout/SectionHeader';
-import GridContainer from '@/components/layout/GridContainer';
+import IndexPageTemplate from '@/components/directory/IndexPageTemplate';
 
 export const metadata: Metadata = {
   title: 'Maryland Counties with Breweries - Browse by County',
@@ -47,11 +44,13 @@ export default async function CountiesIndexPage() {
   const processed = await getProcessedBreweryData();
 
   const items = ALL_MD_COUNTIES.map((county) => ({
-    county,
+    name: `${county} County`,
+    slug: slugify(county),
     count: processed.breweries.filter(b => (b as any).county?.toLowerCase() === county.toLowerCase()).length,
+    url: `/county/${slugify(county)}/breweries`,
   }));
 
-  // Simple region grouping
+  // Region grouping
   const REGIONS: Record<string, string[]> = {
     'Western Maryland': ['Allegany', 'Garrett', 'Washington'],
     'Central Maryland': ['Frederick', 'Carroll', 'Howard', 'Montgomery', 'Baltimore', 'Anne Arundel'],
@@ -59,7 +58,7 @@ export default async function CountiesIndexPage() {
     'Eastern Shore': ['Cecil', 'Kent', 'Queen Annes', 'Caroline', 'Talbot', 'Dorchester', 'Wicomico', 'Somerset', 'Worcester'],
   };
 
-  const grouped: Record<string, { county: string; count: number }[]> = {
+  const grouped: Record<string, typeof items> = {
     'Western Maryland': [],
     'Central Maryland': [],
     'Southern Maryland': [],
@@ -67,49 +66,50 @@ export default async function CountiesIndexPage() {
   };
 
   for (const item of items) {
+    const countyName = item.name.replace(' County', '');
     const region = Object.entries(REGIONS).find(([_, list]) =>
-      list.some(c => c.toLowerCase() === item.county.toLowerCase())
+      list.some(c => c.toLowerCase() === countyName.toLowerCase())
     )?.[0] || 'Central Maryland';
     grouped[region].push(item);
   }
 
-  // Sort by density desc
+  // Sort by count desc
   for (const key of Object.keys(grouped)) {
-    grouped[key].sort((a, b) => b.count - a.count || a.county.localeCompare(b.county));
+    grouped[key].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
   }
 
+  // Stats
+  const totalBreweries = processed.breweries.length;
+  const countiesWithBreweries = items.filter(i => i.count > 0).length;
+  const avgPerCounty = countiesWithBreweries > 0 ? Math.round(totalBreweries / countiesWithBreweries) : 0;
+  const topCounty = items.sort((a, b) => b.count - a.count)[0];
+
+  const stats = [
+    { label: 'Counties with Breweries', value: countiesWithBreweries },
+    { label: 'Total Breweries', value: totalBreweries },
+    { label: 'Avg per County', value: avgPerCounty },
+    { label: 'Top County', value: topCounty ? `${topCounty.name.replace(' County', '')} (${topCounty.count})` : 'N/A' },
+  ];
+
+  // Breadcrumbs
+  const breadcrumbs = [
+    { name: 'Home', url: '/', isActive: false },
+    { name: 'Counties', url: '/county', isActive: true },
+  ];
+
   return (
-    <PageContainer>
-      <SectionHeader
-        title="Maryland Counties"
-        subtitle="Browse all 24 counties with brewery counts."
-      />
-
-      {/* Density map placeholder */}
-      <div className="mb-10">
-        <div className="rounded-card border bg-white">
-          <div className="p-4 border-b font-medium">Brewery Density Map</div>
-          <div className="h-64 flex items-center justify-center text-gray-500">
-            Maryland county map visualization (placeholder)
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-10">
-        {Object.entries(grouped).map(([region, list]) => (
-          <section key={region}>
-            <h3 className="text-h3 font-semibold mb-4">{region}</h3>
-            <GridContainer>
-              {list.map(({ county, count }) => (
-                <Link key={county} href={`/county/${slugify(county)}/breweries`} className="card card-hover flex items-center justify-between">
-                  <span className="font-medium text-gray-900">{county} County</span>
-                  <span className="text-sm text-gray-600">{count}</span>
-                </Link>
-              ))}
-            </GridContainer>
-          </section>
-        ))}
-      </div>
-    </PageContainer>
+    <IndexPageTemplate
+      h1="Maryland Counties with Breweries"
+      introText="Browse all 24 Maryland counties with craft breweries. From urban centers like Baltimore City and Montgomery County to rural areas across the state, discover how craft beer has spread throughout Maryland's diverse regions."
+      breadcrumbs={breadcrumbs}
+      items={items}
+      stats={stats}
+      groupedItems={grouped}
+      allBreweries={processed.breweries as any}
+      pageType="county"
+      showMap={true}
+      showStats={true}
+      mapZoom={8}
+    />
   );
 }

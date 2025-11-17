@@ -52,7 +52,7 @@ const client = adminClient as NonNullable<typeof adminClient>;
 /**
  * Build search query from brewery data
  */
-function buildSearchQuery(brewery: DatabaseBrewery): string {
+function buildSearchQuery(brewery: { name?: string | null; city?: string | null; state?: string | null }): string {
   const parts: string[] = [];
   
   if (brewery.name) {

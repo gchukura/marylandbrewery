@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
-import SimpleProgrammaticPageTemplate from '@/components/templates/SimpleProgrammaticPageTemplate';
+import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 import { getProcessedBreweryData } from '../../../../lib/brewery-data';
 import { slugify, deslugify } from '@/lib/data-utils';
+import { generateTypeContentBlocks } from '@/lib/content-generators';
 
 const TYPES = ['microbrewery', 'brewpub', 'taproom', 'production', 'nano'] as const;
 
@@ -53,6 +54,7 @@ export async function generateMetadata({ params }: { params: { type: string } })
 export default async function TypePage({ params }: { params: { type: string } }) {
   const processed = await getProcessedBreweryData();
   const typeKey = params.type.toLowerCase();
+  const typeLabel = deslugify(params.type);
   const breweries = processed.breweries.filter((b) => {
     if (Array.isArray(b.type)) {
       return b.type.some(type => type.toLowerCase() === typeKey);
@@ -65,51 +67,91 @@ export default async function TypePage({ params }: { params: { type: string } })
   for (const b of breweries) {
     cityCounts.set(b.city, (cityCounts.get(b.city) || 0) + 1);
   }
-  const topCities = Array.from(cityCounts.entries())
+  const topCitiesData = Array.from(cityCounts.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
-    .map(([city]) => ({ title: `${city} Breweries`, url: `/city/${slugify(city)}/breweries`, type: 'city' }));
+    .map(([city, count]) => ({ city, count }));
 
-  const stats = {
-    title: `${deslugify(params.type)} Overview`,
-    stats: [
-      { label: 'Total Breweries', value: breweries.length },
-      { label: 'Top Cities', value: topCities.length },
-      { label: 'Share of All', value: processed.breweries.length > 0 ? `${Math.round((breweries.length / processed.breweries.length) * 100)}%` : '0%' },
-    ],
-    lastUpdated: new Date().toISOString(),
-  } as any;
+  // Most popular amenity for this type
+  const amenityCounts = new Map<string, number>();
+  breweries.forEach(b => {
+    const amenities = (b as any).amenities || (b as any).features || [];
+    amenities.forEach((a: string) => {
+      const key = a.trim();
+      amenityCounts.set(key, (amenityCounts.get(key) || 0) + 1);
+    });
+  });
+  const mostPopularAmenity = Array.from(amenityCounts.entries())
+    .sort((a, b) => b[1] - a[1])[0]?.[0] || 'Food';
 
-  const introText = breweries.length > 0
-    ? `Maryland has ${breweries.length} ${deslugify(params.type).toLowerCase()} breweries, with strong presence in ${topCities.slice(0, 3).map(c => c.title.replace(' Breweries','')).join(', ')}.`
-    : `No ${deslugify(params.type).toLowerCase()} breweries listed yet. Check back soon.`;
+  const percentage = processed.breweries.length > 0 
+    ? Math.round((breweries.length / processed.breweries.length) * 100) 
+    : 0;
 
-  const breadcrumbs = [
-    { name: 'Home', url: '/', position: 1, isActive: false },
-    { name: 'Brewery Types', url: '/type', position: 2, isActive: false },
-    { name: deslugify(params.type), url: `/type/${params.type}`, position: 3, isActive: true },
+  // Stats
+  const stats = [
+    { label: 'Total of Type', value: breweries.length },
+    { label: '% of All', value: `${percentage}%` },
+    { label: 'Largest City', value: topCitiesData[0] ? `${topCitiesData[0].city} (${topCitiesData[0].count})` : 'N/A' },
+    { label: 'Most Popular Amenity', value: mostPopularAmenity },
   ];
 
-  // Related types
-  const related = TYPES.filter((t) => t !== params.type)
-    .slice(0, 5)
-    .map((t) => ({ title: `${deslugify(t)} Breweries`, url: `/type/${t}`, type: 'type' }));
+  // Intro text
+  const introText = breweries.length > 0
+    ? `Maryland has ${breweries.length} ${typeLabel.toLowerCase()} breweries, representing ${percentage}% of the state's total breweries. With strong presence in ${topCitiesData.slice(0, 3).map(c => c.city).join(', ')}, these breweries showcase the diversity and quality of ${typeLabel.toLowerCase()} brewing across the Old Line State.`
+    : `No ${typeLabel.toLowerCase()} breweries listed yet. Check back soon.`;
+
+  // Breadcrumbs
+  const breadcrumbs = [
+    { name: 'Home', url: '/', isActive: false },
+    { name: 'Types', url: '/type', isActive: false },
+    { name: typeLabel, url: `/type/${params.type}`, isActive: true },
+  ];
+
+  // Content blocks
+  const contentBlocks = generateTypeContentBlocks(typeLabel, breweries.length, percentage, topCitiesData);
+
+  // Related pages
+  // Top cities for this type
+  const topCities = topCitiesData.slice(0, 5).map(({ city, count }) => ({
+    title: `${city} ${typeLabel} Breweries`,
+    url: `/city/${slugify(city)}/breweries`,
+    count,
+  }));
+
+  // Other types
+  const otherTypes = TYPES.filter((t) => t !== params.type)
+    .slice(0, 3)
+    .map((t) => {
+      const typeBreweries = processed.breweries.filter((b) => {
+        if (Array.isArray(b.type)) {
+          return b.type.some(type => type.toLowerCase() === t);
+        }
+        return b.type?.toLowerCase() === t;
+      });
+      return {
+        title: `${deslugify(t)} Breweries`,
+        url: `/type/${t}`,
+        count: typeBreweries.length,
+      };
+    });
+
+  const relatedPages = [...topCities, ...otherTypes];
 
   return (
-    <SimpleProgrammaticPageTemplate
-      title={`${deslugify(params.type)} Breweries in Maryland`}
-      metaDescription={`Explore Maryland ${deslugify(params.type).toLowerCase()} breweries and where to find them.`}
-      h1={`${deslugify(params.type)} Breweries`}
+    <DirectoryPageTemplate
+      h1={`${typeLabel} Breweries in Maryland`}
       introText={introText}
+      breadcrumbs={breadcrumbs}
       breweries={breweries as any}
       stats={stats}
-      breadcrumbs={breadcrumbs as any}
-      relatedPages={related as any}
+      contentBlocks={contentBlocks}
+      relatedPages={relatedPages}
       pageType="type"
       showMap={true}
       showStats={true}
-      showRelatedPages={true}
-      currentFilters={{ type: deslugify(params.type) }}
+      showTable={true}
+      mapZoom={9}
     />
   );
 }

@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
-import SimpleProgrammaticPageTemplate from '@/components/templates/SimpleProgrammaticPageTemplate';
+import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 import { getProcessedBreweryData } from '../../../../../lib/brewery-data';
-import { slugify, deslugify } from '@/lib/data-utils';
+import { slugify, deslugify, isOpenNow } from '@/lib/data-utils';
+import { generateComboIntroText } from '@/lib/content-generators';
 
 const AMENITY_SLUGS = [
   'dog-friendly', 'outdoor-seating', 'live-music', 'food-trucks', 'full-kitchen', 'beer-garden',
@@ -80,60 +81,76 @@ export default async function CityAmenityPage({ params }: { params: { city: stri
       (((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey)))
   );
 
-  // Nearby cities with this amenity (if none in current city)
+  // Stats
+  const openNow = breweries.filter((b) => isOpenNow(b)).length;
+  const stats = [
+    { label: 'Total Breweries', value: breweries.length },
+    { label: 'Open Today', value: openNow },
+    { label: 'In This City', value: cityName },
+    { label: 'With This Amenity', value: amenityLabel },
+  ];
+
+  // Intro text
+  const introText = generateComboIntroText(cityName, amenityLabel, breweries.length);
+
+  // Breadcrumbs
+  const breadcrumbs = [
+    { name: 'Home', url: '/', isActive: false },
+    { name: 'Cities', url: '/city', isActive: false },
+    { name: cityName, url: `/city/${params.city}/breweries`, isActive: false },
+    { name: amenityLabel, url: `/city/${params.city}/${params.amenity}`, isActive: true },
+  ];
+
+  // Content blocks - simplified for combo pages
+  const contentBlocks = [
+    {
+      title: `About ${amenityLabel} in ${cityName}`,
+      content: `${cityName} offers ${breweries.length} breweries with ${amenityLabel.toLowerCase()}, providing convenient options for craft beer enthusiasts seeking this specific amenity. These breweries enhance the local craft beer scene by offering ${amenityLabel.toLowerCase()} alongside quality beer.`
+    },
+    {
+      title: 'What to Expect',
+      content: `When visiting ${cityName} breweries with ${amenityLabel.toLowerCase()}, you can expect a welcoming atmosphere that combines craft beer with this popular amenity. Most breweries clearly indicate their ${amenityLabel.toLowerCase()} offerings, making it easy to plan your visit.`
+    }
+  ];
+
+  // Related pages
+  // Nearby cities with this amenity
   const cityToCount = new Map<string, number>();
   for (const b of processed.breweries) {
     const hasAmenity = ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey));
-    if (hasAmenity) {
+    if (hasAmenity && b.city.toLowerCase() !== cityName.toLowerCase()) {
       cityToCount.set(b.city, (cityToCount.get(b.city) || 0) + 1);
     }
   }
   const nearby = Array.from(cityToCount.entries())
-    .filter(([c]) => c.toLowerCase() !== cityName.toLowerCase())
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 6)
-    .map(([c]) => ({ title: `${c} Breweries`, url: `/city/${slugify(c)}/breweries`, type: 'city' }));
+    .slice(0, 4)
+    .map(([city, count]) => ({
+      title: `${city} ${amenityLabel} Breweries`,
+      url: `/city/${slugify(city)}/${params.amenity}`,
+      count,
+    }));
 
-  const stats = {
-    title: `${amenityLabel} in ${cityName}`,
-    stats: [
-      { label: 'Total Breweries', value: breweries.length },
-      { label: 'Cities With This Amenity', value: cityToCount.size },
-    ],
-    lastUpdated: new Date().toISOString(),
-  } as any;
-
-  const introText = breweries.length > 0
-    ? `${cityName} has ${breweries.length} breweries offering ${amenityLabel.toLowerCase()}. Discover local favorites and plan your visit.`
-    : `No breweries with ${amenityLabel.toLowerCase()} are listed in ${cityName} yet. Consider nearby cities like ${nearby.slice(0,3).map(n => n.title.replace(' Breweries','')).join(', ')}.`;
-
-  const breadcrumbs = [
-    { name: 'Home', url: '/', position: 1, isActive: false },
-    { name: 'Maryland', url: '/city', position: 2, isActive: false },
-    { name: cityName, url: `/city/${params.city}/breweries`, position: 3, isActive: false },
-    { name: amenityLabel, url: `/city/${params.city}/${params.amenity}`, position: 4, isActive: true },
-  ];
-
-  const related = [
-    { title: `All ${cityName} Breweries`, url: `/city/${params.city}/breweries`, type: 'city' },
-    { title: `${amenityLabel} Breweries (Statewide)`, url: `/amenities/${params.amenity}`, type: 'amenity' },
+  const relatedPages = [
+    { title: `All ${cityName} Breweries`, url: `/city/${params.city}/breweries`, count: processed.byCity.get(cityName.toLowerCase())?.length || 0 },
+    { title: `${amenityLabel} Breweries (Statewide)`, url: `/amenities/${params.amenity}`, count: processed.breweries.filter((b) => ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey))).length },
+    ...nearby,
   ];
 
   return (
-    <SimpleProgrammaticPageTemplate
-      title={`${amenityLabel} Breweries in ${cityName}, MD - ${breweries.length} Locations`}
-      metaDescription={`Explore ${amenityLabel.toLowerCase()} breweries in ${cityName}, Maryland.`}
-      h1={`${amenityLabel} Breweries in ${cityName}`}
+    <DirectoryPageTemplate
+      h1={`${amenityLabel} Breweries in ${cityName}, Maryland`}
       introText={introText}
+      breadcrumbs={breadcrumbs}
       breweries={breweries as any}
       stats={stats}
-      breadcrumbs={breadcrumbs as any}
-      relatedPages={related.concat(nearby as any) as any}
-      pageType="city"
+      contentBlocks={contentBlocks}
+      relatedPages={relatedPages}
+      pageType="amenity"
       showMap={true}
       showStats={true}
-      showRelatedPages={true}
-      currentFilters={{ city: cityName, amenity: amenityLabel }}
+      showTable={true}
+      mapZoom={11}
     />
   );
 }

@@ -455,3 +455,164 @@ export function generatePageTitle(
   const variations = titleVariations[pageType] || titleVariations.city;
   return variations[Math.floor(Math.random() * variations.length)];
 }
+
+/**
+ * Generate city page content blocks
+ */
+export function generateCityContentBlocks(
+  city: string,
+  breweries: Brewery[]
+): { title: string; content: string }[] {
+  const cityKey = city.toLowerCase().replace(/\s+/g, '_') as keyof typeof MARYLAND_LANDMARKS;
+  const landmarks = MARYLAND_LANDMARKS[cityKey] || [];
+  
+  // Block 1: About City's Brewery Scene
+  const historicalContext: Record<string, string> = {
+    baltimore: "Baltimore's brewing heritage dates back to the 1800s, when German immigrants established the city as a brewing powerhouse. Today's craft beer renaissance continues this tradition across neighborhoods like Fells Point, Canton, and Federal Hill. The city's brewery scene reflects its industrial heritage, waterfront location, and diverse communities, with everything from historic brewpubs in converted warehouses to modern taprooms in revitalized neighborhoods.",
+    annapolis: "Annapolis' craft beer scene blends the city's historic maritime character with modern brewing innovation. As Maryland's capital, the city attracts both locals and visitors seeking quality craft beer experiences. Many breweries incorporate local ingredients and celebrate Chesapeake Bay culture, creating a unique regional identity in Maryland's brewing landscape.",
+    frederick: "Frederick's craft beer scene has grown rapidly, transforming the historic downtown into a destination for beer enthusiasts. The city's agricultural roots provide access to fresh, local ingredients, while its location between Baltimore and Washington creates a diverse customer base. Frederick's breweries range from small nano operations to larger production facilities, all contributing to the city's reputation as a craft beer destination."
+  };
+  
+  const block1Content = historicalContext[city.toLowerCase()] || 
+    `${city}'s craft beer scene reflects the city's unique character and community spirit. Local breweries have become gathering places that celebrate the area's culture while contributing to economic development and tourism. From traditional brewing methods to innovative techniques, ${city}'s breweries offer diverse experiences for craft beer enthusiasts.`;
+  
+  // Block 2: Popular Neighborhoods
+  const neighborhoods = landmarks.slice(0, 4);
+  const neighborhoodCounts = new Map<string, number>();
+  breweries.forEach(b => {
+    // Simple heuristic - could be improved with actual neighborhood data
+    neighborhoods.forEach(neighborhood => {
+      if (b.name.toLowerCase().includes(neighborhood.toLowerCase().split(' ')[0])) {
+        neighborhoodCounts.set(neighborhood, (neighborhoodCounts.get(neighborhood) || 0) + 1);
+      }
+    });
+  });
+  
+  let block2Content = '';
+  if (neighborhoods.length > 0) {
+    block2Content = neighborhoods.slice(0, 3).map(neighborhood => {
+      const count = neighborhoodCounts.get(neighborhood) || Math.floor(breweries.length / neighborhoods.length);
+      return `${neighborhood} (${count} ${count === 1 ? 'brewery' : 'breweries'}): ${neighborhood.includes('Historic') ? 'Historic district' : 'Vibrant area'} with ${count === 1 ? 'a' : 'multiple'} local ${count === 1 ? 'brewery' : 'breweries'}`;
+    }).join('\n\n');
+  } else {
+    block2Content = `${city} features breweries distributed across various neighborhoods and districts. Each area offers its own character and atmosphere, from downtown locations to suburban settings.`;
+  }
+  
+  // Block 3: Planning Your Visit
+  const openCount = breweries.filter(b => b.hours).length;
+  const block3Content = `Most ${city} breweries open at 4pm on weekdays and noon on weekends. Plan for 1-2 hours per brewery if doing a tour. ${openCount > 0 ? `${openCount} breweries` : 'Many breweries'} have regular hours posted. Peak times are Friday and Saturday evenings; visit weekday afternoons for quieter experiences.`;
+  
+  return [
+    { title: `About ${city}'s Brewery Scene`, content: block1Content },
+    { title: 'Popular Neighborhoods & Districts', content: block2Content },
+    { title: 'Planning Your Visit', content: block3Content }
+  ];
+}
+
+/**
+ * Generate county page content blocks
+ */
+export function generateCountyContentBlocks(
+  county: string,
+  breweries: Brewery[],
+  cities: string[]
+): { title: string; content: string }[] {
+  const countyKey = county as keyof typeof MARYLAND_COUNTIES;
+  const countyData = MARYLAND_COUNTIES[countyKey] || {
+    population: 'diverse',
+    economic_impact: 'vibrant',
+    landmarks: [],
+    industries: []
+  };
+  
+  // Block 1: About County's Craft Beer Scene
+  const industries = countyData.industries.slice(0, 2).join(' and ');
+  const block1Content = `${county} County's craft beer scene reflects the region's ${countyData.economic_impact} economy and ${industries} heritage. With ${breweries.length} breweries across ${cities.length} ${cities.length === 1 ? 'city' : 'cities'}, the county offers diverse brewing experiences from urban taprooms to rural production facilities. These breweries contribute to local economic development while celebrating Maryland's brewing traditions.`;
+  
+  // Block 2: Cities & Communities
+  const cityList = cities.slice(0, 6).map(city => {
+    const cityBreweries = breweries.filter(b => b.city === city);
+    return `${city} (${cityBreweries.length} ${cityBreweries.length === 1 ? 'brewery' : 'breweries'})`;
+  }).join(', ');
+  const block2Content = `${county} County's breweries are distributed across ${cities.length} ${cities.length === 1 ? 'city' : 'cities and communities'}: ${cityList}. Each location offers unique characteristics, from historic downtowns to suburban commercial areas, creating a diverse craft beer landscape throughout the county.`;
+  
+  // Block 3: County Highlights
+  const block3Content = `${county} County's breweries benefit from the region's ${countyData.economic_impact} economy and strategic location. Many breweries participate in local events, festivals, and community initiatives, strengthening the connection between craft beer and local culture. The county's ${industries} industries provide both customers and potential partnerships for local breweries.`;
+  
+  return [
+    { title: `About ${county} County's Craft Beer Scene`, content: block1Content },
+    { title: 'Cities & Communities', content: block2Content },
+    { title: 'County Highlights', content: block3Content }
+  ];
+}
+
+/**
+ * Generate amenity page content blocks
+ */
+export function generateAmenityContentBlocks(
+  amenity: string,
+  breweryCount: number,
+  percentage: number,
+  topCities: { city: string; count: number }[]
+): { title: string; content: string }[] {
+  const amenityKey = amenity as keyof typeof AMENITY_DESCRIPTIONS;
+  const amenityData = AMENITY_DESCRIPTIONS[amenityKey] || {
+    value_prop: 'enhanced experience',
+    keywords: ['special features']
+  };
+  
+  // Block 1: Why This Amenity Matters
+  const block1Content = `${amenity} breweries recognize that craft beer enthusiasts often want ${amenityData.value_prop}. These breweries typically feature ${amenityData.keywords.slice(0, 2).join(' and ')} that enhance the overall experience. With ${percentage}% of Maryland breweries now offering ${amenity.toLowerCase()}, it's easier than ever to find breweries that meet your specific preferences and needs.`;
+  
+  // Block 2: What to Expect
+  const block2Content = `When visiting breweries with ${amenity.toLowerCase()}, you can expect ${amenityData.value_prop}. Most breweries clearly indicate their ${amenity.toLowerCase()} offerings on their websites and social media. It's always a good idea to call ahead or check online for specific details, hours, and any restrictions that may apply.`;
+  
+  // Block 3: Top Cities
+  const topCitiesList = topCities.slice(0, 5).map(({ city, count }) => 
+    `${city} (${count} ${count === 1 ? 'brewery' : 'breweries'})`
+  ).join(', ');
+  const block3Content = `The cities with the most breweries offering ${amenity.toLowerCase()} include: ${topCitiesList}. These areas lead in ${amenity.toLowerCase()} adoption, making them ideal destinations for craft beer enthusiasts seeking this specific amenity.`;
+  
+  return [
+    { title: `Why ${amenity} Matters`, content: block1Content },
+    { title: 'What to Expect', content: block2Content },
+    { title: `Top Cities for ${amenity}`, content: block3Content }
+  ];
+}
+
+/**
+ * Generate type page content blocks
+ */
+export function generateTypeContentBlocks(
+  type: string,
+  breweryCount: number,
+  percentage: number,
+  topCities: { city: string; count: number }[]
+): { title: string; content: string }[] {
+  const typeDefinitions: Record<string, string> = {
+    microbrewery: "Microbreweries are small, independent breweries that produce limited quantities of beer, typically under 15,000 barrels annually. They focus on quality, creativity, and community connections, often experimenting with unique flavors and brewing techniques.",
+    brewpub: "Brewpubs combine brewing operations with full-service restaurants, offering fresh beer alongside quality food. They create a complete dining experience where beer and food are designed to complement each other.",
+    taproom: "Taprooms are brewery-owned tasting rooms where customers can sample and purchase beer directly from the source. They often feature a rotating selection of beers and provide an intimate setting to experience the brewery's offerings.",
+    production: "Production breweries focus on brewing beer for distribution, often producing larger volumes for retail and wholesale markets. They may have tasting rooms but prioritize brewing and packaging operations.",
+    nano: "Nano breweries are the smallest scale operations, typically producing just a few barrels at a time. They emphasize experimentation, local community focus, and often feature the most unique and limited-edition beers."
+  };
+  
+  // Block 1: Understanding the Type
+  const block1Content = typeDefinitions[type.toLowerCase()] || 
+    `${type} breweries represent a specific category in Maryland's craft beer industry. These breweries follow industry standards and regulations while bringing their unique approach to brewing and serving craft beer.`;
+  
+  // Block 2: Maryland's Scene
+  const topCitiesList = topCities.slice(0, 4).map(({ city, count }) => 
+    `${city} (${count})`
+  ).join(', ');
+  const block2Content = `Maryland has ${breweryCount} ${type.toLowerCase()} breweries, representing ${percentage}% of the state's total breweries. The top cities for ${type.toLowerCase()} breweries include: ${topCitiesList}. These locations showcase the diversity and quality of ${type.toLowerCase()} brewing across Maryland.`;
+  
+  // Block 3: What Makes It Special
+  const block3Content = `${type} breweries offer unique characteristics that set them apart. They typically focus on ${type === 'microbrewery' ? 'small-batch quality and innovation' : type === 'brewpub' ? 'food and beer pairings' : type === 'taproom' ? 'direct customer experience' : type === 'production' ? 'consistent quality and distribution' : 'experimentation and community connection'}, creating distinct experiences for craft beer enthusiasts.`;
+  
+  return [
+    { title: `Understanding ${type.charAt(0).toUpperCase() + type.slice(1)}`, content: block1Content },
+    { title: `Maryland's ${type.charAt(0).toUpperCase() + type.slice(1)} Scene`, content: block2Content },
+    { title: `What Makes ${type.charAt(0).toUpperCase() + type.slice(1)} Special`, content: block3Content }
+  ];
+}

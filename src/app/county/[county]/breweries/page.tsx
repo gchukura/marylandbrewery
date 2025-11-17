@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
-import SimpleProgrammaticPageTemplate from '@/components/templates/SimpleProgrammaticPageTemplate';
+import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 import { getProcessedBreweryData } from '../../../../../lib/brewery-data';
 import { slugify, deslugify } from '@/lib/data-utils';
+import { generateCountyIntroText, generateCountyContentBlocks } from '@/lib/content-generators';
 
 const ALL_MD_COUNTIES = [
   'Allegany', 'Anne Arundel', 'Baltimore', 'Calvert', 'Caroline', 'Carroll', 'Cecil', 'Charles',
@@ -58,47 +59,74 @@ export default async function CountyBreweriesPage({ params }: { params: { county
   const breweries = processed.breweries.filter(b => (b as any).county?.toLowerCase() === countyName.toLowerCase());
   const citiesInCounty = Array.from(new Set(breweries.map(b => b.city))).sort();
 
-  // Stats & demographics (placeholder; can be enriched later)
-  const stats = {
-    title: `${countyName} County Statistics`,
-    stats: [
-      { label: 'Total Breweries', value: breweries.length },
-      { label: 'Cities with Breweries', value: citiesInCounty.length },
-    ],
-    lastUpdated: new Date().toISOString(),
-  } as any;
+  // Intro text
+  const statsForIntro = { totalBreweries: breweries.length, totalCounties: processed.counties.length, totalTypes: 0 };
+  const introText = generateCountyIntroText(countyName, breweries.length, statsForIntro);
 
-  // Nearby counties: pick a few others alphabetically as a simple heuristic
-  const neighbors = ALL_MD_COUNTIES
-    .filter(c => c.toLowerCase() !== countyName.toLowerCase())
-    .slice(0, 6)
-    .map(c => ({ title: `${c} County Breweries`, url: `/county/${slugify(c)}/breweries`, type: 'county' }));
-
+  // Breadcrumbs
   const breadcrumbs = [
-    { name: 'Home', url: '/', position: 1, isActive: false },
-    { name: 'Maryland', url: '/county', position: 2, isActive: false },
-    { name: `${countyName} County`, url: `/county/${params.county}/breweries`, position: 3, isActive: true },
+    { name: 'Home', url: '/', isActive: false },
+    { name: 'Counties', url: '/county', isActive: false },
+    { name: `${countyName} County`, url: `/county/${params.county}/breweries`, isActive: true },
   ];
 
-  const introText = breweries.length > 0
-    ? `${countyName} County's craft beer scene features ${breweries.length} breweries across ${citiesInCounty.length} cities.`
-    : `${countyName} County doesn’t have listed breweries yet. Explore nearby counties while we update listings.`;
+  // Stats
+  const microbreweries = breweries.filter(b => {
+    const types = Array.isArray(b.type) ? b.type : [b.type];
+    return types.some((t: string) => t?.toLowerCase() === 'microbrewery');
+  }).length;
+  const brewpubs = breweries.filter(b => {
+    const types = Array.isArray(b.type) ? b.type : [b.type];
+    return types.some((t: string) => t?.toLowerCase() === 'brewpub');
+  }).length;
+
+  const stats = [
+    { label: 'Total Breweries', value: breweries.length },
+    { label: 'Cities Covered', value: citiesInCounty.length },
+    { label: 'Microbreweries', value: microbreweries },
+    { label: 'Brewpubs', value: brewpubs },
+  ];
+
+  // Content blocks
+  const contentBlocks = generateCountyContentBlocks(countyName, breweries, citiesInCounty);
+
+  // Related pages
+  // Cities in this county
+  const cityPages = citiesInCounty.slice(0, 5).map(city => ({
+    title: `${city} Breweries`,
+    url: `/city/${slugify(city)}/breweries`,
+    count: breweries.filter(b => b.city === city).length,
+  }));
+
+  // Nearby counties
+  const neighbors = ALL_MD_COUNTIES
+    .filter(c => c.toLowerCase() !== countyName.toLowerCase())
+    .slice(0, 3)
+    .map(c => {
+      const neighborBreweries = processed.breweries.filter(b => (b as any).county?.toLowerCase() === c.toLowerCase());
+      return {
+        title: `${c} County Breweries`,
+        url: `/county/${slugify(c)}/breweries`,
+        count: neighborBreweries.length,
+      };
+    });
+
+  const relatedPages = [...cityPages, ...neighbors];
 
   return (
-    <SimpleProgrammaticPageTemplate
-      title={`${countyName} County Breweries - ${breweries.length} Craft Breweries`}
-      metaDescription={`Discover breweries in ${countyName} County, Maryland. ${breweries.length > 0 ? `${breweries.length} breweries listed.` : 'No breweries listed yet.'}`}
+    <DirectoryPageTemplate
       h1={`${countyName} County Breweries`}
       introText={introText}
+      breadcrumbs={breadcrumbs}
       breweries={breweries as any}
       stats={stats}
-      breadcrumbs={breadcrumbs as any}
-      relatedPages={neighbors as any}
+      contentBlocks={contentBlocks}
+      relatedPages={relatedPages}
       pageType="county"
       showMap={true}
       showStats={true}
-      showRelatedPages={true}
-      currentFilters={{ county: countyName }}
+      showTable={true}
+      mapZoom={9}
     />
   );
 }

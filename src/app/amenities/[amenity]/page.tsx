@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
-import SimpleProgrammaticPageTemplate from '@/components/templates/SimpleProgrammaticPageTemplate';
+import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 import { getProcessedBreweryData } from '../../../../lib/brewery-data';
 import { slugify, deslugify } from '@/lib/data-utils';
+import { generateAmenityIntroText, generateAmenityContentBlocks } from '@/lib/content-generators';
 
 const AMENITY_SLUGS = [
   'dog-friendly', 'outdoor-seating', 'live-music', 'food-trucks', 'full-kitchen', 'beer-garden',
@@ -76,51 +77,86 @@ export default async function AmenityPage({ params }: { params: { amenity: strin
   for (const b of breweries) {
     cityCounts.set(b.city, (cityCounts.get(b.city) || 0) + 1);
   }
-  const topCities = Array.from(cityCounts.entries())
+  const topCitiesData = Array.from(cityCounts.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
-    .map(([city]) => ({ title: `${city} Breweries`, url: `/city/${slugify(city)}/breweries`, type: 'city' }));
+    .map(([city, count]) => ({ city, count }));
 
-  // Related amenities: pick a few others
-  const related = AMENITY_SLUGS.filter((a) => a !== params.amenity)
-    .slice(0, 6)
-    .map((a) => ({ title: `${normalizeAmenityLabel(a)} Breweries`, url: `/amenities/${a}`, type: 'amenity' }));
+  // Most common type with this amenity
+  const typeCounts = new Map<string, number>();
+  breweries.forEach(b => {
+    const types = Array.isArray(b.type) ? b.type : [b.type];
+    types.forEach((type: string) => {
+      if (type) {
+        const key = type.toLowerCase();
+        typeCounts.set(key, (typeCounts.get(key) || 0) + 1);
+      }
+    });
+  });
+  const mostCommonType = Array.from(typeCounts.entries())
+    .sort((a, b) => b[1] - a[1])[0]?.[0] || 'Brewpubs';
 
-  const stats = {
-    title: `${label} Availability`,
-    stats: [
-      { label: 'Total Breweries', value: total },
-      { label: 'Share of All Breweries', value: `${pct}%` },
-      { label: 'Top Cities', value: topCities.length },
-    ],
-    lastUpdated: new Date().toISOString(),
-  } as any;
-
-  const introText = total > 0
-    ? `Discover ${total} Maryland breweries offering ${label.toLowerCase()}. Popular in ${topCities.slice(0, 3).map(c => c.title.replace(' Breweries','')).join(', ')}.`
-    : `We haven't listed breweries with ${label.toLowerCase()} yet. Check back soon or explore related amenities.`;
-
-  const breadcrumbs = [
-    { name: 'Home', url: '/', position: 1, isActive: false },
-    { name: 'Breweries', url: '/breweries', position: 2, isActive: false },
-    { name: label, url: `/amenities/${params.amenity}`, position: 3, isActive: true },
+  // Stats
+  const stats = [
+    { label: 'With This Amenity', value: total },
+    { label: '% of Total', value: `${pct}%` },
+    { label: 'Top City', value: topCitiesData[0] ? `${topCitiesData[0].city} (${topCitiesData[0].count})` : 'N/A' },
+    { label: 'Most Common Type', value: mostCommonType },
   ];
 
+  // Intro text
+  const introText = generateAmenityIntroText(label, total, pct);
+
+  // Breadcrumbs
+  const breadcrumbs = [
+    { name: 'Home', url: '/', isActive: false },
+    { name: 'Amenities', url: '/amenities', isActive: false },
+    { name: label, url: `/amenities/${params.amenity}`, isActive: true },
+  ];
+
+  // Content blocks
+  const contentBlocks = generateAmenityContentBlocks(label, total, pct, topCitiesData);
+
+  // Related pages
+  // Top cities with this amenity
+  const topCities = topCitiesData.slice(0, 5).map(({ city, count }) => ({
+    title: `${city} ${label} Breweries`,
+    url: `/city/${slugify(city)}/${params.amenity}`,
+    count,
+  }));
+
+  // Related amenities
+  const relatedAmenities = AMENITY_SLUGS.filter((a) => a !== params.amenity)
+    .slice(0, 4)
+    .map((a) => {
+      const relatedBreweries = processed.breweries.filter(
+        (b) => ((b as any).amenities || (b as any).features || []).some((amenity: string) => 
+          amenity.toLowerCase().includes(normalizeAmenityLabel(a).toLowerCase())
+        )
+      );
+      return {
+        title: `${normalizeAmenityLabel(a)} Breweries`,
+        url: `/amenities/${a}`,
+        count: relatedBreweries.length,
+      };
+    });
+
+  const relatedPages = [...topCities, ...relatedAmenities];
+
   return (
-    <SimpleProgrammaticPageTemplate
-      title={`${label} Breweries in Maryland`}
-      metaDescription={`Explore Maryland breweries with ${label.toLowerCase()}.`}
-      h1={`${label} Breweries`}
+    <DirectoryPageTemplate
+      h1={`${label} Breweries in Maryland`}
       introText={introText}
+      breadcrumbs={breadcrumbs}
       breweries={breweries as any}
       stats={stats}
-      breadcrumbs={breadcrumbs as any}
-      relatedPages={related as any}
+      contentBlocks={contentBlocks}
+      relatedPages={relatedPages}
       pageType="amenity"
       showMap={true}
       showStats={true}
-      showRelatedPages={true}
-      currentFilters={{ amenity: label }}
+      showTable={true}
+      mapZoom={9}
     />
   );
 }

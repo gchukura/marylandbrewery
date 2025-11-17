@@ -1,6 +1,36 @@
+import { Metadata } from 'next';
 import { getProcessedBreweryData } from '../../../lib/brewery-data';
 
 export const revalidate = 3600; // ISR hourly
+
+export const metadata: Metadata = {
+  title: 'Breweries Open Now - Maryland Brewery Directory',
+  description: 'Find Maryland breweries currently open. Real-time list of breweries open now across the state. Updated hourly with current hours and closing times.',
+  alternates: {
+    canonical: '/open-now',
+  },
+  openGraph: {
+    title: 'Breweries Open Now - Maryland Brewery Directory',
+    description: 'Find Maryland breweries currently open. Real-time list of breweries open now across the state.',
+    url: 'https://marylandbrewery.com/open-now',
+    siteName: 'Maryland Brewery Directory',
+    type: 'website',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Maryland Brewery Directory - Open Now',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Breweries Open Now - Maryland Brewery Directory',
+    description: 'Find Maryland breweries currently open. Real-time list of breweries open now across the state.',
+    images: ['/og-image.jpg'],
+  },
+};
 
 function isOpenNow(hours?: Record<string, string>): { open: boolean; closeTime?: string } {
   if (!hours) return { open: false };

@@ -1,9 +1,39 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { getProcessedBreweryData } from '../../../lib/brewery-data';
 import { slugify } from '@/lib/data-utils';
 import PageContainer from '@/components/layout/PageContainer';
 import SectionHeader from '@/components/layout/SectionHeader';
 import GridContainer from '@/components/layout/GridContainer';
+
+export const metadata: Metadata = {
+  title: 'Maryland Counties with Breweries - Browse by County',
+  description: 'Browse all 24 Maryland counties with breweries. Find breweries by county across Maryland. Explore Baltimore City, Anne Arundel, Montgomery, and more.',
+  alternates: {
+    canonical: '/county',
+  },
+  openGraph: {
+    title: 'Maryland Counties with Breweries - Browse by County',
+    description: 'Browse all 24 Maryland counties with breweries. Find breweries by county across Maryland.',
+    url: 'https://marylandbrewery.com/county',
+    siteName: 'Maryland Brewery Directory',
+    type: 'website',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Maryland Brewery Directory - Counties',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Maryland Counties with Breweries - Browse by County',
+    description: 'Browse all 24 Maryland counties with breweries. Find breweries by county across Maryland.',
+    images: ['/og-image.jpg'],
+  },
+};
 
 const ALL_MD_COUNTIES = [
   'Allegany', 'Anne Arundel', 'Baltimore', 'Calvert', 'Caroline', 'Carroll', 'Cecil', 'Charles',

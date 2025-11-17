@@ -42,24 +42,24 @@ const NAVIGATION_ITEMS = [
     label: 'Features',
     href: '/features',
     children: [
-      { label: 'Food', href: '/breweries/amenity/food' },
-      { label: 'Outdoor Seating', href: '/breweries/amenity/outdoor-seating' },
-      { label: 'Live Music', href: '/breweries/amenity/live-music' },
-      { label: 'Tours', href: '/breweries/amenity/tours' },
-      { label: 'Pet Friendly', href: '/breweries/amenity/pet-friendly' },
-      { label: 'WiFi', href: '/breweries/amenity/wifi' },
-      { label: 'Parking', href: '/breweries/amenity/parking' },
+      { label: 'Food', href: '/amenities/food' },
+      { label: 'Outdoor Seating', href: '/amenities/outdoor-seating' },
+      { label: 'Live Music', href: '/amenities/live-music' },
+      { label: 'Tours', href: '/amenities/tours' },
+      { label: 'Pet Friendly', href: '/amenities/pet-friendly' },
+      { label: 'WiFi', href: '/amenities/wifi' },
+      { label: 'Parking', href: '/amenities/parking' },
     ]
   },
   {
     label: 'Types',
     href: '/types',
     children: [
-      { label: 'Microbrewery', href: '/breweries/type/microbrewery' },
-      { label: 'Brewpub', href: '/breweries/type/brewpub' },
-      { label: 'Taproom', href: '/breweries/type/taproom' },
-      { label: 'Production', href: '/breweries/type/production' },
-      { label: 'Nano', href: '/breweries/type/nano' },
+      { label: 'Microbrewery', href: '/type/microbrewery' },
+      { label: 'Brewpub', href: '/type/brewpub' },
+      { label: 'Taproom', href: '/type/taproom' },
+      { label: 'Production', href: '/type/production' },
+      { label: 'Nano', href: '/type/nano' },
     ]
   },
   {

@@ -14,6 +14,40 @@ const nextConfig: NextConfig = {
     ],
     formats: ['image/webp', 'image/avif'],
   },
+  async redirects() {
+    return [
+      // Redirect old amenity URLs to new format
+      {
+        source: '/breweries/amenity/:path*',
+        destination: '/amenities/:path*',
+        permanent: true,
+      },
+      // Redirect old type URLs to new format
+      {
+        source: '/breweries/type/:path*',
+        destination: '/type/:path*',
+        permanent: true,
+      },
+      // Redirect /features to /amenities (features index doesn't exist)
+      {
+        source: '/features',
+        destination: '/amenities',
+        permanent: false,
+      },
+      // Redirect /types to /type (types index doesn't exist, redirect to first type)
+      {
+        source: '/types',
+        destination: '/type',
+        permanent: false,
+      },
+      // Redirect /breweries to homepage (all breweries page doesn't exist)
+      {
+        source: '/breweries',
+        destination: '/',
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     return [
       {

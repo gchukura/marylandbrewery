@@ -1,8 +1,38 @@
+import { Metadata } from 'next';
 import HeroSection from '@/components/home/HeroSection';
 import MapAndTableSection from '@/components/home/MapAndTableSection';
 import Link from 'next/link';
 import { getProcessedBreweryData } from '../../lib/brewery-data';
 import { slugify } from '../lib/data-utils';
+
+export const metadata: Metadata = {
+  title: 'Maryland Brewery Directory | Craft Breweries Across Maryland',
+  description: 'Discover the best craft breweries across Maryland. Find breweries by city, county, type, and amenities. Interactive map, brewery hours, and complete guide to Maryland\'s craft beer scene.',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'Maryland Brewery Directory | Craft Breweries Across Maryland',
+    description: 'Discover the best craft breweries across Maryland. Find breweries by city, county, type, and amenities. Interactive map and complete guide.',
+    url: 'https://marylandbrewery.com',
+    siteName: 'Maryland Brewery Directory',
+    type: 'website',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Maryland Brewery Directory - Craft Breweries Across Maryland',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Maryland Brewery Directory | Craft Breweries Across Maryland',
+    description: 'Discover the best craft breweries across Maryland. Find breweries by city, county, type, and amenities.',
+    images: ['/og-image.jpg'],
+  },
+};
 
 export default async function HomePage() {
   const processed = await getProcessedBreweryData();
@@ -64,15 +94,15 @@ export default async function HomePage() {
             <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:border-yellow-200 transition-colors">
               <h3 className="font-semibold text-gray-900 mb-4">Features</h3>
               <ul className="space-y-2">
-                <li><Link href="/breweries/dog-friendly" 
+                <li><Link href="/amenities/dog-friendly" 
                          className="text-gray-600 hover:text-yellow-600 transition-colors">
                       Dog-Friendly
                     </Link></li>
-                <li><Link href="/breweries/tours" 
+                <li><Link href="/amenities/tours" 
                          className="text-gray-600 hover:text-yellow-600 transition-colors">
                       Tours
                     </Link></li>
-                <li><Link href="/breweries/food" 
+                <li><Link href="/amenities/food" 
                          className="text-gray-600 hover:text-yellow-600 transition-colors">
                       Food
                     </Link></li>

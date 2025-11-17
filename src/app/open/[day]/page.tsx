@@ -1,8 +1,50 @@
+import { Metadata } from 'next';
 import { getProcessedBreweryData } from '../../../../lib/brewery-data';
 
 export const revalidate = 3600; // ISR hourly
 
 const DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'] as const;
+
+export async function generateMetadata({ params }: { params: { day: string } }): Promise<Metadata> {
+  const day = params.day.charAt(0).toUpperCase() + params.day.slice(1);
+  const processed = await getProcessedBreweryData();
+  const list = processed.breweries.filter((b) => {
+    const hours = b.hours as any;
+    if (!hours) return false;
+    const h = hours[params.day.toLowerCase() as keyof typeof hours];
+    if (!h || /closed/i.test(h)) return false;
+    return true;
+  });
+
+  return {
+    title: `Breweries Open on ${day} - Maryland Brewery Directory`,
+    description: `Find ${list.length} Maryland breweries open on ${day}. Complete list of breweries with hours for ${day}. Plan your visit to Maryland craft breweries.`,
+    alternates: {
+      canonical: `/open/${params.day}`,
+    },
+    openGraph: {
+      title: `Breweries Open on ${day} - Maryland Brewery Directory`,
+      description: `Find ${list.length} Maryland breweries open on ${day}. Complete list of breweries with hours for ${day}.`,
+      url: `https://marylandbrewery.com/open/${params.day}`,
+      siteName: 'Maryland Brewery Directory',
+      type: 'website',
+      images: [
+        {
+          url: '/og-image.jpg',
+          width: 1200,
+          height: 630,
+          alt: `Maryland Brewery Directory - Open on ${day}`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `Breweries Open on ${day} - Maryland Brewery Directory`,
+      description: `Find ${list.length} Maryland breweries open on ${day}. Complete list of breweries with hours for ${day}.`,
+      images: ['/og-image.jpg'],
+    },
+  };
+}
 
 export async function generateStaticParams() {
   return DAYS.map((d) => ({ day: d }));

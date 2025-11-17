@@ -31,20 +31,20 @@ const TOP_COUNTIES = [
 ];
 
 const FEATURES = [
-  { name: 'Food', href: '/breweries/amenity/food' },
-  { name: 'Outdoor Seating', href: '/breweries/amenity/outdoor-seating' },
-  { name: 'Live Music', href: '/breweries/amenity/live-music' },
-  { name: 'Tours', href: '/breweries/amenity/tours' },
-  { name: 'Pet Friendly', href: '/breweries/amenity/pet-friendly' },
-  { name: 'WiFi', href: '/breweries/amenity/wifi' },
+  { name: 'Food', href: '/amenities/food' },
+  { name: 'Outdoor Seating', href: '/amenities/outdoor-seating' },
+  { name: 'Live Music', href: '/amenities/live-music' },
+  { name: 'Tours', href: '/amenities/tours' },
+  { name: 'Pet Friendly', href: '/amenities/pet-friendly' },
+  { name: 'WiFi', href: '/amenities/wifi' },
 ];
 
 const BREWERY_TYPES = [
-  { name: 'Microbrewery', href: '/breweries/type/microbrewery' },
-  { name: 'Brewpub', href: '/breweries/type/brewpub' },
-  { name: 'Taproom', href: '/breweries/type/taproom' },
-  { name: 'Production', href: '/breweries/type/production' },
-  { name: 'Nano', href: '/breweries/type/nano' },
+  { name: 'Microbrewery', href: '/type/microbrewery' },
+  { name: 'Brewpub', href: '/type/brewpub' },
+  { name: 'Taproom', href: '/type/taproom' },
+  { name: 'Production', href: '/type/production' },
+  { name: 'Nano', href: '/type/nano' },
 ];
 
 const SOCIAL_LINKS = [

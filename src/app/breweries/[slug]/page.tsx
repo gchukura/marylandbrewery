@@ -35,6 +35,9 @@ export async function generateMetadata({ params }: BreweryPageProps) {
   return {
     title,
     description,
+    alternates: {
+      canonical: `/breweries/${params.slug}`,
+    },
     openGraph: {
       title,
       description,

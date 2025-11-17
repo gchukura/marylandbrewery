@@ -351,7 +351,7 @@ export default function SimpleBreweryPageTemplate({
                       ? brewery.type.map((type: string, index: number) => (
                           <span key={index}>
                             <Link 
-                              href={`/breweries/type/${type.toLowerCase().replace(/\s+/g, '-')}`}
+                              href={`/type/${type.toLowerCase().replace(/\s+/g, '-')}`}
                               className="text-red-600 hover:text-red-800 hover:underline font-medium"
                             >
                               {type}
@@ -361,7 +361,7 @@ export default function SimpleBreweryPageTemplate({
                         ))
                       : (
                           <Link 
-                            href={`/breweries/type/${brewery.type.toLowerCase().replace(/\s+/g, '-')}`}
+                            href={`/type/${brewery.type.toLowerCase().replace(/\s+/g, '-')}`}
                             className="text-red-600 hover:text-red-800 hover:underline font-medium"
                           >
                             {brewery.type}
@@ -391,25 +391,25 @@ export default function SimpleBreweryPageTemplate({
                 <div className="space-y-2">
                   {brewery.socialMedia?.facebook && (
                     <a href={brewery.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-red-600 hover:text-red-700">
-                      <img src={getSocialMediaIcon('facebook')} alt="Facebook" className="h-4 w-4" />
+                      <img src={getSocialMediaIcon('facebook')} alt={`${brewery.name} on Facebook`} className="h-4 w-4" />
                       Facebook
                     </a>
                   )}
                   {brewery.socialMedia?.twitter && (
                     <a href={brewery.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-red-600 hover:text-red-700">
-                      <img src={getSocialMediaIcon('twitter')} alt="Twitter" className="h-4 w-4" />
+                      <img src={getSocialMediaIcon('twitter')} alt={`${brewery.name} on Twitter`} className="h-4 w-4" />
                       Twitter
                     </a>
                   )}
                   {brewery.socialMedia?.instagram && (
                     <a href={brewery.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-red-600 hover:text-red-700">
-                      <img src={getSocialMediaIcon('instagram')} alt="Instagram" className="h-4 w-4" />
+                      <img src={getSocialMediaIcon('instagram')} alt={`${brewery.name} on Instagram`} className="h-4 w-4" />
                       Instagram
                     </a>
                   )}
                   {brewery.socialMedia?.untappd && (
                     <a href={brewery.socialMedia.untappd} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-red-600 hover:text-red-700">
-                      <img src={getSocialMediaIcon('untappd')} alt="Untappd" className="h-4 w-4" />
+                      <img src={getSocialMediaIcon('untappd')} alt={`${brewery.name} on Untappd`} className="h-4 w-4" />
                       Untappd
                     </a>
                   )}
@@ -443,7 +443,7 @@ export default function SimpleBreweryPageTemplate({
                             <span className="text-gray-700">
                               {brewery.allowsVisitors ? (
                                 <Link 
-                                  href="/breweries/amenity/visitors-welcome"
+                                  href="/amenities/visitors-welcome"
                                   className="text-red-600 hover:text-red-800 hover:underline font-medium"
                                 >
                                   Visitors Welcome
@@ -458,7 +458,7 @@ export default function SimpleBreweryPageTemplate({
                             <span className="text-gray-700">
                               {brewery.offersTours ? (
                                 <Link 
-                                  href="/breweries/amenity/tours"
+                                  href="/amenities/tours"
                                   className="text-red-600 hover:text-red-800 hover:underline font-medium"
                                 >
                                   Tours Available
@@ -473,7 +473,7 @@ export default function SimpleBreweryPageTemplate({
                             <span className="text-gray-700">
                               {brewery.beerToGo ? (
                                 <Link 
-                                  href="/breweries/amenity/beer-to-go"
+                                  href="/amenities/beer-to-go"
                                   className="text-red-600 hover:text-red-800 hover:underline font-medium"
                                 >
                                   Beer To Go Available
@@ -488,7 +488,7 @@ export default function SimpleBreweryPageTemplate({
                             <span className="text-gray-700">
                               {brewery.hasMerch ? (
                                 <Link 
-                                  href="/breweries/amenity/merchandise"
+                                  href="/amenities/merchandise"
                                   className="text-red-600 hover:text-red-800 hover:underline font-medium"
                                 >
                                   Merchandise Available
@@ -506,7 +506,7 @@ export default function SimpleBreweryPageTemplate({
                                 return (
                                   <span key={index}>
                                     <Link 
-                                      href={`/breweries/amenity/${foodItem.trim().toLowerCase().replace(/\s+/g, '-')}`}
+                                      href={`/amenities/${foodItem.trim().toLowerCase().replace(/\s+/g, '-')}`}
                                       className="text-red-600 hover:text-red-800 hover:underline font-medium"
                                     >
                                       {foodItem.trim()}
@@ -523,7 +523,7 @@ export default function SimpleBreweryPageTemplate({
                             <Coffee className="h-4 w-4 text-red-600" />
                             <span className="text-gray-700">
                               <Link 
-                                href="/breweries/amenity/other-drinks"
+                                href="/amenities/other-drinks"
                                 className="text-red-600 hover:text-red-800 hover:underline font-medium"
                               >
                                 Other Drinks
@@ -536,7 +536,7 @@ export default function SimpleBreweryPageTemplate({
                             <Car className="h-4 w-4 text-red-600" />
                             <span className="text-gray-700">
                               <Link 
-                                href="/breweries/amenity/parking"
+                                href="/amenities/parking"
                                 className="text-red-600 hover:text-red-800 hover:underline font-medium"
                               >
                                 Parking
@@ -549,7 +549,7 @@ export default function SimpleBreweryPageTemplate({
                             <Dog className="h-4 w-4 text-red-600" />
                             <span className="text-gray-700">
                               <Link 
-                                href="/breweries/amenity/dog-friendly"
+                                href="/amenities/dog-friendly"
                                 className="text-red-600 hover:text-red-800 hover:underline font-medium"
                               >
                                 Dog Friendly
@@ -562,7 +562,7 @@ export default function SimpleBreweryPageTemplate({
                             <Utensils className="h-4 w-4 text-red-600" />
                             <span className="text-gray-700">
                               <Link 
-                                href="/breweries/amenity/outdoor-seating"
+                                href="/amenities/outdoor-seating"
                                 className="text-red-600 hover:text-red-800 hover:underline font-medium"
                               >
                                 Outdoor Seating
@@ -583,7 +583,7 @@ export default function SimpleBreweryPageTemplate({
                           <div key={index} className="flex items-center gap-2">
                             {getAmenityIcon(amenity)}
                             <Link 
-                              href={`/breweries/amenity/${amenity.toLowerCase().replace(/\s+/g, '-')}`}
+                              href={`/amenities/${amenity.toLowerCase().replace(/\s+/g, '-')}`}
                               className="text-red-600 hover:text-red-800 hover:underline font-medium"
                             >
                               {amenity}

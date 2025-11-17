@@ -32,7 +32,22 @@ export async function generateMetadata({ params }: { params: { county: string } 
       title,
       description,
       url: `https://marylandbrewery.com/county/${params.county}/breweries`,
+      siteName: 'Maryland Brewery Directory',
       type: 'website',
+      images: [
+        {
+          url: '/og-image.jpg',
+          width: 1200,
+          height: 630,
+          alt: `${countyName} County Breweries`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/og-image.jpg'],
     },
   };
 }

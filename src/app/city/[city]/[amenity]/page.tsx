@@ -49,7 +49,22 @@ export async function generateMetadata({ params }: { params: { city: string; ame
       title,
       description,
       url: `https://marylandbrewery.com/city/${params.city}/${params.amenity}`,
+      siteName: 'Maryland Brewery Directory',
       type: 'website',
+      images: [
+        {
+          url: '/og-image.jpg',
+          width: 1200,
+          height: 630,
+          alt: `${amenityLabel} Breweries in ${cityName}`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/og-image.jpg'],
     },
   };
 }
@@ -101,7 +116,7 @@ export default async function CityAmenityPage({ params }: { params: { city: stri
 
   const related = [
     { title: `All ${cityName} Breweries`, url: `/city/${params.city}/breweries`, type: 'city' },
-    { title: `${amenityLabel} Breweries (Statewide)`, url: `/breweries/${params.amenity}`, type: 'amenity' },
+    { title: `${amenityLabel} Breweries (Statewide)`, url: `/amenities/${params.amenity}`, type: 'amenity' },
   ];
 
   return (

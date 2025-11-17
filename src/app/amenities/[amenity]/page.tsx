@@ -25,8 +25,9 @@ export async function generateMetadata({ params }: { params: { amenity: string }
   );
   const pct = processed.breweries.length > 0 ? Math.round((breweries.length / processed.breweries.length) * 100) : 0;
 
+  const labelLower = label.toLowerCase();
   const title = `${label} Breweries - ${breweries.length} in Maryland (${pct}%)`;
-  const description = `${pct}% of Maryland breweries offer ${label.toLowerCase()}. Explore ${breweries.length} breweries with ${label.toLowerCase()} across Maryland.`;
+  const description = `${pct}% of Maryland breweries offer ${labelLower}. Explore ${breweries.length} breweries with ${labelLower} across Maryland, including top cities like Baltimore, Annapolis, and Frederick. Find the best ${labelLower} breweries near you.`;
 
   return {
     title,
@@ -36,7 +37,22 @@ export async function generateMetadata({ params }: { params: { amenity: string }
       title,
       description,
       url: `https://marylandbrewery.com/amenities/${params.amenity}`,
+      siteName: 'Maryland Brewery Directory',
       type: 'website',
+      images: [
+        {
+          url: '/og-image.jpg',
+          width: 1200,
+          height: 630,
+          alt: `${label} Breweries in Maryland`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/og-image.jpg'],
     },
   };
 }

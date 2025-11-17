@@ -48,7 +48,22 @@ export async function generateMetadata({ params }: { params: { city: string } })
       title,
       description,
       url: `https://marylandbrewery.com/city/${params.city}/breweries`,
+      siteName: 'Maryland Brewery Directory',
       type: 'website',
+      images: [
+        {
+          url: '/og-image.jpg',
+          width: 1200,
+          height: 630,
+          alt: `${cityName} Breweries`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/og-image.jpg'],
     },
   };
 }

@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { getAllCities, getProcessedBreweryData } from '../../../lib/brewery-data';
 import { slugify } from '@/lib/data-utils';
@@ -6,6 +7,35 @@ import SectionHeader from '@/components/layout/SectionHeader';
 import GridContainer from '@/components/layout/GridContainer';
 import GoogleMap from '@/components/maps/GoogleMap';
 import StatsBar from '@/components/home/StatsBar';
+
+export const metadata: Metadata = {
+  title: 'Maryland Cities with Breweries - Browse by City',
+  description: 'Browse all Maryland cities with breweries. Find breweries by city across the Old Line State. Explore Baltimore, Annapolis, Frederick, and more.',
+  alternates: {
+    canonical: '/city',
+  },
+  openGraph: {
+    title: 'Maryland Cities with Breweries - Browse by City',
+    description: 'Browse all Maryland cities with breweries. Find breweries by city across the Old Line State.',
+    url: 'https://marylandbrewery.com/city',
+    siteName: 'Maryland Brewery Directory',
+    type: 'website',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Maryland Brewery Directory - Cities',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Maryland Cities with Breweries - Browse by City',
+    description: 'Browse all Maryland cities with breweries. Find breweries by city across the Old Line State.',
+    images: ['/og-image.jpg'],
+  },
+};
 
 const REGIONS: Record<string, string[]> = {
   'Western Maryland': ['Cumberland', 'Hagerstown', 'Frederick'],

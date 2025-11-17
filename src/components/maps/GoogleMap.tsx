@@ -305,7 +305,7 @@ export default function GoogleMap({
           streetViewControl={DEFAULT_MAP_OPTIONS.streetViewControl}
           fullscreenControl={DEFAULT_MAP_OPTIONS.fullscreenControl}
           zoomControl={DEFAULT_MAP_OPTIONS.zoomControl}
-          styles={[...DEFAULT_MAP_OPTIONS.styles]}
+          // Note: styles cannot be set when mapId is present - styles must be configured in Google Cloud Console
         >
           <MapContent
             breweries={breweries}

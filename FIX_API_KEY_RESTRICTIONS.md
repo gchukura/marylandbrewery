@@ -29,9 +29,10 @@ The test script confirmed your API key works. The AuthFailure error in the brows
   ```
   localhost:3000/*
   *.vercel.app/*
-  yourdomain.com/*
+  https://www.marylandbrewery.com/*
+  https://marylandbrewery.com/*
   ```
-- Replace `yourdomain.com` with your actual production domain
+- **Important:** Add both `www` and non-`www` versions of your domain
 - Click **Save**
 
 ### Step 4: Verify API Restrictions

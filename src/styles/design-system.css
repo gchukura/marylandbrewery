@@ -1,9 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Maryland flag subtle background (5% opacity) */
-.@layer utilities {
+@layer utilities {
   .bg-md-flag {
     background-image: url('/md-flag.svg');
     background-size: cover;
@@ -15,45 +11,92 @@
 @layer components {
   /* Card styles */
   .card {
-    @apply bg-white rounded-card shadow-card border border-gray-100 p-card-padding; 
+    background-color: white;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    border: 1px solid rgb(243 244 246);
+    padding: 1rem;
   }
   .card-hover:hover {
-    @apply shadow-card-hover;
+    box-shadow: 0 4px 8px -2px rgb(0 0 0 / 0.08);
   }
 
   /* Buttons */
   .btn {
-    @apply inline-flex items-center justify-center font-medium rounded-btn px-4 py-2 transition-colors;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    border-radius: 0.25rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
   }
   .btn-primary-gold {
-    @apply btn bg-md-gold text-md-black hover:bg-yellow-400;
+    background-color: #EAAA00;
+    color: #000000;
+  }
+  .btn-primary-gold:hover {
+    background-color: rgb(250 204 21);
   }
   .btn-secondary-red {
-    @apply btn bg-md-red text-white hover:bg-red-600;
+    background-color: #E03A3E;
+    color: white;
+  }
+  .btn-secondary-red:hover {
+    background-color: rgb(220 38 38);
   }
   .btn-outline {
-    @apply btn border border-gray-300 text-gray-800 hover:bg-gray-50;
+    border: 1px solid rgb(209 213 219);
+    color: rgb(31 41 55);
+  }
+  .btn-outline:hover {
+    background-color: rgb(249 250 251);
   }
 
   /* Status badges */
   .badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold;
+    display: inline-flex;
+    align-items: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-top: 0.125rem;
+    padding-bottom: 0.125rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
   }
   .badge-open {
-    @apply badge bg-status-open/10 text-status-open border border-status-open/20;
+    background-color: rgb(16 185 129 / 0.1);
+    color: #10B981;
+    border: 1px solid rgb(16 185 129 / 0.2);
   }
   .badge-closed {
-    @apply badge bg-status-closed/10 text-status-closed border border-status-closed/20;
+    background-color: rgb(239 68 68 / 0.1);
+    color: #EF4444;
+    border: 1px solid rgb(239 68 68 / 0.2);
   }
   .badge-coming {
-    @apply badge bg-status-coming/10 text-status-coming border border-status-coming/20;
+    background-color: rgb(245 158 11 / 0.1);
+    color: #F59E0B;
+    border: 1px solid rgb(245 158 11 / 0.2);
   }
 
   /* Loading skeleton */
   .skeleton {
-    @apply animate-pulse bg-gray-200 rounded;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    background-color: rgb(229 231 235);
+    border-radius: 0.25rem;
   }
   .skeleton-line {
-    @apply h-4 bg-gray-200 rounded w-full;
+    height: 1rem;
+    background-color: rgb(229 231 235);
+    border-radius: 0.25rem;
+    width: 100%;
   }
 }

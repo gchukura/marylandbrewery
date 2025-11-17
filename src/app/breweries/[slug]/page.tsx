@@ -7,14 +7,13 @@ interface BreweryPageProps {
   params: { slug: string };
 }
 
-// Temporarily disable static generation to debug the issue
-// export async function generateStaticParams() {
-//   const processed = await getProcessedBreweryData();
-//   
-//   return processed.breweries.map((brewery) => ({
-//     slug: (brewery as any).slug || brewery.id,
-//   }));
-// }
+export async function generateStaticParams() {
+  const processed = await getProcessedBreweryData();
+  
+  return processed.breweries.map((brewery) => ({
+    slug: (brewery as any).slug || brewery.id,
+  }));
+}
 
 export async function generateMetadata({ params }: BreweryPageProps) {
   const processed = await getProcessedBreweryData();

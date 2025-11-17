@@ -88,11 +88,17 @@ export default async function HomePage() {
                   </li>
                 ))}
               </ul>
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <Link href="/city" 
+                      className="text-sm text-red-600 hover:text-red-700 font-medium">
+                  Browse All Cities →
+                </Link>
+              </div>
             </div>
             
             {/* Popular Features */}
             <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:border-yellow-200 transition-colors">
-              <h3 className="font-semibold text-gray-900 mb-4">Features</h3>
+              <h3 className="font-semibold text-gray-900 mb-4">Popular Features</h3>
               <ul className="space-y-2">
                 <li><Link href="/amenities/dog-friendly" 
                          className="text-gray-600 hover:text-yellow-600 transition-colors">
@@ -105,6 +111,14 @@ export default async function HomePage() {
                 <li><Link href="/amenities/food" 
                          className="text-gray-600 hover:text-yellow-600 transition-colors">
                       Food
+                    </Link></li>
+                <li><Link href="/amenities/outdoor-seating" 
+                         className="text-gray-600 hover:text-yellow-600 transition-colors">
+                      Outdoor Seating
+                    </Link></li>
+                <li><Link href="/amenities/live-music" 
+                         className="text-gray-600 hover:text-yellow-600 transition-colors">
+                      Live Music
                     </Link></li>
               </ul>
             </div>
@@ -125,6 +139,70 @@ export default async function HomePage() {
                          className="text-gray-600 hover:text-red-600 transition-colors">
                       Counties
                     </Link></li>
+                <li><Link href="/contact" 
+                         className="text-gray-600 hover:text-red-600 transition-colors">
+                      Contact
+                    </Link></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Browse All Section - Comprehensive Links for SEO */}
+      <section className="bg-gray-50 py-12">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+              Browse <span className="text-red-600">All</span>
+            </h2>
+            <p className="text-gray-600">Explore all breweries, cities, counties, types, and amenities</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Browse by City */}
+            <div className="bg-white rounded-lg p-6 border border-gray-200">
+              <h3 className="font-semibold text-gray-900 mb-4">Browse by City</h3>
+              <p className="text-sm text-gray-600 mb-4">Find breweries in specific cities across Maryland</p>
+              <Link href="/city" 
+                    className="inline-block text-red-600 hover:text-red-700 font-medium">
+                View All Cities →
+              </Link>
+            </div>
+
+            {/* Browse by County */}
+            <div className="bg-white rounded-lg p-6 border border-gray-200">
+              <h3 className="font-semibold text-gray-900 mb-4">Browse by County</h3>
+              <p className="text-sm text-gray-600 mb-4">Explore breweries across all 24 Maryland counties</p>
+              <Link href="/county" 
+                    className="inline-block text-red-600 hover:text-red-700 font-medium">
+                View All Counties →
+              </Link>
+            </div>
+
+            {/* Browse by Type */}
+            <div className="bg-white rounded-lg p-6 border border-gray-200">
+              <h3 className="font-semibold text-gray-900 mb-4">Browse by Type</h3>
+              <ul className="space-y-2 text-sm mb-4">
+                <li><Link href="/type/microbrewery" className="text-gray-600 hover:text-red-600">Microbrewery</Link></li>
+                <li><Link href="/type/brewpub" className="text-gray-600 hover:text-red-600">Brewpub</Link></li>
+                <li><Link href="/type/taproom" className="text-gray-600 hover:text-red-600">Taproom</Link></li>
+                <li><Link href="/type/production" className="text-gray-600 hover:text-red-600">Production</Link></li>
+                <li><Link href="/type/nano" className="text-gray-600 hover:text-red-600">Nano</Link></li>
+              </ul>
+            </div>
+
+            {/* Browse by Amenity */}
+            <div className="bg-white rounded-lg p-6 border border-gray-200">
+              <h3 className="font-semibold text-gray-900 mb-4">Browse by Amenity</h3>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/amenities/dog-friendly" className="text-gray-600 hover:text-red-600">Dog-Friendly</Link></li>
+                <li><Link href="/amenities/outdoor-seating" className="text-gray-600 hover:text-red-600">Outdoor Seating</Link></li>
+                <li><Link href="/amenities/live-music" className="text-gray-600 hover:text-red-600">Live Music</Link></li>
+                <li><Link href="/amenities/food" className="text-gray-600 hover:text-red-600">Food</Link></li>
+                <li><Link href="/amenities/tours" className="text-gray-600 hover:text-red-600">Tours</Link></li>
+                <li><Link href="/amenities/parking" className="text-gray-600 hover:text-red-600">Parking</Link></li>
+                <li><Link href="/amenities/wifi" className="text-gray-600 hover:text-red-600">WiFi</Link></li>
               </ul>
             </div>
           </div>

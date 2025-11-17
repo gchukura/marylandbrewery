@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 import { Brewery, Beer as BeerType, Article, Membership } from '@/types/brewery';
 import { BreadcrumbItem, RelatedPage } from '@/types/seo';
-import MapboxMap from '../maps/MapboxMap';
+import GoogleMap from '../maps/GoogleMap';
 
 // Social Media Icons - SVG data URLs for platform logos
 const SOCIAL_MEDIA_ICONS = {
@@ -233,10 +233,10 @@ export default function SimpleBreweryPageTemplate({
             <h2 className="text-2xl font-bold text-black mb-4">Map</h2>
             <div className="bg-gray-100 rounded-lg p-4">
               <div className="h-96 rounded-lg mb-4 overflow-hidden">
-                <MapboxMap 
+                <GoogleMap 
                   breweries={[brewery]} 
                   height="100%" 
-                  center={[brewery.longitude, brewery.latitude]}
+                  center={{ lat: brewery.latitude, lng: brewery.longitude }}
                   zoom={15}
                   showClusters={false}
                   autoOpenPopup={true}

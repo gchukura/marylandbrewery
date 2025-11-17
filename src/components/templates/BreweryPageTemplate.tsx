@@ -31,8 +31,8 @@ import { BreadcrumbItem, RelatedPage } from '@/types/seo';
 import { isOpenNow, getBreweryStatus, formatDistance, calculateDistance } from '@/lib/data-utils';
 import dynamic from 'next/dynamic';
 
-// Dynamically import Mapbox to avoid SSR issues
-const MapboxMap = dynamic(() => import('@/components/maps/MapboxMap'), {
+// Dynamically import GoogleMap to avoid SSR issues
+const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), {
   ssr: false,
   loading: () => (
     <div className="h-96 bg-gray-200 rounded-lg flex items-center justify-center">
@@ -508,11 +508,11 @@ export default function BreweryPageTemplate({
                 </CardHeader>
                 <CardContent>
                   {isClient ? (
-                    <MapboxMap
+                    <GoogleMap
                       breweries={[brewery]}
                       height="300px"
                       showClusters={false}
-                      center={[brewery.longitude, brewery.latitude]}
+                      center={{ lat: brewery.latitude, lng: brewery.longitude }}
                       zoom={15}
                     />
                   ) : (

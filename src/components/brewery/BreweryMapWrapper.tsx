@@ -17,7 +17,7 @@ const Map = dynamic(() => import('./BreweryMap'), {
 interface BreweryMapWrapperProps {
   breweries: Brewery[];
   height?: string;
-  center?: [number, number];
+  center?: { lat: number; lng: number } | [number, number]; // Support both formats for backward compatibility
   zoom?: number;
   showClustering?: boolean;
 }
@@ -29,11 +29,18 @@ export default function BreweryMapWrapper({
   zoom = 7, 
   showClustering = true 
 }: BreweryMapWrapperProps) {
+  // Convert [lng, lat] array to {lat, lng} object if needed
+  const centerObj = center 
+    ? Array.isArray(center) 
+      ? { lat: center[1], lng: center[0] } // Convert [lng, lat] to {lat, lng}
+      : center
+    : undefined;
+
   return (
     <Map 
       breweries={breweries} 
       height={height} 
-      center={center}
+      center={centerObj}
       zoom={zoom}
       showClustering={showClustering}
     />

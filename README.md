@@ -5,7 +5,7 @@ A Next.js 14 application for discovering and exploring craft breweries across Ma
 ## Features
 
 - 🍺 Comprehensive brewery directory
-- 🗺️ Interactive map integration with Mapbox
+- 🗺️ Interactive map integration with Google Maps
 - 📱 Responsive design with Maryland flag colors
 - 🔍 Advanced filtering and search
 - 📊 Analytics integration
@@ -16,7 +16,7 @@ A Next.js 14 application for discovering and exploring craft breweries across Ma
 - **Framework**: Next.js 14 with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Maps**: Mapbox GL JS
+- **Maps**: Google Maps (via @vis.gl/react-google-maps)
 - **Analytics**: Vercel Analytics
 - **Package Manager**: pnpm
 - **Deployment**: Vercel
@@ -47,13 +47,14 @@ cp .env.local.example .env.local
 ```
 
 4. Fill in the required environment variables in `.env.local`:
-   - `GOOGLE_SHEET_ID`: Google Sheets ID for brewery data
-   - `GOOGLE_SERVICE_ACCOUNT_EMAIL`: Service account email
-   - `GOOGLE_PRIVATE_KEY`: Service account private key
-   - `NEXT_PUBLIC_MAPBOX_TOKEN`: Mapbox access token
+   - `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anon/public key
+   - `SUPABASE_SERVICE_ROLE_KEY`: Supabase service role key
+   - `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`: Google Maps API key
    - `NEXT_PUBLIC_GA_ID`: Google Analytics ID (optional)
    - `NEXT_PUBLIC_SITE_URL`: Site URL
    - `ADMIN_TOKEN`: Admin authentication token
+   - `ADMIN_SYNC_TOKEN`: Admin sync token
 
 5. Run the development server:
 ```bash

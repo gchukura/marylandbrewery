@@ -102,9 +102,20 @@ node scripts/migrate-to-supabase.js
 
 ## Step 7: Deploy
 
-1. Add the Supabase environment variables to your deployment platform (Vercel, etc.)
+1. **Add the Supabase environment variables to Vercel:**
+   - Go to your Vercel project dashboard
+   - Navigate to **Settings** → **Environment Variables**
+   - Add the following variables:
+     - `NEXT_PUBLIC_SUPABASE_URL` = your Supabase project URL
+     - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = your Supabase anon/public key
+     - `SUPABASE_SERVICE_ROLE_KEY` = your Supabase service role key (for admin operations)
+   - Make sure to add them for **Production**, **Preview**, and **Development** environments
+   - Click **Save** and redeploy your application
+
 2. Deploy your application
 3. Test in production
+
+**Important:** The build will fail if these environment variables are not set, as Next.js tries to fetch data from Supabase during the build process for static page generation.
 
 ## Step 8: Clean Up (Optional)
 

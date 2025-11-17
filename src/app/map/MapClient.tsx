@@ -9,7 +9,7 @@ const MapFallback = () => (
   </div>
 );
 
-const MapboxMap = dynamic(() => import('@/components/maps/MapboxMap'), { ssr: false, loading: () => <MapFallback /> });
+const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { ssr: false, loading: () => <MapFallback /> });
 
 export default function MapClient({ breweries }: { breweries: any[] }) {
   const [city, setCity] = useState('');
@@ -26,8 +26,8 @@ export default function MapClient({ breweries }: { breweries: any[] }) {
     });
   }, [breweries, city, amenity]);
 
-  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-  const tokenMissing = !token || token.trim() === '';
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const apiKeyMissing = !apiKey || apiKey.trim() === '';
 
   return (
     <div className="flex flex-col h-full">
@@ -49,12 +49,12 @@ export default function MapClient({ breweries }: { breweries: any[] }) {
         <div className="text-sm text-gray-600 ml-2">Showing {filtered.length} breweries</div>
       </div>
       <div className="flex-1 min-h-[400px]">
-        {tokenMissing ? (
+        {apiKeyMissing ? (
           <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center text-sm text-gray-600 px-4">
-            Map is unavailable: missing Mapbox token. Set NEXT_PUBLIC_MAPBOX_TOKEN and redeploy.
+            Map is unavailable: missing Google Maps API key. Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY and redeploy.
           </div>
         ) : (
-          <MapboxMap breweries={filtered as any} height="100%" />
+          <GoogleMap breweries={filtered as any} height="100%" />
         )}
       </div>
     </div>

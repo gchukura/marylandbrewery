@@ -17,8 +17,8 @@ import { StatisticsBlock } from '@/types/content';
 import { slugify, isOpenNow, formatDistance } from '@/lib/data-utils';
 import dynamic from 'next/dynamic';
 
-// Dynamically import Mapbox to avoid SSR issues
-const MapboxMap = dynamic(() => import('@/components/maps/MapboxMap'), {
+// Dynamically import GoogleMap to avoid SSR issues
+const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), {
   ssr: false,
   loading: () => (
     <div className="h-96 bg-gray-200 rounded-lg flex items-center justify-center">
@@ -440,7 +440,7 @@ export default function ProgrammaticPageTemplate({
                   </CardHeader>
                   <CardContent>
                     {isClient ? (
-                      <MapboxMap
+                      <GoogleMap
                         breweries={breweries}
                         height="400px"
                         showClusters={true}

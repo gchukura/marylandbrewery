@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import SimpleProgrammaticPageTemplate from '@/components/templates/SimpleProgrammaticPageTemplate';
-import MapboxMap from '@/components/maps/MapboxMap';
+import GoogleMap from '@/components/maps/GoogleMap';
 import CityStatsBar from '@/components/city/CityStatsBar';
 import BreweryTable from '@/components/home/BreweryTable';
 import { getAllCities, getProcessedBreweryData } from '../../../../../lib/brewery-data';
@@ -132,7 +132,7 @@ export default async function CityBreweriesPage({ params }: { params: { city: st
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Interactive Map</h3>
               <div className="h-96 rounded-lg overflow-hidden border border-gray-200">
-                <MapboxMap breweries={breweries as any} height="100%" showClusters={true} zoom={10} />
+                <GoogleMap breweries={breweries as any} height="100%" showClusters={true} zoom={10} />
               </div>
             </div>
 

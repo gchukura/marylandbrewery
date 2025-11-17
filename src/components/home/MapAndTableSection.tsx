@@ -1,7 +1,7 @@
 import React from 'react';
 import { Brewery } from '@/types/brewery';
 import BreweryTable from './BreweryTable';
-import MapboxMap from '../maps/MapboxMap';
+import GoogleMap from '../maps/GoogleMap';
 
 interface MapAndTableSectionProps {
   breweries: Brewery[];
@@ -16,7 +16,7 @@ export default function MapAndTableSection({ breweries }: MapAndTableSectionProp
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Interactive Map</h3>
             <div className="h-96 rounded-lg overflow-hidden border border-gray-200">
-              <MapboxMap breweries={breweries as any} height="100%" showClusters={true} zoom={10} />
+              <GoogleMap breweries={breweries as any} height="100%" showClusters={true} zoom={10} />
             </div>
           </div>
 

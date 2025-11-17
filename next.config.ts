@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
       'images.unsplash.com',
       'via.placeholder.com',
       'maps.googleapis.com',
-      'api.mapbox.com',
     ],
     formats: ['image/webp', 'image/avif'],
   },

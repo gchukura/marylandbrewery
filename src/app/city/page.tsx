@@ -4,7 +4,7 @@ import { slugify } from '@/lib/data-utils';
 import PageContainer from '@/components/layout/PageContainer';
 import SectionHeader from '@/components/layout/SectionHeader';
 import GridContainer from '@/components/layout/GridContainer';
-import MapboxMap from '@/components/maps/MapboxMap';
+import GoogleMap from '@/components/maps/GoogleMap';
 import StatsBar from '@/components/home/StatsBar';
 
 const REGIONS: Record<string, string[]> = {
@@ -59,7 +59,7 @@ export default async function CitiesIndexPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Interactive Map</h3>
             <div className="h-96 rounded-lg overflow-hidden border border-gray-200">
-              <MapboxMap breweries={processed.breweries as any} height="100%" showClusters={true} zoom={10} />
+              <GoogleMap breweries={processed.breweries as any} height="100%" showClusters={true} zoom={10} />
             </div>
           </div>
         </div>

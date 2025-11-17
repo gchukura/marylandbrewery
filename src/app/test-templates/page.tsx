@@ -34,7 +34,7 @@ export default function TestTemplatesPage() {
                   </div>
                   <ul className="text-sm text-gray-600 list-disc list-inside">
                     <li>Brewery grid/list view</li>
-                    <li>Interactive Mapbox map</li>
+                    <li>Interactive Google Maps</li>
                     <li>Sorting and filtering</li>
                     <li>Statistics bar</li>
                     <li>Related pages</li>
@@ -99,7 +99,7 @@ export default function TestTemplatesPage() {
                 📝 Development Notes
               </h3>
               <div className="text-sm text-blue-700 space-y-2">
-                <p><strong>Mapbox Integration:</strong> Requires NEXT_PUBLIC_MAPBOX_TOKEN environment variable</p>
+                <p><strong>Google Maps Integration:</strong> Requires NEXT_PUBLIC_GOOGLE_MAPS_API_KEY environment variable</p>
                 <p><strong>Styling:</strong> Uses Maryland flag colors (red, yellow, black)</p>
                 <p><strong>TypeScript:</strong> Fully typed for better development experience</p>
                 <p><strong>SEO:</strong> Optimized for search engines with structured data</p>

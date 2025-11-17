@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { getProcessedBreweryData, getAllCities } from '../../lib/brewery-data';
 import { slugify } from '../lib/data-utils';
 
-const BASE_URL = 'https://marylandbrewery.com';
+const BASE_URL = 'https://www.marylandbrewery.com';
 const AMENITY_SLUGS = [
   'dog-friendly', 'outdoor-seating', 'live-music', 'food-trucks', 'full-kitchen', 'beer-garden',
   'games', 'wifi', 'parking', 'private-events', 'tours', 'tastings', 'merchandise', 'growlers', 'crowlers'
@@ -18,8 +18,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const urls: MetadataRoute.Sitemap = [];
 
-  // Homepage
-  urls.push({ url: `${BASE_URL}/`, lastModified: lastMod, priority: 1.0 });
+  // Homepage (no trailing slash - Next.js default)
+  urls.push({ url: BASE_URL, lastModified: lastMod, priority: 1.0 });
 
   // Important static pages
   urls.push({ url: `${BASE_URL}/map`, lastModified: lastMod, priority: 0.8 });

@@ -67,12 +67,12 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
       const matchesCity = !cityLower || b.city?.toLowerCase().includes(cityLower);
 
       const matchesType = !typeLower || 
-        (Array.isArray(b.type) ? b.type.some(t => t.toLowerCase().includes(typeLower)) : 
+        (Array.isArray(b.type) ? b.type.some((t: string) => t.toLowerCase().includes(typeLower)) : 
          b.type?.toLowerCase().includes(typeLower));
 
       const amenityList: string[] = (b.amenities || b.features || []) as string[];
       const matchesAmenity = !amenityLower || 
-        amenityList.some(a => a?.toLowerCase().includes(amenityLower));
+        amenityList.some((a: string) => a?.toLowerCase().includes(amenityLower));
 
       return matchesSearch && matchesCity && matchesType && matchesAmenity;
     });

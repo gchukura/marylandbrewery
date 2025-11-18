@@ -63,14 +63,14 @@ export function createPageMetadata({
       address: false,
       telephone: false,
     },
-    metadataBase: new URL('https://marylandbrewery.com'),
+    metadataBase: new URL('https://www.marylandbrewery.com'),
     alternates: {
       canonical: path,
     },
     openGraph: {
       type,
       locale: 'en_US',
-      url: `https://marylandbrewery.com${path}`,
+      url: `https://www.marylandbrewery.com${path}`,
       siteName: 'Maryland Brewery Directory',
       title: fullTitle,
       description,
@@ -117,7 +117,7 @@ export function generateBreadcrumbStructuredData(breadcrumbs: Array<{
       '@type': 'ListItem',
       position: breadcrumb.position,
       name: breadcrumb.name,
-      item: `https://marylandbrewery.com${breadcrumb.url}`
+      item: `https://www.marylandbrewery.com${breadcrumb.url}`
     }))
   };
 }
@@ -128,8 +128,8 @@ export function generateOrganizationStructuredData() {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Maryland Brewery Directory',
-    url: 'https://marylandbrewery.com',
-    logo: 'https://marylandbrewery.com/logo.png',
+    url: 'https://www.marylandbrewery.com',
+    logo: 'https://www.marylandbrewery.com/logo.png',
     description: 'Complete directory of craft breweries across Maryland',
     address: {
       '@type': 'PostalAddress',
@@ -209,7 +209,7 @@ export function generateCollectionStructuredData({
     '@type': 'CollectionPage',
     name,
     description,
-    url: `https://marylandbrewery.com${url}`,
+    url: `https://www.marylandbrewery.com${url}`,
     numberOfItems: itemCount,
     mainEntity: {
       '@type': 'ItemList',
@@ -220,7 +220,7 @@ export function generateCollectionStructuredData({
         item: {
           '@type': 'Brewery',
           name: item.name,
-          url: `https://marylandbrewery.com${item.url}`
+          url: `https://www.marylandbrewery.com${item.url}`
         }
       }))
     }

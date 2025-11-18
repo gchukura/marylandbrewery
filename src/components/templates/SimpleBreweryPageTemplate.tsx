@@ -144,7 +144,7 @@ export default function SimpleBreweryPageTemplate({
       '@type': 'Brewery',
       name: brewery.name,
       description: brewery.description,
-      url: `https://marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`,
+      url: `https://www.marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`,
       telephone: brewery.phone,
       address: {
         '@type': 'PostalAddress',

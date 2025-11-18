@@ -28,23 +28,23 @@ const nextConfig: NextConfig = {
         destination: '/type/:path*',
         permanent: true,
       },
-      // Redirect /features to /amenities (features index doesn't exist)
+      // Redirect /features to /amenities (permanent - features index doesn't exist)
       {
         source: '/features',
         destination: '/amenities',
-        permanent: false,
+        permanent: true,
       },
-      // Redirect /types to /type (types index doesn't exist, redirect to first type)
+      // Redirect /types to /type (permanent - types index doesn't exist)
       {
         source: '/types',
         destination: '/type',
-        permanent: false,
+        permanent: true,
       },
-      // Redirect /breweries to homepage (all breweries page doesn't exist)
+      // Redirect /breweries to homepage (permanent - all breweries page doesn't exist)
       {
         source: '/breweries',
         destination: '/',
-        permanent: false,
+        permanent: true,
       },
     ];
   },

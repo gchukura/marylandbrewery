@@ -80,7 +80,7 @@ export default function BreweryPageTemplate({
       '@type': 'Brewery',
       name: brewery.name,
       description: brewery.description,
-      url: `https://marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`,
+      url: `https://www.marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`,
       telephone: brewery.phone,
       address: {
         '@type': 'PostalAddress',
@@ -131,16 +131,16 @@ export default function BreweryPageTemplate({
       <NextSeo
         title={title}
         description={metaDescription}
-        canonical={`https://marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`}
+        canonical={`https://www.marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`}
         openGraph={{
           title,
           description: metaDescription,
           type: 'website',
-          url: `https://marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`,
+          url: `https://www.marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`,
           siteName: 'Maryland Brewery Directory',
           images: [
             {
-              url: `https://marylandbrewery.com/api/og?title=${encodeURIComponent(brewery.name)}&location=${encodeURIComponent(brewery.city)}`,
+              url: `https://www.marylandbrewery.com/api/og?title=${encodeURIComponent(brewery.name)}&location=${encodeURIComponent(brewery.city)}`,
               width: 1200,
               height: 630,
               alt: `${brewery.name} - Maryland Brewery`,

@@ -147,15 +147,14 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
   // Generate breadcrumbs
   const breadcrumbs = [
     { name: 'Home', url: '/', position: 1, isActive: false },
-    { name: 'Breweries', url: '/breweries', position: 2, isActive: false },
-    { name: brewery.name, url: `/breweries/${params.slug}`, position: 3, isActive: true },
+    { name: brewery.name, url: `/breweries/${params.slug}`, position: 2, isActive: true },
   ];
 
   // Generate related pages
   const relatedPages = [
     { title: `${brewery.city} Breweries`, url: `/city/${(brewery as any).citySlug || brewery.city.toLowerCase().replace(/\s+/g, '-')}/breweries`, type: 'city' },
-    { title: 'All Breweries', url: '/breweries', type: 'general' },
     { title: 'Interactive Map', url: '/map', type: 'general' },
+    { title: 'All Cities', url: '/city', type: 'general' },
   ];
 
   const title = `${brewery.name} - ${brewery.city}, MD`;

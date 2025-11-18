@@ -140,12 +140,12 @@ export default function ProgrammaticPageTemplate({
       <NextSeo
         title={title}
         description={metaDescription}
-        canonical={`https://marylandbrewery.com/${pageType}/${slugify(h1)}`}
+        canonical={`https://www.marylandbrewery.com/${pageType}/${slugify(h1)}`}
         openGraph={{
           title,
           description: metaDescription,
           type: 'website',
-          url: `https://marylandbrewery.com/${pageType}/${slugify(h1)}`,
+          url: `https://www.marylandbrewery.com/${pageType}/${slugify(h1)}`,
           siteName: 'Maryland Brewery Directory',
         }}
         additionalMetaTags={[

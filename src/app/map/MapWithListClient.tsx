@@ -88,9 +88,9 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
   const hasActiveFilters = search || city || type || amenity;
 
   return (
-    <div className="flex flex-col lg:flex-row h-full">
+    <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-4 h-full max-w-[1400px] mx-auto px-4 py-4">
       {/* Left Side - Filterable List */}
-      <div className="w-full lg:w-1/2 flex flex-col border-r border-gray-200 bg-white min-w-0">
+      <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden min-h-0 lg:max-h-full max-h-[500px]">
         {/* Filter Header */}
         <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
@@ -112,7 +112,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
             <input
               type="text"
               placeholder="Search breweries..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -121,7 +121,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
           {/* Filter Row */}
           <div className="grid grid-cols-3 gap-2">
             <select
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-red-500 focus:border-transparent"
               value={city}
               onChange={(e) => setCity(e.target.value)}
             >
@@ -132,7 +132,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
             </select>
 
             <select
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-red-500 focus:border-transparent"
               value={type}
               onChange={(e) => setType(e.target.value)}
             >
@@ -143,7 +143,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
             </select>
 
             <select
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-red-500 focus:border-transparent"
               value={amenity}
               onChange={(e) => setAmenity(e.target.value)}
             >
@@ -160,8 +160,8 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
           </div>
         </div>
 
-        {/* Brewery List */}
-        <div className="flex-1 overflow-y-auto">
+        {/* Brewery List - Scrollable */}
+        <div className="flex-1 overflow-y-auto min-h-0">
           {filtered.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
               <p>No breweries found matching your filters.</p>
@@ -190,11 +190,11 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1 hover:text-red-600">
+                        <h3 className="font-semibold text-gray-900 mb-1 hover:text-red-600 text-sm">
                           {brewery.name}
                         </h3>
-                        <div className="flex items-center text-sm text-gray-600 mb-2">
-                          <MapPin className="h-4 w-4 mr-1" />
+                        <div className="flex items-center text-xs text-gray-600 mb-2">
+                          <MapPin className="h-3 w-3 mr-1" />
                           <span>{brewery.city}</span>
                           {brewery.type && (
                             <>
@@ -231,8 +231,8 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
       </div>
 
       {/* Right Side - Map */}
-      <div className="w-full lg:w-1/2 flex flex-col bg-gray-50 min-w-0">
-        <div className="p-4 border-b border-gray-200 bg-white flex-shrink-0">
+      <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden min-h-0 lg:h-full h-[400px]">
+        <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
           <h2 className="text-xl font-bold text-gray-900">Interactive Map</h2>
           <p className="text-sm text-gray-600 mt-1">
             Click on markers or list items to explore breweries

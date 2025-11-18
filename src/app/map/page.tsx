@@ -50,7 +50,7 @@ export default async function MapPage() {
         introText="Explore all Maryland breweries on an interactive map with a filterable directory. Search by name, city, type, or amenities to find the perfect brewery for your visit."
         breadcrumbs={breadcrumbs}
       />
-      <div className="flex-1 min-h-0 overflow-hidden">
+      <div className="flex-1 min-h-0" style={{ height: 'calc(100vh - 300px)', minHeight: '600px' }}>
         <MapWithListClient breweries={breweries} />
       </div>
     </div>

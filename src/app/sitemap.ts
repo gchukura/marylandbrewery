@@ -27,6 +27,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   urls.push({ url: `${BASE_URL}/contact`, lastModified: lastMod, priority: 0.6 });
   urls.push({ url: `${BASE_URL}/city`, lastModified: lastMod, priority: 0.8 });
   urls.push({ url: `${BASE_URL}/county`, lastModified: lastMod, priority: 0.8 });
+  urls.push({ url: `${BASE_URL}/amenities`, lastModified: lastMod, priority: 0.8 });
+  urls.push({ url: `${BASE_URL}/type`, lastModified: lastMod, priority: 0.8 });
 
   // Open by day pages
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];

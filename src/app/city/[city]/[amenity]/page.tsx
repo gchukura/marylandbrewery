@@ -30,22 +30,21 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: { city: string; amenity: string } }): Promise<Metadata> {
   const processed = await getProcessedBreweryData();
   const cityName = deslugify(params.city);
+  const cityKey = cityName.toLowerCase();
   const amenityLabel = normalizeAmenityLabel(params.amenity);
   const amenityKey = amenityLabel.toLowerCase();
 
-  const breweries = processed.breweries.filter(
-    (b) => b.city.toLowerCase() === cityName.toLowerCase() &&
-      (((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey)))
+  // Optimize: use pre-indexed city data if available
+  const cityBreweries = processed.byCity.get(cityKey) || [];
+  const breweries = cityBreweries.filter(
+    (b) => ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey))
   );
 
-  const rawTitle = `${amenityLabel} Breweries in ${cityName}, MD - ${breweries.length}`;
-  const title = truncateTitle(rawTitle);
-
-  const rawDescription = breweries.length > 0
-    ? `Find ${breweries.length} breweries with ${amenityLabel.toLowerCase()} in ${cityName}, Maryland. Explore local taprooms and brewpubs with this amenity. View hours, locations, and visitor information.`
-    : `No breweries with ${amenityLabel.toLowerCase()} are currently listed in ${cityName}, Maryland. Check nearby cities for similar options or explore other amenities in ${cityName}.`;
-
-  const description = optimizeDescription(rawDescription);
+  const title = `${amenityLabel} in ${cityName}, MD | ${breweries.length}`;
+  
+  const description = breweries.length > 0
+    ? `Find ${breweries.length} breweries with ${amenityLabel.toLowerCase()} in ${cityName}, MD. Hours, locations, and visitor info.`
+    : `No breweries with ${amenityLabel.toLowerCase()} in ${cityName}, MD. Check nearby cities.`;
 
   return {
     title,
@@ -118,12 +117,20 @@ export default async function CityAmenityPage({ params }: { params: { city: stri
     }
   ];
 
-  // Related pages
-  // Nearby cities with this amenity
+  // Related pages - optimized for performance
+  const cityBreweries = processed.byCity.get(cityName.toLowerCase()) || [];
+  const cityBreweryCount = cityBreweries.length;
+  
+  // Pre-filter breweries with this amenity for efficiency
+  const amenityBreweries = processed.breweries.filter((b) => 
+    ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey))
+  );
+  const amenityCount = amenityBreweries.length;
+  
+  // Nearby cities - limit processing
   const cityToCount = new Map<string, number>();
-  for (const b of processed.breweries) {
-    const hasAmenity = ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey));
-    if (hasAmenity && b.city.toLowerCase() !== cityName.toLowerCase()) {
+  for (const b of amenityBreweries) {
+    if (b.city.toLowerCase() !== cityName.toLowerCase()) {
       cityToCount.set(b.city, (cityToCount.get(b.city) || 0) + 1);
     }
   }
@@ -137,8 +144,8 @@ export default async function CityAmenityPage({ params }: { params: { city: stri
     }));
 
   const relatedPages = [
-    { title: `All ${cityName} Breweries`, url: `/city/${params.city}/breweries`, count: processed.byCity.get(cityName.toLowerCase())?.length || 0 },
-    { title: `${amenityLabel} Breweries (Statewide)`, url: `/amenities/${params.amenity}`, count: processed.breweries.filter((b) => ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey))).length },
+    { title: `All ${cityName} Breweries`, url: `/city/${params.city}/breweries`, count: cityBreweryCount },
+    { title: `${amenityLabel} Breweries (Statewide)`, url: `/amenities/${params.amenity}`, count: amenityCount },
     ...nearby,
   ];
 

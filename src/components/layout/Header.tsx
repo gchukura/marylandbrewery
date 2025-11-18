@@ -40,7 +40,7 @@ const NAVIGATION_ITEMS = [
   },
   {
     label: 'Features',
-    href: '/features',
+    href: '/amenities',
     children: [
       { label: 'Food', href: '/amenities/food' },
       { label: 'Outdoor Seating', href: '/amenities/outdoor-seating' },
@@ -53,7 +53,7 @@ const NAVIGATION_ITEMS = [
   },
   {
     label: 'Types',
-    href: '/types',
+    href: '/type',
     children: [
       { label: 'Microbrewery', href: '/type/microbrewery' },
       { label: 'Brewpub', href: '/type/brewpub' },

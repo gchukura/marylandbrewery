@@ -27,8 +27,8 @@ export async function generateMetadata({ params }: { params: { amenity: string }
   const pct = processed.breweries.length > 0 ? Math.round((breweries.length / processed.breweries.length) * 100) : 0;
 
   const labelLower = label.toLowerCase();
-  const title = `${label} Breweries - ${breweries.length} in Maryland (${pct}%)`;
-  const description = `${pct}% of Maryland breweries offer ${labelLower}. Explore ${breweries.length} breweries with ${labelLower} across Maryland, including top cities like Baltimore, Annapolis, and Frederick. Find the best ${labelLower} breweries near you.`;
+  const title = `${label} Breweries in MD | ${breweries.length}`;
+  const description = `Find ${breweries.length} MD breweries with ${labelLower} (${pct}% of total). Explore top cities like Baltimore, Annapolis, and Frederick.`;
 
   return {
     title,

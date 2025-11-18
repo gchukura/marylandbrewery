@@ -64,21 +64,72 @@ const getCurrentDate = () => {
 
 export default function Footer() {
   return (
-    <footer className="bg-black text-white" style={{ height: '250px', maxHeight: '250px', overflow: 'hidden' }}>
-      <div className="container mx-auto px-4" style={{ height: '100%', display: 'flex', alignItems: 'center' }}>
-        <div className="flex items-center justify-between w-full">
-          {/* Left Section - Copyright */}
-          <div className="text-base">
-            <p>© 2025 MarylandBrewery.com</p>
+    <footer className="bg-black text-white py-8">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-6">
+          {/* Quick Links */}
+          <div>
+            <h3 className="font-bold text-lg mb-4">Quick Links</h3>
+            <ul className="space-y-2 text-sm">
+              <li><Link href="/" className="hover:text-red-300 transition-colors">Home</Link></li>
+              <li><Link href="/map" className="hover:text-red-300 transition-colors">Interactive Map</Link></li>
+              <li><Link href="/open-now" className="hover:text-red-300 transition-colors">Open Now</Link></li>
+              <li><Link href="/contact" className="hover:text-red-300 transition-colors">Contact</Link></li>
+            </ul>
           </div>
 
-          {/* Center Section - Logo */}
+          {/* Cities */}
+          <div>
+            <h3 className="font-bold text-lg mb-4">Top Cities</h3>
+            <ul className="space-y-2 text-sm">
+              {TOP_CITIES.slice(0, 6).map((city) => (
+                <li key={city.href}>
+                  <Link href={city.href} className="hover:text-red-300 transition-colors">
+                    {city.name} ({city.count})
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Features */}
+          <div>
+            <h3 className="font-bold text-lg mb-4">Features</h3>
+            <ul className="space-y-2 text-sm">
+              {FEATURES.map((feature) => (
+                <li key={feature.href}>
+                  <Link href={feature.href} className="hover:text-red-300 transition-colors">
+                    {feature.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Types */}
+          <div>
+            <h3 className="font-bold text-lg mb-4">Brewery Types</h3>
+            <ul className="space-y-2 text-sm">
+              {BREWERY_TYPES.map((type) => (
+                <li key={type.href}>
+                  <Link href={type.href} className="hover:text-red-300 transition-colors">
+                    {type.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="border-t border-gray-800 pt-6 flex items-center justify-between">
+          <div className="text-sm">
+            <p>© 2025 MarylandBrewery.com</p>
+          </div>
           <div className="flex items-center">
             <Logo showText={true} />
           </div>
-
-          {/* Right Section - All Rights Reserved + Contact */}
-          <div className="text-base">
+          <div className="text-sm">
             <p>
               All rights reserved. <Link href="/contact" className="underline hover:text-red-300">Contact us</Link>
             </p>

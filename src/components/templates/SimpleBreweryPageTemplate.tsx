@@ -142,20 +142,32 @@ export default function SimpleBreweryPageTemplate({
     const structuredData: any = {
       '@context': 'https://schema.org',
       '@type': 'Brewery',
-      name: brewery.name,
-      description: brewery.description,
-      url: `https://www.marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`,
-      telephone: brewery.phone,
+      name: brewery.name || 'Brewery',
       address: {
         '@type': 'PostalAddress',
-        streetAddress: brewery.street,
-        addressLocality: brewery.city,
-        addressRegion: brewery.state,
-        postalCode: brewery.zip,
+        addressLocality: brewery.city || '',
+        addressRegion: brewery.state || 'MD',
         addressCountry: 'US',
       },
     };
 
+    // Only add fields if they have valid values
+    if (brewery.description && brewery.description.trim()) {
+      structuredData.description = brewery.description;
+    }
+    
+    if (brewery.street && brewery.street.trim()) {
+      structuredData.address.streetAddress = brewery.street;
+    }
+    
+    if (brewery.zip && brewery.zip.trim()) {
+      structuredData.address.postalCode = brewery.zip;
+    }
+    
+    if (brewery.phone && brewery.phone.trim()) {
+      structuredData.telephone = brewery.phone;
+    }
+    
     if (brewery.latitude && brewery.longitude) {
       structuredData.geo = {
         '@type': 'GeoCoordinates',
@@ -164,15 +176,24 @@ export default function SimpleBreweryPageTemplate({
       };
     }
 
-    if (brewery.website) {
+    // URL should point to brewery website if available, otherwise our page
+    if (brewery.website && brewery.website.trim()) {
       structuredData.url = brewery.website;
+    } else {
+      structuredData.url = `https://www.marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`;
     }
 
     if (brewery.socialMedia) {
       const sameAs = [];
-      if (brewery.socialMedia.facebook) sameAs.push(brewery.socialMedia.facebook);
-      if (brewery.socialMedia.instagram) sameAs.push(brewery.socialMedia.instagram);
-      if (brewery.socialMedia.twitter) sameAs.push(brewery.socialMedia.twitter);
+      if (brewery.socialMedia.facebook && brewery.socialMedia.facebook.trim()) {
+        sameAs.push(brewery.socialMedia.facebook);
+      }
+      if (brewery.socialMedia.instagram && brewery.socialMedia.instagram.trim()) {
+        sameAs.push(brewery.socialMedia.instagram);
+      }
+      if (brewery.socialMedia.twitter && brewery.socialMedia.twitter.trim()) {
+        sameAs.push(brewery.socialMedia.twitter);
+      }
       if (sameAs.length > 0) {
         structuredData.sameAs = sameAs;
       }

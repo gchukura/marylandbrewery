@@ -158,32 +158,63 @@ export function generateBreweryStructuredData(brewery: {
   hours?: Record<string, string>;
   description?: string;
 }) {
-  return {
+  const structuredData: any = {
     '@context': 'https://schema.org',
     '@type': 'Brewery',
-    name: brewery.name,
-    description: brewery.description,
-    url: brewery.website,
-    telephone: brewery.phone,
+    name: brewery.name || 'Brewery',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: brewery.address,
-      addressLocality: brewery.city,
-      addressRegion: brewery.state,
-      postalCode: brewery.zipCode,
+      addressLocality: brewery.city || '',
+      addressRegion: brewery.state || 'MD',
+      postalCode: brewery.zipCode || '',
       addressCountry: 'US'
-    },
-    geo: {
+    }
+  };
+
+  // Only add fields if they have valid values
+  if (brewery.address && brewery.address.trim()) {
+    structuredData.address.streetAddress = brewery.address;
+  }
+  
+  if (brewery.description && brewery.description.trim()) {
+    structuredData.description = brewery.description;
+  }
+  
+  if (brewery.website && brewery.website.trim()) {
+    structuredData.url = brewery.website;
+  }
+  
+  if (brewery.phone && brewery.phone.trim()) {
+    structuredData.telephone = brewery.phone;
+  }
+  
+  if (brewery.latitude && brewery.longitude) {
+    structuredData.geo = {
       '@type': 'GeoCoordinates',
       latitude: brewery.latitude,
       longitude: brewery.longitude
-    },
-    openingHours: brewery.hours ? Object.entries(brewery.hours)
-      .filter(([_, hours]) => hours && hours !== 'Closed')
-      .map(([day, hours]) => `${day.substring(0, 2)} ${hours}`)
-      .join(', ') : undefined,
-    sameAs: brewery.website ? [brewery.website] : []
-  };
+    };
+  }
+  
+  if (brewery.hours) {
+    const openingHours = Object.entries(brewery.hours)
+      .filter(([_, hours]) => hours && hours !== 'Closed' && hours.trim())
+      .map(([day, hours]) => {
+        // Format: Mo 10:00-22:00
+        const dayAbbr = day.substring(0, 2);
+        return `${dayAbbr} ${hours}`;
+      });
+    
+    if (openingHours.length > 0) {
+      structuredData.openingHours = openingHours.join(', ');
+    }
+  }
+  
+  if (brewery.website && brewery.website.trim()) {
+    structuredData.sameAs = [brewery.website];
+  }
+
+  return structuredData;
 }
 
 // Generate collection page structured data
@@ -227,7 +258,7 @@ export function generateCollectionStructuredData({
   };
 }
 
-// Utility for consistent page titles
+// Utility for consistent page titles (optimized for <60 chars)
 export function generatePageTitle(
   pageType: 'city' | 'county' | 'amenity' | 'type' | 'brewery',
   name: string,
@@ -237,21 +268,21 @@ export function generatePageTitle(
   
   switch (pageType) {
     case 'city':
-      return `${name} ${breweryText} | Maryland Brewery Directory`;
+      return `${name} ${breweryText} | MD Directory`;
     case 'county':
-      return `${name} County ${breweryText} | Maryland Brewery Guide`;
+      return `${name} County ${breweryText} | MD`;
     case 'amenity':
-      return `Maryland ${breweryText} with ${name} | Complete Guide`;
+      return `${name} Breweries in MD | Guide`;
     case 'type':
-      return `${name} ${breweryText} in Maryland | Directory`;
+      return `${name} Breweries in MD`;
     case 'brewery':
-      return `${name} | Maryland Brewery Directory`;
+      return `${name} | MD Breweries`;
     default:
-      return `${name} | Maryland Brewery Directory`;
+      return `${name} | MD Directory`;
   }
 }
 
-// Utility for consistent meta descriptions
+// Utility for consistent meta descriptions (optimized for <155 chars)
 export function generateMetaDescription(
   pageType: 'city' | 'county' | 'amenity' | 'type' | 'brewery',
   data: {
@@ -267,17 +298,18 @@ export function generateMetaDescription(
   
   switch (pageType) {
     case 'city':
-      return `Discover ${count} ${breweryText} in ${name}, Maryland. Find craft breweries, brewpubs, and taprooms with detailed information, hours, and amenities. Plan your ${name} brewery tour today.`;
+      return `Find ${count} ${breweryText} in ${name}, MD. Hours, amenities, and directions. Visit local breweries today!`;
     case 'county':
-      return `Explore ${count} ${breweryText} across ${name} County, Maryland. From urban centers to rural communities, discover the diverse craft beer culture that makes ${name} County a destination for beer enthusiasts.`;
+      return `Explore ${count} ${breweryText} in ${name} County, MD. Discover craft beer culture across the region.`;
     case 'amenity':
-      return `Find ${count} Maryland ${breweryText} with ${name.toLowerCase()}. Discover breweries offering ${name.toLowerCase()} amenities for the perfect craft beer experience.`;
+      return `Find ${count} MD ${breweryText} with ${name.toLowerCase()}. Discover breweries offering this amenity.`;
     case 'type':
-      return `Explore ${count} ${name.toLowerCase()} ${breweryText} in Maryland. From traditional to innovative, discover the best ${name.toLowerCase()} breweries across the state.`;
+      return `Explore ${count} ${name.toLowerCase()} ${breweryText} in MD. Find the best ${name.toLowerCase()} breweries.`;
     case 'brewery':
-      return `Visit ${name} in ${city || county || 'Maryland'}. Enjoy craft beer, ${amenities.slice(0, 2).join(' and ').toLowerCase()}, and more. Find hours, location, and amenities at this Maryland brewery.`;
+      const amenityText = amenities.length > 0 ? amenities.slice(0, 2).join(', ').toLowerCase() : 'craft beer';
+      return `Visit ${name} in ${city || county || 'MD'}. Enjoy ${amenityText}. Find hours, location, and amenities.`;
     default:
-      return `Discover ${count} ${breweryText} in Maryland. Find craft breweries, brewpubs, and taprooms with detailed information and amenities.`;
+      return `Discover ${count} ${breweryText} in MD. Find craft breweries with hours, amenities, and directions.`;
   }
 }
 

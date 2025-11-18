@@ -1,3 +1,5 @@
+"use client";
+
 import Link from 'next/link';
 import PageHero from './PageHero';
 import DirectoryStatsBar from './DirectoryStatsBar';

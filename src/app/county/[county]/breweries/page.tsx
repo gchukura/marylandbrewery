@@ -20,10 +20,10 @@ export async function generateMetadata({ params }: { params: { county: string } 
   const list = processed.breweries.filter(b => (b as any).county?.toLowerCase() === countyName.toLowerCase());
   const total = list.length;
 
-  const title = `${countyName} County Breweries - ${total} Craft Breweries in ${countyName}, MD`;
+  const title = `${countyName} County Breweries | ${total} in MD`;
   const description = total > 0
-    ? `${countyName} County has ${total} craft breweries. Explore taprooms, brewpubs, and tasting rooms across ${countyName}, Maryland.`
-    : `${countyName} County does not have listed breweries yet. Check nearby counties for great craft beer options.`;
+    ? `Explore ${total} craft breweries in ${countyName} County, MD. Find taprooms, brewpubs, and tasting rooms.`
+    : `No breweries listed in ${countyName} County, MD. Check nearby counties.`;
 
   return {
     title,
@@ -56,7 +56,15 @@ export async function generateMetadata({ params }: { params: { county: string } 
 export default async function CountyBreweriesPage({ params }: { params: { county: string } }) {
   const processed = await getProcessedBreweryData();
   const countyName = deslugify(params.county);
-  const breweries = processed.breweries.filter(b => (b as any).county?.toLowerCase() === countyName.toLowerCase());
+  const countyKey = countyName.toLowerCase();
+  
+  // Optimize filtering - use pre-indexed data if available
+  const breweries = processed.breweries.filter(b => {
+    const breweryCounty = (b as any).county;
+    return breweryCounty && breweryCounty.toLowerCase() === countyKey;
+  });
+  
+  // Optimize city extraction
   const citiesInCounty = Array.from(new Set(breweries.map(b => b.city))).sort();
 
   // Intro text

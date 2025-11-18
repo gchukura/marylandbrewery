@@ -60,14 +60,14 @@ export function optimizeDescription(description: string, minLength: number = 120
 }
 
 /**
- * Generates SEO-optimized title for brewery pages
+ * Generates SEO-optimized title for brewery pages (<60 chars)
  * @param breweryName Brewery name
  * @param city City name
  * @returns Optimized title
  */
 export function generateBreweryTitle(breweryName: string, city: string): string {
   const baseTitle = `${breweryName} - ${city}, MD`;
-  const suffix = ' | Maryland Brewery';
+  const suffix = ' | MD';
   const fullTitle = baseTitle + suffix;
 
   if (fullTitle.length <= 60) {

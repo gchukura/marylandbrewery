@@ -88,14 +88,7 @@ export default function MobileMenu({ navigationItems }: MobileMenuProps) {
                     Home
                   </Link>
 
-                  {/* All Breweries Link */}
-                  <Link
-                    href="/breweries"
-                    onClick={closeMenu}
-                    className="block px-3 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors font-medium"
-                  >
-                    All Breweries
-                  </Link>
+                  {/* All Breweries Link - removed, redirects to homepage */}
 
                   {/* Navigation Items with Dropdowns */}
                   {navigationItems.map((item) => (

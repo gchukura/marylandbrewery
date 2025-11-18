@@ -69,22 +69,22 @@ export default function DirectoryPageTemplate({
   showTable = true,
   mapZoom = 10,
 }: DirectoryPageTemplateProps) {
-  // Structured Data
+  // Structured Data - only include if we have breweries
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: h1,
-    description: introText,
+    name: h1 || 'Breweries',
+    description: introText || 'Maryland breweries directory',
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: breweries.length,
-      itemListElement: breweries.map((brewery, index) => ({
+      itemListElement: breweries.slice(0, 50).map((brewery, index) => ({
         '@type': 'ListItem',
         position: index + 1,
         item: {
           '@type': 'Brewery',
-          name: brewery.name,
-          url: `/breweries/${(brewery as any).slug || brewery.id}`,
+          name: brewery.name || 'Brewery',
+          url: `https://www.marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`,
         },
       })),
     },

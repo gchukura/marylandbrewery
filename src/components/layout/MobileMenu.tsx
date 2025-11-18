@@ -100,32 +100,43 @@ export default function MobileMenu({ navigationItems }: MobileMenuProps) {
                   {/* Navigation Items with Dropdowns */}
                   {navigationItems.map((item) => (
                     <div key={item.label}>
-                      <button
-                        onClick={() => toggleExpanded(item.label)}
-                        className="w-full flex items-center justify-between px-3 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors font-medium"
-                      >
-                        <span className="ml-auto">{item.label}</span>
-                        {item.children && (
-                          expandedItems.has(item.label) ? 
-                            <ChevronDown className="h-4 w-4" /> : 
-                            <ChevronRight className="h-4 w-4" />
-                        )}
-                      </button>
-                      
-                      {/* Dropdown Items */}
-                      {item.children && expandedItems.has(item.label) && (
-                        <div className="mr-4 mt-1 space-y-1">
-                          {item.children.map((child) => (
-                            <Link
-                              key={child.href}
-                              href={child.href}
-                              onClick={closeMenu}
-                              className="block px-3 py-2 text-sm text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors text-right"
-                            >
-                              {child.label}
-                            </Link>
-                          ))}
-                        </div>
+                      {item.children && item.children.length > 0 ? (
+                        <>
+                          <button
+                            onClick={() => toggleExpanded(item.label)}
+                            className="w-full flex items-center justify-between px-3 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors font-medium"
+                          >
+                            <span className="ml-auto">{item.label}</span>
+                            {expandedItems.has(item.label) ? 
+                              <ChevronDown className="h-4 w-4" /> : 
+                              <ChevronRight className="h-4 w-4" />
+                            }
+                          </button>
+                          
+                          {/* Dropdown Items */}
+                          {expandedItems.has(item.label) && (
+                            <div className="mr-4 mt-1 space-y-1">
+                              {item.children.map((child) => (
+                                <Link
+                                  key={child.href}
+                                  href={child.href}
+                                  onClick={closeMenu}
+                                  className="block px-3 py-2 text-sm text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors text-right"
+                                >
+                                  {child.label}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <Link
+                          href={item.href}
+                          onClick={closeMenu}
+                          className="block px-3 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors font-medium text-right"
+                        >
+                          {item.label}
+                        </Link>
                       )}
                     </div>
                   ))}

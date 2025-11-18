@@ -18,19 +18,13 @@ export default function HeroSection({ totalBreweries, totalCities, totalCounties
           <p className="text-xl md:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto leading-relaxed">
             Your complete guide to {totalBreweries}+ craft breweries across {totalCities} cities and {totalCounties} counties in the Old Line State
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+          <div className="flex justify-center items-center mb-12">
             <Link 
-              href="/city"
+              href="/map"
               className="inline-flex items-center justify-center bg-red-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-red-700 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
             >
               Start Here
               <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-            <Link 
-              href="/map"
-              className="inline-flex items-center justify-center bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-gray-900 transition-colors"
-            >
-              View Map
             </Link>
           </div>
           

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { getProcessedBreweryData } from '../../../lib/brewery-data';
-import MapClient from './MapClient';
+import MapWithListClient from './MapWithListClient';
+import PageHero from '@/components/directory/PageHero';
 
 export const revalidate = 3600;
 
@@ -37,14 +38,20 @@ export default async function MapPage() {
   const processed = await getProcessedBreweryData();
   const breweries = processed.breweries as any[];
 
+  const breadcrumbs = [
+    { name: 'Home', url: '/', isActive: false },
+    { name: 'Interactive Map', url: '/map', isActive: true },
+  ];
+
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)]">
-      <div className="p-4 bg-white border-b">
-        <h1 className="text-2xl font-bold text-gray-900">Interactive Brewery Map</h1>
-        <p className="text-gray-600">Explore all Maryland breweries on the map.</p>
-      </div>
-      <div className="flex-1">
-        <MapClient breweries={breweries} />
+    <div className="min-h-screen bg-gray-50">
+      <PageHero
+        h1="Interactive Brewery Map"
+        introText="Explore all Maryland breweries on an interactive map with a filterable directory. Search by name, city, type, or amenities to find the perfect brewery for your visit."
+        breadcrumbs={breadcrumbs}
+      />
+      <div className="h-[calc(100vh-300px)]">
+        <MapWithListClient breweries={breweries} />
       </div>
     </div>
   );

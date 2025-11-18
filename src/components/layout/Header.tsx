@@ -63,6 +63,11 @@ const NAVIGATION_ITEMS = [
     ]
   },
   {
+    label: 'Interactive Map',
+    href: '/map',
+    children: []
+  },
+  {
     label: 'Contact',
     href: '/contact',
     children: []

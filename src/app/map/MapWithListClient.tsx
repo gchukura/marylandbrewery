@@ -88,11 +88,11 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
   const hasActiveFilters = search || city || type || amenity;
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)]">
+    <div className="flex flex-col lg:flex-row h-full">
       {/* Left Side - Filterable List */}
-      <div className="w-full lg:w-1/2 flex flex-col border-r border-gray-200 bg-white">
+      <div className="w-full lg:w-1/2 flex flex-col border-r border-gray-200 bg-white min-w-0">
         {/* Filter Header */}
-        <div className="p-4 border-b border-gray-200 bg-gray-50">
+        <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900">Brewery Directory</h2>
             {hasActiveFilters && (
@@ -231,14 +231,14 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
       </div>
 
       {/* Right Side - Map */}
-      <div className="w-full lg:w-1/2 flex flex-col bg-gray-50">
-        <div className="p-4 border-b border-gray-200 bg-white">
+      <div className="w-full lg:w-1/2 flex flex-col bg-gray-50 min-w-0">
+        <div className="p-4 border-b border-gray-200 bg-white flex-shrink-0">
           <h2 className="text-xl font-bold text-gray-900">Interactive Map</h2>
           <p className="text-sm text-gray-600 mt-1">
             Click on markers or list items to explore breweries
           </p>
         </div>
-        <div className="flex-1 min-h-[400px]">
+        <div className="flex-1 min-h-0 relative">
           {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
             <GoogleMap 
               breweries={filtered as any} 

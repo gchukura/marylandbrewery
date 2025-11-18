@@ -44,13 +44,13 @@ export default async function MapPage() {
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col bg-gray-50 h-full">
       <PageHero
         h1="Interactive Brewery Map"
         introText="Explore all Maryland breweries on an interactive map with a filterable directory. Search by name, city, type, or amenities to find the perfect brewery for your visit."
         breadcrumbs={breadcrumbs}
       />
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 overflow-hidden">
         <MapWithListClient breweries={breweries} />
       </div>
     </div>

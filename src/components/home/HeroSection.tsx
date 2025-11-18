@@ -16,7 +16,7 @@ export default function HeroSection({ totalBreweries, totalCities, totalCounties
             Discover Maryland's Craft Brewery Scene
           </h1>
           <p className="text-xl md:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Your complete guide to {totalBreweries}+ craft breweries across {totalCities} cities and {totalCounties} counties in the Old Line State
+            Complete guide to craft breweries across the state of Maryland
           </p>
           <div className="flex justify-center items-center mb-12">
             <Link 

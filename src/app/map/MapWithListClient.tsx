@@ -35,7 +35,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
     const types = new Set<string>();
     breweries.forEach(b => {
       if (Array.isArray(b.type)) {
-        b.type.forEach(t => types.add(t));
+        b.type.forEach((t: string) => types.add(t));
       } else if (b.type) {
         types.add(b.type);
       }

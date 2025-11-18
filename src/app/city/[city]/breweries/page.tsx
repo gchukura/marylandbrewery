@@ -3,6 +3,7 @@ import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate'
 import { getAllCities, getProcessedBreweryData } from '../../../../../lib/brewery-data';
 import { slugify, deslugify, isOpenNow } from '@/lib/data-utils';
 import { generateCityIntroText, generateCityContentBlocks } from '@/lib/content-generators';
+import { generateCityTitle, generateCityDescription } from '@/lib/seo-utils';
 
 // Build all city pages (no limit)
 export async function generateStaticParams() {
@@ -34,8 +35,8 @@ export async function generateMetadata({ params }: { params: { city: string } })
     .map(([k]) => k)
     .join(', ');
 
-  const title = `${cityName} Breweries - ${total} Craft Breweries in ${cityName}, MD`;
-  const description = `${cityName} has ${total} craft breweries. Popular amenities: ${topAmenities || 'varied options'}. Explore local taprooms, brewpubs, and tasting rooms in ${cityName}, Maryland.`;
+  const title = generateCityTitle(cityName, total);
+  const description = generateCityDescription(cityName, total, topAmenities);
 
   return {
     title,
@@ -124,24 +125,33 @@ export default async function CityBreweriesPage({ params }: { params: { city: st
       count: cityCounts.get(city),
     }));
 
-  // Top amenities in this city
+  // Top amenities in this city - now including ALL major amenities for SEO
+  const majorAmenities = ['dog-friendly', 'outdoor-seating', 'live-music', 'food-trucks', 'full-kitchen', 'parking', 'tours'];
+
   const amenityCounts = new Map<string, number>();
   breweries.forEach(b => {
     const amenities = (b as any).amenities || (b as any).features || [];
     amenities.forEach((a: string) => {
-      const key = a.trim();
+      const key = a.trim().toLowerCase();
       amenityCounts.set(key, (amenityCounts.get(key) || 0) + 1);
     });
   });
-  
-  const topAmenities = Array.from(amenityCounts.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(([amenity]) => ({
-      title: `${cityName} ${amenity} Breweries`,
-      url: `/city/${params.city}/${slugify(amenity)}`,
-      count: amenityCounts.get(amenity),
-    }));
+
+  // Generate links for ALL major amenities (not just top 3) to fix orphan pages
+  const topAmenities = majorAmenities
+    .map(amenitySlug => {
+      const amenityKey = amenitySlug.replace(/-/g, ' ');
+      const count = Array.from(amenityCounts.entries())
+        .filter(([key]) => key.includes(amenityKey))
+        .reduce((sum, [,val]) => sum + val, 0);
+
+      return count > 0 ? {
+        title: `${cityName} ${amenityKey.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} Breweries`,
+        url: `/city/${params.city}/${amenitySlug}`,
+        count,
+      } : null;
+    })
+    .filter(Boolean) as Array<{title: string; url: string; count: number}>;
 
   // Brewery types in this city
   const typeCounts = new Map<string, number>();

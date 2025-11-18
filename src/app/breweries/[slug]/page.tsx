@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getProcessedBreweryData, getNearbyBreweries } from '../../../../lib/brewery-data';
 import { deslugify } from '../../../../lib/utils';
 import SimpleBreweryPageTemplate from '@/components/templates/SimpleBreweryPageTemplate';
+import { generateBreweryTitle, generateBreweryDescription } from '@/lib/seo-utils';
 
 interface BreweryPageProps {
   params: { slug: string };
@@ -28,8 +29,13 @@ export async function generateMetadata({ params }: BreweryPageProps) {
     };
   }
 
-  const title = `${brewery.name} - ${brewery.city}, MD | Maryland Brewery Directory`;
-  const description = `${brewery.name} in ${brewery.city}, Maryland. ${brewery.description || `Discover this ${(brewery as any).type || 'brewery'} in the Old Line State.`}`;
+  const title = generateBreweryTitle(brewery.name, brewery.city);
+  const description = generateBreweryDescription(
+    brewery.name,
+    brewery.city,
+    brewery.description,
+    (brewery as any).type
+  );
 
   return {
     title,

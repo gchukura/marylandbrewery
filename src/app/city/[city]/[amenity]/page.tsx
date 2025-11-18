@@ -3,6 +3,7 @@ import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate'
 import { getProcessedBreweryData } from '../../../../../lib/brewery-data';
 import { slugify, deslugify, isOpenNow } from '@/lib/data-utils';
 import { generateComboIntroText } from '@/lib/content-generators';
+import { truncateTitle, optimizeDescription } from '@/lib/seo-utils';
 
 const AMENITY_SLUGS = [
   'dog-friendly', 'outdoor-seating', 'live-music', 'food-trucks', 'full-kitchen', 'beer-garden',
@@ -37,10 +38,14 @@ export async function generateMetadata({ params }: { params: { city: string; ame
       (((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey)))
   );
 
-  const title = `${amenityLabel} Breweries in ${cityName}, MD - ${breweries.length} Locations`;
-  const description = breweries.length > 0
-    ? `Find ${breweries.length} breweries with ${amenityLabel.toLowerCase()} in ${cityName}, Maryland. Explore local taprooms and brewpubs.`
-    : `No breweries with ${amenityLabel.toLowerCase()} are listed in ${cityName} yet. See nearby cities and related amenities.`;
+  const rawTitle = `${amenityLabel} Breweries in ${cityName}, MD - ${breweries.length}`;
+  const title = truncateTitle(rawTitle);
+
+  const rawDescription = breweries.length > 0
+    ? `Find ${breweries.length} breweries with ${amenityLabel.toLowerCase()} in ${cityName}, Maryland. Explore local taprooms and brewpubs with this amenity. View hours, locations, and visitor information.`
+    : `No breweries with ${amenityLabel.toLowerCase()} are currently listed in ${cityName}, Maryland. Check nearby cities for similar options or explore other amenities in ${cityName}.`;
+
+  const description = optimizeDescription(rawDescription);
 
   return {
     title,

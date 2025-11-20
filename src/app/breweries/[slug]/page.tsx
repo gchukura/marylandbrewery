@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getProcessedBreweryData, getNearbyBreweries } from '../../../../lib/brewery-data';
 import { deslugify } from '../../../../lib/utils';
+import { slugify } from '@/lib/data-utils';
 import SimpleBreweryPageTemplate from '@/components/templates/SimpleBreweryPageTemplate';
 import { generateBreweryTitle, generateBreweryDescription } from '@/lib/seo-utils';
 
@@ -150,17 +151,48 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
   // Get nearby breweries (within 10 miles)
   const nearbyBreweries = await getNearbyBreweries(brewery.latitude, brewery.longitude, 10);
 
-  // Generate breadcrumbs
+  // Generate breadcrumbs with more links
+  const citySlug = (brewery as any).citySlug || slugify(brewery.city);
   const breadcrumbs = [
     { name: 'Home', url: '/', position: 1, isActive: false },
-    { name: brewery.name, url: `/breweries/${params.slug}`, position: 2, isActive: true },
+    { name: 'Cities', url: '/city', position: 2, isActive: false },
+    { name: brewery.city, url: `/city/${citySlug}/breweries`, position: 3, isActive: false },
+    { name: brewery.name, url: `/breweries/${params.slug}`, position: 4, isActive: true },
   ];
 
-  // Generate related pages
+  // Get same city breweries for related links
+  const sameCityBreweries = processed.byCity.get(brewery.city.toLowerCase()) || [];
+  const sameCityOther = sameCityBreweries
+    .filter(b => b.id !== brewery.id)
+    .slice(0, 4)
+    .map(b => ({
+      title: b.name,
+      url: `/breweries/${(b as any).slug || b.id}`,
+      type: 'brewery' as const,
+    }));
+
+  // Get breweries with similar amenities
+  const breweryAmenities = ((brewery as any).amenities || (brewery as any).features || []).map((a: string) => a.toLowerCase());
+  const similarAmenityBreweries = processed.breweries
+    .filter(b => {
+      if (b.id === brewery.id) return false;
+      const bAmenities = ((b as any).amenities || (b as any).features || []).map((a: string) => a.toLowerCase());
+      return breweryAmenities.some((a: string) => bAmenities.includes(a));
+    })
+    .slice(0, 3)
+    .map(b => ({
+      title: b.name,
+      url: `/breweries/${(b as any).slug || b.id}`,
+      type: 'brewery' as const,
+    }));
+
+  // Generate related pages with more links
   const relatedPages = [
-    { title: `${brewery.city} Breweries`, url: `/city/${(brewery as any).citySlug || brewery.city.toLowerCase().replace(/\s+/g, '-')}/breweries`, type: 'city' },
-    { title: 'Interactive Map', url: '/map', type: 'general' },
-    { title: 'All Cities', url: '/city', type: 'general' },
+    { title: `All ${brewery.city} Breweries`, url: `/city/${citySlug}/breweries`, type: 'city' as const, count: sameCityBreweries.length },
+    { title: 'Interactive Map', url: '/map', type: 'general' as const },
+    { title: 'Open Now', url: '/open-now', type: 'general' as const },
+    ...sameCityOther,
+    ...similarAmenityBreweries,
   ];
 
   const title = `${brewery.name} - ${brewery.city}, MD`;

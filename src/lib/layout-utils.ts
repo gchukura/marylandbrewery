@@ -282,7 +282,7 @@ export function generatePageTitle(
   }
 }
 
-// Utility for consistent meta descriptions (optimized for <155 chars)
+// Utility for consistent meta descriptions (optimized for 120-160 chars)
 export function generateMetaDescription(
   pageType: 'city' | 'county' | 'amenity' | 'type' | 'brewery',
   data: {
@@ -298,18 +298,20 @@ export function generateMetaDescription(
   
   switch (pageType) {
     case 'city':
-      return `Find ${count} ${breweryText} in ${name}, MD. Hours, amenities, and directions. Visit local breweries today!`;
+      return `Discover ${count} craft ${breweryText} in ${name}, Maryland. Find local taprooms, brewpubs, and microbreweries with food, outdoor seating, live music, and more. Explore ${name}'s beer scene today!`;
     case 'county':
-      return `Explore ${count} ${breweryText} in ${name} County, MD. Discover craft beer culture across the region.`;
+      return `Explore ${count} craft ${breweryText} across ${name} County, Maryland. From urban centers to rural communities, discover diverse brewing experiences with detailed hours, amenities, and visitor information.`;
     case 'amenity':
-      return `Find ${count} MD ${breweryText} with ${name.toLowerCase()}. Discover breweries offering this amenity.`;
+      return `Find ${count} Maryland ${breweryText} with ${name.toLowerCase()}. Browse our curated selection of craft beer locations offering ${name.toLowerCase()} across cities like Baltimore, Annapolis, and Frederick. Plan your visit now!`;
     case 'type':
-      return `Explore ${count} ${name.toLowerCase()} ${breweryText} in MD. Find the best ${name.toLowerCase()} breweries.`;
+      return `Discover ${count} ${name.toLowerCase()} ${breweryText} throughout Maryland. Find the perfect ${name.toLowerCase()} locations with great beer, food, events, and more. Your complete guide to Maryland craft beer.`;
     case 'brewery':
-      const amenityText = amenities.length > 0 ? amenities.slice(0, 2).join(', ').toLowerCase() : 'craft beer';
-      return `Visit ${name} in ${city || county || 'MD'}. Enjoy ${amenityText}. Find hours, location, and amenities.`;
+      const amenityText = amenities.length > 0 
+        ? ` Features include ${amenities.slice(0, 3).join(', ').toLowerCase()}.` 
+        : ' A premier Maryland craft brewery.';
+      return `Visit ${name} in ${city || county || 'Maryland'}. Enjoy exceptional local beer, unique atmosphere, and memorable experiences.${amenityText} Check hours, location, and special events.`;
     default:
-      return `Discover ${count} ${breweryText} in MD. Find craft breweries with hours, amenities, and directions.`;
+      return `Explore Maryland's vibrant craft brewery scene. Find the perfect spot for great local beer, food, and atmosphere across all Maryland cities and counties.`;
   }
 }
 

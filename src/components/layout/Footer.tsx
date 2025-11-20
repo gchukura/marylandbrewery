@@ -103,6 +103,11 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link href="/amenities" className="hover:text-red-300 transition-colors font-medium">
+                  View All Amenities →
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -117,6 +122,11 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link href="/type" className="hover:text-red-300 transition-colors font-medium">
+                  View All Types →
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

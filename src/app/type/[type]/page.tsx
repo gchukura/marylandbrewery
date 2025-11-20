@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: { type: string } })
   const typeLabel = deslugify(params.type);
   const typeLabelLower = typeLabel.toLowerCase();
   const title = `${typeLabel} Breweries in MD | ${breweries.length}`;
-  const description = `Explore ${breweries.length} ${typeLabelLower} breweries in MD. Find top ${typeLabelLower} breweries in Baltimore, Annapolis, and Frederick.`;
+  const description = `Explore ${breweries.length} ${typeLabelLower} breweries across Maryland. Find top ${typeLabelLower} breweries in Baltimore, Annapolis, Frederick, and other cities. Complete guide to ${typeLabelLower} breweries in the Old Line State with hours, amenities, and visitor information.`;
   return {
     title,
     description,

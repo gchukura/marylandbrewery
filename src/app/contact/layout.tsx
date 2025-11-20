@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Contact Us - Maryland Brewery Directory',
-  description: 'Contact Maryland Brewery Directory. Send us questions, suggestions, or brewery information updates. We\'d love to hear from you!',
+  description: 'Contact Maryland Brewery Directory with questions, suggestions, or brewery information updates. Help us keep Maryland\'s craft brewery directory accurate and comprehensive. We\'d love to hear from you!',
   alternates: {
     canonical: '/contact',
   },

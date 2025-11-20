@@ -106,7 +106,7 @@ export function generateCityTitle(cityName: string, count: number): string {
 }
 
 /**
- * Generates SEO-optimized description for brewery pages
+ * Generates SEO-optimized description for brewery pages (120-160 chars)
  * @param breweryName Brewery name
  * @param city City name
  * @param description Optional brewery description
@@ -119,20 +119,20 @@ export function generateBreweryDescription(
   description?: string,
   type?: string
 ): string {
-  let baseDesc = `${breweryName} in ${city}, Maryland.`;
+  const typeStr = type || 'craft brewery';
+  let baseDesc = `Visit ${breweryName} in ${city}, Maryland. A premier ${typeStr} offering exceptional local beer, unique atmosphere, and memorable experiences.`;
 
-  if (description && description.length > 20) {
+  if (description && description.length > 20 && description.length < 80) {
     baseDesc += ` ${description}`;
-  } else {
-    const typeStr = type || 'craft brewery';
-    baseDesc += ` Discover this ${typeStr} in the Old Line State.`;
   }
 
-  return optimizeDescription(baseDesc);
+  baseDesc += ` Find hours, location, amenities, and special events at this Maryland brewery.`;
+
+  return optimizeDescription(baseDesc, 120, 160);
 }
 
 /**
- * Generates SEO-optimized description for city pages
+ * Generates SEO-optimized description for city pages (120-160 chars)
  * @param cityName City name
  * @param count Number of breweries
  * @param topAmenities Top amenities string
@@ -143,13 +143,14 @@ export function generateCityDescription(
   count: number,
   topAmenities?: string
 ): string {
-  let desc = `Discover ${count} craft breweries in ${cityName}, Maryland.`;
+  const breweryText = count === 1 ? 'brewery' : 'breweries';
+  let desc = `Discover ${count} craft ${breweryText} in ${cityName}, Maryland.`;
 
   if (topAmenities) {
-    desc += ` Popular amenities: ${topAmenities}.`;
+    desc += ` Popular amenities include ${topAmenities}.`;
   }
 
-  desc += ` Find brewery hours, locations, and visitor information for all ${cityName} breweries.`;
+  desc += ` Find local taprooms, brewpubs, and microbreweries with detailed hours, locations, and visitor information. Plan your ${cityName} brewery tour today!`;
 
-  return optimizeDescription(desc);
+  return optimizeDescription(desc, 120, 160);
 }

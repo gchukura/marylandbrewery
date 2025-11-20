@@ -22,8 +22,8 @@ export async function generateMetadata({ params }: { params: { county: string } 
 
   const title = `${countyName} County Breweries | ${total} in MD`;
   const description = total > 0
-    ? `Explore ${total} craft breweries in ${countyName} County, MD. Find taprooms, brewpubs, and tasting rooms.`
-    : `No breweries listed in ${countyName} County, MD. Check nearby counties.`;
+    ? `Explore ${total} craft breweries across ${countyName} County, Maryland. From historic downtowns to scenic countryside, discover taprooms, brewpubs, and tasting rooms with detailed information, hours, and amenities.`
+    : `Discover Maryland's craft beer scene. While ${countyName} County doesn't have listed breweries yet, check nearby counties like Baltimore, Anne Arundel, and Montgomery for great craft beer options.`;
 
   return {
     title,
@@ -98,9 +98,9 @@ export default async function CountyBreweriesPage({ params }: { params: { county
   // Content blocks
   const contentBlocks = generateCountyContentBlocks(countyName, breweries, citiesInCounty);
 
-  // Related pages
+  // Related pages - enhanced for better internal linking
   // Cities in this county
-  const cityPages = citiesInCounty.slice(0, 5).map(city => ({
+  const cityPages = citiesInCounty.slice(0, 6).map(city => ({
     title: `${city} Breweries`,
     url: `/city/${slugify(city)}/breweries`,
     count: breweries.filter(b => b.city === city).length,
@@ -109,7 +109,7 @@ export default async function CountyBreweriesPage({ params }: { params: { county
   // Nearby counties
   const neighbors = ALL_MD_COUNTIES
     .filter(c => c.toLowerCase() !== countyName.toLowerCase())
-    .slice(0, 3)
+    .slice(0, 4)
     .map(c => {
       const neighborBreweries = processed.breweries.filter(b => (b as any).county?.toLowerCase() === c.toLowerCase());
       return {
@@ -119,7 +119,29 @@ export default async function CountyBreweriesPage({ params }: { params: { county
       };
     });
 
-  const relatedPages = [...cityPages, ...neighbors];
+  // Top amenities in this county
+  const amenityCounts = new Map<string, number>();
+  breweries.forEach(b => {
+    const amenities = (b as any).amenities || (b as any).features || [];
+    amenities.forEach((a: string) => {
+      const key = a.trim().toLowerCase();
+      amenityCounts.set(key, (amenityCounts.get(key) || 0) + 1);
+    });
+  });
+  
+  const topAmenities = Array.from(amenityCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([amenity]) => {
+      const amenitySlug = amenity.replace(/\s+/g, '-').toLowerCase();
+      return {
+        title: `${countyName} ${amenity.charAt(0).toUpperCase() + amenity.slice(1)} Breweries`,
+        url: `/amenities/${amenitySlug}`,
+        count: amenityCounts.get(amenity) || 0,
+      };
+    });
+
+  const relatedPages = [...cityPages, ...neighbors, ...topAmenities];
 
   return (
     <DirectoryPageTemplate

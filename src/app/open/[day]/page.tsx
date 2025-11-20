@@ -1,5 +1,8 @@
 import { Metadata } from 'next';
 import { getProcessedBreweryData } from '../../../../lib/brewery-data';
+import PageHero from '@/components/directory/PageHero';
+import Link from 'next/link';
+import { slugify } from '@/lib/data-utils';
 
 export const revalidate = 3600; // ISR hourly
 
@@ -18,7 +21,7 @@ export async function generateMetadata({ params }: { params: { day: string } }):
 
   return {
     title: `Breweries Open on ${day} - Maryland Brewery Directory`,
-    description: `Find ${list.length} Maryland breweries open on ${day}. Complete list of breweries with hours for ${day}. Plan your visit to Maryland craft breweries.`,
+    description: `Find ${list.length} Maryland breweries open on ${day}s. Complete list of craft breweries, taprooms, and brewpubs with hours for ${day}. Plan your ${day} brewery tour across Baltimore, Annapolis, Frederick, and more cities.`,
     alternates: {
       canonical: `/open/${params.day}`,
     },
@@ -69,10 +72,29 @@ export default async function OpenDayPage({ params }: { params: { day: string } 
   }
   const sorted = Array.from(groups.entries()).sort((a,b) => a[0].localeCompare(b[0]));
 
+  const dayCapitalized = day.charAt(0).toUpperCase() + day.slice(1);
+  const breadcrumbs = [
+    { name: 'Home', url: '/', isActive: false },
+    { name: 'Open Now', url: '/open-now', isActive: false },
+    { name: `Open on ${dayCapitalized}`, url: `/open/${day}`, isActive: true },
+  ];
+
+  // Related pages for internal linking
+  const relatedPages = [
+    { title: 'Open Now', url: '/open-now', count: processed.breweries.length },
+    { title: 'Interactive Map', url: '/map', count: processed.breweries.length },
+    { title: 'All Cities', url: '/city', count: processed.cities.length },
+  ];
+
   return (
-    <div className="container mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold mb-2">Open on {day.charAt(0).toUpperCase()+day.slice(1)}</h1>
-      <p className="text-gray-600 mb-6">Breweries open on {day}. Updated hourly.</p>
+    <div className="bg-gray-50 min-h-screen">
+      <PageHero
+        h1={`Breweries Open on ${dayCapitalized}`}
+        introText={`Find ${list.length} Maryland breweries open on ${dayCapitalized}s. Complete list of craft breweries, taprooms, and brewpubs with hours for ${dayCapitalized}. Plan your ${dayCapitalized} brewery tour across Baltimore, Annapolis, Frederick, and more cities.`}
+        breadcrumbs={breadcrumbs}
+      />
+      
+      <div className="container mx-auto px-4 py-10">
 
       {sorted.length === 0 && (
         <div className="text-gray-600">No breweries listed as open on this day.</div>
@@ -92,6 +114,26 @@ export default async function OpenDayPage({ params }: { params: { day: string } 
             </ul>
           </section>
         ))}
+      </div>
+
+      {/* Related Links Section */}
+      <section className="container mx-auto px-4 py-8 border-t border-gray-200 mt-12">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Explore More</h2>
+        <div className="grid md:grid-cols-3 gap-4">
+          {relatedPages.map((page) => (
+            <Link
+              key={page.url}
+              href={page.url}
+              className="bg-white rounded-lg p-4 border border-gray-200 hover:border-red-500 hover:shadow-md transition-all"
+            >
+              <div className="font-semibold text-gray-900">{page.title}</div>
+              {page.count > 0 && (
+                <div className="text-sm text-gray-600 mt-1">{page.count} {page.count === 1 ? 'brewery' : 'breweries'}</div>
+              )}
+            </Link>
+          ))}
+        </div>
+      </section>
       </div>
     </div>
   );

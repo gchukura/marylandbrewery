@@ -43,8 +43,8 @@ export async function generateMetadata({ params }: { params: { city: string; ame
   const title = `${amenityLabel} in ${cityName}, MD | ${breweries.length}`;
   
   const description = breweries.length > 0
-    ? `Find ${breweries.length} breweries with ${amenityLabel.toLowerCase()} in ${cityName}, MD. Hours, locations, and visitor info.`
-    : `No breweries with ${amenityLabel.toLowerCase()} in ${cityName}, MD. Check nearby cities.`;
+    ? `Find ${breweries.length} breweries with ${amenityLabel.toLowerCase()} in ${cityName}, Maryland. Explore local taprooms and brewpubs offering ${amenityLabel.toLowerCase()} with detailed hours, locations, and visitor information. Plan your ${cityName} brewery tour today!`
+    : `Discover ${cityName}'s craft beer scene. While no breweries currently list ${amenityLabel.toLowerCase()}, check nearby cities for similar options or explore other amenities in ${cityName}, Maryland.`;
 
   return {
     title,

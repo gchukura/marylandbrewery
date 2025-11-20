@@ -1,8 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import PageHero from '@/components/directory/PageHero';
+import Link from 'next/link';
 
 export default function ContactPage() {
+  const breadcrumbs = [
+    { name: 'Home', url: '/', isActive: false },
+    { name: 'Contact', url: '/contact', isActive: true },
+  ];
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -43,11 +49,14 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">Contact Us</h1>
-      <p className="text-gray-700 mb-8">
-        Have a question or suggestion? Send us a note and we’ll get back to you.
-      </p>
+    <div className="bg-gray-50 min-h-screen">
+      <PageHero
+        h1="Contact Us"
+        introText="Have a question or suggestion? Send us a note and we'll get back to you. Help us keep Maryland's craft brewery directory accurate and comprehensive."
+        breadcrumbs={breadcrumbs}
+      />
+      
+      <div className="max-w-2xl mx-auto px-4 py-12">
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -77,6 +86,26 @@ export default function ContactPage() {
         {status === "success" && <p className="text-green-700 font-medium mt-2">{message}</p>}
         {status === "error" && <p className="text-red-700 font-medium mt-2">{message}</p>}
       </form>
+
+      {/* Related Links Section */}
+      <section className="mt-12 pt-8 border-t border-gray-200">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Explore More</h2>
+        <div className="grid md:grid-cols-3 gap-4">
+          <Link href="/map" className="bg-white rounded-lg p-4 border border-gray-200 hover:border-red-500 hover:shadow-md transition-all">
+            <div className="font-semibold text-gray-900">Interactive Map</div>
+            <div className="text-sm text-gray-600 mt-1">Find breweries near you</div>
+          </Link>
+          <Link href="/city" className="bg-white rounded-lg p-4 border border-gray-200 hover:border-red-500 hover:shadow-md transition-all">
+            <div className="font-semibold text-gray-900">Browse by City</div>
+            <div className="text-sm text-gray-600 mt-1">Explore all cities</div>
+          </Link>
+          <Link href="/amenities" className="bg-white rounded-lg p-4 border border-gray-200 hover:border-red-500 hover:shadow-md transition-all">
+            <div className="font-semibold text-gray-900">Browse by Amenity</div>
+            <div className="text-sm text-gray-600 mt-1">Find features you want</div>
+          </Link>
+        </div>
+      </section>
+      </div>
     </div>
   );
 }

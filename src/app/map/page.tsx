@@ -7,7 +7,7 @@ export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Interactive Brewery Map - Maryland Brewery Directory',
-  description: 'Interactive map of all Maryland breweries. Find breweries near you and explore the craft beer scene across the state. Search by location, filter by amenities, and discover new breweries.',
+  description: 'Explore all Maryland breweries on an interactive map with filterable directory. Search by name, city, type, or amenities to find the perfect brewery. Discover taprooms, brewpubs, and microbreweries across Baltimore, Annapolis, Frederick, and more.',
   alternates: {
     canonical: '/map',
   },
@@ -41,6 +41,15 @@ export default async function MapPage() {
   const breadcrumbs = [
     { name: 'Home', url: '/', isActive: false },
     { name: 'Interactive Map', url: '/map', isActive: true },
+  ];
+
+  // Related pages for internal linking
+  const relatedPages = [
+    { title: 'Open Now', url: '/open-now', count: processed.breweries.length },
+    { title: 'All Cities', url: '/city', count: processed.cities.length },
+    { title: 'All Counties', url: '/county', count: processed.counties.length },
+    { title: 'Browse by Amenity', url: '/amenities', count: 0 },
+    { title: 'Browse by Type', url: '/type', count: 0 },
   ];
 
   return (

@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { MapPin, Phone, Globe, Search, Filter, X } from 'lucide-react';
+import { MapPin, Phone, Globe, Search, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
   ssr: false, 
@@ -24,6 +24,8 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
   const [type, setType] = useState('');
   const [amenity, setAmenity] = useState('');
   const [selectedBrewery, setSelectedBrewery] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   // Get unique values for filters
   const uniqueCities = useMemo(() => {
@@ -78,19 +80,40 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
     });
   }, [breweries, search, city, type, amenity]);
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedBreweries = filtered.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, city, type, amenity]);
+
   const clearFilters = () => {
     setSearch('');
     setCity('');
     setType('');
     setAmenity('');
+    setCurrentPage(1);
   };
 
   const hasActiveFilters = search || city || type || amenity;
 
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of list
+    const listElement = document.getElementById('brewery-list');
+    if (listElement) {
+      listElement.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-4 h-full max-w-[1400px] mx-auto px-4 py-4">
+    <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-4 max-w-[1400px] mx-auto">
       {/* Left Side - Filterable List */}
-      <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden min-h-0 lg:max-h-full max-h-[500px]">
+      <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[600px] lg:h-[700px]">
         {/* Filter Header */}
         <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
@@ -156,12 +179,13 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
 
           {/* Results Count */}
           <div className="mt-3 text-sm text-gray-600">
-            Showing {filtered.length} of {breweries.length} breweries
+            Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries
+            {filtered.length !== breweries.length && ` (filtered from ${breweries.length} total)`}
           </div>
         </div>
 
         {/* Brewery List - Scrollable */}
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div id="brewery-list" className="flex-1 overflow-y-auto min-h-0">
           {filtered.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
               <p>No breweries found matching your filters.</p>
@@ -176,7 +200,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {filtered.map((brewery) => {
+              {paginatedBreweries.map((brewery) => {
                 const slug = (brewery as any).slug || brewery.id;
                 return (
                   <Link
@@ -228,10 +252,68 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {filtered.length > itemsPerPage && (
+          <div className="p-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                aria-label="Previous page"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              
+              {/* Page numbers */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => goToPage(pageNum)}
+                      className={`px-3 py-1 text-sm border rounded-lg transition-colors ${
+                        currentPage === pageNum
+                          ? 'bg-red-600 text-white border-red-600'
+                          : 'border-gray-300 hover:bg-gray-100'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                aria-label="Next page"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Right Side - Map */}
-      <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden min-h-0 lg:h-full h-[400px]">
+      <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[600px] lg:h-[700px]">
         <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
           <h2 className="text-xl font-bold text-gray-900">Interactive Map</h2>
           <p className="text-sm text-gray-600 mt-1">

@@ -48,7 +48,7 @@ export default function BreweryLogo({
       <img
         src={logoUrl}
         alt={`${breweryName} logo`}
-        className={`${sizeClasses[size]} object-contain rounded-lg border border-gray-200 bg-white ${
+        className={`${sizeClasses[size]} object-contain ${
           imageLoading ? 'opacity-0' : 'opacity-100'
         } transition-opacity duration-200`}
         onLoad={() => setImageLoading(false)}

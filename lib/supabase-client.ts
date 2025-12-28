@@ -122,7 +122,6 @@ function breweryToDbBrewery(brewery: Brewery): DatabaseBrewery {
  */
 export async function getBreweryDataFromSupabase(): Promise<Brewery[]> {
   const startTime = Date.now();
-  console.log('Starting Supabase data fetch...');
 
   try {
     // Fetch breweries
@@ -136,7 +135,9 @@ export async function getBreweryDataFromSupabase(): Promise<Brewery[]> {
     }
 
     if (!breweriesData || breweriesData.length === 0) {
-      console.warn('No breweries found in Supabase');
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('No breweries found in Supabase');
+      }
       return [];
     }
 
@@ -145,7 +146,7 @@ export async function getBreweryDataFromSupabase(): Promise<Brewery[]> {
       .from('beers')
       .select('*');
 
-    if (beersError) {
+    if (beersError && process.env.NODE_ENV === 'development') {
       console.warn(`Failed to fetch beers: ${beersError.message}`);
     }
 
@@ -173,7 +174,11 @@ export async function getBreweryDataFromSupabase(): Promise<Brewery[]> {
 
     const endTime = Date.now();
     const duration = endTime - startTime;
-    console.log(`Successfully fetched ${breweries.length} breweries from Supabase in ${duration}ms`);
+    
+    // Only log in development mode
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Successfully fetched ${breweries.length} breweries from Supabase in ${duration}ms`);
+    }
 
     return breweries;
   } catch (error) {

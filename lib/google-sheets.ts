@@ -285,7 +285,7 @@ export async function getBreweryDataFromSheets(): Promise<Brewery[]> {
     const response = await withRetry(async () => {
       return await sheetsClient.spreadsheets.values.get({
         spreadsheetId: sheetId,
-        range: 'A:AK', // Get all columns up to AK
+        range: 'A:AP', // Get all columns up to AP (includes place_id, google_rating, etc.)
         valueRenderOption: 'UNFORMATTED_VALUE',
         dateTimeRenderOption: 'FORMATTED_STRING',
       });
@@ -531,6 +531,293 @@ export async function addNewsletterSubscriber(email: string, metadata: any = {})
     return { success: true };
   } catch (error) {
     console.error('Failed to add newsletter subscriber:', error);
+    throw error;
+  }
+}
+
+/**
+ * Google Review interface matching Places API response
+ */
+export interface GoogleReview {
+  author_name: string;
+  author_url?: string;
+  language?: string;
+  profile_photo_url?: string;
+  rating: number;
+  relative_time_description: string;
+  text: string;
+  time: number;
+}
+
+/**
+ * Write reviews to Google Sheets Reviews sheet
+ * Uses brewery.id to link reviews to breweries
+ */
+export async function writeReviewsToSheets(
+  breweryId: string,
+  breweryName: string,
+  reviews: GoogleReview[]
+): Promise<void> {
+  try {
+    const { sheetsClient } = await initializeSheetsClient();
+    const sheetId = process.env.GOOGLE_SHEET_ID!;
+    
+    if (!reviews || reviews.length === 0) {
+      return;
+    }
+    
+    const fetchedAt = new Date().toISOString();
+    
+    // Prepare review rows
+    const values = reviews.map(review => [
+      breweryId,
+      breweryName,
+      review.author_name || '',
+      review.rating || 0,
+      review.text || '',
+      review.relative_time_description || '',
+      review.time || 0,
+      review.author_url || '',
+      review.profile_photo_url || '',
+      review.language || 'en',
+      fetchedAt
+    ]);
+    
+    // Append reviews to Reviews sheet
+    await withRetry(async () => {
+      return await sheetsClient.spreadsheets.values.append({
+        spreadsheetId: sheetId,
+        range: 'Reviews!A:K', // brewery_id, brewery_name, reviewer_name, rating, review_text, review_date, review_timestamp, reviewer_url, profile_photo_url, language, fetched_at
+        valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
+        resource: { values }
+      });
+    });
+    
+    // Logging is handled by the calling script
+  } catch (error) {
+    console.error('Failed to write reviews to Google Sheets:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update review summary in main sheet
+ * Finds brewery by id column and updates summary columns
+ */
+export async function updateReviewSummary(
+  breweryId: string,
+  breweryName: string,
+  rating: number,
+  ratingCount: number
+): Promise<void> {
+  try {
+    const { sheetsClient } = await initializeSheetsClient();
+    const sheetId = process.env.GOOGLE_SHEET_ID!;
+    
+    // First, get all data to find the row index
+    const response = await withRetry(async () => {
+      return await sheetsClient.spreadsheets.values.get({
+        spreadsheetId: sheetId,
+        range: 'A:AP', // Get all columns including new review columns
+        valueRenderOption: 'UNFORMATTED_VALUE',
+      });
+    });
+    
+    const rows = response.data.values;
+    if (!rows || rows.length < 2) {
+      throw new Error('No data found in Google Sheets');
+    }
+    
+    // Get headers and find column indices
+    const headers = rows[0];
+    const columnIndex = (headerName: string) => {
+      const index = headers.findIndex((header: any) => 
+        header?.toString().trim().toLowerCase() === headerName.toLowerCase()
+      );
+      return index >= 0 ? index : -1;
+    };
+    
+    const idColIndex = columnIndex('id');
+    if (idColIndex === -1) {
+      throw new Error('Could not find "id" column in Google Sheets');
+    }
+    
+    // Find the row with matching brewery ID
+    let rowIndex = -1;
+    for (let i = 1; i < rows.length; i++) {
+      const rowId = rows[i][idColIndex]?.toString().trim();
+      if (rowId === breweryId.toString().trim()) {
+        rowIndex = i + 1; // Google Sheets uses 1-based indexing
+        break;
+      }
+    }
+    
+    if (rowIndex === -1) {
+      console.warn(`   ⚠️  Could not find brewery with ID ${breweryId} in Google Sheets`);
+      return;
+    }
+    
+    // Find or create column indices for review summary columns
+    const placeIdColIndex = columnIndex('place_id');
+    const ratingColIndex = columnIndex('google_rating');
+    const ratingCountColIndex = columnIndex('google_rating_count');
+    const lastUpdatedColIndex = columnIndex('google_reviews_last_updated');
+    
+    // Prepare updates
+    const updates: Array<{ range: string; values: any[][] }> = [];
+    const now = new Date().toISOString();
+    
+    // Helper function to convert column index to letter
+    const indexToColumnLetter = (index: number): string => {
+      if (index < 26) {
+        return String.fromCharCode(65 + index);
+      } else {
+        const first = String.fromCharCode(64 + Math.floor(index / 26));
+        const second = String.fromCharCode(65 + (index % 26));
+        return first + second;
+      }
+    };
+    
+    // Update google_rating (column AM, index 38)
+    if (ratingColIndex >= 0) {
+      const colLetter = indexToColumnLetter(ratingColIndex);
+      updates.push({
+        range: `${colLetter}${rowIndex}:${colLetter}${rowIndex}`,
+        values: [[rating > 0 ? rating.toString() : '']]
+      });
+    }
+    
+    // Update google_rating_count (column AN, index 39)
+    if (ratingCountColIndex >= 0) {
+      const colLetter = indexToColumnLetter(ratingCountColIndex);
+      updates.push({
+        range: `${colLetter}${rowIndex}:${colLetter}${rowIndex}`,
+        values: [[ratingCount.toString()]]
+      });
+    }
+    
+    // Update google_reviews_last_updated (column AO, index 40)
+    if (lastUpdatedColIndex >= 0) {
+      const colLetter = indexToColumnLetter(lastUpdatedColIndex);
+      updates.push({
+        range: `${colLetter}${rowIndex}:${colLetter}${rowIndex}`,
+        values: [[now]]
+      });
+    }
+    
+    // Batch update all columns
+    if (updates.length > 0) {
+      await withRetry(async () => {
+        return await sheetsClient.spreadsheets.values.batchUpdate({
+          spreadsheetId: sheetId,
+          resource: {
+            valueInputOption: 'RAW',
+            data: updates.map(update => ({
+              range: update.range,
+              values: update.values
+            }))
+          }
+        });
+      });
+    }
+    
+  } catch (error) {
+    console.error('Failed to update review summary in Google Sheets:', error);
+    throw error;
+  }
+}
+
+/**
+ * Store Place ID for a brewery
+ * Updates place_id column in main sheet
+ */
+export async function storePlaceId(
+  breweryId: string,
+  placeId: string
+): Promise<void> {
+  try {
+    const { sheetsClient } = await initializeSheetsClient();
+    const sheetId = process.env.GOOGLE_SHEET_ID!;
+    
+    // First, get all data to find the row index
+    const response = await withRetry(async () => {
+      return await sheetsClient.spreadsheets.values.get({
+        spreadsheetId: sheetId,
+        range: 'A:AP', // Get all columns
+        valueRenderOption: 'UNFORMATTED_VALUE',
+      });
+    });
+    
+    const rows = response.data.values;
+    if (!rows || rows.length < 2) {
+      throw new Error('No data found in Google Sheets');
+    }
+    
+    // Get headers and find column indices
+    const headers = rows[0];
+    const columnIndex = (headerName: string) => {
+      const index = headers.findIndex((header: any) => 
+        header?.toString().trim().toLowerCase() === headerName.toLowerCase()
+      );
+      return index >= 0 ? index : -1;
+    };
+    
+    const idColIndex = columnIndex('id');
+    if (idColIndex === -1) {
+      throw new Error('Could not find "id" column in Google Sheets');
+    }
+    
+    // Find the row with matching brewery ID
+    let rowIndex = -1;
+    for (let i = 1; i < rows.length; i++) {
+      const rowId = rows[i][idColIndex]?.toString().trim();
+      if (rowId === breweryId.toString().trim()) {
+        rowIndex = i + 1; // Google Sheets uses 1-based indexing
+        break;
+      }
+    }
+    
+    if (rowIndex === -1) {
+      console.warn(`   ⚠️  Could not find brewery with ID ${breweryId} in Google Sheets`);
+      return;
+    }
+    
+    // Helper function to convert column index to letter
+    const indexToColumnLetter = (index: number): string => {
+      if (index < 26) {
+        return String.fromCharCode(65 + index);
+      } else {
+        const first = String.fromCharCode(64 + Math.floor(index / 26));
+        const second = String.fromCharCode(65 + (index % 26));
+        return first + second;
+      }
+    };
+    
+    // Find or create place_id column index
+    let placeIdColIndex = columnIndex('place_id');
+    
+    // If place_id column doesn't exist, we'll use column AL (index 37)
+    if (placeIdColIndex === -1) {
+      placeIdColIndex = 37; // Column AL (0-based: A=0, B=1, ..., AL=37)
+    }
+    
+    // Convert column index to letter
+    const colLetter = indexToColumnLetter(placeIdColIndex);
+    
+    await withRetry(async () => {
+      return await sheetsClient.spreadsheets.values.update({
+        spreadsheetId: sheetId,
+        range: `${colLetter}${rowIndex}:${colLetter}${rowIndex}`,
+        valueInputOption: 'RAW',
+        resource: {
+          values: [[placeId]]
+        }
+      });
+    });
+    
+  } catch (error) {
+    console.error('Failed to store Place ID in Google Sheets:', error);
     throw error;
   }
 }

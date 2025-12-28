@@ -1,10 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
   experimental: {
-    staticGenerationRetryCount: 3,
+    staticGenerationRetryCount: 1, // Reduced from 3 to speed up builds
     largePageDataBytes: 512 * 1024, // 512KB (default is 128KB, but allow for larger pages)
+    optimizePackageImports: ['lucide-react', '@vis.gl/react-google-maps', '@googlemaps/markerclusterer'],
   },
   images: {
     domains: [

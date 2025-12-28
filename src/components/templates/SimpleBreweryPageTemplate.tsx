@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import BreweryLogo from '@/components/brewery/BreweryLogo';
 import { 
   MapPin, 
   Phone, 
@@ -236,10 +237,10 @@ export default function SimpleBreweryPageTemplate({
                 <div className="mb-8">
                   <div className="flex items-center gap-6 mb-6">
                     {brewery.logo && (
-                      <img 
-                        src={brewery.logo} 
-                        alt={`${brewery.name} logo`}
-                        className="h-32 w-32 object-contain rounded-lg"
+                      <BreweryLogo 
+                        logo={brewery.logo} 
+                        breweryName={brewery.name}
+                        size="lg"
                       />
                     )}
                     <h1 className="text-4xl font-bold text-gray-900">{brewery.name}</h1>

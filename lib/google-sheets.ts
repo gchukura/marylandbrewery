@@ -729,6 +729,93 @@ export async function updateReviewSummary(
 }
 
 /**
+ * Update logo for a brewery in Google Sheets
+ */
+export async function updateBreweryLogo(
+  breweryId: string,
+  logoPath: string
+): Promise<void> {
+  try {
+    const { sheetsClient } = await initializeSheetsClient();
+    const sheetId = process.env.GOOGLE_SHEET_ID!;
+    
+    // Get all data to find the row
+    const response = await withRetry(async () => {
+      return await sheetsClient.spreadsheets.values.get({
+        spreadsheetId: sheetId,
+        range: 'A:AP',
+        valueRenderOption: 'UNFORMATTED_VALUE',
+      });
+    });
+    
+    const rows = response.data.values;
+    if (!rows || rows.length < 2) {
+      throw new Error('No data found in Google Sheets');
+    }
+    
+    const headers = rows[0];
+    const columnIndex = (headerName: string) => {
+      const index = headers.findIndex((header: any) => 
+        header?.toString().trim().toLowerCase() === headerName.toLowerCase()
+      );
+      return index >= 0 ? index : -1;
+    };
+    
+    const idColIndex = columnIndex('id');
+    if (idColIndex === -1) {
+      throw new Error('Could not find "id" column');
+    }
+    
+    // Find the row
+    let rowIndex = -1;
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i][idColIndex]?.toString().trim() === breweryId.toString().trim()) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+    
+    if (rowIndex === -1) {
+      console.warn(`Could not find brewery with ID ${breweryId}`);
+      return;
+    }
+    
+    // Find or create logo column
+    let logoColIndex = columnIndex('logo');
+    if (logoColIndex === -1) {
+      logoColIndex = headers.length; // Add as new column
+    }
+    
+    // Convert to column letter
+    const indexToColumnLetter = (index: number): string => {
+      if (index < 26) {
+        return String.fromCharCode(65 + index);
+      } else {
+        const first = String.fromCharCode(64 + Math.floor(index / 26));
+        const second = String.fromCharCode(65 + (index % 26));
+        return first + second;
+      }
+    };
+    
+    const colLetter = indexToColumnLetter(logoColIndex);
+    
+    await withRetry(async () => {
+      return await sheetsClient.spreadsheets.values.update({
+        spreadsheetId: sheetId,
+        range: `${colLetter}${rowIndex}:${colLetter}${rowIndex}`,
+        valueInputOption: 'RAW',
+        resource: {
+          values: [[logoPath]]
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Failed to update logo in Google Sheets:', error);
+    throw error;
+  }
+}
+
+/**
  * Store Place ID for a brewery
  * Updates place_id column in main sheet
  */

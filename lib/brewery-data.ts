@@ -212,14 +212,22 @@ function calculateSiteStatistics(
 /**
  * Get processed brewery data with caching
  * This is the main function that powers all 500+ pages
+ * Cached to avoid reprocessing data on every page generation
  */
-export async function getProcessedBreweryData(): Promise<ProcessedBreweryData> {
-  // Get raw brewery data (cached)
-  const breweries = await getAllBreweryData();
-  
-  // Process data into efficient lookup structures
-  return await processBreweryData(breweries);
-}
+export const getProcessedBreweryData = unstable_cache(
+  async (): Promise<ProcessedBreweryData> => {
+    // Get raw brewery data (cached)
+    const breweries = await getAllBreweryData();
+    
+    // Process data into efficient lookup structures
+    return await processBreweryData(breweries);
+  },
+  ['processed-brewery-data'], // Cache key
+  {
+    tags: ['brewery-data'],
+    revalidate: 60, // Revalidate every 60 seconds in development
+  }
+);
 
 /**
  * Get breweries by city with caching

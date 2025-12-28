@@ -22,7 +22,6 @@ import {
  */
 export const getAllBreweryData = unstable_cache(
   async (): Promise<Brewery[]> => {
-    console.log('Fetching brewery data from Supabase (build-time cache)...');
     // getBreweryDataFromSupabase already includes beers, so we don't need to fetch separately
     const breweries = await getBreweryDataFromSupabase();
     return breweries;
@@ -39,8 +38,6 @@ export const getAllBreweryData = unstable_cache(
  * This single processing step powers ALL 500+ pages
  */
 export async function processBreweryData(breweries: Brewery[]): Promise<ProcessedBreweryData> {
-  console.log(`Processing ${breweries.length} breweries into lookup structures...`);
-  
   const startTime = Date.now();
   
   // Initialize Maps for efficient lookups
@@ -125,11 +122,14 @@ export async function processBreweryData(breweries: Brewery[]): Promise<Processe
   const endTime = Date.now();
   const duration = endTime - startTime;
   
-  console.log(`Processed brewery data in ${duration}ms`);
-  console.log(`- Cities: ${cities.length}`);
-  console.log(`- Counties: ${counties.length}`);
-  console.log(`- Types: ${types.length}`);
-  console.log(`- Amenities: ${amenities.length}`);
+  // Only log in development mode
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Processed brewery data in ${duration}ms`);
+    console.log(`- Cities: ${cities.length}`);
+    console.log(`- Counties: ${counties.length}`);
+    console.log(`- Types: ${types.length}`);
+    console.log(`- Amenities: ${amenities.length}`);
+  }
   
   return {
     breweries,
@@ -214,8 +214,6 @@ function calculateSiteStatistics(
  * This is the main function that powers all 500+ pages
  */
 export async function getProcessedBreweryData(): Promise<ProcessedBreweryData> {
-  console.log('Getting processed brewery data...');
-  
   // Get raw brewery data (cached)
   const breweries = await getAllBreweryData();
   

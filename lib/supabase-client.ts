@@ -689,9 +689,20 @@ export async function getBreweryReviews(
       throw error;
     }
 
-    // Deduplicate by ID in case of duplicates in database
+    // Deduplicate by content (brewery_id + review_timestamp + reviewer_name) in case of duplicates in database
     const uniqueReviews = (data || []).reduce((acc: DatabaseReview[], review: DatabaseReview) => {
-      if (!acc.find(r => r.id === review.id)) {
+      const timestamp = review.review_timestamp || 0;
+      const reviewerName = (review.reviewer_name || '').toLowerCase().trim();
+      const duplicateKey = `${review.brewery_id}|${timestamp}|${reviewerName}`;
+      
+      // Check if we already have a review with the same content
+      const existing = acc.find(r => {
+        const rTimestamp = r.review_timestamp || 0;
+        const rName = (r.reviewer_name || '').toLowerCase().trim();
+        return `${r.brewery_id}|${rTimestamp}|${rName}` === duplicateKey;
+      });
+      
+      if (!existing) {
         acc.push(review);
       }
       return acc;

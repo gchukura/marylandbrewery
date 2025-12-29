@@ -41,9 +41,20 @@ export default function BreweryReviews({ breweryId, reviewsPerPage = 5 }: Brewer
         
         if (cancelled) return;
 
-        // Deduplicate reviews by ID in case of duplicates
+        // Deduplicate reviews by content (brewery_id + review_timestamp + reviewer_name) in case of duplicates
         const uniqueReviews = (data.reviews || []).reduce((acc: Review[], review: Review) => {
-          if (!acc.find(r => r.id === review.id)) {
+          const timestamp = review.review_timestamp || 0;
+          const reviewerName = (review.reviewer_name || '').toLowerCase().trim();
+          const duplicateKey = `${timestamp}|${reviewerName}`;
+          
+          // Check if we already have a review with the same content
+          const existing = acc.find(r => {
+            const rTimestamp = r.review_timestamp || 0;
+            const rName = (r.reviewer_name || '').toLowerCase().trim();
+            return `${rTimestamp}|${rName}` === duplicateKey;
+          });
+          
+          if (!existing) {
             acc.push(review);
           }
           return acc;

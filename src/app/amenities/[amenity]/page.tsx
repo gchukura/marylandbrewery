@@ -17,9 +17,10 @@ export async function generateStaticParams() {
   return AMENITY_SLUGS.map((a) => ({ amenity: a }));
 }
 
-export async function generateMetadata({ params }: { params: { amenity: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ amenity: string }> }): Promise<Metadata> {
+  const { amenity } = await params;
   const processed = await getProcessedBreweryData();
-  const label = normalizeAmenityLabel(params.amenity);
+  const label = normalizeAmenityLabel(amenity);
   const key = label.toLowerCase();
   const breweries = processed.breweries.filter(
     (b) => ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(key))
@@ -33,11 +34,11 @@ export async function generateMetadata({ params }: { params: { amenity: string }
   return {
     title,
     description,
-    alternates: { canonical: `/amenities/${params.amenity}` },
+    alternates: { canonical: `/amenities/${amenity}` },
     openGraph: {
       title,
       description,
-      url: `https://www.marylandbrewery.com/amenities/${params.amenity}`,
+      url: `https://www.marylandbrewery.com/amenities/${amenity}`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [
@@ -58,9 +59,10 @@ export async function generateMetadata({ params }: { params: { amenity: string }
   };
 }
 
-export default async function AmenityPage({ params }: { params: { amenity: string } }) {
+export default async function AmenityPage({ params }: { params: Promise<{ amenity: string }> }) {
+  const { amenity } = await params;
   const processed = await getProcessedBreweryData();
-  const label = normalizeAmenityLabel(params.amenity);
+  const label = normalizeAmenityLabel(amenity);
   const key = label.toLowerCase();
 
   // Filter efficiently from preprocessed list
@@ -111,7 +113,7 @@ export default async function AmenityPage({ params }: { params: { amenity: strin
   const breadcrumbs = [
     { name: 'Home', url: '/', isActive: false },
     { name: 'Amenities', url: '/amenities', isActive: false },
-    { name: label, url: `/amenities/${params.amenity}`, isActive: true },
+    { name: label, url: `/amenities/${amenity}`, isActive: true },
   ];
 
   // Content blocks
@@ -121,12 +123,12 @@ export default async function AmenityPage({ params }: { params: { amenity: strin
   // Top cities with this amenity
   const topCities = topCitiesData.slice(0, 5).map(({ city, count }) => ({
     title: `${city} ${label} Breweries`,
-    url: `/city/${slugify(city)}/${params.amenity}`,
+    url: `/city/${slugify(city)}/${amenity}`,
     count,
   }));
 
   // Related amenities
-  const relatedAmenities = AMENITY_SLUGS.filter((a) => a !== params.amenity)
+  const relatedAmenities = AMENITY_SLUGS.filter((a) => a !== amenity)
     .slice(0, 4)
     .map((a) => {
       const relatedBreweries = processed.breweries.filter(

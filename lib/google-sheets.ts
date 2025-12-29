@@ -14,7 +14,7 @@ let authClient: any = null;
  * Initialize Google Sheets API client with proper authentication
  * Handles private key formatting for Vercel environment
  */
-async function initializeSheetsClient() {
+export async function initializeSheetsClient() {
   if (sheetsClient && authClient) {
     return { sheetsClient, authClient };
   }

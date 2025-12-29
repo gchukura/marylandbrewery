@@ -115,7 +115,7 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
   // Related pages
   const allCities = await getAllCities();
   const cityCounts = new Map<string, number>();
-  processed.breweries.forEach(b => {
+  processed.breweries.forEach((b: any) => {
     if (b.city && b.city.toLowerCase() !== cityName.toLowerCase()) {
       const city = b.city.toLowerCase().trim();
       cityCounts.set(city, (cityCounts.get(city) || 0) + 1);
@@ -135,7 +135,7 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
   const majorAmenities = ['dog-friendly', 'outdoor-seating', 'live-music', 'food-trucks', 'full-kitchen', 'parking', 'tours'];
 
   const amenityCounts = new Map<string, number>();
-  breweries.forEach(b => {
+  breweries.forEach((b: any) => {
     const amenities = (b as any).amenities || (b as any).features || [];
     amenities.forEach((a: string) => {
       const key = a.trim().toLowerCase();
@@ -161,7 +161,7 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
 
   // Brewery types in this city
   const typeCounts = new Map<string, number>();
-  breweries.forEach(b => {
+  breweries.forEach((b: any) => {
     const types = Array.isArray(b.type) ? b.type : [b.type];
     types.forEach((type: string) => {
       if (type) {

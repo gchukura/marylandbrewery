@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { MapPin, Phone, Globe, Search, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Phone, Globe, Search, Filter, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
   ssr: false, 
@@ -214,17 +214,34 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1 hover:text-red-600 text-sm">
-                          {brewery.name}
-                        </h3>
-                        <div className="flex items-center text-xs text-gray-600 mb-2">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          <span>{brewery.city}</span>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-gray-900 hover:text-red-600 text-sm">
+                            {brewery.name}
+                          </h3>
+                          {brewery.googleRating && (
+                            <div className="flex items-center gap-0.5">
+                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              <span className="text-xs font-medium text-gray-700">
+                                {brewery.googleRating.toFixed(1)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-600 mb-2">
+                          <div className="flex items-start">
+                            <MapPin className="h-3 w-3 mr-1 mt-0.5 flex-shrink-0" />
+                            <span>
+                              {[brewery.street, brewery.city, brewery.state, brewery.zip]
+                                .filter(Boolean)
+                                .join(', ')}
+                            </span>
+                          </div>
                           {brewery.type && (
-                            <>
-                              <span className="mx-2">•</span>
-                              <span>{Array.isArray(brewery.type) ? brewery.type.join(', ') : brewery.type}</span>
-                            </>
+                            <div className="mt-1">
+                              <span className="text-gray-500">
+                                {Array.isArray(brewery.type) ? brewery.type.join(', ') : brewery.type}
+                              </span>
+                            </div>
                           )}
                         </div>
                         {(brewery.amenities || brewery.features) && (

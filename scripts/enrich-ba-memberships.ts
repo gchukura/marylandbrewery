@@ -47,6 +47,10 @@ const BASE_URL = "https://www.brewersassociation.org/directories/breweries/?loca
 const MEMBER_TOKEN = "ba_member";
 const INDEP_TOKEN = "ba_independent_seal";
 
+// Canonical membership keys used in the breweries.memberships JSONB
+const MEMBERSHIP_BA = 'brewers_association';
+const MEMBERSHIP_INDEPENDENT = 'independent_craft_brewers_certified';
+
 /**
  * Fuzzy match brewery names (handles variations, case-insensitive)
  */
@@ -336,38 +340,44 @@ async function scrapeBAMemberships(): Promise<Map<string, { name: string; ba_mem
 
 /**
  * Update memberships field with BA data
+ * - Uses canonical keys:
+ *   - brewers_association
+ *   - independent_craft_brewers_certified
+ * - Does NOT set description/benefits
  */
 function updateMemberships(
-  currentMemberships: Array<{ name: string; description?: string; benefits?: string[]; price?: number; duration?: string }>,
+  currentMemberships: Array<{ name: string; price?: number; duration?: string }>,
   baMember: boolean,
   independentSeal: boolean
-): Array<{ name: string; description?: string; benefits?: string[]; price?: number; duration?: string }> {
+): Array<{ name: string; price?: number; duration?: string }> {
   const updated = [...(currentMemberships || [])];
-  
-  // Remove existing BA memberships to avoid duplicates
-  const filtered = updated.filter(m => 
-    !m.name.toLowerCase().includes('brewers association') && 
-    !m.name.toLowerCase().includes('independent craft')
-  );
-  
+
+  // Remove existing BA-related memberships to avoid duplicates
+  const filtered = updated.filter((m) => {
+    const n = m.name.toLowerCase();
+    return !(
+      n.includes('brewers_association') ||
+      n.includes('brewers association') ||
+      n.includes('independent_craft_brewers_certified') ||
+      n.includes('independent craft brewer') ||
+      n.includes('independent craft')
+    );
+  });
+
   // Add BA Member if applicable
   if (baMember) {
     filtered.push({
-      name: 'Brewers Association Member',
-      description: 'Member of the Brewers Association',
-      benefits: ['Access to BA resources and networking'],
+      name: MEMBERSHIP_BA,
     });
   }
-  
+
   // Add Independent Seal if applicable
   if (independentSeal) {
     filtered.push({
-      name: 'Independent Craft Brewer Seal',
-      description: 'Certified Independent Craft Brewer by the Brewers Association',
-      benefits: ['Independent craft brewery certification'],
+      name: MEMBERSHIP_INDEPENDENT,
     });
   }
-  
+
   return filtered;
 }
 

@@ -230,11 +230,16 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                         <div className="text-xs text-gray-600 mb-2">
                           <div className="flex items-start">
                             <MapPin className="h-3 w-3 mr-1 mt-0.5 flex-shrink-0" />
-                            <span>
-                              {[brewery.street, brewery.city, brewery.state, brewery.zip]
-                                .filter(Boolean)
-                                .join(', ')}
-                            </span>
+                            <div>
+                              {brewery.street && (
+                                <div>{brewery.street}</div>
+                              )}
+                              <div>
+                                {[brewery.city, brewery.state, brewery.zip]
+                                  .filter(Boolean)
+                                  .join(', ')}
+                              </div>
+                            </div>
                           </div>
                           {brewery.type && (
                             <div className="mt-1">

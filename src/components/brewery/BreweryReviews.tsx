@@ -96,6 +96,21 @@ export default function BreweryReviews({ breweryId, reviewsPerPage = 5 }: Brewer
     return 'Unknown date';
   };
 
+  const formatReviewerName = (name: string | null): string => {
+    if (!name) return 'Anonymous';
+    
+    const trimmed = name.trim();
+    const parts = trimmed.split(/\s+/);
+    
+    if (parts.length === 0) return 'Anonymous';
+    if (parts.length === 1) return parts[0];
+    
+    // First name + last initial
+    const firstName = parts[0];
+    const lastInitial = parts[parts.length - 1][0].toUpperCase();
+    return `${firstName} ${lastInitial}.`;
+  };
+
   const toggleReview = (reviewId: string) => {
     setExpandedReviews((prev) => {
       const newSet = new Set(prev);
@@ -143,49 +158,32 @@ export default function BreweryReviews({ breweryId, reviewsPerPage = 5 }: Brewer
       <div className="space-y-6">
         {reviews.map((review) => (
           <div key={review.id} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
-            <div className="flex items-start gap-4">
-              {review.profile_photo_url ? (
-                <img
-                  src={review.profile_photo_url}
-                  alt={review.reviewer_name || 'Reviewer'}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500 text-sm font-medium">
-                    {(review.reviewer_name || 'A')[0].toUpperCase()}
-                  </span>
-                </div>
-              )}
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-semibold text-black">
-                    {review.reviewer_name || 'Anonymous'}
-                  </h3>
-                  {review.rating && renderStars(review.rating)}
-                </div>
-                <div className="text-sm text-gray-500 mb-3">
-                  {formatDate(review.review_date, review.review_timestamp)}
-                </div>
-                {review.review_text && (
-                  <div>
-                    <p className="text-gray-700 leading-relaxed">
-                      {expandedReviews.has(review.id) || !shouldTruncate(review.review_text)
-                        ? review.review_text
-                        : getPreviewText(review.review_text)}
-                    </p>
-                    {shouldTruncate(review.review_text) && (
-                      <button
-                        onClick={() => toggleReview(review.id)}
-                        className="mt-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
-                      >
-                        {expandedReviews.has(review.id) ? 'Show less' : 'Read more'}
-                      </button>
-                    )}
-                  </div>
+            <div className="flex items-center gap-3 mb-2">
+              <h3 className="font-semibold text-black">
+                {formatReviewerName(review.reviewer_name)}
+              </h3>
+              {review.rating && renderStars(review.rating)}
+            </div>
+            <div className="text-sm text-gray-500 mb-3">
+              {formatDate(review.review_date, review.review_timestamp)}
+            </div>
+            {review.review_text && (
+              <div>
+                <p className="text-gray-700 leading-relaxed">
+                  {expandedReviews.has(review.id) || !shouldTruncate(review.review_text)
+                    ? review.review_text
+                    : getPreviewText(review.review_text)}
+                </p>
+                {shouldTruncate(review.review_text) && (
+                  <button
+                    onClick={() => toggleReview(review.id)}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    {expandedReviews.has(review.id) ? 'Show less' : 'Read more'}
+                  </button>
                 )}
               </div>
-            </div>
+            )}
           </div>
         ))}
       </div>

@@ -667,10 +667,10 @@ export async function getBreweryReviews(
   offset: number = 0
 ): Promise<{ reviews: DatabaseReview[]; total: number }> {
   try {
-    // Get total count
+    // Get total count (deduplicated by id)
     const { count, error: countError } = await supabase
       .from('reviews')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('brewery_id', breweryId);
 
     if (countError) {
@@ -689,8 +689,16 @@ export async function getBreweryReviews(
       throw error;
     }
 
+    // Deduplicate by ID in case of duplicates in database
+    const uniqueReviews = (data || []).reduce((acc: DatabaseReview[], review: DatabaseReview) => {
+      if (!acc.find(r => r.id === review.id)) {
+        acc.push(review);
+      }
+      return acc;
+    }, []);
+
     return {
-      reviews: (data || []) as DatabaseReview[],
+      reviews: uniqueReviews,
       total: count || 0,
     };
   } catch (error) {

@@ -20,29 +20,53 @@ interface BreweryReviewsProps {
   reviewsPerPage?: number;
 }
 
+const MAX_PREVIEW_LENGTH = 250; // Character limit for preview
+
 export default function BreweryReviews({ breweryId, reviewsPerPage = 5 }: BreweryReviewsProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [totalReviews, setTotalReviews] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [expandedReviews, setExpandedReviews] = useState<Set<string>>(new Set());
 
   useEffect(() => {
+    let cancelled = false;
+
     async function fetchReviews() {
       setLoading(true);
       try {
         const offset = (currentPage - 1) * reviewsPerPage;
         const response = await fetch(`/api/reviews?breweryId=${breweryId}&limit=${reviewsPerPage}&offset=${offset}`);
         const data = await response.json();
-        setReviews(data.reviews || []);
+        
+        if (cancelled) return;
+
+        // Deduplicate reviews by ID in case of duplicates
+        const uniqueReviews = (data.reviews || []).reduce((acc: Review[], review: Review) => {
+          if (!acc.find(r => r.id === review.id)) {
+            acc.push(review);
+          }
+          return acc;
+        }, []);
+
+        setReviews(uniqueReviews);
         setTotalReviews(data.total || 0);
       } catch (error) {
-        console.error('Failed to fetch reviews:', error);
+        if (!cancelled) {
+          console.error('Failed to fetch reviews:', error);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     fetchReviews();
+
+    return () => {
+      cancelled = true;
+    };
   }, [breweryId, currentPage, reviewsPerPage]);
 
   const totalPages = Math.ceil(totalReviews / reviewsPerPage);
@@ -70,6 +94,31 @@ export default function BreweryReviews({ breweryId, reviewsPerPage = 5 }: Brewer
       return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     }
     return 'Unknown date';
+  };
+
+  const toggleReview = (reviewId: string) => {
+    setExpandedReviews((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(reviewId)) {
+        newSet.delete(reviewId);
+      } else {
+        newSet.add(reviewId);
+      }
+      return newSet;
+    });
+  };
+
+  const shouldTruncate = (text: string | null): boolean => {
+    return text ? text.length > MAX_PREVIEW_LENGTH : false;
+  };
+
+  const getPreviewText = (text: string | null): string => {
+    if (!text) return '';
+    if (text.length <= MAX_PREVIEW_LENGTH) return text;
+    // Find the last space before the limit to avoid cutting words
+    const truncated = text.substring(0, MAX_PREVIEW_LENGTH);
+    const lastSpace = truncated.lastIndexOf(' ');
+    return lastSpace > 0 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
   };
 
   if (loading && currentPage === 1) {
@@ -119,7 +168,21 @@ export default function BreweryReviews({ breweryId, reviewsPerPage = 5 }: Brewer
                   {formatDate(review.review_date, review.review_timestamp)}
                 </div>
                 {review.review_text && (
-                  <p className="text-gray-700 leading-relaxed">{review.review_text}</p>
+                  <div>
+                    <p className="text-gray-700 leading-relaxed">
+                      {expandedReviews.has(review.id) || !shouldTruncate(review.review_text)
+                        ? review.review_text
+                        : getPreviewText(review.review_text)}
+                    </p>
+                    {shouldTruncate(review.review_text) && (
+                      <button
+                        onClick={() => toggleReview(review.id)}
+                        className="mt-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        {expandedReviews.has(review.id) ? 'Show less' : 'Read more'}
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

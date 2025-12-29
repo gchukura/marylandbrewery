@@ -47,7 +47,9 @@ export default async function CitiesIndexPage() {
   const items = cities.map((city) => ({
     name: city,
     slug: slugify(city),
-    count: processed.byCity.get(city.toLowerCase().trim())?.length || 0,
+    count: (processed.byCity instanceof Map 
+      ? processed.byCity.get(city.toLowerCase().trim())
+      : (processed.byCity as any)?.[city.toLowerCase().trim()])?.length || 0,
     url: `/city/${slugify(city)}/breweries`,
   })).filter(item => item.count > 0);
 

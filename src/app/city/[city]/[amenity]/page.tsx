@@ -36,7 +36,9 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   const amenityKey = amenityLabel.toLowerCase();
 
   // Optimize: use pre-indexed city data if available
-  const cityBreweries = processed.byCity.get(cityKey) || [];
+  const cityBreweries = (processed.byCity instanceof Map 
+    ? processed.byCity.get(cityKey)
+    : (processed.byCity as any)?.[cityKey]) || [];
   const breweries = cityBreweries.filter(
     (b) => ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey))
   );
@@ -120,7 +122,9 @@ export default async function CityAmenityPage({ params }: { params: Promise<{ ci
   ];
 
   // Related pages - optimized for performance
-  const cityBreweries = processed.byCity.get(cityName.toLowerCase()) || [];
+  const cityBreweries = (processed.byCity instanceof Map 
+    ? processed.byCity.get(cityName.toLowerCase())
+    : (processed.byCity as any)?.[cityName.toLowerCase()]) || [];
   const cityBreweryCount = cityBreweries.length;
   
   // Pre-filter breweries with this amenity for efficiency

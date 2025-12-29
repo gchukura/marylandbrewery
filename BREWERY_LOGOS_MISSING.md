@@ -1,6 +1,6 @@
 # Missing Brewery Logos Report
 
-Generated: 2025-12-28T20:50:47.870Z
+Generated: 2025-12-29T07:40:39.568Z
 
 This report lists breweries that need manual logo review.
 
@@ -17,12 +17,12 @@ These breweries did not have logos found on the Maryland Beer website or their o
 | Johanssons Dining House | 65 | www.johanssonsdininghouse.com | Not found on Maryland Beer website or brewery website |
 | Landmade Brewing | 69 | www.landmadebeer.com | Not found on Maryland Beer website or brewery website |
 | Lillard and Daughters Farms | 70 | www.facebook.com/ladfarmsbrewing/ | Not found on Maryland Beer website or brewery website |
-| LindGreen | 71 | N/A | Not found on Maryland Beer website (no website URL in Google Sheets) |
+| LindGreen | 71 | N/A | Not found on Maryland Beer website (no website URL in Supabase) |
 | Mystique Barrel Brewing and Lager House | 87 | www.mystiquebarrelbrewing.com | Not found on Maryland Beer website or brewery website |
 | Phoenix Upper Main | 95 | www.ellicottmillsbrewing.com | Not found on Maryland Beer website or brewery website |
 | Rock Bottom Brewery - Bethesda | 108 | www.rockbottom.com/locations/bethesda/ | Not found on Maryland Beer website or brewery website |
 | Seawolf Brewery | 116 | www.seawolfbrewery.com | Not found on Maryland Beer website or brewery website |
-| Stillwater Artisanal Ales | 124 | N/A | Not found on Maryland Beer website (no website URL in Google Sheets) |
+| Stillwater Artisanal Ales | 124 | N/A | Not found on Maryland Beer website (no website URL in Supabase) |
 | Suspended Brewing Company | 128 | www.suspendedbrewing.com | Not found on Maryland Beer website or brewery website |
 | Wet City Brewing | 141 | www.wetcitybrewing.com | Not found on Maryland Beer website or brewery website |
 | White Marsh Brewing Co/Red Brick Station | 142 | www.redbrickstation.com | Not found on Maryland Beer website or brewery website |
@@ -41,8 +41,8 @@ These breweries encountered errors during logo download.
 1. Review the breweries listed above
 2. Manually find logos for these breweries
 3. Download logos and save to `public/logos/` directory
-4. Update Google Sheets with the logo path (e.g., `/logos/brewery-name.png`)
-5. Or add the logo URL directly to the `logo` column in Google Sheets
+4. Update Supabase with the logo path (e.g., `/logos/brewery-name.png`)
+5. Or add the logo URL directly to the `logo` column in Supabase
 
 ## Tips
 

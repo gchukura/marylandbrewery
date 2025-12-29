@@ -2,19 +2,18 @@
  * Fetch Google Reviews Script
  * 
  * This script:
- * 1. Fetches all breweries from Google Sheets
+ * 1. Fetches all breweries from Supabase
  * 2. Finds/stores Place IDs for each brewery (if not already stored)
  * 3. Fetches reviews via Place Details API
- * 4. Writes reviews to "Reviews" sheet
- * 5. Updates summary columns in main sheet (google_rating, google_rating_count, google_reviews_last_updated)
+ * 4. Writes reviews to Supabase reviews table
+ * 5. Updates summary columns in breweries table (google_rating, google_rating_count, google_reviews_last_updated)
  * 
  * Usage:
  *   npx tsx scripts/fetch-google-reviews.ts
  * 
  * Make sure to set environment variables in .env.local:
- *   - GOOGLE_SHEET_ID
- *   - GOOGLE_SERVICE_ACCOUNT_EMAIL
- *   - GOOGLE_PRIVATE_KEY
+ *   - NEXT_PUBLIC_SUPABASE_URL
+ *   - SUPABASE_SERVICE_ROLE_KEY
  *   - NEXT_PUBLIC_GOOGLE_MAPS_API_KEY (or GOOGLE_MAPS_API_KEY)
  * 
  * Required APIs in Google Cloud Console:
@@ -30,8 +29,8 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
-import { getBreweryDataFromSheets } from '../lib/google-sheets';
-import { writeReviewsToSheets, updateReviewSummary, storePlaceId } from '../lib/google-sheets';
+import { getBreweryDataFromSupabase } from '../lib/supabase-client';
+import { writeReviewsToSupabase, updateReviewSummaryInSupabase, storePlaceIdInSupabase } from '../lib/supabase-client';
 
 const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
 if (!apiKey) {
@@ -231,15 +230,15 @@ function sleep(ms: number): Promise<void> {
  */
 async function fetchGoogleReviews() {
   console.log('🚀 Starting Google Reviews fetch...\n');
-  console.log('📋 Using Places API to fetch reviews and store in Google Sheets\n');
+  console.log('📋 Using Places API to fetch reviews and store in Supabase\n');
 
   try {
-    // Step 1: Fetch all breweries from Google Sheets
-    console.log('📥 Step 1: Fetching breweries from Google Sheets...');
-    const breweries = await getBreweryDataFromSheets();
+    // Step 1: Fetch all breweries from Supabase
+    console.log('📥 Step 1: Fetching breweries from Supabase...');
+    const breweries = await getBreweryDataFromSupabase();
     
     if (!breweries || breweries.length === 0) {
-      console.log('   ℹ️  No breweries found in Google Sheets');
+      console.log('   ℹ️  No breweries found in Supabase');
       return;
     }
     
@@ -273,12 +272,9 @@ async function fetchGoogleReviews() {
       
       try {
         // Check if reviews were recently updated (within last week)
-        const rawData = brewery.rawData || {};
-        const lastUpdatedStr = rawData['google_reviews_last_updated'] || rawData['Google Reviews Last Updated'];
-        
-        if (lastUpdatedStr) {
+        if (brewery.googleReviewsLastUpdated) {
           try {
-            const lastUpdated = new Date(lastUpdatedStr.toString());
+            const lastUpdated = new Date(brewery.googleReviewsLastUpdated);
             if (!isNaN(lastUpdated.getTime()) && lastUpdated > oneWeekAgo) {
               const daysSinceUpdate = Math.floor((Date.now() - lastUpdated.getTime()) / (1000 * 60 * 60 * 24));
               console.log(`   ⏭️  Skipping - reviews updated ${daysSinceUpdate} day(s) ago (less than 7 days)`);
@@ -293,14 +289,11 @@ async function fetchGoogleReviews() {
           }
         }
         
-        // Check if Place ID already exists in rawData (from Google Sheets)
+        // Check if Place ID already exists
         let placeId: string | null = null;
         
-        // Try different variations of the place_id column name
-        const existingPlaceId = rawData['place_id'] || rawData['Place ID'] || rawData['place_id'];
-        
-        if (existingPlaceId && existingPlaceId.toString().trim() !== '' && existingPlaceId.toString().trim() !== 'undefined') {
-          placeId = existingPlaceId.toString().trim();
+        if (brewery.placeId && brewery.placeId.trim() !== '') {
+          placeId = brewery.placeId.trim();
           console.log(`   ✓ Using existing Place ID: ${placeId}`);
         } else {
           // Find Place ID using Text Search
@@ -360,11 +353,11 @@ async function fetchGoogleReviews() {
           console.log(`   ✓ Found Place ID: ${placeId}`);
           placeIdsFound++;
           
-          // Store Place ID in Google Sheets
+          // Store Place ID in Supabase
           try {
-            await storePlaceId(brewery.id, placeId);
+            await storePlaceIdInSupabase(brewery.id, placeId);
             placeIdsStored++;
-            console.log(`   ✓ Stored Place ID in Google Sheets`);
+            console.log(`   ✓ Stored Place ID in Supabase`);
           } catch (error) {
             console.warn(`   ⚠️  Could not store Place ID: ${error instanceof Error ? error.message : 'Unknown error'}`);
             // Continue anyway - we can still fetch reviews
@@ -414,7 +407,7 @@ async function fetchGoogleReviews() {
           // Still update summary with rating/count if available
           if (rating !== undefined || ratingCount > 0) {
             try {
-              await updateReviewSummary(brewery.id, brewery.name, rating || 0, ratingCount);
+              await updateReviewSummaryInSupabase(brewery.id, rating || 0, ratingCount);
               summariesUpdated++;
               console.log(`   ✓ Updated summary (Rating: ${rating || 'N/A'}, Count: ${ratingCount})`);
             } catch (error) {
@@ -429,21 +422,21 @@ async function fetchGoogleReviews() {
         reviewsFetched += reviews.length;
         console.log(`   ✓ Fetched ${reviews.length} reviews (Rating: ${rating || 'N/A'}, Total: ${ratingCount})`);
         
-        // Write reviews to Reviews sheet
+        // Write reviews to Supabase
         try {
-          await writeReviewsToSheets(brewery.id, brewery.name, reviews);
+          await writeReviewsToSupabase(brewery.id, brewery.name, reviews);
           reviewsWritten += reviews.length;
-          console.log(`   ✓ Wrote ${reviews.length} reviews to Reviews sheet`);
+          console.log(`   ✓ Wrote ${reviews.length} reviews to Supabase`);
         } catch (error) {
           console.error(`   ✗ Error writing reviews: ${error instanceof Error ? error.message : 'Unknown error'}`);
           errorCount++;
         }
         
-        // Update summary columns in main sheet
+        // Update summary in breweries table
         try {
-          await updateReviewSummary(brewery.id, brewery.name, rating || 0, ratingCount);
+          await updateReviewSummaryInSupabase(brewery.id, rating || 0, ratingCount);
           summariesUpdated++;
-          console.log(`   ✓ Updated summary in main sheet`);
+          console.log(`   ✓ Updated summary in Supabase`);
         } catch (error) {
           console.warn(`   ⚠️  Could not update summary: ${error instanceof Error ? error.message : 'Unknown error'}`);
           errorCount++;

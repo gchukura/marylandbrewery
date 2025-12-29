@@ -145,6 +145,12 @@ export interface Brewery {
   openingDate?: string;
   lastUpdated: string;
   
+  // Google Reviews summary
+  googleRating?: number;
+  googleRatingCount?: number;
+  googleReviewsLastUpdated?: string;
+  placeId?: string;
+  
   // Raw data for debugging
   rawData?: Record<string, any>;
 }

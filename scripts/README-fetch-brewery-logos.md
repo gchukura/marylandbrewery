@@ -4,17 +4,16 @@ This script fetches brewery logos from the Maryland Beer website and downloads t
 
 ## What It Does
 
-1. **Fetches breweries** from Google Sheets that don't have logos
+1. **Fetches breweries** from Supabase that don't have logos
 2. **Scrapes logos** from `marylandbeer.org/brewing-companies/current-members/`
 3. **Downloads logos** to `public/logos/` directory
-4. **Updates Google Sheets** with local logo paths (e.g., `/logos/brewery-name.png`)
+4. **Updates Supabase** with local logo paths (e.g., `/logos/brewery-name.png`)
 
 ## Prerequisites
 
 - Environment variables set in `.env.local`:
-  - `GOOGLE_SHEET_ID`
-  - `GOOGLE_SERVICE_ACCOUNT_EMAIL`
-  - `GOOGLE_PRIVATE_KEY`
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `SUPABASE_SERVICE_ROLE_KEY`
 
 ## Usage
 
@@ -37,7 +36,7 @@ The script uses multiple strategies to match brewery names to logos:
 - Logos are saved to: `public/logos/`
 - Filenames are sanitized from brewery names (e.g., "1623 Brewing Company" → `1623-brewing-company.png`)
 - File extensions are determined from the URL or content type (png, jpg, svg)
-- Google Sheets is updated with paths like `/logos/brewery-name.png`
+- Supabase is updated with paths like `/logos/brewery-name.png`
 
 ## Output
 
@@ -54,13 +53,13 @@ The script will show:
 The page structure may have changed. You can:
 1. Inspect the page source manually
 2. Update the HTML parsing regex patterns in the script
-3. Or manually add logos to Google Sheets
+3. Or manually add logos to Supabase
 
 ### "Logo not found"
 
 The brewery might not be listed on the Maryland Beer website, or the name doesn't match. You can:
 1. Check the website manually
-2. Add the logo URL directly to Google Sheets
+2. Add the logo URL directly to Supabase
 3. Or download the logo manually and add it to `public/logos/`
 
 ### "Failed to download"
@@ -77,4 +76,4 @@ Check the error message for details.
 - Logos are downloaded with a 500ms delay between requests (to be respectful)
 - If a logo already exists in `public/logos/`, it will be overwritten
 - The script creates the `public/logos/` directory if it doesn't exist
-
+- External logo URLs are also downloaded and converted to local paths

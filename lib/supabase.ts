@@ -145,6 +145,13 @@ export interface DatabaseBrewery {
   
   // Metadata
   opened_date?: string;
+  
+  // Google Reviews summary
+  google_rating?: number;
+  google_rating_count?: number;
+  google_reviews_last_updated?: string;
+  place_id?: string;
+  
   created_at?: string;
   updated_at?: string;
 }

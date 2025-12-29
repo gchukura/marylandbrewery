@@ -36,11 +36,11 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   const amenityKey = amenityLabel.toLowerCase();
 
   // Optimize: use pre-indexed city data if available
-  const cityBreweries = (processed.byCity instanceof Map 
+  const cityBreweries: any[] = (processed.byCity instanceof Map 
     ? processed.byCity.get(cityKey)
     : (processed.byCity as any)?.[cityKey]) || [];
   const breweries = cityBreweries.filter(
-    (b) => ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey))
+    (b: any) => ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey))
   );
 
   const title = `${amenityLabel} in ${cityName}, MD | ${breweries.length}`;
@@ -85,7 +85,7 @@ export default async function CityAmenityPage({ params }: { params: Promise<{ ci
   const amenityKey = amenityLabel.toLowerCase();
 
   const breweries = processed.breweries.filter(
-    (b) => b.city.toLowerCase() === cityName.toLowerCase() &&
+    (b: any) => b.city.toLowerCase() === cityName.toLowerCase() &&
       (((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey)))
   );
 
@@ -122,13 +122,13 @@ export default async function CityAmenityPage({ params }: { params: Promise<{ ci
   ];
 
   // Related pages - optimized for performance
-  const cityBreweries = (processed.byCity instanceof Map 
+  const cityBreweriesForCount: any[] = (processed.byCity instanceof Map 
     ? processed.byCity.get(cityName.toLowerCase())
     : (processed.byCity as any)?.[cityName.toLowerCase()]) || [];
-  const cityBreweryCount = cityBreweries.length;
+  const cityBreweryCount = cityBreweriesForCount.length;
   
   // Pre-filter breweries with this amenity for efficiency
-  const amenityBreweries = processed.breweries.filter((b) => 
+  const amenityBreweries = processed.breweries.filter((b: any) => 
     ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey))
   );
   const amenityCount = amenityBreweries.length;

@@ -12,7 +12,7 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "format": "prettier --write .",
-    "postinstall": "npm rebuild lightningcss --update-binary || true"
+    "postinstall": "node scripts/ensure-lightningcss-binary.js"
   },
   "dependencies": {
     "@googlemaps/markerclusterer": "^2.6.2",

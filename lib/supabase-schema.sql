@@ -148,3 +148,37 @@ CREATE POLICY "Public can insert newsletter subscribers" ON newsletter_subscribe
 CREATE POLICY "Service role can read newsletter subscribers" ON newsletter_subscribers
   FOR SELECT USING (auth.role() = 'service_role');
 
+-- Reviews table (for Google Reviews)
+CREATE TABLE IF NOT EXISTS reviews (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  brewery_id TEXT NOT NULL REFERENCES breweries(id) ON DELETE CASCADE,
+  brewery_name TEXT NOT NULL,
+  reviewer_name TEXT,
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+  review_text TEXT,
+  review_date TEXT, -- Relative time description (e.g., "2 months ago")
+  review_timestamp BIGINT, -- Unix timestamp
+  reviewer_url TEXT,
+  profile_photo_url TEXT,
+  language TEXT DEFAULT 'en',
+  fetched_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create indexes for reviews
+CREATE INDEX IF NOT EXISTS idx_reviews_brewery_id ON reviews(brewery_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews(rating);
+CREATE INDEX IF NOT EXISTS idx_reviews_timestamp ON reviews(review_timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_reviews_fetched_at ON reviews(fetched_at DESC);
+
+-- RLS for reviews
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+
+-- Policies: Allow public read access to reviews
+CREATE POLICY "Public can read reviews" ON reviews
+  FOR SELECT USING (true);
+
+-- Policies: Only service role can insert/update/delete
+CREATE POLICY "Service role can manage reviews" ON reviews
+  FOR ALL USING (auth.role() = 'service_role');
+

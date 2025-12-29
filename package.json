@@ -11,7 +11,8 @@
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "postinstall": "npm rebuild lightningcss --update-binary || true"
   },
   "dependencies": {
     "@googlemaps/markerclusterer": "^2.6.2",

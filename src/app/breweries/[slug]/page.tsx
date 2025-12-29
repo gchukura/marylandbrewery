@@ -105,13 +105,13 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
   ];
 
   // Get same city breweries for related links
-  const sameCityBreweries = (processed.byCity instanceof Map 
+  const sameCityBreweries: any[] = (processed.byCity instanceof Map 
     ? processed.byCity.get(brewery.city.toLowerCase())
     : (processed.byCity as any)?.[brewery.city.toLowerCase()]) || [];
   const sameCityOther = sameCityBreweries
-    .filter(b => b.id !== brewery.id)
+    .filter((b: any) => b.id !== brewery.id)
     .slice(0, 4)
-    .map(b => ({
+    .map((b: any) => ({
       title: b.name,
       url: `/breweries/${(b as any).slug || b.id}`,
       type: 'brewery' as const,

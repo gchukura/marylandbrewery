@@ -36,6 +36,7 @@ import {
 import { Brewery, Beer as BeerType, Article, Membership } from '@/types/brewery';
 import { BreadcrumbItem, RelatedPage } from '@/types/seo';
 import GoogleMap from '../maps/GoogleMap';
+import BreweryReviews from '../brewery/BreweryReviews';
 
 // Social Media Icons - SVG data URLs for platform logos
 const SOCIAL_MEDIA_ICONS = {
@@ -705,6 +706,11 @@ export default function SimpleBreweryPageTemplate({
           </div>
 
         </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <BreweryReviews breweryId={brewery.id} reviewsPerPage={5} />
       </div>
     </>
   );

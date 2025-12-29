@@ -639,3 +639,63 @@ export async function updateBreweryLogoInSupabase(
   }
 }
 
+/**
+ * Review interface matching Supabase schema
+ */
+export interface DatabaseReview {
+  id: string;
+  brewery_id: string;
+  brewery_name: string;
+  reviewer_name: string | null;
+  rating: number | null;
+  review_text: string | null;
+  review_date: string | null;
+  review_timestamp: number | null;
+  reviewer_url: string | null;
+  profile_photo_url: string | null;
+  language: string;
+  fetched_at: string;
+  created_at: string;
+}
+
+/**
+ * Fetch reviews for a brewery from Supabase
+ */
+export async function getBreweryReviews(
+  breweryId: string,
+  limit: number = 10,
+  offset: number = 0
+): Promise<{ reviews: DatabaseReview[]; total: number }> {
+  try {
+    // Get total count
+    const { count, error: countError } = await supabase
+      .from('reviews')
+      .select('*', { count: 'exact', head: true })
+      .eq('brewery_id', breweryId);
+
+    if (countError) {
+      throw countError;
+    }
+
+    // Get reviews with pagination
+    const { data, error } = await supabase
+      .from('reviews')
+      .select('*')
+      .eq('brewery_id', breweryId)
+      .order('review_timestamp', { ascending: false, nullsFirst: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      throw error;
+    }
+
+    return {
+      reviews: (data || []) as DatabaseReview[],
+      total: count || 0,
+    };
+  } catch (error) {
+    console.error('Failed to fetch reviews from Supabase:', error);
+    return { reviews: [], total: 0 };
+  }
+}
+

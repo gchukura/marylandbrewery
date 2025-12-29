@@ -4,7 +4,7 @@
  * This script:
  * 1. Fetches brewery logos from marylandbeer.org/brewing-companies/current-members/
  * 2. Downloads logos to public/logos/ directory
- * 3. Updates Google Sheets with local logo paths
+ * 3. Updates Supabase with local logo paths
  * 
  * Usage:
  *   npx tsx scripts/fetch-brewery-logos.ts
@@ -14,7 +14,8 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
-import { getBreweryDataFromSheets, updateBreweryLogo } from '../lib/google-sheets';
+import { getBreweryDataFromSupabase } from '../lib/supabase-client';
+import { updateBreweryLogoInSupabase } from '../lib/supabase-client';
 
 // Load environment variables
 config({ path: resolve(process.cwd(), '.env.local') });
@@ -354,8 +355,8 @@ function generateMissingLogosReport(
   content += `1. Review the breweries listed above\n`;
   content += `2. Manually find logos for these breweries\n`;
   content += `3. Download logos and save to \`public/logos/\` directory\n`;
-  content += `4. Update Google Sheets with the logo path (e.g., \`/logos/brewery-name.png\`)\n`;
-  content += `5. Or add the logo URL directly to the \`logo\` column in Google Sheets\n\n`;
+  content += `4. Update Supabase with the logo path (e.g., \`/logos/brewery-name.png\`)\n`;
+  content += `5. Or add the logo URL directly to the \`logo\` column in Supabase\n\n`;
   content += `## Tips\n\n`;
   content += `- Check brewery websites manually\n`;
   content += `- Look for logos on social media pages\n`;
@@ -378,9 +379,9 @@ async function fetchBreweryLogos() {
       console.log(`✓ Created directory: ${LOGOS_DIR}\n`);
     }
     
-    // Step 1: Fetch breweries from Google Sheets
-    console.log('📥 Step 1: Fetching breweries from Google Sheets...');
-    const breweries = await getBreweryDataFromSheets();
+    // Step 1: Fetch breweries from Supabase
+    console.log('📥 Step 1: Fetching breweries from Supabase...');
+    const breweries = await getBreweryDataFromSupabase();
     console.log(`   ✓ Found ${breweries.length} breweries\n`);
     
     // Filter breweries that need logos:
@@ -440,10 +441,10 @@ async function fetchBreweryLogos() {
         const logoPath = await downloadLogo(logoUrl, brewery.name);
         downloaded++;
         
-        // Update Google Sheets
-        await updateBreweryLogo(brewery.id, logoPath);
+        // Update Supabase
+        await updateBreweryLogoInSupabase(brewery.id, logoPath);
         updated++;
-        console.log(`   ✓ Downloaded and updated Google Sheets with: ${logoPath}\n`);
+        console.log(`   ✓ Downloaded and updated Supabase with: ${logoPath}\n`);
         
         // Small delay to be respectful
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -534,7 +535,7 @@ async function fetchBreweryLogos() {
           website: brewery.website,
           reason: brewery.website 
             ? 'Not found on Maryland Beer website or brewery website' 
-            : 'Not found on Maryland Beer website (no website URL in Google Sheets)'
+            : 'Not found on Maryland Beer website (no website URL in Supabase)'
         });
         console.log('');
         continue;
@@ -545,10 +546,10 @@ async function fetchBreweryLogos() {
         const logoPath = await downloadLogo(logoUrl, brewery.name);
         downloaded++;
         
-        // Update Google Sheets
-        await updateBreweryLogo(brewery.id, logoPath);
+        // Update Supabase
+        await updateBreweryLogoInSupabase(brewery.id, logoPath);
         updated++;
-        console.log(`   ✓ Updated Google Sheets with: ${logoPath}\n`);
+        console.log(`   ✓ Updated Supabase with: ${logoPath}\n`);
         
         // Small delay to be respectful
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -567,7 +568,7 @@ async function fetchBreweryLogos() {
     
     console.log(`\n📊 Summary:`);
     console.log(`   ✓ Logos downloaded: ${downloaded}`);
-    console.log(`   ✓ Google Sheets updated: ${updated}`);
+    console.log(`   ✓ Supabase updated: ${updated}`);
     console.log(`   ⚠️  Logos not found: ${notFound}`);
     console.log(`   ✗ Errors: ${errors}\n`);
     

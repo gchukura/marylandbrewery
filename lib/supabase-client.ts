@@ -59,6 +59,12 @@ function dbBreweryToBrewery(dbBrewery: DatabaseBrewery, beers: Beer[] = []): Bre
     openedDate: dbBrewery.opened_date,
     lastUpdated: dbBrewery.updated_at || new Date().toISOString(),
     
+    // Google Reviews summary
+    googleRating: dbBrewery.google_rating,
+    googleRatingCount: dbBrewery.google_rating_count,
+    googleReviewsLastUpdated: dbBrewery.google_reviews_last_updated,
+    placeId: dbBrewery.place_id,
+    
     // Beer data
     beers: beers.length > 0 ? beers : undefined,
   };
@@ -114,6 +120,12 @@ function breweryToDbBrewery(brewery: Brewery): DatabaseBrewery {
     
     // Metadata
     opened_date: brewery.openedDate,
+    
+    // Google Reviews summary
+    google_rating: brewery.googleRating,
+    google_rating_count: brewery.googleRatingCount,
+    google_reviews_last_updated: brewery.googleReviewsLastUpdated,
+    place_id: brewery.placeId,
   };
 }
 
@@ -487,5 +499,143 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
+}
+
+/**
+ * Write reviews to Supabase reviews table
+ */
+export async function writeReviewsToSupabase(
+  breweryId: string,
+  breweryName: string,
+  reviews: Array<{
+    author_name?: string;
+    author_url?: string;
+    language?: string;
+    profile_photo_url?: string;
+    rating: number;
+    relative_time_description: string;
+    text: string;
+    time: number;
+  }>
+): Promise<void> {
+  try {
+    if (!supabaseAdmin) {
+      throw new Error('Supabase admin client not available');
+    }
+
+    if (!reviews || reviews.length === 0) {
+      return;
+    }
+
+    const fetchedAt = new Date().toISOString();
+
+    const reviewRecords = reviews.map(review => ({
+      brewery_id: breweryId,
+      brewery_name: breweryName,
+      reviewer_name: review.author_name || null,
+      rating: review.rating || null,
+      review_text: review.text || null,
+      review_date: review.relative_time_description || null,
+      review_timestamp: review.time || null,
+      reviewer_url: review.author_url || null,
+      profile_photo_url: review.profile_photo_url || null,
+      language: review.language || 'en',
+      fetched_at: fetchedAt,
+    }));
+
+    const { error } = await supabaseAdmin
+      .from('reviews')
+      .insert(reviewRecords);
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    console.error('Failed to write reviews to Supabase:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update review summary in breweries table
+ */
+export async function updateReviewSummaryInSupabase(
+  breweryId: string,
+  rating: number,
+  ratingCount: number
+): Promise<void> {
+  try {
+    if (!supabaseAdmin) {
+      throw new Error('Supabase admin client not available');
+    }
+
+    const { error } = await supabaseAdmin
+      .from('breweries')
+      .update({
+        google_rating: rating,
+        google_rating_count: ratingCount,
+        google_reviews_last_updated: new Date().toISOString(),
+      })
+      .eq('id', breweryId);
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    console.error('Failed to update review summary in Supabase:', error);
+    throw error;
+  }
+}
+
+/**
+ * Store Place ID for a brewery
+ */
+export async function storePlaceIdInSupabase(
+  breweryId: string,
+  placeId: string
+): Promise<void> {
+  try {
+    if (!supabaseAdmin) {
+      throw new Error('Supabase admin client not available');
+    }
+
+    const { error } = await supabaseAdmin
+      .from('breweries')
+      .update({ place_id: placeId })
+      .eq('id', breweryId);
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    console.error('Failed to store Place ID in Supabase:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update brewery logo in Supabase
+ */
+export async function updateBreweryLogoInSupabase(
+  breweryId: string,
+  logoPath: string
+): Promise<void> {
+  try {
+    if (!supabaseAdmin) {
+      throw new Error('Supabase admin client not available');
+    }
+
+    const { error } = await supabaseAdmin
+      .from('breweries')
+      .update({ logo: logoPath })
+      .eq('id', breweryId);
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    console.error('Failed to update logo in Supabase:', error);
+    throw error;
+  }
 }
 

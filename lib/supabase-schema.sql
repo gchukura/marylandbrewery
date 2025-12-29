@@ -54,6 +54,13 @@ CREATE TABLE IF NOT EXISTS breweries (
   
   -- Metadata
   opened_date TEXT,
+  
+  -- Google Reviews summary
+  google_rating DOUBLE PRECISION,
+  google_rating_count INTEGER,
+  google_reviews_last_updated TIMESTAMPTZ,
+  place_id TEXT,
+  
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -63,6 +70,7 @@ CREATE INDEX IF NOT EXISTS idx_breweries_city ON breweries(city);
 CREATE INDEX IF NOT EXISTS idx_breweries_county ON breweries(county);
 CREATE INDEX IF NOT EXISTS idx_breweries_slug ON breweries(slug);
 CREATE INDEX IF NOT EXISTS idx_breweries_featured ON breweries(featured);
+CREATE INDEX IF NOT EXISTS idx_breweries_place_id ON breweries(place_id);
 CREATE INDEX IF NOT EXISTS idx_breweries_location ON breweries USING GIST(
   ST_MakePoint(longitude, latitude)
 );

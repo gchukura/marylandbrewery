@@ -10,27 +10,28 @@ export async function generateStaticParams() {
   return TYPES.map((t) => ({ type: t }));
 }
 
-export async function generateMetadata({ params }: { params: { type: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ type: string }> }): Promise<Metadata> {
+  const { type } = await params;
   const processed = await getProcessedBreweryData();
-  const typeKey = params.type.toLowerCase();
+  const typeKey = type.toLowerCase();
   const breweries = processed.breweries.filter((b) => {
     if (Array.isArray(b.type)) {
       return b.type.some(type => type.toLowerCase() === typeKey);
     }
     return b.type?.toLowerCase() === typeKey;
   });
-  const typeLabel = deslugify(params.type);
+  const typeLabel = deslugify(type);
   const typeLabelLower = typeLabel.toLowerCase();
   const title = `${typeLabel} Breweries in MD | ${breweries.length}`;
   const description = `Explore ${breweries.length} ${typeLabelLower} breweries across Maryland. Find top ${typeLabelLower} breweries in Baltimore, Annapolis, Frederick, and other cities. Complete guide to ${typeLabelLower} breweries in the Old Line State with hours, amenities, and visitor information.`;
   return {
     title,
     description,
-    alternates: { canonical: `/type/${params.type}` },
+    alternates: { canonical: `/type/${type}` },
     openGraph: {
       title,
       description,
-      url: `https://www.marylandbrewery.com/type/${params.type}`,
+      url: `https://www.marylandbrewery.com/type/${type}`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [
@@ -51,10 +52,11 @@ export async function generateMetadata({ params }: { params: { type: string } })
   };
 }
 
-export default async function TypePage({ params }: { params: { type: string } }) {
+export default async function TypePage({ params }: { params: Promise<{ type: string }> }) {
+  const { type } = await params;
   const processed = await getProcessedBreweryData();
-  const typeKey = params.type.toLowerCase();
-  const typeLabel = deslugify(params.type);
+  const typeKey = type.toLowerCase();
+  const typeLabel = deslugify(type);
   const breweries = processed.breweries.filter((b) => {
     if (Array.isArray(b.type)) {
       return b.type.some(type => type.toLowerCase() === typeKey);
@@ -105,7 +107,7 @@ export default async function TypePage({ params }: { params: { type: string } })
   const breadcrumbs = [
     { name: 'Home', url: '/', isActive: false },
     { name: 'Types', url: '/type', isActive: false },
-    { name: typeLabel, url: `/type/${params.type}`, isActive: true },
+    { name: typeLabel, url: `/type/${type}`, isActive: true },
   ];
 
   // Content blocks
@@ -120,7 +122,7 @@ export default async function TypePage({ params }: { params: { type: string } })
   }));
 
   // Other types
-  const otherTypes = TYPES.filter((t) => t !== params.type)
+  const otherTypes = TYPES.filter((t) => t !== type)
     .slice(0, 3)
     .map((t) => {
       const typeBreweries = processed.breweries.filter((b) => {

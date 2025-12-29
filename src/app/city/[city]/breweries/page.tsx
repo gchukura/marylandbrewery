@@ -23,8 +23,9 @@ function collectAmenities(breweries: any[]): Record<string, number> {
   return counts;
 }
 
-export async function generateMetadata({ params }: { params: { city: string } }): Promise<Metadata> {
-  const cityName = deslugify(params.city);
+export async function generateMetadata({ params }: { params: Promise<{ city: string }> }): Promise<Metadata> {
+  const { city } = await params;
+  const cityName = deslugify(city);
   const processed = await getProcessedBreweryData();
   const breweries = processed.byCity.get(cityName.toLowerCase().trim()) || [];
   const total = breweries.length;
@@ -41,11 +42,11 @@ export async function generateMetadata({ params }: { params: { city: string } })
   return {
     title,
     description,
-    alternates: { canonical: `/city/${params.city}/breweries` },
+    alternates: { canonical: `/city/${city}/breweries` },
     openGraph: {
       title,
       description,
-      url: `https://www.marylandbrewery.com/city/${params.city}/breweries`,
+      url: `https://www.marylandbrewery.com/city/${city}/breweries`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [
@@ -84,8 +85,9 @@ function computeCityStats(breweries: any[]) {
   ];
 }
 
-export default async function CityBreweriesPage({ params }: { params: { city: string } }) {
-  const cityName = deslugify(params.city);
+export default async function CityBreweriesPage({ params }: { params: Promise<{ city: string }> }) {
+  const { city } = await params;
+  const cityName = deslugify(city);
   const processed = await getProcessedBreweryData();
   const breweries = processed.byCity.get(cityName.toLowerCase().trim()) || [];
 
@@ -97,7 +99,7 @@ export default async function CityBreweriesPage({ params }: { params: { city: st
   const breadcrumbs = [
     { name: 'Home', url: '/', isActive: false },
     { name: 'Cities', url: '/city', isActive: false },
-    { name: cityName, url: `/city/${params.city}/breweries`, isActive: true },
+    { name: cityName, url: `/city/${city}/breweries`, isActive: true },
   ];
 
   // Stats
@@ -147,7 +149,7 @@ export default async function CityBreweriesPage({ params }: { params: { city: st
 
       return count > 0 ? {
         title: `${cityName} ${amenityKey.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} Breweries`,
-        url: `/city/${params.city}/${amenitySlug}`,
+        url: `/city/${city}/${amenitySlug}`,
         count,
       } : null;
     })
@@ -170,7 +172,7 @@ export default async function CityBreweriesPage({ params }: { params: { city: st
     .slice(0, 2)
     .map(([type]) => ({
       title: `${cityName} ${type.charAt(0).toUpperCase() + type.slice(1)} Breweries`,
-      url: `/city/${params.city}/${slugify(type)}`,
+      url: `/city/${city}/${slugify(type)}`,
       count: typeCounts.get(type),
     }));
 

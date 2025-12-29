@@ -27,11 +27,12 @@ export async function generateStaticParams() {
   return combinations;
 }
 
-export async function generateMetadata({ params }: { params: { city: string; amenity: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ city: string; amenity: string }> }): Promise<Metadata> {
+  const { city, amenity } = await params;
   const processed = await getProcessedBreweryData();
-  const cityName = deslugify(params.city);
+  const cityName = deslugify(city);
   const cityKey = cityName.toLowerCase();
-  const amenityLabel = normalizeAmenityLabel(params.amenity);
+  const amenityLabel = normalizeAmenityLabel(amenity);
   const amenityKey = amenityLabel.toLowerCase();
 
   // Optimize: use pre-indexed city data if available
@@ -49,11 +50,11 @@ export async function generateMetadata({ params }: { params: { city: string; ame
   return {
     title,
     description,
-    alternates: { canonical: `/city/${params.city}/${params.amenity}` },
+    alternates: { canonical: `/city/${city}/${amenity}` },
     openGraph: {
       title,
       description,
-      url: `https://www.marylandbrewery.com/city/${params.city}/${params.amenity}`,
+      url: `https://www.marylandbrewery.com/city/${city}/${amenity}`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [
@@ -74,10 +75,11 @@ export async function generateMetadata({ params }: { params: { city: string; ame
   };
 }
 
-export default async function CityAmenityPage({ params }: { params: { city: string; amenity: string } }) {
+export default async function CityAmenityPage({ params }: { params: Promise<{ city: string; amenity: string }> }) {
+  const { city, amenity } = await params;
   const processed = await getProcessedBreweryData();
-  const cityName = deslugify(params.city);
-  const amenityLabel = normalizeAmenityLabel(params.amenity);
+  const cityName = deslugify(city);
+  const amenityLabel = normalizeAmenityLabel(amenity);
   const amenityKey = amenityLabel.toLowerCase();
 
   const breweries = processed.breweries.filter(
@@ -101,8 +103,8 @@ export default async function CityAmenityPage({ params }: { params: { city: stri
   const breadcrumbs = [
     { name: 'Home', url: '/', isActive: false },
     { name: 'Cities', url: '/city', isActive: false },
-    { name: cityName, url: `/city/${params.city}/breweries`, isActive: false },
-    { name: amenityLabel, url: `/city/${params.city}/${params.amenity}`, isActive: true },
+    { name: cityName, url: `/city/${city}/breweries`, isActive: false },
+    { name: amenityLabel, url: `/city/${city}/${amenity}`, isActive: true },
   ];
 
   // Content blocks - simplified for combo pages
@@ -139,13 +141,13 @@ export default async function CityAmenityPage({ params }: { params: { city: stri
     .slice(0, 4)
     .map(([city, count]) => ({
       title: `${city} ${amenityLabel} Breweries`,
-      url: `/city/${slugify(city)}/${params.amenity}`,
+        url: `/city/${slugify(city)}/${amenity}`,
       count,
     }));
 
   const relatedPages = [
-    { title: `All ${cityName} Breweries`, url: `/city/${params.city}/breweries`, count: cityBreweryCount },
-    { title: `${amenityLabel} Breweries (Statewide)`, url: `/amenities/${params.amenity}`, count: amenityCount },
+    { title: `All ${cityName} Breweries`, url: `/city/${city}/breweries`, count: cityBreweryCount },
+    { title: `${amenityLabel} Breweries (Statewide)`, url: `/amenities/${amenity}`, count: amenityCount },
     ...nearby,
   ];
 

@@ -6,7 +6,7 @@ import SimpleBreweryPageTemplate from '@/components/templates/SimpleBreweryPageT
 import { generateBreweryTitle, generateBreweryDescription } from '@/lib/seo-utils';
 
 interface BreweryPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
@@ -18,9 +18,10 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: BreweryPageProps) {
+  const { slug } = await params;
   const processed = await getProcessedBreweryData();
   const brewery = processed.breweries.find(
-    (b) => (b as any).slug === params.slug || b.id === params.slug
+    (b) => (b as any).slug === slug || b.id === slug
   );
 
   if (!brewery) {
@@ -42,13 +43,13 @@ export async function generateMetadata({ params }: BreweryPageProps) {
     title,
     description,
     alternates: {
-      canonical: `/breweries/${params.slug}`,
+      canonical: `/breweries/${slug}`,
     },
     openGraph: {
       title,
       description,
       type: 'website',
-      url: `https://www.marylandbrewery.com/breweries/${params.slug}`,
+      url: `https://www.marylandbrewery.com/breweries/${slug}`,
       siteName: 'Maryland Brewery Directory',
       images: [
         {
@@ -69,9 +70,10 @@ export async function generateMetadata({ params }: BreweryPageProps) {
 }
 
 export default async function BreweryPage({ params }: BreweryPageProps) {
+  const { slug } = await params;
   const processed = await getProcessedBreweryData();
   const brewery = processed.breweries.find(
-    (b) => (b as any).slug === params.slug || b.id === params.slug
+    (b) => (b as any).slug === slug || b.id === slug
   );
 
   if (!brewery) {
@@ -99,7 +101,7 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     { name: 'Home', url: '/', position: 1, isActive: false },
     { name: 'Cities', url: '/city', position: 2, isActive: false },
     { name: brewery.city, url: `/city/${citySlug}/breweries`, position: 3, isActive: false },
-    { name: brewery.name, url: `/breweries/${params.slug}`, position: 4, isActive: true },
+    { name: brewery.name, url: `/breweries/${slug}`, position: 4, isActive: true },
   ];
 
   // Get same city breweries for related links

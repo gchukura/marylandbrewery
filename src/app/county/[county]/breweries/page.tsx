@@ -14,9 +14,10 @@ export async function generateStaticParams() {
   return ALL_MD_COUNTIES.map(c => ({ county: slugify(c) }));
 }
 
-export async function generateMetadata({ params }: { params: { county: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ county: string }> }): Promise<Metadata> {
+  const { county } = await params;
   const processed = await getProcessedBreweryData();
-  const countyName = deslugify(params.county);
+  const countyName = deslugify(county);
   const list = processed.breweries.filter(b => (b as any).county?.toLowerCase() === countyName.toLowerCase());
   const total = list.length;
 
@@ -28,11 +29,11 @@ export async function generateMetadata({ params }: { params: { county: string } 
   return {
     title,
     description,
-    alternates: { canonical: `/county/${params.county}/breweries` },
+    alternates: { canonical: `/county/${county}/breweries` },
     openGraph: {
       title,
       description,
-      url: `https://www.marylandbrewery.com/county/${params.county}/breweries`,
+      url: `https://www.marylandbrewery.com/county/${county}/breweries`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [
@@ -53,9 +54,10 @@ export async function generateMetadata({ params }: { params: { county: string } 
   };
 }
 
-export default async function CountyBreweriesPage({ params }: { params: { county: string } }) {
+export default async function CountyBreweriesPage({ params }: { params: Promise<{ county: string }> }) {
+  const { county } = await params;
   const processed = await getProcessedBreweryData();
-  const countyName = deslugify(params.county);
+  const countyName = deslugify(county);
   const countyKey = countyName.toLowerCase();
   
   // Optimize filtering - use pre-indexed data if available
@@ -75,7 +77,7 @@ export default async function CountyBreweriesPage({ params }: { params: { county
   const breadcrumbs = [
     { name: 'Home', url: '/', isActive: false },
     { name: 'Counties', url: '/county', isActive: false },
-    { name: `${countyName} County`, url: `/county/${params.county}/breweries`, isActive: true },
+    { name: `${countyName} County`, url: `/county/${county}/breweries`, isActive: true },
   ];
 
   // Stats

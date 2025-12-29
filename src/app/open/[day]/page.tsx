@@ -8,13 +8,14 @@ export const revalidate = 3600; // ISR hourly
 
 const DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'] as const;
 
-export async function generateMetadata({ params }: { params: { day: string } }): Promise<Metadata> {
-  const day = params.day.charAt(0).toUpperCase() + params.day.slice(1);
+export async function generateMetadata({ params }: { params: Promise<{ day: string }> }): Promise<Metadata> {
+  const { day: dayParam } = await params;
+  const day = dayParam.charAt(0).toUpperCase() + dayParam.slice(1);
   const processed = await getProcessedBreweryData();
   const list = processed.breweries.filter((b) => {
     const hours = b.hours as any;
     if (!hours) return false;
-    const h = hours[params.day.toLowerCase() as keyof typeof hours];
+    const h = hours[dayParam.toLowerCase() as keyof typeof hours];
     if (!h || /closed/i.test(h)) return false;
     return true;
   });
@@ -23,12 +24,12 @@ export async function generateMetadata({ params }: { params: { day: string } }):
     title: `Breweries Open on ${day} - Maryland Brewery Directory`,
     description: `Find ${list.length} Maryland breweries open on ${day}s. Complete list of craft breweries, taprooms, and brewpubs with hours for ${day}. Plan your ${day} brewery tour across Baltimore, Annapolis, Frederick, and more cities.`,
     alternates: {
-      canonical: `/open/${params.day}`,
+      canonical: `/open/${dayParam}`,
     },
     openGraph: {
       title: `Breweries Open on ${day} - Maryland Brewery Directory`,
       description: `Find ${list.length} Maryland breweries open on ${day}. Complete list of breweries with hours for ${day}.`,
-      url: `https://www.marylandbrewery.com/open/${params.day}`,
+      url: `https://www.marylandbrewery.com/open/${dayParam}`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [
@@ -60,8 +61,9 @@ function isOpenOnDay(hours?: Record<string, string>, day?: string) {
   return true;
 }
 
-export default async function OpenDayPage({ params }: { params: { day: string } }) {
-  const day = (params.day || '').toLowerCase();
+export default async function OpenDayPage({ params }: { params: Promise<{ day: string }> }) {
+  const { day: dayParam } = await params;
+  const day = (dayParam || '').toLowerCase();
   const processed = await getProcessedBreweryData();
   const list = processed.breweries.filter((b) => isOpenOnDay(b.hours as any, day));
 
@@ -76,7 +78,7 @@ export default async function OpenDayPage({ params }: { params: { day: string } 
   const breadcrumbs = [
     { name: 'Home', url: '/', isActive: false },
     { name: 'Open Now', url: '/open-now', isActive: false },
-    { name: `Open on ${dayCapitalized}`, url: `/open/${day}`, isActive: true },
+    { name: `Open on ${dayCapitalized}`, url: `/open/${dayParam}`, isActive: true },
   ];
 
   // Related pages for internal linking

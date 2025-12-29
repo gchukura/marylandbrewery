@@ -27,7 +27,9 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   const { city } = await params;
   const cityName = deslugify(city);
   const processed = await getProcessedBreweryData();
-  const breweries = processed.byCity.get(cityName.toLowerCase().trim()) || [];
+  const breweries = (processed.byCity instanceof Map 
+    ? processed.byCity.get(cityName.toLowerCase().trim())
+    : (processed.byCity as any)?.[cityName.toLowerCase().trim()]) || [];
   const total = breweries.length;
   const amenityCounts = collectAmenities(breweries);
   const topAmenities = Object.entries(amenityCounts)
@@ -89,7 +91,9 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
   const { city } = await params;
   const cityName = deslugify(city);
   const processed = await getProcessedBreweryData();
-  const breweries = processed.byCity.get(cityName.toLowerCase().trim()) || [];
+  const breweries = (processed.byCity instanceof Map 
+    ? processed.byCity.get(cityName.toLowerCase().trim())
+    : (processed.byCity as any)?.[cityName.toLowerCase().trim()]) || [];
 
   // Intro text
   const statsForIntro = { totalBreweries: breweries.length, totalCounties: 0, totalTypes: 0 };

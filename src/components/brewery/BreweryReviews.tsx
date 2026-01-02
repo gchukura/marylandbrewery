@@ -13,16 +13,19 @@ interface Review {
   review_timestamp: number | null;
   reviewer_url: string | null;
   profile_photo_url: string | null;
+  source: string | null; // 'google' or 'yelp'
 }
 
 interface BreweryReviewsProps {
   breweryId: string;
   reviewsPerPage?: number;
+  placeId?: string; // Google Place ID for linking to full reviews
+  totalGoogleReviews?: number; // Total review count from Google
 }
 
 const MAX_PREVIEW_LENGTH = 250; // Character limit for preview
 
-export default function BreweryReviews({ breweryId, reviewsPerPage = 5 }: BreweryReviewsProps) {
+export default function BreweryReviews({ breweryId, reviewsPerPage = 5, placeId, totalGoogleReviews }: BreweryReviewsProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [totalReviews, setTotalReviews] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,24 +44,23 @@ export default function BreweryReviews({ breweryId, reviewsPerPage = 5 }: Brewer
         
         if (cancelled) return;
 
-        // Deduplicate reviews by content (brewery_id + review_timestamp + reviewer_name) in case of duplicates
-        const uniqueReviews = (data.reviews || []).reduce((acc: Review[], review: Review) => {
+        // Deduplicate reviews by content (review_timestamp + reviewer_name + review_text) in case of duplicates
+        // Use the same deduplication logic as the server-side function
+        const uniqueReviewsMap = new Map<string, Review>();
+        
+        (data.reviews || []).forEach((review: Review) => {
           const timestamp = review.review_timestamp || 0;
           const reviewerName = (review.reviewer_name || '').toLowerCase().trim();
-          const duplicateKey = `${timestamp}|${reviewerName}`;
+          const reviewTextSnippet = (review.review_text || '').substring(0, 100).toLowerCase().trim();
+          const duplicateKey = `${timestamp}|${reviewerName}|${reviewTextSnippet}`;
           
-          // Check if we already have a review with the same content
-          const existing = acc.find(r => {
-            const rTimestamp = r.review_timestamp || 0;
-            const rName = (r.reviewer_name || '').toLowerCase().trim();
-            return `${rTimestamp}|${rName}` === duplicateKey;
-          });
-          
-          if (!existing) {
-            acc.push(review);
+          // Only add if we haven't seen this exact review before
+          if (!uniqueReviewsMap.has(duplicateKey)) {
+            uniqueReviewsMap.set(duplicateKey, review);
           }
-          return acc;
-        }, []);
+        });
+        
+        const uniqueReviews = Array.from(uniqueReviewsMap.values());
 
         setReviews(uniqueReviews);
         setTotalReviews(data.total || 0);
@@ -122,6 +124,11 @@ export default function BreweryReviews({ breweryId, reviewsPerPage = 5 }: Brewer
     return `${firstName} ${lastInitial}.`;
   };
 
+  const formatSource = (source: string | null): string => {
+    if (!source) return '';
+    return `, via ${source.charAt(0).toUpperCase() + source.slice(1)}`;
+  };
+
   const toggleReview = (reviewId: string) => {
     setExpandedReviews((prev) => {
       const newSet = new Set(prev);
@@ -172,6 +179,7 @@ export default function BreweryReviews({ breweryId, reviewsPerPage = 5 }: Brewer
             <div className="flex items-center gap-3 mb-2">
               <h3 className="font-semibold text-black">
                 {formatReviewerName(review.reviewer_name)}
+                <span className="font-normal">{formatSource(review.source)}</span>
               </h3>
               {review.rating && renderStars(review.rating)}
             </div>

@@ -6,10 +6,12 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import BreweryLogo from '@/components/brewery/BreweryLogo';
+import BreweryPhotoGallery from '@/components/brewery/BreweryPhotoGallery';
 import { 
   MapPin, 
   Phone, 
@@ -33,10 +35,69 @@ import {
   Beer,
   Shirt
 } from 'lucide-react';
-import { Brewery, Beer as BeerType, Article, Membership } from '@/types/brewery';
+import { Brewery, Beer as BeerType, Article, Membership, BreweryArticle } from '@/types/brewery';
 import { BreadcrumbItem, RelatedPage } from '@/types/seo';
 import GoogleMap from '../maps/GoogleMap';
 import BreweryReviews from '../brewery/BreweryReviews';
+import BreweryArticles from '../brewery/BreweryArticles';
+
+/**
+ * Format hours string to ensure consistent AM/PM and HH:MM format
+ * Example: "2:00 – 9:00 PM" -> "02:00 PM – 09:00 PM"
+ */
+function formatHoursString(hoursString: string): string {
+  if (!hoursString || hoursString.toLowerCase() === 'closed') {
+    return 'Closed';
+  }
+
+  // Match time ranges with various separators (hyphen, en dash, em dash)
+  const match = hoursString.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?\s*[–—-]\s*(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  
+  if (!match) {
+    return hoursString; // Return as-is if we can't parse it
+  }
+
+  const [, openHour, openMin, openAmPm, closeHour, closeMin, closeAmPm] = match;
+
+  // Parse hours as numbers
+  let openHourNum = parseInt(openHour, 10);
+  let closeHourNum = parseInt(closeHour, 10);
+  
+  // Determine AM/PM for open time
+  let openAmPmFinal = openAmPm?.toUpperCase() || '';
+  if (!openAmPmFinal && closeAmPm) {
+    // If open doesn't have AM/PM but close does, infer it
+    const closeAmPmUpper = closeAmPm.toUpperCase();
+    if (openHourNum < closeHourNum || (closeAmPmUpper === 'PM' && openHourNum >= 12)) {
+      openAmPmFinal = closeAmPmUpper;
+    } else {
+      openAmPmFinal = 'AM';
+    }
+  } else if (!openAmPmFinal) {
+    // If neither has AM/PM, infer from hour value
+    openAmPmFinal = openHourNum < 12 ? 'AM' : 'PM';
+  }
+  
+  // Determine AM/PM for close time
+  let closeAmPmFinal = closeAmPm?.toUpperCase() || '';
+  if (!closeAmPmFinal && openAmPmFinal) {
+    // If close doesn't have AM/PM but open does, infer it
+    if (closeHourNum < openHourNum || (openAmPmFinal === 'AM' && closeHourNum >= 12)) {
+      closeAmPmFinal = 'PM';
+    } else {
+      closeAmPmFinal = openAmPmFinal;
+    }
+  } else if (!closeAmPmFinal) {
+    // If neither has AM/PM, infer from hour value
+    closeAmPmFinal = closeHourNum < 12 ? 'AM' : 'PM';
+  }
+
+  // Format to HH:MM with 2-digit hours
+  const formattedOpen = `${openHourNum.toString().padStart(2, '0')}:${openMin} ${openAmPmFinal}`;
+  const formattedClose = `${closeHourNum.toString().padStart(2, '0')}:${closeMin} ${closeAmPmFinal}`;
+
+  return `${formattedOpen} – ${formattedClose}`;
+}
 
 // Social Media Icons - SVG data URLs for platform logos
 const SOCIAL_MEDIA_ICONS = {
@@ -78,7 +139,28 @@ interface SimpleBreweryPageTemplateProps {
   
   // Navigation
   breadcrumbs: BreadcrumbItem[];
+  
+  // Generated content
+  aboutContent?: string;
   relatedPages: RelatedPage[];
+  
+  // News articles
+  articles?: BreweryArticle[];
+  
+  // Computed values for enhanced features
+  computed?: {
+    isOpenNow: boolean;
+    closingTime: string | null;
+    nextOpenDay: string | null;
+    nextOpenTime: string | null;
+    currentDay: string;
+    currentDayIndex: number;
+    cityAverageRating: number;
+    stateAverageRating: number;
+    sameCityCount: number;
+    sameCountyCount: number;
+    sameCityBreweries: Brewery[];
+  };
 }
 
 // Simple utility functions (no hooks)
@@ -133,11 +215,18 @@ export default function SimpleBreweryPageTemplate({
   metaDescription,
   breadcrumbs,
   relatedPages,
+  computed,
+  aboutContent,
+  articles,
 }: SimpleBreweryPageTemplateProps) {
   
-  const breweryStatus = getBreweryStatus(brewery);
-  const isOpen = isOpenNow(brewery);
-  const currentDay = getCurrentDay();
+  // Use computed values if available, otherwise fall back to utility functions
+  const isOpen = computed?.isOpenNow ?? isOpenNow(brewery);
+  const currentDay = computed?.currentDay ?? getCurrentDay();
+  const breweryStatus = {
+    status: isOpen ? 'Open Now' : 'Closed',
+    color: isOpen ? 'text-green-600' : 'text-red-600'
+  };
 
   // Generate structured data for individual brewery
   const generateStructuredData = () => {
@@ -230,141 +319,241 @@ export default function SimpleBreweryPageTemplate({
       />
 
       <div className="min-h-screen bg-white">
-        {/* Colorado Brewery List Style Header */}
-        <div className="bg-white">
-          <div className="max-w-6xl mx-auto px-4 py-8">
-
-                {/* Brewery Name and Logo */}
-                <div className="mb-8">
-                  <div className="flex items-center gap-6 mb-6">
-                    {brewery.logo && (
-                      <BreweryLogo 
-                        logo={brewery.logo} 
-                        breweryName={brewery.name}
-                        size="lg"
-                      />
-                    )}
-                    <h1 className="text-4xl font-bold text-gray-900">{brewery.name}</h1>
-                  </div>
-                </div>
-          </div>
-        </div>
-
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          {/* Interactive Map */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-black mb-4">Map</h2>
-            <div className="bg-gray-100 rounded-lg p-4">
-              <div className="h-96 rounded-lg mb-4 overflow-hidden">
-                <GoogleMap 
-                  breweries={[brewery]} 
-                  height="100%" 
-                  center={{ lat: brewery.latitude, lng: brewery.longitude }}
-                  zoom={15}
-                  showClusters={false}
-                  autoOpenPopup={true}
+        {/* Hero Photo Section with Overlapping Logo */}
+        <div className="relative w-full mb-16">
+          {(() => {
+            // Use first photo from photos array (local) if available, otherwise fall back to photoUrl
+            // This avoids external API calls for the hero image
+            const heroImage = brewery.photos && brewery.photos.length > 0 
+              ? brewery.photos[0] 
+              : brewery.photoUrl;
+            
+            return heroImage ? (
+              <div className="relative w-full h-64 md:h-96">
+                {heroImage.startsWith('http') ? (
+                  <img 
+                    src={heroImage} 
+                    alt={`${brewery.name} exterior`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Image
+                    src={heroImage}
+                    alt={`${brewery.name} exterior`}
+                    fill
+                    className="object-cover"
+                    sizes="100vw"
+                    priority
+                  />
+                )}
+                {/* Optional overlay gradient for better text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+              </div>
+            ) : null;
+          })()}
+          
+          {/* Logo overlapping into header (Bimmershops style) */}
+          {brewery.logo && (
+            <div className={`absolute ${brewery.photoUrl ? 'bottom-0' : 'top-0'} left-4 lg:left-8 transform ${brewery.photoUrl ? 'translate-y-1/2' : 'translate-y-0'} z-10`}>
+              <div className="bg-white p-2 rounded-lg shadow-lg flex items-center justify-center h-[176px] w-[176px]">
+                <BreweryLogo 
+                  logo={brewery.logo} 
+                  breweryName={brewery.name}
+                  size="xl"
                 />
               </div>
-              <div className="text-center">
-                <a
-                  href={`https://maps.google.com/?q=${brewery.latitude},${brewery.longitude}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-                >
-                  Get Directions
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Description */}
-          {brewery.description && (
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-black mb-4">Description</h2>
-              <p className="text-gray-700 leading-relaxed text-lg">{brewery.description}</p>
             </div>
           )}
 
-          {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Beers Table */}
-            <div>
-              <h2 className="text-2xl font-bold text-black mb-4">Beers Brewed</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="bg-red-600 text-white">
-                      <th className="text-left py-3 px-4 font-bold">Name</th>
-                      <th className="text-left py-3 px-4 font-bold">Style</th>
-                      <th className="text-left py-3 px-4 font-bold">ABV</th>
-                      <th className="text-left py-3 px-4 font-bold">Availability</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {/* Beer data from Google Sheets - brewery.beers array */}
-                    {brewery.beers && brewery.beers.length > 0 ? (
-                      brewery.beers.map((beer: BeerType, index: number) => (
-                        <tr key={index} className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-yellow-50' : 'bg-white'}`}>
-                          <td className="py-3 px-4 font-semibold text-gray-900">{beer.name}</td>
-                          <td className="py-3 px-4 text-gray-700">{beer.style}</td>
-                          <td className="py-3 px-4 text-gray-700">{formatABV(beer.abv)}</td>
-                          <td className="py-3 px-4 text-gray-700">{beer.availability}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={4} className="py-8 px-4 text-center text-gray-500">
-                          No beer information available
-                        </td>
-                      </tr>
+          {/* Breadcrumb Navigation - Bottom of hero image, to the right of logo */}
+          {breadcrumbs && breadcrumbs.length > 0 && (
+            <div className="absolute bottom-4 left-[200px] lg:left-[220px] xl:left-[240px] z-10 max-w-[calc(100%-240px)]">
+              <nav className="flex items-center space-x-1 text-xs sm:text-sm flex-wrap">
+                {breadcrumbs.map((crumb, index) => (
+                  <div key={index} className="flex items-center">
+                    {index > 0 && (
+                      <ChevronRight className="h-3 w-3 text-white/90 mx-1 flex-shrink-0" />
                     )}
-                  </tbody>
-                </table>
+                    {crumb.isActive ? (
+                      <span className="text-white font-medium px-2 py-1 bg-black/60 rounded backdrop-blur-sm shadow-md whitespace-nowrap">
+                        {crumb.name}
+                      </span>
+                    ) : (
+                      <Link
+                        href={crumb.url}
+                        className="text-white/95 hover:text-white px-2 py-1 bg-black/50 hover:bg-black/70 rounded backdrop-blur-sm transition-all shadow-md whitespace-nowrap underline hover:no-underline hover:font-semibold"
+                      >
+                        {crumb.name}
+                      </Link>
+                    )}
+                  </div>
+                ))}
+              </nav>
+            </div>
+          )}
+        </div>
+
+        {/* Main Content Area - Bimmershops Style Layout */}
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          {/* Three Column Layout: Left Sidebar | Main Content | Right Sidebar */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left Sidebar - Empty (logo overlaps into header) */}
+            <div className="lg:col-span-2">
+              <div className="sticky top-8">
+                {/* Left sidebar is intentionally empty - logo overlaps from hero section */}
               </div>
             </div>
 
-            {/* Right Column - Structured Information */}
-            <div className="space-y-6">
-              {/* Address */}
-              <div>
-                <h3 className="text-xl font-bold text-black mb-3">Address</h3>
-                <div className="text-gray-700">
-                  {brewery.street}<br />
-                  <Link 
-                    href={`/city/${brewery.city.toLowerCase().replace(/\s+/g, '-')}/breweries`}
-                    className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                  >
-                    {brewery.city}
-                  </Link>, {brewery.state} {brewery.zip}
+            {/* Main Content - Center Column */}
+            <div className="lg:col-span-7">
+              {/* Business Name */}
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">{brewery.name}</h1>
+              
+              {/* City, State, Rating, and Website Link on same line */}
+              <div className="mb-6 flex items-center gap-8 flex-wrap">
+                <div className="text-gray-600 text-lg">
+                  {brewery.city}, {brewery.state}
                 </div>
+                {brewery.googleRating && (
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-5 w-5 ${
+                            i < Math.round(brewery.googleRating!)
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-lg font-semibold">{brewery.googleRating.toFixed(1)}</span>
+                    <span className="text-gray-500 text-sm">
+                      ({(brewery as any).actualReviewCount || brewery.googleRatingCount || 0})
+                    </span>
+                  </div>
+                )}
+                {brewery.website && (
+                  <div className="flex items-center gap-2 text-red-600 hover:text-red-700">
+                    <Globe className="h-5 w-5" />
+                    <a
+                      href={brewery.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-lg font-medium hover:underline"
+                    >
+                      Visit our Website
+                    </a>
+                  </div>
+                )}
               </div>
+              
+              {/* Dividing line between brewery name section and about section */}
+              <div className="border-t border-gray-300 mb-8"></div>
+              
+              {/* About Section - Enhanced */}
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold text-black mb-4">About Brewery</h2>
+                
+                {/* Primary Description - Generated from review themes */}
+                {aboutContent ? (
+                  <p className="text-gray-700 mb-4 leading-relaxed text-lg">{aboutContent}</p>
+                ) : brewery.description ? (
+                  <p className="text-gray-700 mb-4 leading-relaxed text-lg">{brewery.description}</p>
+                ) : (
+                  <p className="text-gray-700 mb-4 leading-relaxed text-lg">
+                    {brewery.name} is a {Array.isArray(brewery.type) ? brewery.type.join(' and ').toLowerCase() : (brewery.type || 'brewery').toLowerCase()} located in {brewery.city}, {brewery.county} County, Maryland.
+                    {brewery.amenities && brewery.amenities.length > 0 && (
+                      <> Featuring {brewery.amenities.slice(0, 3).join(', ').toLowerCase()}, this local brewery welcomes craft beer enthusiasts.</>
+                    )}
+                  </p>
+                )}
+                
+                {/* Awards - If available */}
+                {brewery.awards && brewery.awards.length > 0 && (
+                  <>
+                    <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Awards & Recognition</h3>
+                    <ul className="list-disc list-inside text-gray-700">
+                      {brewery.awards.map((award, index) => (
+                        <li key={index}>{award}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                
+                {/* Photo Gallery - Bimmershops Style */}
+                {brewery.photos && brewery.photos.length > 0 && (() => {
+                  // The hero image (photoUrl) is the first photo from Google Places API,
+                  // which corresponds to the first photo in the photos array (/photos/{breweryId}-1.jpg).
+                  // Exclude the first photo from the gallery to avoid duplication.
+                  const galleryPhotos = brewery.photos
+                    .filter(photo => !!photo)
+                    .slice(1) // Skip the first photo (index 0) which is the hero image
+                    .slice(0, 9); // Limit to 9 photos (all same size in 3x3 grid)
+                  
+                  return galleryPhotos.length > 0 ? (
+                    <div className="mt-8">
+                      <BreweryPhotoGallery 
+                        photos={galleryPhotos} 
+                        breweryName={brewery.name}
+                      />
+                    </div>
+                  ) : null;
+                })()}
+              </section>
 
-              {/* Contact Information */}
-              {(brewery.phone || brewery.website) && (
-                <div>
-                  <h3 className="text-xl font-bold text-black mb-3">Contact</h3>
-                  <div className="space-y-2">
-                    {brewery.phone && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-red-600" />
-                        <a href={`tel:${brewery.phone}`} className="text-gray-700 hover:text-red-600">
-                          {brewery.phone}
-                        </a>
+              {/* Amenities Section - Bimmershops Style */}
+              {brewery.amenities && brewery.amenities.length > 0 && (
+                <div className="mb-8">
+                  <h2 className="text-2xl font-bold text-black mb-4">Amenities</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {brewery.amenities.map((amenity: string, index: number) => (
+                      <div key={index} className="flex items-center gap-2 text-gray-700">
+                        <CheckCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
+                        <Link 
+                          href={`/amenities/${amenity.toLowerCase().replace(/\s+/g, '-')}`}
+                          className="text-red-600 hover:text-red-800 hover:underline text-sm"
+                        >
+                          {amenity}
+                        </Link>
                       </div>
-                    )}
-                    {brewery.website && (
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-red-600" />
-                        <a href={brewery.website} target="_blank" rel="noopener noreferrer" className="text-gray-700 hover:text-red-600">
-                          Website
-                        </a>
-                      </div>
-                    )}
+                    ))}
                   </div>
                 </div>
               )}
 
+              {/* Beers Table */}
+              {brewery.beers && brewery.beers.length > 0 && (
+                <div className="mb-8">
+                  <h2 className="text-2xl font-bold text-black mb-4">Beers Brewed</h2>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-red-600 text-white">
+                          <th className="text-left py-3 px-4 font-bold">Name</th>
+                          <th className="text-left py-3 px-4 font-bold">Style</th>
+                          <th className="text-left py-3 px-4 font-bold">ABV</th>
+                          <th className="text-left py-3 px-4 font-bold">Availability</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {brewery.beers.map((beer: BeerType, index: number) => (
+                          <tr key={index} className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-yellow-50' : 'bg-white'}`}>
+                            <td className="py-3 px-4 font-semibold text-gray-900">{beer.name}</td>
+                            <td className="py-3 px-4 text-gray-700">{beer.style}</td>
+                            <td className="py-3 px-4 text-gray-700">{formatABV(beer.abv)}</td>
+                            <td className="py-3 px-4 text-gray-700">{beer.availability}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Additional Information Sections */}
+              <div className="space-y-6">
               {/* Brewery Type */}
               {brewery.type && (
                 <div>
@@ -439,23 +628,7 @@ export default function SimpleBreweryPageTemplate({
                 </div>
               </div>
 
-              {/* Hours */}
-              {brewery.hours && (
-                <div>
-                  <h3 className="text-xl font-bold text-black mb-3">Hours</h3>
-                  <div className="space-y-1">
-                    {Object.entries(brewery.hours).map(([day, hours]) => (
-                      <div key={day} className="flex">
-                        <span className="font-medium text-gray-900 w-20">{day.charAt(0).toUpperCase() + day.slice(1)}</span>
-                        <span className="text-gray-700 ml-4">{hours ? hours : 'Closed'}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-
-                  {/* Visitor Information */}
+                {/* Visitor Information */}
                   {(brewery.allowsVisitors !== undefined || brewery.offersTours !== undefined || brewery.beerToGo !== undefined || brewery.hasMerch !== undefined || brewery.food || brewery.otherDrinks || brewery.parking || brewery.dogFriendly || brewery.outdoorSeating) && (
                     <div>
                       <h3 className="text-xl font-bold text-black mb-3">Visitor Information</h3>
@@ -694,23 +867,188 @@ export default function SimpleBreweryPageTemplate({
                     <div>
                       <h3 className="text-xl font-bold text-black mb-3">Last Updated</h3>
                       <div className="text-gray-700">{
-                        new Date(brewery.lastUpdated).toLocaleDateString('en-US', {
-                          month: '2-digit',
-                          day: '2-digit',
-                          year: 'numeric'
-                        })
+                        (() => {
+                          const date = new Date(brewery.lastUpdated);
+                          const month = date.toLocaleDateString('en-US', { month: 'long' });
+                          const day = date.getDate();
+                          const year = date.getFullYear();
+                          return `${month} ${day}, ${year}`;
+                        })()
                       }</div>
                     </div>
                   )}
+              </div>
+            </div>
+
+            {/* Right Sidebar - Map and Contact Info (Bimmershops style) */}
+            <div className="lg:col-span-3">
+              <div className="sticky top-8">
+                {/* Phone Number Button - CTA */}
+                {brewery.phone && (
+                  <div className="mb-4">
+                    <a
+                      href={`tel:${brewery.phone}`}
+                      className="inline-flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded text-lg transition-colors"
+                    >
+                      <Phone className="h-5 w-5" />
+                      {brewery.phone}
+                    </a>
+                  </div>
+                )}
+                
+                {/* Open/Closed Status - Moved from main content, centered */}
+                {computed && (computed.isOpenNow !== undefined) && (
+                  <div className="mb-4 text-center">
+                    {computed.isOpenNow ? (
+                      <span className="text-sm text-gray-600">
+                        <span className="font-bold">Open</span>
+                        {computed.closingTime 
+                          ? ` now until ${computed.closingTime}`
+                          : ' now'}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-600">
+                        <span className="font-bold">Closed</span>
+                        {computed.nextOpenDay && computed.nextOpenTime ? (
+                          <>
+                            , open again{' '}
+                            <span className="font-bold">
+                              {computed.nextOpenDay.charAt(0).toUpperCase() + computed.nextOpenDay.slice(1)} at {computed.nextOpenTime}
+                            </span>
+                          </>
+                        ) : null}
+                      </span>
+                    )}
+                  </div>
+                )}
+                
+                {/* Map */}
+                <div className="mb-4">
+                  <div className="h-64 rounded-lg overflow-hidden border border-gray-200">
+                    <GoogleMap 
+                      breweries={[brewery]} 
+                      height="100%" 
+                      center={{ lat: brewery.latitude, lng: brewery.longitude }}
+                      zoom={14}
+                      showClusters={false}
+                      autoOpenPopup={false}
+                      useFitBounds={false}
+                    />
+                  </div>
+                </div>
+                
+                {/* Address */}
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-black mb-3">Address</h3>
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                    <div className="text-gray-700">
+                      <div className="text-sm">{brewery.street}</div>
+                      <div className="text-sm">{brewery.city}, {brewery.state} {brewery.zip} US</div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Hours of Operation Section */}
+                {brewery.hours && (
+                  <div className="mb-4">
+                    <h3 className="text-lg font-bold text-black mb-3">Hours of Operation</h3>
+                    <ul className="space-y-1 text-sm">
+                      {(() => {
+                        // Group Monday-Friday if they have the same hours
+                        const mondayHours = brewery.hours?.monday;
+                        const tuesdayHours = brewery.hours?.tuesday;
+                        const wednesdayHours = brewery.hours?.wednesday;
+                        const thursdayHours = brewery.hours?.thursday;
+                        const fridayHours = brewery.hours?.friday;
+                        
+                        const allWeekdaysSame = mondayHours && 
+                          mondayHours === tuesdayHours &&
+                          mondayHours === wednesdayHours &&
+                          mondayHours === thursdayHours &&
+                          mondayHours === fridayHours;
+                        
+                        const hoursList = [];
+                        
+                        // Add Monday-Friday grouped if same
+                        if (allWeekdaysSame) {
+                          hoursList.push(
+                            <li key="weekdays" className="flex items-center">
+                              <span className="font-medium text-gray-900 w-32 text-sm">Monday - Friday</span>
+                              <span className="text-gray-700 ml-2 text-sm">
+                                {mondayHours && mondayHours !== 'Closed' ? formatHoursString(mondayHours) : 'Closed'}
+                              </span>
+                            </li>
+                          );
+                        } else {
+                          // Add individual weekdays
+                          ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'].forEach(day => {
+                            const dayName = day.charAt(0).toUpperCase() + day.slice(1);
+                            const hours = brewery.hours?.[day as keyof typeof brewery.hours];
+                            hoursList.push(
+                              <li key={day} className="flex items-center">
+                                <span className="font-medium text-gray-900 w-32 text-sm">{dayName}</span>
+                                <span className="text-gray-700 ml-2 text-sm">
+                                  {hours && hours !== 'Closed' ? formatHoursString(hours) : 'Closed'}
+                                </span>
+                              </li>
+                            );
+                          });
+                        }
+                        
+                        // Add Saturday
+                        const satHours = brewery.hours?.saturday;
+                        if (satHours !== undefined) {
+                          hoursList.push(
+                            <li key="saturday" className="flex items-center">
+                              <span className="font-medium text-gray-900 w-32 text-sm">Saturday</span>
+                              <span className="text-gray-700 ml-2 text-sm">
+                                {satHours && satHours !== 'Closed' ? formatHoursString(satHours) : 'Closed'}
+                              </span>
+                            </li>
+                          );
+                        }
+                        
+                        // Add Sunday
+                        const sunHours = brewery.hours?.sunday;
+                        if (sunHours !== undefined) {
+                          hoursList.push(
+                            <li key="sunday" className="flex items-center">
+                              <span className="font-medium text-gray-900 w-32 text-sm">Sunday</span>
+                              <span className="text-gray-700 ml-2 text-sm">
+                                {sunHours && sunHours !== 'Closed' ? formatHoursString(sunHours) : 'Closed'}
+                              </span>
+                            </li>
+                          );
+                        }
+                        
+                        return hoursList;
+                      })()}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
         </div>
       </div>
 
+      {/* News & Articles Section */}
+      {articles && articles.length > 0 && (
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <BreweryArticles articles={articles} breweryName={brewery.name} />
+        </div>
+      )}
+
       {/* Reviews Section */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <BreweryReviews breweryId={brewery.id} reviewsPerPage={5} />
+        <BreweryReviews 
+          breweryId={brewery.id} 
+          reviewsPerPage={5}
+          placeId={brewery.placeId}
+          totalGoogleReviews={brewery.googleRatingCount}
+        />
       </div>
     </>
   );

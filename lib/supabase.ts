@@ -138,6 +138,8 @@ export interface DatabaseBrewery {
   dog_friendly?: boolean;
   outdoor_seating?: boolean;
   logo?: string;
+  photo_url?: string;
+  photos?: string[]; // Array of photo paths (e.g., ["/photos/brewery-1.jpg"])
   featured?: boolean;
   special_events?: string[]; // JSONB array
   awards?: string[]; // JSONB array
@@ -151,6 +153,15 @@ export interface DatabaseBrewery {
   google_rating_count?: number;
   google_reviews_last_updated?: string;
   place_id?: string;
+  
+  // Yelp Reviews summary
+  yelp_business_id?: string;
+  yelp_rating?: number;
+  yelp_rating_count?: number;
+  yelp_reviews_last_updated?: string;
+  
+  // Review themes (extracted from reviews)
+  review_themes?: Record<string, any>; // JSONB - ReviewThemes structure
   
   created_at?: string;
   updated_at?: string;
@@ -174,5 +185,62 @@ export interface DatabaseNewsletterSubscriber {
   ip_address?: string;
   user_agent?: string;
   source?: string;
+}
+
+export interface DatabaseAttraction {
+  id?: string;
+  place_id: string;
+  name: string;
+  slug: string;
+  type: string;
+  google_types?: string[];
+  street?: string;
+  city: string;
+  state: string;
+  zip?: string;
+  county?: string;
+  latitude: number;
+  longitude: number;
+  description?: string;
+  phone?: string;
+  website?: string;
+  rating?: number;
+  rating_count?: number;
+  price_level?: number;
+  hours?: Record<string, string>;
+  photos?: string[];
+  last_updated?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface DatabaseNeighborhood {
+  id?: string;
+  name: string;
+  slug: string;
+  description?: string;
+  city?: string;
+  county?: string;
+  state: string;
+  url?: string;
+  homes_url?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface DatabaseBreweryArticle {
+  id?: string;
+  brewery_id: string;
+  title: string;
+  description?: string;
+  url: string;
+  source?: string;
+  author?: string;
+  image_url?: string;
+  published_at?: string;
+  fetched_at?: string;
+  relevance_score?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 

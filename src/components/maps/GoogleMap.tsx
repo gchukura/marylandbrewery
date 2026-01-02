@@ -20,6 +20,7 @@ interface GoogleMapProps {
   zoom?: number;
   onBreweryClick?: (brewery: Brewery) => void;
   autoOpenPopup?: boolean;
+  useFitBounds?: boolean; // If false, use zoom/center instead of fitting bounds
 }
 
 // Internal component that handles markers and clustering
@@ -28,6 +29,7 @@ function MapContent({
   showClusters = true,
   onBreweryClick,
   autoOpenPopup = false,
+  useFitBounds = true,
 }: Omit<GoogleMapProps, 'height' | 'center' | 'zoom'>) {
   const map = useMap();
   const clustererRef = useRef<MarkerClusterer | null>(null);
@@ -116,8 +118,8 @@ function MapContent({
       }, 500);
     }
 
-    // Fit bounds if we have breweries
-    if (newMarkers.length > 0) {
+    // Fit bounds if we have breweries and useFitBounds is true
+    if (newMarkers.length > 0 && useFitBounds) {
       const bounds = new google.maps.LatLngBounds();
       newMarkers.forEach((marker) => {
         const pos = marker.getPosition();
@@ -127,7 +129,7 @@ function MapContent({
     }
 
     setIsLoaded(true);
-  }, [map, breweries, showClusters, onBreweryClick, autoOpenPopup]);
+  }, [map, breweries, showClusters, onBreweryClick, autoOpenPopup, useFitBounds]);
 
   // Close popup when clicking outside
   useEffect(() => {
@@ -255,6 +257,7 @@ export default function GoogleMap({
   zoom = 10,
   onBreweryClick,
   autoOpenPopup = false,
+  useFitBounds = true,
 }: GoogleMapProps) {
   const apiKey = useMemo(
     () => (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '').trim(),
@@ -312,6 +315,7 @@ export default function GoogleMap({
             showClusters={showClusters}
             onBreweryClick={onBreweryClick}
             autoOpenPopup={autoOpenPopup}
+            useFitBounds={useFitBounds}
           />
         </Map>
       </APIProvider>

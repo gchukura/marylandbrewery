@@ -58,7 +58,7 @@ export default function BreweryLogo({
   const sizePx = sizePixels[size];
 
   return (
-    <div className={`${sizeClasses[size]} flex-shrink-0 relative ${className}`}>
+    <div className={`${sizeClasses[size]} flex-shrink-0 relative flex items-center justify-center ${className}`}>
       {imageLoading && (
         <div className={`absolute inset-0 bg-gray-100 animate-pulse rounded ${sizeClasses[size]}`} />
       )}

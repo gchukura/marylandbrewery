@@ -47,6 +47,8 @@ CREATE TABLE IF NOT EXISTS breweries (
   dog_friendly BOOLEAN DEFAULT false,
   outdoor_seating BOOLEAN DEFAULT false,
   logo TEXT,
+  photo_url TEXT,
+  photos JSONB DEFAULT '[]', -- Array of photo paths (e.g., ["/photos/brewery-1.jpg", "/photos/brewery-2.jpg"])
   featured BOOLEAN DEFAULT false,
   special_events JSONB DEFAULT '[]',
   awards JSONB DEFAULT '[]',
@@ -60,6 +62,12 @@ CREATE TABLE IF NOT EXISTS breweries (
   google_rating_count INTEGER,
   google_reviews_last_updated TIMESTAMPTZ,
   place_id TEXT,
+  
+  -- Yelp Reviews summary
+  yelp_business_id TEXT,
+  yelp_rating DOUBLE PRECISION,
+  yelp_rating_count INTEGER,
+  yelp_reviews_last_updated TIMESTAMPTZ,
   
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -156,11 +164,12 @@ CREATE POLICY "Public can insert newsletter subscribers" ON newsletter_subscribe
 CREATE POLICY "Service role can read newsletter subscribers" ON newsletter_subscribers
   FOR SELECT USING (auth.role() = 'service_role');
 
--- Reviews table (for Google Reviews)
+-- Reviews table (for Google Reviews and Yelp Reviews)
 CREATE TABLE IF NOT EXISTS reviews (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   brewery_id TEXT NOT NULL REFERENCES breweries(id) ON DELETE CASCADE,
   brewery_name TEXT NOT NULL,
+  source TEXT NOT NULL DEFAULT 'google', -- 'google' or 'yelp'
   reviewer_name TEXT,
   rating INTEGER CHECK (rating >= 1 AND rating <= 5),
   review_text TEXT,
@@ -175,6 +184,8 @@ CREATE TABLE IF NOT EXISTS reviews (
 
 -- Create indexes for reviews
 CREATE INDEX IF NOT EXISTS idx_reviews_brewery_id ON reviews(brewery_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_source ON reviews(source);
+CREATE INDEX IF NOT EXISTS idx_reviews_brewery_source ON reviews(brewery_id, source);
 CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews(rating);
 CREATE INDEX IF NOT EXISTS idx_reviews_timestamp ON reviews(review_timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_reviews_fetched_at ON reviews(fetched_at DESC);

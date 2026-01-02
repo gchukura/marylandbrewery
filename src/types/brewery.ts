@@ -46,6 +46,23 @@ export interface Article {
 }
 
 /**
+ * Brewery news article from Google News RSS
+ */
+export interface BreweryArticle {
+  id: string;
+  breweryId: string;
+  title: string;
+  description?: string;
+  url: string;
+  source?: string;
+  author?: string;
+  imageUrl?: string;
+  publishedAt?: string;
+  fetchedAt: string;
+  relevanceScore?: number;
+}
+
+/**
  * Operating hours for each day of the week
  */
 export interface OperatingHours {
@@ -82,6 +99,44 @@ export interface SiteStatistics {
   newestBrewery?: string;
   oldestBrewery?: string;
   lastUpdated: string;
+}
+
+/**
+ * Review theme analysis result for a single theme category
+ */
+export interface ThemeResult {
+  detected: boolean;
+  score: number;
+  keywords: string[];
+  matchCount: number;
+}
+
+/**
+ * Amenities extracted from reviews
+ */
+export interface ReviewAmenities {
+  allows_visitors: boolean;
+  offers_tours: boolean;
+  beer_to_go: boolean;
+  has_merch: boolean;
+  dog_friendly: boolean;
+  outdoor_seating: boolean;
+  food: string | null; // "In-House", "Food Trucks", or null
+  other_drinks: string; // "yes" or "no"
+  parking: string; // "yes" or "no"
+}
+
+/**
+ * Complete review themes object stored in breweries.review_themes
+ */
+export interface ReviewThemes {
+  beer_quality: ThemeResult;
+  food_menu: ThemeResult;
+  service_staff: ThemeResult;
+  atmosphere: ThemeResult;
+  amenities: ReviewAmenities;
+  last_analyzed: string;
+  review_count_analyzed: number;
 }
 
 /**
@@ -133,6 +188,8 @@ export interface Brewery {
   dogFriendly?: boolean;
   outdoorSeating?: boolean;
   logo?: string;
+  photoUrl?: string;
+  photos?: string[]; // Array of photo paths
   
   // Additional fields (add your new columns here)
   featured?: boolean;
@@ -150,6 +207,15 @@ export interface Brewery {
   googleRatingCount?: number;
   googleReviewsLastUpdated?: string;
   placeId?: string;
+  
+  // Yelp Reviews summary
+  yelpBusinessId?: string;
+  yelpRating?: number;
+  yelpRatingCount?: number;
+  yelpReviewsLastUpdated?: string;
+  
+  // Review themes (extracted from reviews)
+  reviewThemes?: ReviewThemes;
   
   // Raw data for debugging
   rawData?: Record<string, any>;

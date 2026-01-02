@@ -4,7 +4,7 @@
  * Provides the same interface as google-sheets.ts but uses Supabase
  */
 
-import { supabase, supabaseAdmin, DatabaseBrewery, DatabaseBeer, DatabaseNewsletterSubscriber } from './supabase';
+import { supabase, supabaseAdmin, DatabaseBrewery, DatabaseBeer, DatabaseNewsletterSubscriber, DatabaseBreweryArticle } from './supabase';
 import { Brewery, Beer, SocialMedia, OperatingHours, Membership, ReviewThemes } from '../src/types/brewery';
 
 /**

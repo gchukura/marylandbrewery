@@ -60,8 +60,8 @@ function formatHoursString(hoursString: string): string {
   const [, openHour, openMin, openAmPm, closeHour, closeMin, closeAmPm] = match;
 
   // Parse hours as numbers
-  let openHourNum = parseInt(openHour, 10);
-  let closeHourNum = parseInt(closeHour, 10);
+  const openHourNum = parseInt(openHour, 10);
+  const closeHourNum = parseInt(closeHour, 10);
   
   // Determine AM/PM for open time
   let openAmPmFinal = openAmPm?.toUpperCase() || '';

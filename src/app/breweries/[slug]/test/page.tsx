@@ -141,7 +141,7 @@ export default async function BreweryPageTest({ params }: BreweryPageProps) {
     const match = hoursString.match(/(\d{1,2}:\d{2}\s*(?:AM|PM)?)\s*[–-]\s*(\d{1,2}:\d{2}\s*(?:AM|PM)?)/i);
     if (match) {
       let openTime = match[1].trim();
-      let closeTime = match[2].trim();
+      const closeTime = match[2].trim();
       
       // If open time doesn't have AM/PM but close time does, infer it
       const openHasAmPm = /AM|PM/i.test(openTime);

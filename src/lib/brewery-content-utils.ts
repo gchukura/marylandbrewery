@@ -191,28 +191,28 @@ export function formatReviewThemesForAbout(
   const significantThemes: Array<{ name: string; score: number }> = [];
 
   // Add main theme categories (using standardized names)
-  if (reviewThemes.beer_quality.detected && reviewThemes.beer_quality.score >= SCORE_THRESHOLD) {
+  if (reviewThemes.beer_quality?.detected && reviewThemes.beer_quality.score >= SCORE_THRESHOLD) {
     significantThemes.push({
       name: THEME_DISPLAY_NAMES.beer_quality,
       score: reviewThemes.beer_quality.score,
     });
   }
 
-  if (reviewThemes.food_menu.detected && reviewThemes.food_menu.score >= SCORE_THRESHOLD) {
+  if (reviewThemes.food_menu?.detected && reviewThemes.food_menu.score >= SCORE_THRESHOLD) {
     significantThemes.push({
       name: THEME_DISPLAY_NAMES.food_menu,
       score: reviewThemes.food_menu.score,
     });
   }
 
-  if (reviewThemes.service_staff.detected && reviewThemes.service_staff.score >= SCORE_THRESHOLD) {
+  if (reviewThemes.service_staff?.detected && reviewThemes.service_staff.score >= SCORE_THRESHOLD) {
     significantThemes.push({
       name: THEME_DISPLAY_NAMES.service_staff,
       score: reviewThemes.service_staff.score,
     });
   }
 
-  if (reviewThemes.atmosphere.detected && reviewThemes.atmosphere.score >= SCORE_THRESHOLD) {
+  if (reviewThemes.atmosphere?.detected && reviewThemes.atmosphere.score >= SCORE_THRESHOLD) {
     significantThemes.push({
       name: THEME_DISPLAY_NAMES.atmosphere,
       score: reviewThemes.atmosphere.score,
@@ -221,21 +221,21 @@ export function formatReviewThemesForAbout(
 
   // Add amenity-based themes (using standardized names)
   const amenities = reviewThemes.amenities;
-  if (amenities.dog_friendly) {
+  if (amenities?.dog_friendly) {
     significantThemes.push({ name: THEME_DISPLAY_NAMES.dog_friendly, score: 0.5 });
   }
-  if (amenities.outdoor_seating) {
+  if (amenities?.outdoor_seating) {
     significantThemes.push({ name: THEME_DISPLAY_NAMES.outdoor_seating, score: 0.5 });
   }
-  if (amenities.offers_tours) {
+  if (amenities?.offers_tours) {
     significantThemes.push({ name: THEME_DISPLAY_NAMES.offers_tours, score: 0.5 });
   }
-  if (amenities.beer_to_go) {
+  if (amenities?.beer_to_go) {
     significantThemes.push({ name: THEME_DISPLAY_NAMES.beer_to_go, score: 0.4 });
   }
-  if (amenities.food === 'In-House') {
+  if (amenities?.food === 'In-House') {
     significantThemes.push({ name: THEME_DISPLAY_NAMES.food_in_house, score: 0.45 });
-  } else if (amenities.food === 'Food Trucks') {
+  } else if (amenities?.food === 'Food Trucks') {
     significantThemes.push({ name: THEME_DISPLAY_NAMES.food_trucks, score: 0.4 });
   }
 
@@ -271,27 +271,27 @@ export function getAllApplicableThemes(reviewThemes?: ReviewThemes): string[] {
   const themes: string[] = [];
 
   // Main categories
-  if (reviewThemes.beer_quality.detected && reviewThemes.beer_quality.score >= SCORE_THRESHOLD) {
+  if (reviewThemes.beer_quality?.detected && reviewThemes.beer_quality.score >= SCORE_THRESHOLD) {
     themes.push(THEME_DISPLAY_NAMES.beer_quality);
   }
-  if (reviewThemes.food_menu.detected && reviewThemes.food_menu.score >= SCORE_THRESHOLD) {
+  if (reviewThemes.food_menu?.detected && reviewThemes.food_menu.score >= SCORE_THRESHOLD) {
     themes.push(THEME_DISPLAY_NAMES.food_menu);
   }
-  if (reviewThemes.service_staff.detected && reviewThemes.service_staff.score >= SCORE_THRESHOLD) {
+  if (reviewThemes.service_staff?.detected && reviewThemes.service_staff.score >= SCORE_THRESHOLD) {
     themes.push(THEME_DISPLAY_NAMES.service_staff);
   }
-  if (reviewThemes.atmosphere.detected && reviewThemes.atmosphere.score >= SCORE_THRESHOLD) {
+  if (reviewThemes.atmosphere?.detected && reviewThemes.atmosphere.score >= SCORE_THRESHOLD) {
     themes.push(THEME_DISPLAY_NAMES.atmosphere);
   }
 
   // Amenities
   const amenities = reviewThemes.amenities;
-  if (amenities.dog_friendly) themes.push(THEME_DISPLAY_NAMES.dog_friendly);
-  if (amenities.outdoor_seating) themes.push(THEME_DISPLAY_NAMES.outdoor_seating);
-  if (amenities.offers_tours) themes.push(THEME_DISPLAY_NAMES.offers_tours);
-  if (amenities.beer_to_go) themes.push(THEME_DISPLAY_NAMES.beer_to_go);
-  if (amenities.has_merch) themes.push(THEME_DISPLAY_NAMES.has_merch);
-  if (amenities.food === 'In-House') themes.push(THEME_DISPLAY_NAMES.food_in_house);
+  if (amenities?.dog_friendly) themes.push(THEME_DISPLAY_NAMES.dog_friendly);
+  if (amenities?.outdoor_seating) themes.push(THEME_DISPLAY_NAMES.outdoor_seating);
+  if (amenities?.offers_tours) themes.push(THEME_DISPLAY_NAMES.offers_tours);
+  if (amenities?.beer_to_go) themes.push(THEME_DISPLAY_NAMES.beer_to_go);
+  if (amenities?.has_merch) themes.push(THEME_DISPLAY_NAMES.has_merch);
+  if (amenities?.food === 'In-House') themes.push(THEME_DISPLAY_NAMES.food_in_house);
   if (amenities.food === 'Food Trucks') themes.push(THEME_DISPLAY_NAMES.food_trucks);
   if (amenities.other_drinks === 'yes') themes.push(THEME_DISPLAY_NAMES.other_drinks);
   if (amenities.parking === 'yes') themes.push(THEME_DISPLAY_NAMES.parking);

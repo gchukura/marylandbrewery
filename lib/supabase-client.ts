@@ -5,7 +5,7 @@
  */
 
 import { supabase, supabaseAdmin, DatabaseBrewery, DatabaseBeer, DatabaseNewsletterSubscriber } from './supabase';
-import { Brewery, Beer, SocialMedia, OperatingHours, Membership } from '../src/types/brewery';
+import { Brewery, Beer, SocialMedia, OperatingHours, Membership, ReviewThemes } from '../src/types/brewery';
 
 /**
  * Convert database brewery to application brewery type
@@ -50,6 +50,8 @@ function dbBreweryToBrewery(dbBrewery: DatabaseBrewery, beers: Beer[] = []): Bre
     dogFriendly: dbBrewery.dog_friendly || false,
     outdoorSeating: dbBrewery.outdoor_seating || false,
     logo: dbBrewery.logo,
+    photoUrl: dbBrewery.photo_url,
+    photos: dbBrewery.photos || [],
     featured: dbBrewery.featured || false,
     specialEvents: dbBrewery.special_events || [],
     awards: dbBrewery.awards || [],
@@ -64,6 +66,15 @@ function dbBreweryToBrewery(dbBrewery: DatabaseBrewery, beers: Beer[] = []): Bre
     googleRatingCount: dbBrewery.google_rating_count,
     googleReviewsLastUpdated: dbBrewery.google_reviews_last_updated,
     placeId: dbBrewery.place_id,
+    
+    // Yelp Reviews summary
+    yelpBusinessId: dbBrewery.yelp_business_id,
+    yelpRating: dbBrewery.yelp_rating,
+    yelpRatingCount: dbBrewery.yelp_rating_count,
+    yelpReviewsLastUpdated: dbBrewery.yelp_reviews_last_updated,
+    
+    // Review themes
+    reviewThemes: dbBrewery.review_themes as ReviewThemes | undefined,
     
     // Beer data
     beers: beers.length > 0 ? beers : undefined,
@@ -113,6 +124,8 @@ function breweryToDbBrewery(brewery: Brewery): DatabaseBrewery {
     dog_friendly: brewery.dogFriendly,
     outdoor_seating: brewery.outdoorSeating,
     logo: brewery.logo,
+    photo_url: brewery.photoUrl,
+    photos: brewery.photos || [],
     featured: brewery.featured,
     special_events: brewery.specialEvents,
     awards: brewery.awards,
@@ -516,7 +529,8 @@ export async function writeReviewsToSupabase(
     relative_time_description: string;
     text: string;
     time: number;
-  }>
+  }>,
+  source: 'google' | 'yelp' = 'google'
 ): Promise<void> {
   try {
     if (!supabaseAdmin) {
@@ -527,25 +541,63 @@ export async function writeReviewsToSupabase(
       return;
     }
 
+    // Get existing reviews for this brewery to check for duplicates
+    const { data: existingReviews } = await supabaseAdmin
+      .from('reviews')
+      .select('review_timestamp, reviewer_name, review_text')
+      .eq('brewery_id', breweryId)
+      .eq('source', source);
+
+    // Create a set of existing review keys for fast lookup
+    const existingKeys = new Set<string>();
+    (existingReviews || []).forEach((review: any) => {
+      const timestamp = review.review_timestamp || 0;
+      const reviewerName = (review.reviewer_name || '').toLowerCase().trim();
+      const reviewTextSnippet = (review.review_text || '').substring(0, 100).toLowerCase().trim();
+      const key = `${timestamp}|${reviewerName}|${reviewTextSnippet}`;
+      existingKeys.add(key);
+    });
+
     const fetchedAt = new Date().toISOString();
 
-    const reviewRecords = reviews.map(review => ({
-      brewery_id: breweryId,
-      brewery_name: breweryName,
-      reviewer_name: review.author_name || null,
-      rating: review.rating || null,
-      review_text: review.text || null,
-      review_date: review.relative_time_description || null,
-      review_timestamp: review.time || null,
-      reviewer_url: review.author_url || null,
-      profile_photo_url: review.profile_photo_url || null,
-      language: review.language || 'en',
-      fetched_at: fetchedAt,
-    }));
+    // Filter out duplicates before inserting
+    const newReviewRecords = reviews
+      .map(review => {
+        const timestamp = review.time || 0;
+        const reviewerName = (review.author_name || '').toLowerCase().trim();
+        const reviewTextSnippet = (review.text || '').substring(0, 100).toLowerCase().trim();
+        const key = `${timestamp}|${reviewerName}|${reviewTextSnippet}`;
+        
+        // Skip if this review already exists
+        if (existingKeys.has(key)) {
+          return null;
+        }
+
+        return {
+          brewery_id: breweryId,
+          brewery_name: breweryName,
+          source: source,
+          reviewer_name: review.author_name || null,
+          rating: review.rating || null,
+          review_text: review.text || null,
+          review_date: review.relative_time_description || null,
+          review_timestamp: review.time || null,
+          reviewer_url: review.author_url || null,
+          profile_photo_url: review.profile_photo_url || null,
+          language: review.language || 'en',
+          fetched_at: fetchedAt,
+        };
+      })
+      .filter((record): record is NonNullable<typeof record> => record !== null);
+
+    // Only insert if there are new reviews
+    if (newReviewRecords.length === 0) {
+      return;
+    }
 
     const { error } = await supabaseAdmin
       .from('reviews')
-      .insert(reviewRecords);
+      .insert(newReviewRecords);
 
     if (error) {
       throw error;
@@ -614,6 +666,63 @@ export async function storePlaceIdInSupabase(
 }
 
 /**
+ * Update Yelp review summary in breweries table
+ */
+export async function updateYelpReviewSummaryInSupabase(
+  breweryId: string,
+  rating: number,
+  ratingCount: number
+): Promise<void> {
+  try {
+    if (!supabaseAdmin) {
+      throw new Error('Supabase admin client not available');
+    }
+
+    const { error } = await supabaseAdmin
+      .from('breweries')
+      .update({
+        yelp_rating: rating,
+        yelp_rating_count: ratingCount,
+        yelp_reviews_last_updated: new Date().toISOString(),
+      })
+      .eq('id', breweryId);
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    console.error('Failed to update Yelp review summary in Supabase:', error);
+    throw error;
+  }
+}
+
+/**
+ * Store Yelp Business ID for a brewery
+ */
+export async function storeYelpBusinessIdInSupabase(
+  breweryId: string,
+  yelpBusinessId: string
+): Promise<void> {
+  try {
+    if (!supabaseAdmin) {
+      throw new Error('Supabase admin client not available');
+    }
+
+    const { error } = await supabaseAdmin
+      .from('breweries')
+      .update({ yelp_business_id: yelpBusinessId })
+      .eq('id', breweryId);
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    console.error('Failed to store Yelp Business ID in Supabase:', error);
+    throw error;
+  }
+}
+
+/**
  * Update brewery logo in Supabase
  */
 export async function updateBreweryLogoInSupabase(
@@ -646,6 +755,7 @@ export interface DatabaseReview {
   id: string;
   brewery_id: string;
   brewery_name: string;
+  source: string; // 'google' or 'yelp'
   reviewer_name: string | null;
   rating: number | null;
   review_text: string | null;
@@ -667,54 +777,71 @@ export async function getBreweryReviews(
   offset: number = 0
 ): Promise<{ reviews: DatabaseReview[]; total: number }> {
   try {
-    // Get total count (deduplicated by id)
-    const { count, error: countError } = await supabase
-      .from('reviews')
-      .select('id', { count: 'exact', head: true })
-      .eq('brewery_id', breweryId);
-
-    if (countError) {
-      throw countError;
-    }
-
-    // Get reviews with pagination
-    const { data, error } = await supabase
+    // Get all reviews for this brewery to properly deduplicate and count
+    const { data: allReviews, error: fetchError } = await supabase
       .from('reviews')
       .select('*')
       .eq('brewery_id', breweryId)
-      .order('review_timestamp', { ascending: false, nullsFirst: false })
-      .range(offset, offset + limit - 1);
+      .order('review_timestamp', { ascending: false, nullsFirst: false });
 
-    if (error) {
-      throw error;
+    if (fetchError) {
+      throw fetchError;
     }
 
-    // Deduplicate by content (brewery_id + review_timestamp + reviewer_name) in case of duplicates in database
-    const uniqueReviews = (data || []).reduce((acc: DatabaseReview[], review: DatabaseReview) => {
+    // Deduplicate by content (brewery_id + review_timestamp + reviewer_name + review_text) in case of duplicates in database
+    // Use review_text as part of the key since timestamp might be 0 for many reviews
+    const uniqueReviewsMap = new Map<string, DatabaseReview>();
+    
+    (allReviews || []).forEach((review: DatabaseReview) => {
       const timestamp = review.review_timestamp || 0;
       const reviewerName = (review.reviewer_name || '').toLowerCase().trim();
-      const duplicateKey = `${review.brewery_id}|${timestamp}|${reviewerName}`;
+      // Use first 100 chars of review text as part of key to better identify unique reviews
+      const reviewTextSnippet = (review.review_text || '').substring(0, 100).toLowerCase().trim();
+      // Create a more robust duplicate key that includes review text
+      const duplicateKey = `${review.brewery_id}|${timestamp}|${reviewerName}|${reviewTextSnippet}`;
       
-      // Check if we already have a review with the same content
-      const existing = acc.find(r => {
-        const rTimestamp = r.review_timestamp || 0;
-        const rName = (r.reviewer_name || '').toLowerCase().trim();
-        return `${r.brewery_id}|${rTimestamp}|${rName}` === duplicateKey;
-      });
-      
-      if (!existing) {
-        acc.push(review);
+      // Only add if we haven't seen this exact review before
+      if (!uniqueReviewsMap.has(duplicateKey)) {
+        uniqueReviewsMap.set(duplicateKey, review);
       }
-      return acc;
-    }, []);
+    });
+
+    // Convert map to array and get total count
+    const allUniqueReviews = Array.from(uniqueReviewsMap.values());
+    const total = allUniqueReviews.length;
+
+    // Apply pagination to deduplicated reviews
+    const paginatedReviews = allUniqueReviews.slice(offset, offset + limit);
 
     return {
-      reviews: uniqueReviews,
-      total: count || 0,
+      reviews: paginatedReviews,
+      total: total,
     };
   } catch (error) {
     console.error('Failed to fetch reviews from Supabase:', error);
     return { reviews: [], total: 0 };
+  }
+}
+
+export async function getBreweryArticles(breweryId: string, limit: number = 5): Promise<DatabaseBreweryArticle[]> {
+  try {
+    const { data, error } = await supabase
+      .from('brewery_articles')
+      .select('*')
+      .eq('brewery_id', breweryId)
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .order('relevance_score', { ascending: false })
+      .limit(limit);
+    
+    if (error) {
+      console.error('Error fetching brewery articles:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Failed to fetch brewery articles from Supabase:', error);
+    return [];
   }
 }
 

@@ -237,23 +237,49 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                         </div>
                       )}
                       
-                      {/* Content on the right */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-gray-900 hover:text-red-600 text-sm">
+                      {/* Content on the right - Two columns */}
+                      <div className="flex-1 min-w-0 grid grid-cols-2 gap-4">
+                        {/* Name Column */}
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-gray-900 hover:text-red-600 text-sm mb-1">
                             {brewery.name}
                           </h3>
+                          {/* Reviews below name */}
                           {brewery.googleRating && (
-                            <div className="flex items-center gap-0.5">
+                            <div className="flex items-center gap-1 mt-1">
                               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                               <span className="text-xs font-medium text-gray-700">
                                 {brewery.googleRating.toFixed(1)}
                               </span>
+                              {brewery.googleRatingCount && (
+                                <span className="text-xs text-gray-500">
+                                  ({brewery.googleRatingCount})
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          {(brewery.amenities || brewery.features) && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {((brewery.amenities || brewery.features) as string[]).slice(0, 3).map((a: string) => (
+                                <span
+                                  key={a}
+                                  className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
+                                >
+                                  {a}
+                                </span>
+                              ))}
+                              {((brewery.amenities || brewery.features) as string[]).length > 3 && (
+                                <span className="text-xs text-gray-500">
+                                  +{((brewery.amenities || brewery.features) as string[]).length - 3} more
+                                </span>
+                              )}
                             </div>
                           )}
                         </div>
-                        <div className="text-xs text-gray-600 mb-2">
-                          <div className="flex items-start">
+                        
+                        {/* Address Column */}
+                        <div className="min-w-0 text-xs text-gray-600">
+                          <div className="flex items-start mb-1">
                             <MapPin className="h-3 w-3 mr-1 mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
                               {brewery.street && (
@@ -264,33 +290,16 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                                   .filter(Boolean)
                                   .join(', ')}
                               </div>
-                              {brewery.type && (
-                                <div className="mt-1">
-                                  <span className="text-gray-500">
-                                    {Array.isArray(brewery.type) ? brewery.type.join(', ') : brewery.type}
-                                  </span>
-                                </div>
-                              )}
                             </div>
                           </div>
+                          {/* Phone below address */}
+                          {brewery.phone && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <Phone className="h-3 w-3 flex-shrink-0" />
+                              <span>{brewery.phone}</span>
+                            </div>
+                          )}
                         </div>
-                        {(brewery.amenities || brewery.features) && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {((brewery.amenities || brewery.features) as string[]).slice(0, 3).map((a: string) => (
-                              <span
-                                key={a}
-                                className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
-                              >
-                                {a}
-                              </span>
-                            ))}
-                            {((brewery.amenities || brewery.features) as string[]).length > 3 && (
-                              <span className="text-xs text-gray-500">
-                                +{((brewery.amenities || brewery.features) as string[]).length - 3} more
-                              </span>
-                            )}
-                          </div>
-                        )}
                       </div>
                     </div>
                   </Link>
@@ -362,7 +371,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
       {/* Right Side - Map */}
       <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[600px] lg:h-[1000px]">
         <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-          <h2 className="text-xl font-bold text-gray-900">Interactive Map</h2>
+          <h2 className="text-xl font-bold text-gray-900">Brewery Map</h2>
           <p className="text-sm text-gray-600 mt-1">
             Click on markers or list items to explore breweries
           </p>

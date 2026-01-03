@@ -8,13 +8,13 @@ import { join } from 'path';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Interactive Brewery Map - Maryland Brewery Directory',
+  title: 'Brewery Map - Maryland Brewery Directory',
   description: 'Explore all Maryland breweries on an interactive map with filterable directory. Search by name, city, type, or amenities to find the perfect brewery. Discover taprooms, brewpubs, and microbreweries across Baltimore, Annapolis, Frederick, and more.',
   alternates: {
     canonical: '/map',
   },
   openGraph: {
-    title: 'Interactive Brewery Map - Maryland Brewery Directory',
+    title: 'Brewery Map - Maryland Brewery Directory',
     description: 'Interactive map of all Maryland breweries. Find breweries near you and explore the craft beer scene across the state.',
     url: 'https://www.marylandbrewery.com/map',
     siteName: 'Maryland Brewery Directory',
@@ -24,13 +24,13 @@ export const metadata: Metadata = {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Maryland Brewery Directory - Interactive Map',
+        alt: 'Maryland Brewery Directory - Brewery Map',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Interactive Brewery Map - Maryland Brewery Directory',
+    title: 'Brewery Map - Maryland Brewery Directory',
     description: 'Interactive map of all Maryland breweries. Find breweries near you and explore the craft beer scene across the state.',
     images: ['/og-image.jpg'],
   },
@@ -42,7 +42,7 @@ export default async function MapPage() {
 
   const breadcrumbs = [
     { name: 'Home', url: '/', isActive: false },
-    { name: 'Interactive Map', url: '/map', isActive: true },
+    { name: 'Brewery Map', url: '/map', isActive: true },
   ];
 
   // Related pages for internal linking
@@ -62,7 +62,7 @@ export default async function MapPage() {
   return (
     <div className="bg-gray-50 min-h-screen">
       <PageHero
-        h1="Interactive Brewery Map"
+        h1="Brewery Map"
         introText="Explore all Maryland breweries on an interactive map with a filterable directory. Search by name, city, type, or amenities to find the perfect brewery for your visit."
         breadcrumbs={breadcrumbs}
         heroImage={hasMapHeroImage ? mapHeroImagePath : null}

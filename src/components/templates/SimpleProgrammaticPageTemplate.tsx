@@ -95,11 +95,16 @@ export default function SimpleProgrammaticPageTemplate({
             {breadcrumbs.map((item: any, index: number) => (
               <div key={index} className="flex items-center">
                 {index > 0 && <ChevronRight className="h-4 w-4 mx-2" />}
-                {item.isActive ? (
-                  <span className="text-gray-900 font-medium">{item.name}</span>
-                ) : (
-                  <a href={item.url} className="hover:text-md-red">{item.name}</a>
-                )}
+                <a 
+                  href={item.url} 
+                  className={`transition-colors ${
+                    item.isActive 
+                      ? 'text-gray-900 font-medium' 
+                      : 'hover:text-md-red'
+                  }`}
+                >
+                  {item.name}
+                </a>
               </div>
             ))}
           </nav>

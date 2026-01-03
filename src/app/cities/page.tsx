@@ -144,7 +144,14 @@ export default async function CitiesIndexPage() {
                 </Link>
               </li>
               <li><ChevronRight className={`h-4 w-4 mx-2 ${hasCitiesHeroImage ? 'text-white/70' : ''}`} /></li>
-              <li className={`font-medium ${hasCitiesHeroImage ? 'text-white drop-shadow-md' : 'text-[#1C1C1C]'}`}>Cities</li>
+              <li>
+                <Link 
+                  href="/cities" 
+                  className={`font-medium transition-colors ${hasCitiesHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-[#1C1C1C] hover:text-[#9B2335]'}`}
+                >
+                  Cities
+                </Link>
+              </li>
             </ol>
           </nav>
 

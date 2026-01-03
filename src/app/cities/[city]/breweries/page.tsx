@@ -10,6 +10,7 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import '@/components/home-v2/styles.css';
 import CityBreweriesMapSection from '@/components/directory/CityBreweriesMapSection';
+import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 // Build all city pages (no limit)
 export async function generateStaticParams() {
@@ -139,6 +140,39 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
   const totalBreweries = breweries.length;
   const openNow = breweries.filter((b) => isOpenNow(b)).length;
 
+  // Prepare data for BreweriesByLocationTabs
+  const processed = await getProcessedBreweryData();
+  
+  // Process cities - get unique cities with counts
+  const cityCounts = new Map<string, { name: string; slug: string; count: number }>();
+  processed.breweries.forEach((brewery: any) => {
+    if (brewery.city) {
+      const slug = slugify(brewery.city);
+      const existing = cityCounts.get(slug);
+      if (existing) {
+        existing.count++;
+      } else {
+        cityCounts.set(slug, { name: brewery.city, slug, count: 1 });
+      }
+    }
+  });
+  const cities = Array.from(cityCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
+
+  // Process counties - get unique counties with counts
+  const countyCounts = new Map<string, { name: string; slug: string; count: number }>();
+  processed.breweries.forEach((brewery: any) => {
+    if (brewery.county) {
+      const slug = slugify(brewery.county);
+      const existing = countyCounts.get(slug);
+      if (existing) {
+        existing.count++;
+      } else {
+        countyCounts.set(slug, { name: `${brewery.county} County`, slug, count: 1 });
+      }
+    }
+  });
+  const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
+
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
       {/* Hero Section */}
@@ -189,8 +223,10 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
                 </Link>
               </li>
               <li><ChevronRight className="h-4 w-4 mx-2 text-white/70" /></li>
-              <li className="text-white font-medium drop-shadow-md">
-                {cityName}, MD
+              <li>
+                <Link href={`/cities/${city}/breweries`} className="text-white font-medium drop-shadow-md hover:text-white transition-colors">
+                  {cityName}, MD
+                </Link>
               </li>
             </ol>
           </nav>
@@ -464,6 +500,9 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
           </div>
         </section>
       )}
+
+      {/* Breweries by Location Tabs */}
+      <BreweriesByLocationTabs cities={cities} counties={counties} />
     </div>
   );
 }

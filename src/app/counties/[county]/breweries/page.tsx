@@ -5,6 +5,7 @@ import { slugify, deslugify } from '@/lib/data-utils';
 import { generateCountyIntroText, generateCountyContentBlocks } from '@/lib/content-generators';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 const ALL_MD_COUNTIES = [
   'Allegany', 'Anne Arundel', 'Baltimore', 'Calvert', 'Caroline', 'Carroll', 'Cecil', 'Charles',
@@ -158,21 +159,55 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
   // Use local county image if available
   const countyHeroImage = hasLocalCountyImage ? localCountyImagePath : null;
 
+  // Prepare data for BreweriesByLocationTabs
+  // Process cities - get unique cities with counts
+  const cityCounts = new Map<string, { name: string; slug: string; count: number }>();
+  processed.breweries.forEach((brewery: any) => {
+    if (brewery.city) {
+      const slug = slugify(brewery.city);
+      const existing = cityCounts.get(slug);
+      if (existing) {
+        existing.count++;
+      } else {
+        cityCounts.set(slug, { name: brewery.city, slug, count: 1 });
+      }
+    }
+  });
+  const cities = Array.from(cityCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
+
+  // Process counties - get unique counties with counts
+  const countyCounts = new Map<string, { name: string; slug: string; count: number }>();
+  processed.breweries.forEach((brewery: any) => {
+    if (brewery.county) {
+      const slug = slugify(brewery.county);
+      const existing = countyCounts.get(slug);
+      if (existing) {
+        existing.count++;
+      } else {
+        countyCounts.set(slug, { name: `${brewery.county} County`, slug, count: 1 });
+      }
+    }
+  });
+  const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
+
   return (
-    <DirectoryPageTemplate
-      h1={`${countyName} County Breweries`}
-      introText={introText}
-      breadcrumbs={breadcrumbs}
-      breweries={breweries as any}
-      stats={stats}
-      contentBlocks={contentBlocks}
-      relatedPages={relatedPages}
-      pageType="county"
-      showMap={true}
-      showStats={true}
-      showTable={true}
-      mapZoom={9}
-      heroImage={countyHeroImage}
-    />
+    <>
+      <DirectoryPageTemplate
+        h1={`${countyName} County Breweries`}
+        introText={introText}
+        breadcrumbs={breadcrumbs}
+        breweries={breweries as any}
+        stats={stats}
+        contentBlocks={contentBlocks}
+        relatedPages={relatedPages}
+        pageType="county"
+        showMap={true}
+        showStats={true}
+        showTable={true}
+        mapZoom={9}
+        heroImage={countyHeroImage}
+      />
+      <BreweriesByLocationTabs cities={cities} counties={counties} />
+    </>
   );
 }

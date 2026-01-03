@@ -58,18 +58,20 @@ export default function PageHero({ h1, introText, breadcrumbs, heroImage }: Page
                 {index > 0 && (
                   <ChevronRight className={`h-4 w-4 mx-2 ${heroImage ? 'text-white/70' : 'text-gray-400'}`} />
                 )}
-                {crumb.isActive ? (
-                  <span className={`font-medium ${heroImage ? 'text-white drop-shadow-md' : 'text-gray-900'}`}>
-                    {crumb.name}
-                  </span>
-                ) : (
-                  <Link 
-                    href={crumb.url} 
-                    className={`transition-colors ${heroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-red-600'}`}
-                  >
-                    {crumb.name}
-                  </Link>
-                )}
+                <Link 
+                  href={crumb.url} 
+                  className={`transition-colors font-medium ${
+                    crumb.isActive 
+                      ? heroImage 
+                        ? 'text-white drop-shadow-md' 
+                        : 'text-gray-900'
+                      : heroImage 
+                        ? 'hover:text-white drop-shadow-md' 
+                        : 'hover:text-red-600'
+                  }`}
+                >
+                  {crumb.name}
+                </Link>
               </li>
             ))}
           </ol>

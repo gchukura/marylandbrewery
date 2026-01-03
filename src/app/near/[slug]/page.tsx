@@ -169,15 +169,13 @@ export default async function NearAttractionPage({ params }: { params: Promise<{
     ...(attraction.city ? [{
       title: `${attraction.city} Breweries`,
       url: `/city/${slugify(attraction.city)}/breweries`,
-      count: null,
     }] : []),
     ...(attraction.county ? [{
       title: `${attraction.county} Breweries`,
       url: `/county/${slugify(attraction.county)}/breweries`,
-      count: null,
     }] : []),
-    { title: 'Interactive Map', url: '/map', count: null },
-    { title: 'Best Breweries', url: '/best-breweries', count: null },
+    { title: 'Interactive Map', url: '/map' },
+    { title: 'Best Breweries', url: '/best-breweries' },
   ];
 
   return (

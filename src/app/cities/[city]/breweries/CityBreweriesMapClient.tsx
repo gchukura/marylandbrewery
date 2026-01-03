@@ -27,6 +27,9 @@ interface Neighborhood {
   state: string;
   url?: string;
   homes_url?: string;
+  latitude?: number;
+  longitude?: number;
+  place_id?: string;
 }
 
 interface CityBreweriesMapClientProps {

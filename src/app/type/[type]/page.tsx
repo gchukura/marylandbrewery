@@ -4,7 +4,7 @@ import { getProcessedBreweryData } from '../../../../lib/brewery-data';
 import { slugify, deslugify } from '@/lib/data-utils';
 import { generateTypeContentBlocks } from '@/lib/content-generators';
 
-const TYPES = ['microbrewery', 'brewpub', 'taproom', 'production', 'nano'] as const;
+const TYPES = ['microbrewery', 'brewpub', 'taproom', 'production', 'nano', 'farm-brewery'] as const;
 
 export async function generateStaticParams() {
   return TYPES.map((t) => ({ type: t }));
@@ -57,7 +57,20 @@ export default async function TypePage({ params }: { params: Promise<{ type: str
   const processed = await getProcessedBreweryData();
   const typeKey = type.toLowerCase();
   const typeLabel = deslugify(type);
+  
+  // Special handling for farm-brewery (may not be in type field, check name/description)
   const breweries = processed.breweries.filter((b) => {
+    if (typeKey === 'farm-brewery' || typeKey === 'farm brewery') {
+      // Check if brewery name or description contains "farm"
+      const nameMatch = b.name?.toLowerCase().includes('farm');
+      const descMatch = b.description?.toLowerCase().includes('farm');
+      const typeMatch = Array.isArray(b.type) 
+        ? b.type.some(t => t.toLowerCase().includes('farm'))
+        : b.type?.toLowerCase().includes('farm');
+      return nameMatch || descMatch || typeMatch;
+    }
+    
+    // Standard type matching
     if (Array.isArray(b.type)) {
       return b.type.some(type => type.toLowerCase() === typeKey);
     }

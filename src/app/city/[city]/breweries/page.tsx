@@ -38,8 +38,20 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
     .map(([k]) => k)
     .join(', ');
 
-  const title = generateCityTitle(cityName, total);
-  const description = generateCityDescription(cityName, total, topAmenities);
+  // Special SEO optimization for Frederick (400 Traffic Potential - highest opportunity!)
+  let title: string;
+  let description: string;
+  
+  if (cityName.toLowerCase() === 'frederick') {
+    title = `Breweries in Frederick Maryland | ${total} Local Craft Breweries`;
+    description = `Explore ${total} breweries in Frederick, Maryland. Find the best craft beer spots in downtown Frederick and the surrounding area. ${topAmenities ? `Popular features include ${topAmenities}.` : ''} Plan your Frederick brewery tour today!`;
+  } else if (cityName.toLowerCase() === 'ocean city') {
+    title = `Breweries in Ocean City Maryland | Beach Town Craft Beer Guide`;
+    description = `Discover breweries in Ocean City, Maryland and nearby beach towns. Perfect for your next vacation or weekend getaway. Find ${total} craft breweries in the Ocean City area.`;
+  } else {
+    title = generateCityTitle(cityName, total);
+    description = generateCityDescription(cityName, total, topAmenities);
+  }
 
   return {
     title,
@@ -186,9 +198,27 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
     ...topTypes,
   ];
 
+  // Special content for Frederick (high-value keyword target)
+  let h1Text = `Breweries in ${cityName}, Maryland`;
+  if (cityName.toLowerCase() === 'frederick') {
+    h1Text = `Breweries in Frederick, Maryland`;
+    // Enhance content blocks for Frederick
+    contentBlocks.unshift({
+      title: "About Frederick's Craft Beer Scene",
+      content: `Frederick, Maryland has emerged as one of the state's premier craft beer destinations. With ${total} breweries, Frederick offers a diverse brewery scene from historic downtown taprooms to modern production facilities. The city's walkable downtown makes it easy to visit multiple breweries in one day, and many breweries feature outdoor patios, live music, and local food options.`,
+    });
+  } else if (cityName.toLowerCase() === 'ocean city') {
+    h1Text = `Breweries in Ocean City, Maryland`;
+    // Enhance content blocks for Ocean City
+    contentBlocks.unshift({
+      title: "Ocean City Breweries & Beach Town Craft Beer",
+      content: `Discover craft breweries in Ocean City, Maryland and the surrounding beach communities. While Ocean City itself may have limited brewery options, nearby towns like Berlin and Bishopville offer excellent craft beer experiences. Many breweries in the area cater to vacationers and feature seasonal hours, outdoor seating, and beach-friendly atmospheres.`,
+    });
+  }
+
   return (
     <DirectoryPageTemplate
-      h1={`Breweries in ${cityName}, Maryland`}
+      h1={h1Text}
       introText={introText}
       breadcrumbs={breadcrumbs}
       breweries={breweries as any}

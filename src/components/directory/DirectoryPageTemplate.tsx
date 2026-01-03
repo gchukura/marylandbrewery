@@ -48,7 +48,7 @@ interface DirectoryPageTemplateProps {
   relatedPages: RelatedPage[];
   
   // Configuration
-  pageType: 'city' | 'county' | 'type' | 'amenity';
+  pageType: 'city' | 'county' | 'type' | 'amenity' | 'search' | 'region' | 'near';
   showMap?: boolean;
   showStats?: boolean;
   showTable?: boolean;

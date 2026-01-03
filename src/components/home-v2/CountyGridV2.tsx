@@ -41,7 +41,7 @@ export default function CountyGridV2({ counties }: CountyGridV2Props) {
           {counties.map((county) => (
             <Link
               key={county.slug}
-              href={`/county/${county.slug}/breweries`}
+              href={`/counties/${county.slug}/breweries`}
               className="group relative p-4 bg-[#FAF9F6] hover:bg-white border border-[#E8E6E1] hover:border-[#D4A017] rounded-lg transition-all duration-200 hover:shadow-md"
             >
               {/* County Name */}

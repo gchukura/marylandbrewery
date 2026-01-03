@@ -35,7 +35,7 @@ export default function CityGridV2({ cities }: CityGridV2Props) {
           {cities.map((city) => (
             <Link
               key={city.slug}
-              href={`/city/${city.slug}/breweries`}
+              href={`/cities/${city.slug}/breweries`}
               className="group py-2 flex items-center text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-200"
               style={{ fontFamily: "'Source Sans 3', sans-serif" }}
             >

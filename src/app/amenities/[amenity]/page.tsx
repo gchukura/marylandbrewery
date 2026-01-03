@@ -123,7 +123,7 @@ export default async function AmenityPage({ params }: { params: Promise<{ amenit
   // Top cities with this amenity
   const topCities = topCitiesData.slice(0, 5).map(({ city, count }) => ({
     title: `${city} ${label} Breweries`,
-    url: `/city/${slugify(city)}/${amenity}`,
+    url: `/cities/${slugify(city)}/${amenity}`,
     count,
   }));
 

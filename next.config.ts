@@ -46,6 +46,27 @@ const nextConfig: NextConfig = {
         destination: '/',
         permanent: true,
       },
+      // Redirect singular to plural for consistency
+      {
+        source: '/city',
+        destination: '/cities',
+        permanent: true,
+      },
+      {
+        source: '/city/:path*',
+        destination: '/cities/:path*',
+        permanent: true,
+      },
+      {
+        source: '/county',
+        destination: '/counties',
+        permanent: true,
+      },
+      {
+        source: '/county/:path*',
+        destination: '/counties/:path*',
+        permanent: true,
+      },
     ];
   },
   async headers() {

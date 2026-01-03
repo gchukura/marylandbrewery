@@ -168,11 +168,11 @@ export default async function NearAttractionPage({ params }: { params: Promise<{
   const relatedPages = [
     ...(attraction.city ? [{
       title: `${attraction.city} Breweries`,
-      url: `/city/${slugify(attraction.city)}/breweries`,
+      url: `/cities/${slugify(attraction.city)}/breweries`,
     }] : []),
     ...(attraction.county ? [{
       title: `${attraction.county} Breweries`,
-      url: `/county/${slugify(attraction.county)}/breweries`,
+      url: `/counties/${slugify(attraction.county)}/breweries`,
     }] : []),
     { title: 'Interactive Map', url: '/map' },
     { title: 'Best Breweries', url: '/best-breweries' },

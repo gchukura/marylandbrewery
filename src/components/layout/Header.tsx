@@ -12,8 +12,8 @@ import { Menu, X } from 'lucide-react';
 
 // Static navigation data - simplified to match v2 design
 const NAVIGATION_ITEMS = [
-  { label: 'Cities', href: '/city' },
-  { label: 'Counties', href: '/county' },
+  { label: 'Cities', href: '/cities' },
+  { label: 'Counties', href: '/counties' },
   { label: 'Interactive Map', href: '/map' },
   { label: 'Blog', href: '/blog' },
   { label: 'Contact', href: '/contact' },

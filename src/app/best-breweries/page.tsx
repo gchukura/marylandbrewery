@@ -112,7 +112,7 @@ export default async function BestBreweriesPage() {
     .slice(0, 5)
     .map(([city]) => ({
       title: `${city.charAt(0).toUpperCase() + city.slice(1)} Breweries`,
-      url: `/city/${slugify(city)}/breweries`,
+      url: `/cities/${slugify(city)}/breweries`,
       count: cityCounts.get(city),
     }));
 

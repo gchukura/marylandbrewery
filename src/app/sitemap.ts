@@ -26,8 +26,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   urls.push({ url: `${BASE_URL}/best-breweries`, lastModified: lastMod, priority: 0.8 });
   urls.push({ url: `${BASE_URL}/open-now`, lastModified: lastMod, priority: 0.7 });
   urls.push({ url: `${BASE_URL}/contact`, lastModified: lastMod, priority: 0.6 });
-  urls.push({ url: `${BASE_URL}/city`, lastModified: lastMod, priority: 0.8 });
-  urls.push({ url: `${BASE_URL}/county`, lastModified: lastMod, priority: 0.8 });
+  urls.push({ url: `${BASE_URL}/cities`, lastModified: lastMod, priority: 0.8 });
+  urls.push({ url: `${BASE_URL}/counties`, lastModified: lastMod, priority: 0.8 });
   urls.push({ url: `${BASE_URL}/amenities`, lastModified: lastMod, priority: 0.8 });
   urls.push({ url: `${BASE_URL}/type`, lastModified: lastMod, priority: 0.8 });
   
@@ -45,12 +45,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // City pages
   for (const city of cities) {
-    urls.push({ url: `${BASE_URL}/city/${slugify(city)}/breweries`, lastModified: lastMod, priority: 0.9 });
+    urls.push({ url: `${BASE_URL}/cities/${slugify(city)}/breweries`, lastModified: lastMod, priority: 0.9 });
   }
 
   // County pages
   for (const county of counties) {
-    urls.push({ url: `${BASE_URL}/county/${slugify(county)}/breweries`, lastModified: lastMod, priority: 0.7 });
+    urls.push({ url: `${BASE_URL}/counties/${slugify(county)}/breweries`, lastModified: lastMod, priority: 0.7 });
   }
 
   // Individual breweries
@@ -75,7 +75,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const city of cities) {
     const citySlug = slugify(city);
     for (const a of amenities) {
-      urls.push({ url: `${BASE_URL}/city/${citySlug}/${a}`, lastModified: lastMod, priority: 0.5 });
+      urls.push({ url: `${BASE_URL}/cities/${citySlug}/${a}`, lastModified: lastMod, priority: 0.5 });
     }
   }
 

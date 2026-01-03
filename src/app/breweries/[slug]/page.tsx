@@ -262,7 +262,7 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
   const citySlug = (brewery as any).citySlug || slugify(brewery.city);
   const breadcrumbs = [
     { name: 'Maryland Brewery', url: '/', position: 1, isActive: false },
-    { name: brewery.city, url: `/city/${citySlug}/breweries`, position: 2, isActive: false },
+    { name: brewery.city, url: `/cities/${citySlug}/breweries`, position: 2, isActive: false },
     { name: brewery.name, url: `/breweries/${slug}`, position: 3, isActive: true },
   ];
 
@@ -296,7 +296,7 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
 
   // Generate related pages with more links
   const relatedPages = [
-    { title: `All ${brewery.city} Breweries`, url: `/city/${citySlug}/breweries`, type: 'city' as const, count: sameCityBreweriesForLinks.length },
+    { title: `All ${brewery.city} Breweries`, url: `/cities/${citySlug}/breweries`, type: 'city' as const, count: sameCityBreweriesForLinks.length },
     { title: 'Interactive Map', url: '/map', type: 'general' as const },
     { title: 'Open Now', url: '/open-now', type: 'general' as const },
     ...sameCityOther,

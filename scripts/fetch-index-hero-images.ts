@@ -182,6 +182,31 @@ async function fetchIndexHeroImages() {
       console.log('⊘ Counties hero image already exists (use --force to re-download)\n');
     }
 
+    // Map page - unique brewery-themed image
+    const mapImagePath = join(INDEX_IMAGES_DIR, 'map-hero.jpg');
+    
+    if (!existsSync(mapImagePath) || forceRedownload) {
+      console.log('📥 Fetching brewery image for /map page...');
+      const mapPhoto = await searchPexels('beer flight tasting');
+      
+      if (mapPhoto) {
+        const imageUrl = mapPhoto.src.large2x || mapPhoto.src.large || mapPhoto.src.original;
+        console.log(`   📥 Downloading image (${mapPhoto.width}x${mapPhoto.height})...`);
+        console.log(`   📸 Photo by ${mapPhoto.photographer}`);
+        
+        const success = await downloadImage(imageUrl, mapImagePath);
+        if (success) {
+          console.log(`   ✓ Saved: map-hero.jpg\n`);
+        } else {
+          console.log(`   ✗ Failed to download\n`);
+        }
+      } else {
+        console.log(`   ⚠️  No image found\n`);
+      }
+    } else {
+      console.log('⊘ Map hero image already exists (use --force to re-download)\n');
+    }
+
     console.log('✅ Done!');
 
   } catch (error) {

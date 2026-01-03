@@ -1,10 +1,13 @@
 import { Metadata } from 'next';
-import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 import { getProcessedBreweryData } from '../../../../../lib/brewery-data';
 import { slugify, deslugify } from '@/lib/data-utils';
-import { generateCountyIntroText, generateCountyContentBlocks } from '@/lib/content-generators';
+import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import '@/components/home-v2/styles.css';
+import CountyBreweriesMapClient from './CountyBreweriesMapClient';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 const ALL_MD_COUNTIES = [
@@ -69,84 +72,13 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
     return breweryCounty && breweryCounty.toLowerCase() === countyKey;
   });
   
-  // Optimize city extraction
-  const citiesInCounty = Array.from(new Set(breweries.map(b => b.city))).sort();
-
-  // Intro text
-  const statsForIntro = { totalBreweries: breweries.length, totalCounties: processed.counties.length, totalTypes: 0 };
-  const introText = generateCountyIntroText(countyName, breweries.length, statsForIntro);
-
-  // Breadcrumbs
-  const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
-    { name: 'Counties', url: '/counties', isActive: false },
-    { name: `${countyName} County`, url: `/counties/${county}/breweries`, isActive: true },
-  ];
-
-  // Stats
-  const microbreweries = breweries.filter(b => {
-    const types = Array.isArray(b.type) ? b.type : [b.type];
-    return types.some((t: string) => t?.toLowerCase() === 'microbrewery');
-  }).length;
-  const brewpubs = breweries.filter(b => {
-    const types = Array.isArray(b.type) ? b.type : [b.type];
-    return types.some((t: string) => t?.toLowerCase() === 'brewpub');
-  }).length;
-
-  const stats = [
-    { label: 'Total Breweries', value: breweries.length },
-    { label: 'Cities Covered', value: citiesInCounty.length },
-    { label: 'Microbreweries', value: microbreweries },
-    { label: 'Brewpubs', value: brewpubs },
-  ];
-
-  // Content blocks
-  const contentBlocks = generateCountyContentBlocks(countyName, breweries, citiesInCounty);
-
-  // Related pages - enhanced for better internal linking
-  // Cities in this county
-  const cityPages = citiesInCounty.slice(0, 6).map(city => ({
-    title: `${city} Breweries`,
-    url: `/cities/${slugify(city)}/breweries`,
-    count: breweries.filter(b => b.city === city).length,
-  }));
-
-  // Nearby counties
-  const neighbors = ALL_MD_COUNTIES
-    .filter(c => c.toLowerCase() !== countyName.toLowerCase())
-    .slice(0, 4)
-    .map(c => {
-      const neighborBreweries = processed.breweries.filter(b => (b as any).county?.toLowerCase() === c.toLowerCase());
-      return {
-        title: `${c} County Breweries`,
-        url: `/counties/${slugify(c)}/breweries`,
-        count: neighborBreweries.length,
-      };
-    });
-
-  // Top amenities in this county
-  const amenityCounts = new Map<string, number>();
-  breweries.forEach(b => {
-    const amenities = (b as any).amenities || (b as any).features || [];
-    amenities.forEach((a: string) => {
-      const key = a.trim().toLowerCase();
-      amenityCounts.set(key, (amenityCounts.get(key) || 0) + 1);
-    });
+  // Sort breweries by rating (highest first), then by name
+  const sortedBreweries = [...breweries].sort((a: any, b: any) => {
+    const aRating = a.googleRating || a.yelpRating || 0;
+    const bRating = b.googleRating || b.yelpRating || 0;
+    if (bRating !== aRating) return bRating - aRating;
+    return (a.name || '').localeCompare(b.name || '');
   });
-  
-  const topAmenities = Array.from(amenityCounts.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 4)
-    .map(([amenity]) => {
-      const amenitySlug = amenity.replace(/\s+/g, '-').toLowerCase();
-      return {
-        title: `${countyName} ${amenity.charAt(0).toUpperCase() + amenity.slice(1)} Breweries`,
-        url: `/amenities/${amenitySlug}`,
-        count: amenityCounts.get(amenity) || 0,
-      };
-    });
-
-  const relatedPages = [...cityPages, ...neighbors, ...topAmenities];
 
   // Get county hero image - check for local county image from Pexels
   const countySlug = slugify(countyName);
@@ -158,6 +90,9 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
   
   // Use local county image if available
   const countyHeroImage = hasLocalCountyImage ? localCountyImagePath : null;
+
+  // Calculate stats
+  const totalBreweries = breweries.length;
 
   // Prepare data for BreweriesByLocationTabs
   // Process cities - get unique cities with counts
@@ -191,23 +126,99 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
   const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <>
-      <DirectoryPageTemplate
-        h1={`${countyName} County Breweries`}
-        introText={introText}
-        breadcrumbs={breadcrumbs}
-        breweries={breweries as any}
-        stats={stats}
-        contentBlocks={contentBlocks}
-        relatedPages={relatedPages}
-        pageType="county"
-        showMap={true}
-        showStats={true}
-        showTable={true}
-        mapZoom={9}
-        heroImage={countyHeroImage}
-      />
+    <div className="min-h-screen bg-[#FAF9F6]">
+      {/* Hero Section */}
+      <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
+        {/* County Hero Image Background */}
+        {countyHeroImage && (
+          <div className="absolute inset-0">
+            <Image
+              src={countyHeroImage}
+              alt={`${countyName} County breweries`}
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority
+              unoptimized={false}
+            />
+            {/* Dark overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+          </div>
+        )}
+        
+        {/* Pattern overlay (only if no hero image) */}
+        {!countyHeroImage && (
+          <div className="absolute inset-0 md-pattern-bg pointer-events-none" />
+        )}
+        
+        <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
+          {/* Breadcrumbs */}
+          <nav className="mb-6" aria-label="Breadcrumb">
+            <ol className={`flex items-center flex-wrap gap-2 text-sm ${countyHeroImage ? 'text-white/90' : ''}`} style={{ fontFamily: "'Source Sans 3', sans-serif", color: countyHeroImage ? undefined : '#6B6B6B' }}>
+              <li>
+                <Link 
+                  href="/" 
+                  className={`transition-colors ${countyHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-[#9B2335]'}`}
+                >
+                  Home
+                </Link>
+              </li>
+              <li><ChevronRight className={`h-4 w-4 mx-2 ${countyHeroImage ? 'text-white/70' : ''}`} /></li>
+              <li>
+                <Link 
+                  href="/counties" 
+                  className={`transition-colors ${countyHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-[#9B2335]'}`}
+                >
+                  Counties
+                </Link>
+              </li>
+              <li><ChevronRight className={`h-4 w-4 mx-2 ${countyHeroImage ? 'text-white/70' : ''}`} /></li>
+              <li>
+                <Link 
+                  href={`/counties/${county}/breweries`} 
+                  className={`font-medium transition-colors ${countyHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-[#1C1C1C] hover:text-[#9B2335]'}`}
+                >
+                  {countyName} County
+                </Link>
+              </li>
+            </ol>
+          </nav>
+
+          {/* H1 Title */}
+          <h1 
+            className={`text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight ${
+              countyHeroImage 
+                ? 'text-white drop-shadow-lg' 
+                : 'text-[#1C1C1C]'
+            }`}
+            style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: countyHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
+          >
+            {countyName} County Breweries
+          </h1>
+
+          {/* Count Display */}
+          <p 
+            className={`text-lg md:text-xl mb-6 ${
+              countyHeroImage 
+                ? 'text-white/95 drop-shadow-md' 
+                : 'text-[#6B6B6B]'
+            }`}
+            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+          >
+            <strong className={countyHeroImage ? 'text-white font-semibold' : 'text-[#1C1C1C] font-semibold'}>{totalBreweries}</strong> {totalBreweries === 1 ? 'brewery' : 'breweries'} found.
+          </p>
+        </div>
+      </section>
+
+      {/* Map and List Layout */}
+      <section className="bg-white py-8 md:py-12">
+        <div className="container mx-auto px-4">
+          <CountyBreweriesMapClient breweries={sortedBreweries} countyName={countyName} />
+        </div>
+      </section>
+
+      {/* Breweries by Location Tabs */}
       <BreweriesByLocationTabs cities={cities} counties={counties} />
-    </>
+    </div>
   );
 }

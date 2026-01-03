@@ -868,3 +868,26 @@ export async function getNeighborhoodsByCity(city: string): Promise<DatabaseNeig
   }
 }
 
+/**
+ * Get neighborhoods by county
+ */
+export async function getNeighborhoodsByCounty(county: string): Promise<DatabaseNeighborhood[]> {
+  try {
+    const { data, error } = await supabase
+      .from('maryland_neighborhoods')
+      .select('*')
+      .ilike('county', county)
+      .order('name', { ascending: true });
+    
+    if (error) {
+      console.error('Error fetching neighborhoods by county:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Failed to fetch neighborhoods from Supabase:', error);
+    return [];
+  }
+}
+

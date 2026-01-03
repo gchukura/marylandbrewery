@@ -53,6 +53,7 @@ interface DirectoryPageTemplateProps {
   showStats?: boolean;
   showTable?: boolean;
   mapZoom?: number;
+  heroImage?: string | null;
 }
 
 export default function DirectoryPageTemplate({
@@ -68,6 +69,7 @@ export default function DirectoryPageTemplate({
   showStats = true,
   showTable = true,
   mapZoom = 10,
+  heroImage = null,
 }: DirectoryPageTemplateProps) {
   // Structured Data - only include if we have breweries
   const structuredData = {
@@ -99,7 +101,7 @@ export default function DirectoryPageTemplate({
 
       <div className="min-h-screen bg-gray-50">
         {/* 1. Hero Section */}
-        <PageHero h1={h1} introText={introText} breadcrumbs={breadcrumbs} />
+        <PageHero h1={h1} introText={introText} breadcrumbs={breadcrumbs} heroImage={heroImage} />
 
         {/* 2. Stats Bar */}
         {showStats && stats.length > 0 && (

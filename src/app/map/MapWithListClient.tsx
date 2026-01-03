@@ -161,14 +161,9 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                           {brewery.googleRating && (
                             <div className="flex items-center gap-1 mt-1">
                               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              <span className="text-xs font-medium text-gray-700">
-                                {brewery.googleRating.toFixed(1)}
+                              <span className="text-xs text-gray-700">
+                                {brewery.googleRating.toFixed(1)}{brewery.googleRatingCount ? ` - ${brewery.googleRatingCount} ${brewery.googleRatingCount === 1 ? 'review' : 'reviews'}` : ''}
                               </span>
-                              {brewery.googleRatingCount && (
-                                <span className="text-xs text-gray-500">
-                                  ({brewery.googleRatingCount})
-                                </span>
-                              )}
                             </div>
                           )}
                           {(brewery.amenities || brewery.features) && (

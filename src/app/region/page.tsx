@@ -90,6 +90,7 @@ export default async function RegionsIndexPage() {
       items={items}
       stats={stats}
       groupedItems={{}}
+      pageType="region"
     />
   );
 }

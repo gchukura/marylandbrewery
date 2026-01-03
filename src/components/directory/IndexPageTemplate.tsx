@@ -35,7 +35,7 @@ interface IndexPageTemplateProps {
   allBreweries?: any[]; // For map display
   
   // Configuration
-  pageType: 'city' | 'county' | 'amenity' | 'type';
+  pageType: 'city' | 'county' | 'amenity' | 'type' | 'region';
   showMap?: boolean;
   showStats?: boolean;
   mapZoom?: number;

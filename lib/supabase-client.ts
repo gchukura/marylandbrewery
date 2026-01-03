@@ -891,3 +891,26 @@ export async function getNeighborhoodsByCounty(county: string): Promise<Database
   }
 }
 
+/**
+ * Get neighborhood by slug
+ */
+export async function getNeighborhoodBySlug(slug: string): Promise<DatabaseNeighborhood | null> {
+  try {
+    const { data, error } = await supabase
+      .from('maryland_neighborhoods')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching neighborhood by slug:', error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Failed to fetch neighborhood from Supabase:', error);
+    return null;
+  }
+}
+

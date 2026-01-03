@@ -97,7 +97,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
               }}
             >
               <span className="relative">
-                Maryland Breweries by City
+                Breweries by City
                 {activeTab === 'city' && (
                   <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#D4A017] animate-pulse" />
                 )}
@@ -121,7 +121,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
               }}
             >
               <span className="relative">
-                Maryland Breweries by County
+                Breweries by County
                 {activeTab === 'county' && (
                   <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#D4A017] animate-pulse" />
                 )}

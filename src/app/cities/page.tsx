@@ -71,7 +71,7 @@ export default async function CitiesIndexPage() {
     }
   });
   
-  const items = Array.from(cityCounts.values()).sort((a, b) => b.count - a.count).map(item => ({
+  const items = Array.from(cityCounts.values()).sort((a, b) => a.name.localeCompare(b.name)).map(item => ({
     ...item,
     url: `/cities/${item.slug}/breweries`,
   }));

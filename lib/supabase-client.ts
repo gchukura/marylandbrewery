@@ -4,7 +4,7 @@
  * Provides the same interface as google-sheets.ts but uses Supabase
  */
 
-import { supabase, supabaseAdmin, DatabaseBrewery, DatabaseBeer, DatabaseNewsletterSubscriber, DatabaseBreweryArticle } from './supabase';
+import { supabase, supabaseAdmin, DatabaseBrewery, DatabaseBeer, DatabaseNewsletterSubscriber, DatabaseBreweryArticle, DatabaseNeighborhood } from './supabase';
 import { Brewery, Beer, SocialMedia, OperatingHours, Membership, ReviewThemes } from '../src/types/brewery';
 
 /**
@@ -841,6 +841,29 @@ export async function getBreweryArticles(breweryId: string, limit: number = 5): 
     return data || [];
   } catch (error) {
     console.error('Failed to fetch brewery articles from Supabase:', error);
+    return [];
+  }
+}
+
+/**
+ * Get neighborhoods by city
+ */
+export async function getNeighborhoodsByCity(city: string): Promise<DatabaseNeighborhood[]> {
+  try {
+    const { data, error } = await supabase
+      .from('maryland_neighborhoods')
+      .select('*')
+      .ilike('city', city)
+      .order('name', { ascending: true });
+    
+    if (error) {
+      console.error('Error fetching neighborhoods by city:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Failed to fetch neighborhoods from Supabase:', error);
     return [];
   }
 }

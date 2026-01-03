@@ -184,7 +184,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
                       }}
                     >
                       <span className="relative inline-block">
-                        {county.name}
+                        {county.name.replace(/\s+County$/i, '')}
                         <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gradient-to-r from-[#9B2335] to-[#D4A017] group-hover:w-full transition-all duration-300" />
                       </span>
                       {/* Subtle hover accent */}

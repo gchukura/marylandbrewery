@@ -145,7 +145,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
                   {column.map((city, itemIndex) => (
                     <Link
                       key={city.slug}
-                      href={`/city/${city.slug}/breweries`}
+                      href={`/cities/${city.slug}/breweries`}
                       className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-sm border-b border-[#E5E7EB] last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm"
                       style={{ 
                         fontFamily: "'Source Sans 3', sans-serif",
@@ -176,7 +176,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
                   {column.map((county) => (
                     <Link
                       key={county.slug}
-                      href={`/county/${county.slug}/breweries`}
+                      href={`/counties/${county.slug}/breweries`}
                       className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-sm border-b border-[#E5E7EB] last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm"
                       style={{ 
                         fontFamily: "'Source Sans 3', sans-serif",

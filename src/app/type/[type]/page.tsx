@@ -130,7 +130,7 @@ export default async function TypePage({ params }: { params: Promise<{ type: str
   // Top cities for this type
   const topCities = topCitiesData.slice(0, 5).map(({ city, count }) => ({
     title: `${city} ${typeLabel} Breweries`,
-    url: `/city/${slugify(city)}/breweries`,
+    url: `/cities/${slugify(city)}/breweries`,
     count,
   }));
 

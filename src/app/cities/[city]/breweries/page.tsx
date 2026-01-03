@@ -56,11 +56,11 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   return {
     title,
     description,
-    alternates: { canonical: `/city/${city}/breweries` },
+    alternates: { canonical: `/cities/${city}/breweries` },
     openGraph: {
       title,
       description,
-      url: `https://www.marylandbrewery.com/city/${city}/breweries`,
+      url: `https://www.marylandbrewery.com/cities/${city}/breweries`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [
@@ -114,8 +114,8 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
   // Breadcrumbs
   const breadcrumbs = [
     { name: 'Home', url: '/', isActive: false },
-    { name: 'Cities', url: '/city', isActive: false },
-    { name: cityName, url: `/city/${city}/breweries`, isActive: true },
+    { name: 'Cities', url: '/cities', isActive: false },
+    { name: cityName, url: `/cities/${city}/breweries`, isActive: true },
   ];
 
   // Stats
@@ -139,7 +139,7 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
     .slice(0, 4)
     .map(([city]) => ({
       title: `${city.charAt(0).toUpperCase() + city.slice(1)} Breweries`,
-      url: `/city/${slugify(city)}/breweries`,
+      url: `/cities/${slugify(city)}/breweries`,
       count: cityCounts.get(city),
     }));
 
@@ -165,7 +165,7 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
 
       return count > 0 ? {
         title: `${cityName} ${amenityKey.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} Breweries`,
-        url: `/city/${city}/${amenitySlug}`,
+        url: `/cities/${city}/${amenitySlug}`,
         count,
       } : null;
     })
@@ -188,7 +188,7 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
     .slice(0, 2)
     .map(([type]) => ({
       title: `${cityName} ${type.charAt(0).toUpperCase() + type.slice(1)} Breweries`,
-      url: `/city/${city}/${slugify(type)}`,
+      url: `/cities/${city}/${slugify(type)}`,
       count: typeCounts.get(type),
     }));
 

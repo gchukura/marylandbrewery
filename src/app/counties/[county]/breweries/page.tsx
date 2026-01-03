@@ -29,11 +29,11 @@ export async function generateMetadata({ params }: { params: Promise<{ county: s
   return {
     title,
     description,
-    alternates: { canonical: `/county/${county}/breweries` },
+    alternates: { canonical: `/counties/${county}/breweries` },
     openGraph: {
       title,
       description,
-      url: `https://www.marylandbrewery.com/county/${county}/breweries`,
+      url: `https://www.marylandbrewery.com/counties/${county}/breweries`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [
@@ -76,8 +76,8 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
   // Breadcrumbs
   const breadcrumbs = [
     { name: 'Home', url: '/', isActive: false },
-    { name: 'Counties', url: '/county', isActive: false },
-    { name: `${countyName} County`, url: `/county/${county}/breweries`, isActive: true },
+    { name: 'Counties', url: '/counties', isActive: false },
+    { name: `${countyName} County`, url: `/counties/${county}/breweries`, isActive: true },
   ];
 
   // Stats
@@ -104,7 +104,7 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
   // Cities in this county
   const cityPages = citiesInCounty.slice(0, 6).map(city => ({
     title: `${city} Breweries`,
-    url: `/city/${slugify(city)}/breweries`,
+    url: `/cities/${slugify(city)}/breweries`,
     count: breweries.filter(b => b.city === city).length,
   }));
 
@@ -116,7 +116,7 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
       const neighborBreweries = processed.breweries.filter(b => (b as any).county?.toLowerCase() === c.toLowerCase());
       return {
         title: `${c} County Breweries`,
-        url: `/county/${slugify(c)}/breweries`,
+        url: `/counties/${slugify(c)}/breweries`,
         count: neighborBreweries.length,
       };
     });

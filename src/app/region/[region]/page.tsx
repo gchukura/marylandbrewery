@@ -160,7 +160,7 @@ export default async function RegionPage({ params }: { params: Promise<{ region:
     .slice(0, 5)
     .map(([county]) => ({
       title: `${county.charAt(0).toUpperCase() + county.slice(1)} Breweries`,
-      url: `/county/${slugify(county)}/breweries`,
+      url: `/counties/${slugify(county)}/breweries`,
       count: countyCounts.get(county),
     }));
 
@@ -178,7 +178,7 @@ export default async function RegionPage({ params }: { params: Promise<{ region:
     .slice(0, 5)
     .map(([city]) => ({
       title: `${city.charAt(0).toUpperCase() + city.slice(1)} Breweries`,
-      url: `/city/${slugify(city)}/breweries`,
+      url: `/cities/${slugify(city)}/breweries`,
       count: cityCounts.get(city),
     }));
 

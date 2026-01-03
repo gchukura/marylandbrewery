@@ -52,11 +52,11 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   return {
     title,
     description,
-    alternates: { canonical: `/city/${city}/${amenity}` },
+    alternates: { canonical: `/cities/${city}/${amenity}` },
     openGraph: {
       title,
       description,
-      url: `https://www.marylandbrewery.com/city/${city}/${amenity}`,
+      url: `https://www.marylandbrewery.com/cities/${city}/${amenity}`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [
@@ -104,9 +104,9 @@ export default async function CityAmenityPage({ params }: { params: Promise<{ ci
   // Breadcrumbs
   const breadcrumbs = [
     { name: 'Home', url: '/', isActive: false },
-    { name: 'Cities', url: '/city', isActive: false },
-    { name: cityName, url: `/city/${city}/breweries`, isActive: false },
-    { name: amenityLabel, url: `/city/${city}/${amenity}`, isActive: true },
+    { name: 'Cities', url: '/cities', isActive: false },
+    { name: cityName, url: `/cities/${city}/breweries`, isActive: false },
+    { name: amenityLabel, url: `/cities/${city}/${amenity}`, isActive: true },
   ];
 
   // Content blocks - simplified for combo pages
@@ -145,12 +145,12 @@ export default async function CityAmenityPage({ params }: { params: Promise<{ ci
     .slice(0, 4)
     .map(([city, count]) => ({
       title: `${city} ${amenityLabel} Breweries`,
-        url: `/city/${slugify(city)}/${amenity}`,
+        url: `/cities/${slugify(city)}/${amenity}`,
       count,
     }));
 
   const relatedPages = [
-    { title: `All ${cityName} Breweries`, url: `/city/${city}/breweries`, count: cityBreweryCount },
+    { title: `All ${cityName} Breweries`, url: `/cities/${city}/breweries`, count: cityBreweryCount },
     { title: `${amenityLabel} Breweries (Statewide)`, url: `/amenities/${amenity}`, count: amenityCount },
     ...nearby,
   ];

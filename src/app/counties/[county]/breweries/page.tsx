@@ -3,6 +3,8 @@ import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate'
 import { getProcessedBreweryData } from '../../../../../lib/brewery-data';
 import { slugify, deslugify } from '@/lib/data-utils';
 import { generateCountyIntroText, generateCountyContentBlocks } from '@/lib/content-generators';
+import { existsSync } from 'fs';
+import { join } from 'path';
 
 const ALL_MD_COUNTIES = [
   'Allegany', 'Anne Arundel', 'Baltimore', 'Calvert', 'Caroline', 'Carroll', 'Cecil', 'Charles',
@@ -145,6 +147,17 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
 
   const relatedPages = [...cityPages, ...neighbors, ...topAmenities];
 
+  // Get county hero image - check for local county image from Pexels
+  const countySlug = slugify(countyName);
+  const localCountyImagePath = `/counties/${countySlug}.jpg`;
+  const localCountyImageFile = join(process.cwd(), 'public', 'counties', `${countySlug}.jpg`);
+  
+  // Check if local county image exists
+  const hasLocalCountyImage = existsSync(localCountyImageFile);
+  
+  // Use local county image if available
+  const countyHeroImage = hasLocalCountyImage ? localCountyImagePath : null;
+
   return (
     <DirectoryPageTemplate
       h1={`${countyName} County Breweries`}
@@ -159,6 +172,7 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
       showStats={true}
       showTable={true}
       mapZoom={9}
+      heroImage={countyHeroImage}
     />
   );
 }

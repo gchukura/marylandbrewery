@@ -3,6 +3,9 @@ import { getProcessedBreweryData } from '../../../lib/brewery-data';
 import { slugify } from '@/lib/data-utils';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
+import Image from 'next/image';
+import { existsSync } from 'fs';
+import { join } from 'path';
 import '@/components/home-v2/styles.css';
 
 export const metadata: Metadata = {
@@ -64,41 +67,73 @@ export default async function CountiesIndexPage() {
     url: `/counties/${item.slug}/breweries`,
   }));
 
+  // Check for counties index hero image
+  const countiesHeroImagePath = '/counties-hero.jpg';
+  const countiesHeroImageFile = join(process.cwd(), 'public', 'counties-hero.jpg');
+  const hasCountiesHeroImage = existsSync(countiesHeroImageFile);
+
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
       {/* Hero Section */}
       <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
-        {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 md-pattern-bg pointer-events-none" />
+        {/* Counties Hero Image Background */}
+        {hasCountiesHeroImage && (
+          <div className="absolute inset-0">
+            <Image
+              src={countiesHeroImagePath}
+              alt="Craft breweries"
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority
+              unoptimized={false}
+            />
+            {/* Dark overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+          </div>
+        )}
+        
+        {/* Pattern overlay (only if no hero image) */}
+        {!hasCountiesHeroImage && (
+          <div className="absolute inset-0 md-pattern-bg pointer-events-none" />
+        )}
         
         <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
           {/* Breadcrumbs */}
           <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className="flex items-center flex-wrap gap-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif", color: '#6B6B6B' }}>
+            <ol className={`flex items-center flex-wrap gap-2 text-sm ${hasCountiesHeroImage ? 'text-white/90' : ''}`} style={{ fontFamily: "'Source Sans 3', sans-serif", color: hasCountiesHeroImage ? undefined : '#6B6B6B' }}>
               <li>
                 <Link 
                   href="/" 
-                  className="hover:text-[#9B2335] transition-colors"
+                  className={`transition-colors ${hasCountiesHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-[#9B2335]'}`}
                 >
                   Home
                 </Link>
               </li>
-              <li><ChevronRight className="h-4 w-4 mx-2" /></li>
-              <li className="text-[#1C1C1C] font-medium">Counties</li>
+              <li><ChevronRight className={`h-4 w-4 mx-2 ${hasCountiesHeroImage ? 'text-white/70' : ''}`} /></li>
+              <li className={`font-medium ${hasCountiesHeroImage ? 'text-white drop-shadow-md' : 'text-[#1C1C1C]'}`}>Counties</li>
             </ol>
           </nav>
 
           {/* H1 Title */}
           <h1 
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1C1C1C] mb-6 leading-tight"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className={`text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${
+              hasCountiesHeroImage 
+                ? 'text-white drop-shadow-lg' 
+                : 'text-[#1C1C1C]'
+            }`}
+            style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: hasCountiesHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
           >
             Maryland Counties with Breweries
           </h1>
 
           {/* Intro Paragraph */}
           <p 
-            className="text-lg md:text-xl text-[#6B6B6B] max-w-3xl leading-relaxed"
+            className={`text-lg md:text-xl text-[#6B6B6B] max-w-3xl leading-relaxed ${
+              hasCountiesHeroImage 
+                ? 'text-white/95 drop-shadow-md' 
+                : 'text-[#6B6B6B]'
+            }`}
             style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
             Browse all counties in Maryland with craft breweries. From urban centers like Baltimore City and Montgomery County to rural areas across the state, discover breweries organized by county.

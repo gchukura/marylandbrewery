@@ -6,6 +6,8 @@ import { getNeighborhoodsByCity } from '../../../../../lib/supabase-client';
 import Link from 'next/link';
 import { ChevronRight, MapPin, Star, Phone, Globe } from 'lucide-react';
 import Image from 'next/image';
+import { existsSync } from 'fs';
+import { join } from 'path';
 import '@/components/home-v2/styles.css';
 import CityBreweriesMapSection from '@/components/directory/CityBreweriesMapSection';
 
@@ -90,12 +92,23 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
   // Featured breweries (top 6 by rating)
   const featuredBreweries = sortedBreweries.slice(0, 6);
 
-  // Get a representative city hero image from the top-rated brewery
-  const cityHeroImage = sortedBreweries.length > 0 
+  // Get city hero image - prioritize local city image from Pexels, fallback to brewery photo
+  const citySlug = slugify(cityName);
+  const localCityImagePath = `/cities/${citySlug}.jpg`;
+  const localCityImageFile = join(process.cwd(), 'public', 'cities', `${citySlug}.jpg`);
+  
+  // Check if local city image exists
+  const hasLocalCityImage = existsSync(localCityImageFile);
+  
+  // Get brewery fallback image
+  const breweryFallbackImage = sortedBreweries.length > 0 
     ? (sortedBreweries[0].photos && sortedBreweries[0].photos.length > 0
         ? sortedBreweries[0].photos[0]
         : sortedBreweries[0].photoUrl)
     : null;
+  
+  // Use local city image if available, otherwise fallback to brewery photo
+  const cityHeroImage = hasLocalCityImage ? localCityImagePath : breweryFallbackImage;
 
   // Get neighborhoods for this city from Supabase
   const dbNeighborhoods = await getNeighborhoodsByCity(cityName);
@@ -137,20 +150,21 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
               <img 
                 src={cityHeroImage} 
                 alt={`${cityName} breweries`}
-                className="w-full h-full object-cover opacity-20"
+                className="w-full h-full object-cover"
               />
             ) : (
               <Image
                 src={cityHeroImage}
                 alt={`${cityName} breweries`}
                 fill
-                className="object-cover opacity-20"
+                className="object-cover"
                 sizes="100vw"
                 priority
+                unoptimized={false}
               />
             )}
             {/* Dark overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
           </div>
         )}
         
@@ -162,20 +176,20 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
         <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
           {/* Breadcrumbs */}
           <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className="flex items-center flex-wrap gap-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif", color: '#6B6B6B' }}>
+            <ol className="flex items-center flex-wrap gap-2 text-sm text-white/90" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
               <li>
-                <Link href="/" className="hover:text-[#9B2335] transition-colors">
+                <Link href="/" className="hover:text-white transition-colors drop-shadow-md">
                   Maryland Breweries
                 </Link>
               </li>
-              <li><ChevronRight className="h-4 w-4 mx-2" /></li>
+              <li><ChevronRight className="h-4 w-4 mx-2 text-white/70" /></li>
               <li>
-                <Link href="/cities" className="hover:text-[#9B2335] transition-colors">
+                <Link href="/cities" className="hover:text-white transition-colors drop-shadow-md">
                   Cities
                 </Link>
               </li>
-              <li><ChevronRight className="h-4 w-4 mx-2" /></li>
-              <li className="text-[#1C1C1C] font-medium">
+              <li><ChevronRight className="h-4 w-4 mx-2 text-white/70" /></li>
+              <li className="text-white font-medium drop-shadow-md">
                 {cityName}, MD
               </li>
             </ol>
@@ -183,18 +197,18 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
 
           {/* H1 Title */}
           <h1 
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1C1C1C] mb-4 leading-tight"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-lg"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
           >
             Breweries in {cityName}, MD
           </h1>
 
           {/* Count Display */}
           <p 
-            className="text-lg md:text-xl text-[#6B6B6B] mb-6"
+            className="text-lg md:text-xl text-white/95 mb-6 drop-shadow-md"
             style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
-            <strong className="text-[#1C1C1C]">{totalBreweries}</strong> {totalBreweries === 1 ? 'brewery' : 'breweries'} found.
+            <strong className="text-white font-semibold">{totalBreweries}</strong> {totalBreweries === 1 ? 'brewery' : 'breweries'} found.
           </p>
         </div>
       </section>

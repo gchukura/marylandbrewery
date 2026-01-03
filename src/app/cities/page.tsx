@@ -3,6 +3,9 @@ import { getAllCities, getProcessedBreweryData } from '../../../lib/brewery-data
 import { slugify } from '@/lib/data-utils';
 import Link from 'next/link';
 import { ChevronRight, MapPin } from 'lucide-react';
+import Image from 'next/image';
+import { existsSync } from 'fs';
+import { join } from 'path';
 import '@/components/home-v2/styles.css';
 
 export const metadata: Metadata = {
@@ -97,41 +100,73 @@ export default async function CitiesIndexPage() {
   }
 
 
+  // Check for cities index hero image
+  const citiesHeroImagePath = '/cities-hero.jpg';
+  const citiesHeroImageFile = join(process.cwd(), 'public', 'cities-hero.jpg');
+  const hasCitiesHeroImage = existsSync(citiesHeroImageFile);
+
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
       {/* Hero Section */}
       <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
-        {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 md-pattern-bg pointer-events-none" />
+        {/* Cities Hero Image Background */}
+        {hasCitiesHeroImage && (
+          <div className="absolute inset-0">
+            <Image
+              src={citiesHeroImagePath}
+              alt="Craft breweries"
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority
+              unoptimized={false}
+            />
+            {/* Dark overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+          </div>
+        )}
+        
+        {/* Pattern overlay (only if no hero image) */}
+        {!hasCitiesHeroImage && (
+          <div className="absolute inset-0 md-pattern-bg pointer-events-none" />
+        )}
         
         <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
           {/* Breadcrumbs */}
           <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className="flex items-center flex-wrap gap-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif", color: '#6B6B6B' }}>
+            <ol className={`flex items-center flex-wrap gap-2 text-sm ${hasCitiesHeroImage ? 'text-white/90' : ''}`} style={{ fontFamily: "'Source Sans 3', sans-serif", color: hasCitiesHeroImage ? undefined : '#6B6B6B' }}>
               <li>
                 <Link 
                   href="/" 
-                  className="hover:text-[#9B2335] transition-colors"
+                  className={`transition-colors ${hasCitiesHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-[#9B2335]'}`}
                 >
                   Home
                 </Link>
               </li>
-              <li><ChevronRight className="h-4 w-4 mx-2" /></li>
-              <li className="text-[#1C1C1C] font-medium">Cities</li>
+              <li><ChevronRight className={`h-4 w-4 mx-2 ${hasCitiesHeroImage ? 'text-white/70' : ''}`} /></li>
+              <li className={`font-medium ${hasCitiesHeroImage ? 'text-white drop-shadow-md' : 'text-[#1C1C1C]'}`}>Cities</li>
             </ol>
           </nav>
 
           {/* H1 Title */}
           <h1 
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1C1C1C] mb-6 leading-tight"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className={`text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${
+              hasCitiesHeroImage 
+                ? 'text-white drop-shadow-lg' 
+                : 'text-[#1C1C1C]'
+            }`}
+            style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: hasCitiesHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
           >
             Maryland Cities with Breweries
           </h1>
 
           {/* Intro Paragraph */}
           <p 
-            className="text-lg md:text-xl text-[#6B6B6B] max-w-3xl leading-relaxed"
+            className={`text-lg md:text-xl max-w-3xl leading-relaxed ${
+              hasCitiesHeroImage 
+                ? 'text-white/95 drop-shadow-md' 
+                : 'text-[#6B6B6B]'
+            }`}
             style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
             Browse all cities in Maryland with craft breweries. From Baltimore's historic neighborhoods to Annapolis' waterfront locations, discover breweries across the state organized by city.

@@ -315,12 +315,6 @@ export default function CountyBreweriesMapClient({ breweries, countyName }: Coun
                 hours, amenities, and beer selections.
               </p>
               <p>
-                Our directory includes breweries across counties in Maryland, 
-                from urban centers like Baltimore City and Montgomery County to rural areas across the state. 
-                Whether you're planning a brewery tour or looking for a local spot, we make it easy to discover 
-                Maryland's vibrant craft beer scene.
-              </p>
-              <p>
                 <strong className="text-[#1C1C1C]">Brewery Owners:</strong> Want to list your brewery or update 
                 your information? <Link href="/contact" className="text-[#9B2335] hover:text-[#D4A017] transition-colors underline">
                   Contact us

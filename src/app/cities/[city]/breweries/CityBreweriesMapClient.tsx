@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { MapPin, Phone, Globe, Search, Filter, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { MapPin, Phone, Search, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import BreweryLogo from '@/components/brewery/BreweryLogo';
 
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
@@ -15,13 +15,28 @@ const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), {
   )
 });
 
-interface MapWithListClientProps {
-  breweries: any[];
+interface Neighborhood {
+  id?: string;
+  name: string;
+  slug: string;
+  description?: string;
+  city?: string;
+  county?: string;
+  state: string;
+  url?: string;
+  homes_url?: string;
 }
 
-export default function MapWithListClient({ breweries }: MapWithListClientProps) {
+interface CityBreweriesMapClientProps {
+  breweries: any[];
+  cityName: string;
+  neighborhoods: Neighborhood[];
+}
+
+export default function CityBreweriesMapClient({ breweries, cityName, neighborhoods }: CityBreweriesMapClientProps) {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showAllNeighborhoods, setShowAllNeighborhoods] = useState(false);
   const itemsPerPage = 10;
 
   // Filter breweries
@@ -65,9 +80,10 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[650px_1fr] gap-4 max-w-[1700px] mx-auto">
-      {/* Left Side - Filterable List */}
-      <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[600px] lg:h-[1000px]">
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[650px_1fr] gap-4 max-w-[1700px] mx-auto">
+        {/* Left Side - Filterable List */}
+        <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[600px] lg:h-[700px]">
         {/* Filter Header */}
         <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
@@ -97,7 +113,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
 
           {/* Results Count */}
           <div className="mt-3 text-sm text-gray-600">
-            Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries
+            Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries in {cityName}
             {filtered.length !== breweries.length && ` (filtered from ${breweries.length} total)`}
           </div>
         </div>
@@ -127,7 +143,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                     className="block p-4"
                   >
                     <div className="flex items-start gap-3">
-                      {/* Logo on the left - square with border like inspiration */}
+                      {/* Logo on the left */}
                       {brewery.logo ? (
                         <div className="flex-shrink-0">
                           <div className="w-16 h-16 border-2 border-gray-300 rounded bg-white flex items-center justify-center p-1.5 shadow-sm">
@@ -276,21 +292,82 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
         )}
       </div>
 
-      {/* Right Side - Map */}
-      <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[600px] lg:h-[1000px]">
-        <div className="flex-1 min-h-0 relative">
-          {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
-            <GoogleMap 
-              breweries={filtered as any} 
-              height="100%" 
-              showClusters={true}
-              zoom={9}
-            />
-          ) : (
-            <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center text-sm text-gray-600 px-4">
-              Map is unavailable: missing Google Maps API key. Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY and redeploy.
+        {/* Right Side - Map */}
+        <div className="flex flex-col space-y-4">
+          <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[400px]">
+            <div className="flex-1 min-h-0 relative">
+              {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
+                <GoogleMap 
+                  breweries={filtered as any} 
+                  height="100%" 
+                  showClusters={true}
+                  zoom={11}
+                />
+              ) : (
+                <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center text-sm text-gray-600 px-4">
+                  Map is unavailable: missing Google Maps API key. Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY and redeploy.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Neighborhoods Section - Only under map */}
+          {neighborhoods.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Neighborhoods in {cityName}, MD</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {(showAllNeighborhoods ? neighborhoods : neighborhoods.slice(0, 10)).map((neighborhood) => (
+                  <Link
+                    key={neighborhood.slug || neighborhood.id}
+                    href={neighborhood.url || `#`}
+                    className="text-sm text-gray-700 hover:text-[#9B2335] transition-colors py-2 border-b border-gray-100 last:border-b-0"
+                  >
+                    {neighborhood.name}
+                  </Link>
+                ))}
+              </div>
+              {neighborhoods.length > 10 && (
+                <button
+                  onClick={() => setShowAllNeighborhoods(!showAllNeighborhoods)}
+                  className="mt-4 text-sm text-[#9B2335] hover:text-[#7A1C2A] font-medium transition-colors"
+                >
+                  {showAllNeighborhoods ? 'Show less' : 'Show more'}
+                </button>
+              )}
             </div>
           )}
+
+          {/* About Section */}
+          <div className="bg-white border border-gray-200 rounded-lg p-6 mt-4">
+            <h2 
+              className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-6"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
+              About Maryland Brewery Directory
+            </h2>
+            <div 
+              className="prose prose-lg text-[#6B6B6B] space-y-4"
+              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+            >
+              <p>
+                Maryland Brewery Directory is your complete guide to craft breweries across the Old Line State. 
+                We connect beer enthusiasts with local breweries, providing detailed information about locations, 
+                hours, amenities, and beer selections.
+              </p>
+              <p>
+                Our directory includes breweries across cities in Maryland, 
+                from urban centers like Baltimore City and Montgomery County to rural areas across the state. 
+                Whether you're planning a brewery tour or looking for a local spot, we make it easy to discover 
+                Maryland's vibrant craft beer scene.
+              </p>
+              <p>
+                <strong className="text-[#1C1C1C]">Brewery Owners:</strong> Want to list your brewery or update 
+                your information? <Link href="/contact" className="text-[#9B2335] hover:text-[#D4A017] transition-colors underline">
+                  Contact us
+                </Link> to get started.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

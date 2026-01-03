@@ -374,18 +374,16 @@ export default function SimpleBreweryPageTemplate({
                     {index > 0 && (
                       <ChevronRight className="h-3 w-3 text-white/90 mx-1 flex-shrink-0" />
                     )}
-                    {crumb.isActive ? (
-                      <span className="text-white font-medium px-2 py-1 bg-black/60 rounded backdrop-blur-sm shadow-md whitespace-nowrap">
-                        {crumb.name}
-                      </span>
-                    ) : (
-                      <Link
-                        href={crumb.url}
-                        className="text-white/95 hover:text-white px-2 py-1 bg-black/50 hover:bg-black/70 rounded backdrop-blur-sm transition-all shadow-md whitespace-nowrap underline hover:no-underline hover:font-semibold"
-                      >
-                        {crumb.name}
-                      </Link>
-                    )}
+                    <Link
+                      href={crumb.url}
+                      className={`font-medium px-2 py-1 rounded backdrop-blur-sm transition-all shadow-md whitespace-nowrap ${
+                        crumb.isActive
+                          ? 'text-white bg-black/60'
+                          : 'text-white/95 hover:text-white bg-black/50 hover:bg-black/70 underline hover:no-underline hover:font-semibold'
+                      }`}
+                    >
+                      {crumb.name}
+                    </Link>
                   </div>
                 ))}
               </nav>

@@ -111,7 +111,14 @@ export default async function CountiesIndexPage() {
                 </Link>
               </li>
               <li><ChevronRight className={`h-4 w-4 mx-2 ${hasCountiesHeroImage ? 'text-white/70' : ''}`} /></li>
-              <li className={`font-medium ${hasCountiesHeroImage ? 'text-white drop-shadow-md' : 'text-[#1C1C1C]'}`}>Counties</li>
+              <li>
+                <Link 
+                  href="/counties" 
+                  className={`font-medium transition-colors ${hasCountiesHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-[#1C1C1C] hover:text-[#9B2335]'}`}
+                >
+                  Counties
+                </Link>
+              </li>
             </ol>
           </nav>
 

@@ -186,8 +186,8 @@ export default async function RegionPage({ params }: { params: Promise<{ region:
   const relatedPages = [
     ...topCounties,
     ...topCities,
-    { title: 'Best Breweries in Maryland', url: '/best-breweries', count: null },
-    { title: 'Interactive Map', url: '/map', count: null },
+    { title: 'Best Breweries in Maryland', url: '/best-breweries' },
+    { title: 'Interactive Map', url: '/map' },
   ];
 
   return (

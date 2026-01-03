@@ -139,7 +139,7 @@ export default async function BestBreweriesPage() {
     ...topCities,
     ...topAmenities,
     { title: 'All Maryland Breweries', url: '/', count: processed.breweries.length },
-    { title: 'Interactive Map', url: '/map', count: null },
+    { title: 'Interactive Map', url: '/map' },
   ];
 
   return (

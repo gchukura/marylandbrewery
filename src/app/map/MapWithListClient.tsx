@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { MapPin, Phone, Globe, Search, Filter, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import BreweryLogo from '@/components/brewery/BreweryLogo';
 
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
   ssr: false, 
@@ -25,7 +26,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
   const [amenity, setAmenity] = useState('');
   const [selectedBrewery, setSelectedBrewery] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
+  const itemsPerPage = 10;
 
   // Get unique values for filters
   const uniqueCities = useMemo(() => {
@@ -111,9 +112,9 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-4 max-w-[1400px] mx-auto">
+    <div className="grid grid-cols-1 lg:grid-cols-[650px_1fr] gap-4 max-w-[1700px] mx-auto">
       {/* Left Side - Filterable List */}
-      <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[600px] lg:h-[700px]">
+      <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[600px] lg:h-[1000px]">
         {/* Filter Header */}
         <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
@@ -212,8 +213,32 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                     onMouseEnter={() => setSelectedBrewery(brewery.id)}
                     onMouseLeave={() => setSelectedBrewery(null)}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
+                    <div className="flex items-start gap-3">
+                      {/* Logo on the left - square with border like inspiration */}
+                      {brewery.logo ? (
+                        <div className="flex-shrink-0">
+                          <div className="w-16 h-16 border-2 border-gray-300 rounded bg-white flex items-center justify-center p-1.5 shadow-sm">
+                            <BreweryLogo 
+                              logo={brewery.logo} 
+                              breweryName={brewery.name}
+                              size="sm"
+                              className="w-full h-full"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        // Placeholder for breweries without logos
+                        <div className="flex-shrink-0">
+                          <div className="w-16 h-16 border-2 border-gray-200 rounded bg-gray-50 flex items-center justify-center">
+                            <div className="text-gray-400 text-xs font-semibold text-center px-1">
+                              {brewery.name?.substring(0, 2).toUpperCase() || 'BW'}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Content on the right */}
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-semibold text-gray-900 hover:text-red-600 text-sm">
                             {brewery.name}
@@ -230,7 +255,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                         <div className="text-xs text-gray-600 mb-2">
                           <div className="flex items-start">
                             <MapPin className="h-3 w-3 mr-1 mt-0.5 flex-shrink-0" />
-                            <div>
+                            <div className="flex-1">
                               {brewery.street && (
                                 <div>{brewery.street}</div>
                               )}
@@ -239,15 +264,15 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                                   .filter(Boolean)
                                   .join(', ')}
                               </div>
+                              {brewery.type && (
+                                <div className="mt-1">
+                                  <span className="text-gray-500">
+                                    {Array.isArray(brewery.type) ? brewery.type.join(', ') : brewery.type}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           </div>
-                          {brewery.type && (
-                            <div className="mt-1">
-                              <span className="text-gray-500">
-                                {Array.isArray(brewery.type) ? brewery.type.join(', ') : brewery.type}
-                              </span>
-                            </div>
-                          )}
                         </div>
                         {(brewery.amenities || brewery.features) && (
                           <div className="flex flex-wrap gap-1 mt-2">
@@ -335,7 +360,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
       </div>
 
       {/* Right Side - Map */}
-      <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[600px] lg:h-[700px]">
+      <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[600px] lg:h-[1000px]">
         <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
           <h2 className="text-xl font-bold text-gray-900">Interactive Map</h2>
           <p className="text-sm text-gray-600 mt-1">

@@ -21,65 +21,21 @@ interface MapWithListClientProps {
 
 export default function MapWithListClient({ breweries }: MapWithListClientProps) {
   const [search, setSearch] = useState('');
-  const [city, setCity] = useState('');
-  const [type, setType] = useState('');
-  const [amenity, setAmenity] = useState('');
-  const [selectedBrewery, setSelectedBrewery] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
-  // Get unique values for filters
-  const uniqueCities = useMemo(() => {
-    const cities = new Set(breweries.map(b => b.city).filter(Boolean));
-    return Array.from(cities).sort();
-  }, [breweries]);
-
-  const uniqueTypes = useMemo(() => {
-    const types = new Set<string>();
-    breweries.forEach(b => {
-      if (Array.isArray(b.type)) {
-        b.type.forEach((t: string) => types.add(t));
-      } else if (b.type) {
-        types.add(b.type);
-      }
-    });
-    return Array.from(types).sort();
-  }, [breweries]);
-
-  const uniqueAmenities = useMemo(() => {
-    const amenities = new Set<string>();
-    breweries.forEach(b => {
-      const amenityList = (b.amenities || b.features || []) as string[];
-      amenityList.forEach(a => amenities.add(a));
-    });
-    return Array.from(amenities).sort();
-  }, [breweries]);
 
   // Filter breweries
   const filtered = useMemo(() => {
     return breweries.filter((b) => {
       const searchLower = search.trim().toLowerCase();
-      const cityLower = city.trim().toLowerCase();
-      const typeLower = type.trim().toLowerCase();
-      const amenityLower = amenity.trim().toLowerCase();
 
       const matchesSearch = !searchLower || 
         b.name?.toLowerCase().includes(searchLower) ||
         b.city?.toLowerCase().includes(searchLower);
 
-      const matchesCity = !cityLower || b.city?.toLowerCase().includes(cityLower);
-
-      const matchesType = !typeLower || 
-        (Array.isArray(b.type) ? b.type.some((t: string) => t.toLowerCase().includes(typeLower)) : 
-         b.type?.toLowerCase().includes(typeLower));
-
-      const amenityList: string[] = (b.amenities || b.features || []) as string[];
-      const matchesAmenity = !amenityLower || 
-        amenityList.some((a: string) => a?.toLowerCase().includes(amenityLower));
-
-      return matchesSearch && matchesCity && matchesType && matchesAmenity;
+      return matchesSearch;
     });
-  }, [breweries, search, city, type, amenity]);
+  }, [breweries, search]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -90,17 +46,14 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, city, type, amenity]);
+  }, [search]);
 
   const clearFilters = () => {
     setSearch('');
-    setCity('');
-    setType('');
-    setAmenity('');
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = search || city || type || amenity;
+  const hasActiveFilters = search;
 
   const goToPage = (page: number) => {
     setCurrentPage(page);
@@ -131,7 +84,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
           </div>
 
           {/* Search Bar */}
-          <div className="relative mb-3">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
@@ -140,42 +93,6 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-          </div>
-
-          {/* Filter Row */}
-          <div className="grid grid-cols-3 gap-2">
-            <select
-              className="px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-            >
-              <option value="">All Cities</option>
-              {uniqueCities.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-
-            <select
-              className="px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-            >
-              <option value="">All Types</option>
-              {uniqueTypes.map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-
-            <select
-              className="px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              value={amenity}
-              onChange={(e) => setAmenity(e.target.value)}
-            >
-              <option value="">All Amenities</option>
-              {uniqueAmenities.map(a => (
-                <option key={a} value={a}>{a}</option>
-              ))}
-            </select>
           </div>
 
           {/* Results Count */}
@@ -207,11 +124,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                   <Link
                     key={brewery.id}
                     href={`/breweries/${slug}`}
-                    className={`block p-4 hover:bg-gray-50 transition-colors ${
-                      selectedBrewery === brewery.id ? 'bg-red-50 border-l-4 border-red-600' : ''
-                    }`}
-                    onMouseEnter={() => setSelectedBrewery(brewery.id)}
-                    onMouseLeave={() => setSelectedBrewery(null)}
+                    className="block p-4"
                   >
                     <div className="flex items-start gap-3">
                       {/* Logo on the left - square with border like inspiration */}
@@ -241,7 +154,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                       <div className="flex-1 min-w-0 grid grid-cols-2 gap-4">
                         {/* Name Column */}
                         <div className="min-w-0">
-                          <h3 className="font-semibold text-gray-900 hover:text-red-600 text-sm mb-1">
+                          <h3 className="font-semibold text-gray-900 text-sm mb-1">
                             {brewery.name}
                           </h3>
                           {/* Reviews below name */}

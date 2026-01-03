@@ -6,3 +6,5 @@ ALTER TABLE breweries ADD COLUMN IF NOT EXISTS photo_url TEXT;
 -- Add a comment to document the field
 COMMENT ON COLUMN breweries.photo_url IS 'URL to brewery photo from Google Places API';
 
+
+

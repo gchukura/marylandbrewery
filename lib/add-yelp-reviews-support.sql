@@ -23,3 +23,5 @@ COMMENT ON COLUMN breweries.yelp_rating IS 'Overall Yelp rating (1-5)';
 COMMENT ON COLUMN breweries.yelp_rating_count IS 'Total number of Yelp reviews';
 COMMENT ON COLUMN reviews.source IS 'Review source: google or yelp';
 
+
+

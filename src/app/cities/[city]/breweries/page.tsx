@@ -1,9 +1,13 @@
 import { Metadata } from 'next';
-import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
-import { getAllCities, getProcessedBreweryData } from '../../../../../lib/brewery-data';
+import { getAllCities, getProcessedBreweryData, getBreweriesByCity } from '../../../../../lib/brewery-data';
 import { slugify, deslugify, isOpenNow } from '@/lib/data-utils';
-import { generateCityIntroText, generateCityContentBlocks } from '@/lib/content-generators';
 import { generateCityTitle, generateCityDescription } from '@/lib/seo-utils';
+import { getNeighborhoodsByCity } from '../../../../../lib/supabase-client';
+import Link from 'next/link';
+import { ChevronRight, MapPin, Star, Phone, Globe } from 'lucide-react';
+import Image from 'next/image';
+import '@/components/home-v2/styles.css';
+import CityBreweriesMapSection from '@/components/directory/CityBreweriesMapSection';
 
 // Build all city pages (no limit)
 export async function generateStaticParams() {
@@ -11,46 +15,24 @@ export async function generateStaticParams() {
   return cities.map((city) => ({ city: slugify(city) }));
 }
 
-function collectAmenities(breweries: any[]): Record<string, number> {
-  const counts: Record<string, number> = {};
-  for (const b of breweries) {
-    const amenities = (b as any).amenities || b.features || [];
-    for (const a of amenities) {
-      const key = a.trim();
-      counts[key] = (counts[key] || 0) + 1;
-    }
-  }
-  return counts;
-}
-
 export async function generateMetadata({ params }: { params: Promise<{ city: string }> }): Promise<Metadata> {
   const { city } = await params;
   const cityName = deslugify(city);
-  const processed = await getProcessedBreweryData();
-  const breweries = (processed.byCity instanceof Map 
-    ? processed.byCity.get(cityName.toLowerCase().trim())
-    : (processed.byCity as any)?.[cityName.toLowerCase().trim()]) || [];
+  const breweries = await getBreweriesByCity(cityName);
   const total = breweries.length;
-  const amenityCounts = collectAmenities(breweries);
-  const topAmenities = Object.entries(amenityCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(([k]) => k)
-    .join(', ');
 
-  // Special SEO optimization for Frederick (400 Traffic Potential - highest opportunity!)
   let title: string;
   let description: string;
   
   if (cityName.toLowerCase() === 'frederick') {
     title = `Breweries in Frederick Maryland | ${total} Local Craft Breweries`;
-    description = `Explore ${total} breweries in Frederick, Maryland. Find the best craft beer spots in downtown Frederick and the surrounding area. ${topAmenities ? `Popular features include ${topAmenities}.` : ''} Plan your Frederick brewery tour today!`;
+    description = `Explore ${total} breweries in Frederick, Maryland. Find the best craft beer spots in downtown Frederick and the surrounding area. Plan your Frederick brewery tour today!`;
   } else if (cityName.toLowerCase() === 'ocean city') {
     title = `Breweries in Ocean City Maryland | Beach Town Craft Beer Guide`;
     description = `Discover breweries in Ocean City, Maryland and nearby beach towns. Perfect for your next vacation or weekend getaway. Find ${total} craft breweries in the Ocean City area.`;
   } else {
     title = generateCityTitle(cityName, total);
-    description = generateCityDescription(cityName, total, topAmenities);
+    description = generateCityDescription(cityName, total, '');
   }
 
   return {
@@ -81,155 +63,393 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   };
 }
 
-function computeCityStats(breweries: any[]) {
-  const total = breweries.length;
-  const openNow = breweries.filter((b) => isOpenNow(b)).length;
-  const dogFriendly = breweries.filter((b) =>
-    ((b as any).amenities || b.features || []).some((a: string) => /dog|pet/i.test(a))
-  ).length;
-  const withFood = breweries.filter((b) =>
-    ((b as any).amenities || b.features || []).some((a: string) => /food|kitchen|restaurant/i.test(a))
-  ).length;
-
-  return [
-    { label: 'Total Breweries', value: total },
-    { label: 'Open Today', value: openNow },
-    { label: 'Dog-Friendly', value: dogFriendly },
-    { label: 'With Food', value: withFood },
-  ];
-}
-
 export default async function CityBreweriesPage({ params }: { params: Promise<{ city: string }> }) {
   const { city } = await params;
   const cityName = deslugify(city);
-  const processed = await getProcessedBreweryData();
-  const breweries = (processed.byCity instanceof Map 
-    ? processed.byCity.get(cityName.toLowerCase().trim())
-    : (processed.byCity as any)?.[cityName.toLowerCase().trim()]) || [];
-
-  // Intro text
-  const statsForIntro = { totalBreweries: breweries.length, totalCounties: 0, totalTypes: 0 };
-  const introText = generateCityIntroText(cityName, breweries.length, statsForIntro);
-
-  // Breadcrumbs
-  const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
-    { name: 'Cities', url: '/cities', isActive: false },
-    { name: cityName, url: `/cities/${city}/breweries`, isActive: true },
-  ];
-
-  // Stats
-  const stats = computeCityStats(breweries);
-
-  // Content blocks
-  const contentBlocks = generateCityContentBlocks(cityName, breweries);
-
-  // Related pages
-  const allCities = await getAllCities();
-  const cityCounts = new Map<string, number>();
-  processed.breweries.forEach((b: any) => {
-    if (b.city && b.city.toLowerCase() !== cityName.toLowerCase()) {
-      const city = b.city.toLowerCase().trim();
-      cityCounts.set(city, (cityCounts.get(city) || 0) + 1);
-    }
-  });
   
-  const topCities = Array.from(cityCounts.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 4)
-    .map(([city]) => ({
-      title: `${city.charAt(0).toUpperCase() + city.slice(1)} Breweries`,
-      url: `/cities/${slugify(city)}/breweries`,
-      count: cityCounts.get(city),
-    }));
-
-  // Top amenities in this city - now including ALL major amenities for SEO
-  const majorAmenities = ['dog-friendly', 'outdoor-seating', 'live-music', 'food-trucks', 'full-kitchen', 'parking', 'tours'];
-
-  const amenityCounts = new Map<string, number>();
-  breweries.forEach((b: any) => {
-    const amenities = (b as any).amenities || (b as any).features || [];
-    amenities.forEach((a: string) => {
-      const key = a.trim().toLowerCase();
-      amenityCounts.set(key, (amenityCounts.get(key) || 0) + 1);
-    });
-  });
-
-  // Generate links for ALL major amenities (not just top 3) to fix orphan pages
-  const topAmenities = majorAmenities
-    .map(amenitySlug => {
-      const amenityKey = amenitySlug.replace(/-/g, ' ');
-      const count = Array.from(amenityCounts.entries())
-        .filter(([key]) => key.includes(amenityKey))
-        .reduce((sum, [,val]) => sum + val, 0);
-
-      return count > 0 ? {
-        title: `${cityName} ${amenityKey.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} Breweries`,
-        url: `/cities/${city}/${amenitySlug}`,
-        count,
-      } : null;
-    })
-    .filter(Boolean) as Array<{title: string; url: string; count: number}>;
-
-  // Brewery types in this city
-  const typeCounts = new Map<string, number>();
-  breweries.forEach((b: any) => {
-    const types = Array.isArray(b.type) ? b.type : [b.type];
-    types.forEach((type: string) => {
-      if (type) {
-        const key = type.toLowerCase();
-        typeCounts.set(key, (typeCounts.get(key) || 0) + 1);
-      }
-    });
-  });
+  // Use the helper function which handles Map serialization properly
+  let breweries = await getBreweriesByCity(cityName);
   
-  const topTypes = Array.from(typeCounts.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 2)
-    .map(([type]) => ({
-      title: `${cityName} ${type.charAt(0).toUpperCase() + type.slice(1)} Breweries`,
-      url: `/cities/${city}/${slugify(type)}`,
-      count: typeCounts.get(type),
-    }));
-
-  const relatedPages = [
-    ...topCities,
-    ...topAmenities,
-    ...topTypes,
-  ];
-
-  // Special content for Frederick (high-value keyword target)
-  let h1Text = `Breweries in ${cityName}, Maryland`;
-  if (cityName.toLowerCase() === 'frederick') {
-    h1Text = `Breweries in Frederick, Maryland`;
-    // Enhance content blocks for Frederick
-    contentBlocks.unshift({
-      title: "About Frederick's Craft Beer Scene",
-      content: `Frederick, Maryland has emerged as one of the state's premier craft beer destinations. With ${breweries.length} breweries, Frederick offers a diverse brewery scene from historic downtown taprooms to modern production facilities. The city's walkable downtown makes it easy to visit multiple breweries in one day, and many breweries feature outdoor patios, live music, and local food options.`,
-    });
-  } else if (cityName.toLowerCase() === 'ocean city') {
-    h1Text = `Breweries in Ocean City, Maryland`;
-    // Enhance content blocks for Ocean City
-    contentBlocks.unshift({
-      title: "Ocean City Breweries & Beach Town Craft Beer",
-      content: `Discover craft breweries in Ocean City, Maryland and the surrounding beach communities. While Ocean City itself may have limited brewery options, nearby towns like Berlin and Bishopville offer excellent craft beer experiences. Many breweries in the area cater to vacationers and feature seasonal hours, outdoor seating, and beach-friendly atmospheres.`,
-    });
+  // Fallback: if no breweries found, try with processed data directly
+  if (breweries.length === 0) {
+    const processed = await getProcessedBreweryData();
+    const cityKey = cityName.toLowerCase().trim();
+    breweries = (processed.byCity instanceof Map 
+      ? processed.byCity.get(cityKey)
+      : (processed.byCity as any)?.[cityKey]) || [];
   }
 
+  // Sort breweries by rating (highest first), then by name
+  const sortedBreweries = [...breweries].sort((a: any, b: any) => {
+    const aRating = a.googleRating || a.yelpRating || 0;
+    const bRating = b.googleRating || b.yelpRating || 0;
+    if (bRating !== aRating) return bRating - aRating;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  // Featured breweries (top 6 by rating)
+  const featuredBreweries = sortedBreweries.slice(0, 6);
+
+  // Get a representative city hero image from the top-rated brewery
+  const cityHeroImage = sortedBreweries.length > 0 
+    ? (sortedBreweries[0].photos && sortedBreweries[0].photos.length > 0
+        ? sortedBreweries[0].photos[0]
+        : sortedBreweries[0].photoUrl)
+    : null;
+
+  // Get neighborhoods for this city from Supabase
+  const dbNeighborhoods = await getNeighborhoodsByCity(cityName);
+  const neighborhoods = dbNeighborhoods.map(n => n.name);
+  
+  // Fallback to hardcoded neighborhoods if database is empty
+  const cityNeighborhoods: Record<string, string[]> = {
+    baltimore: [
+      'Fells Point', 'Canton', 'Federal Hill', 'Mount Vernon', 'Hampden',
+      'Charles Village', 'Patterson Park', 'Druid Hill Park', 'Little Italy',
+      'Bolton Hill', 'Riverside', 'Locust Point', 'Highlandtown'
+    ],
+    annapolis: [
+      'Historic Downtown', 'Eastport', 'West Street', 'Parole', 'Cape St. Claire',
+      'Arnold', 'Severna Park', 'Crownsville'
+    ],
+    frederick: [
+      'Historic Downtown', 'Carroll Creek', 'Baker Park', 'West Frederick',
+      'North Market', 'South Market'
+    ],
+  };
+  
+  const finalNeighborhoods = neighborhoods.length > 0 
+    ? neighborhoods 
+    : (cityNeighborhoods[cityName.toLowerCase()] || []);
+
+  // Calculate stats
+  const totalBreweries = breweries.length;
+  const openNow = breweries.filter((b) => isOpenNow(b)).length;
+
   return (
-    <DirectoryPageTemplate
-      h1={h1Text}
-      introText={introText}
-      breadcrumbs={breadcrumbs}
-      breweries={breweries as any}
-      stats={stats}
-      contentBlocks={contentBlocks}
-      relatedPages={relatedPages}
-      pageType="city"
-      showMap={true}
-      showStats={true}
-      showTable={true}
-      mapZoom={11}
-    />
+    <div className="min-h-screen bg-[#FAF9F6]">
+      {/* Hero Section */}
+      <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
+        {/* City Hero Image Background */}
+        {cityHeroImage && (
+          <div className="absolute inset-0">
+            {cityHeroImage.startsWith('http') ? (
+              <img 
+                src={cityHeroImage} 
+                alt={`${cityName} breweries`}
+                className="w-full h-full object-cover opacity-20"
+              />
+            ) : (
+              <Image
+                src={cityHeroImage}
+                alt={`${cityName} breweries`}
+                fill
+                className="object-cover opacity-20"
+                sizes="100vw"
+                priority
+              />
+            )}
+            {/* Dark overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40" />
+          </div>
+        )}
+        
+        {/* Pattern overlay (only if no hero image) */}
+        {!cityHeroImage && (
+          <div className="absolute inset-0 md-pattern-bg pointer-events-none" />
+        )}
+        
+        <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
+          {/* Breadcrumbs */}
+          <nav className="mb-6" aria-label="Breadcrumb">
+            <ol className="flex items-center flex-wrap gap-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif", color: '#6B6B6B' }}>
+              <li>
+                <Link href="/" className="hover:text-[#9B2335] transition-colors">
+                  Maryland Breweries
+                </Link>
+              </li>
+              <li><ChevronRight className="h-4 w-4 mx-2" /></li>
+              <li>
+                <Link href="/cities" className="hover:text-[#9B2335] transition-colors">
+                  Cities
+                </Link>
+              </li>
+              <li><ChevronRight className="h-4 w-4 mx-2" /></li>
+              <li className="text-[#1C1C1C] font-medium">
+                {cityName}, MD
+              </li>
+            </ol>
+          </nav>
+
+          {/* H1 Title */}
+          <h1 
+            className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1C1C1C] mb-4 leading-tight"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            Breweries in {cityName}, MD
+          </h1>
+
+          {/* Count Display */}
+          <p 
+            className="text-lg md:text-xl text-[#6B6B6B] mb-6"
+            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+          >
+            <strong className="text-[#1C1C1C]">{totalBreweries}</strong> {totalBreweries === 1 ? 'brewery' : 'breweries'} found.
+          </p>
+        </div>
+      </section>
+
+      {/* Sort Options */}
+      <section className="bg-white border-b border-[#E8E6E1] py-4">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center gap-6" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+            <span className="text-[#6B6B6B] font-medium">Sort</span>
+            <div className="flex gap-4">
+              <button className="text-[#1C1C1C] hover:text-[#9B2335] transition-colors font-medium">
+                Sort by Rating
+              </button>
+              <button className="text-[#6B6B6B] hover:text-[#9B2335] transition-colors">
+                Sort by Distance
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Neighborhoods Section */}
+      {neighborhoods.length > 0 && (
+        <section className="bg-white py-8 md:py-12 border-b border-[#E8E6E1]">
+          <div className="container mx-auto px-4">
+            <h2 
+              className="text-2xl md:text-3xl font-bold text-[#1C1C1C] mb-6"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
+              Neighborhoods in {cityName}, MD
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {finalNeighborhoods.map((neighborhood) => (
+                <Link
+                  key={neighborhood}
+                  href={`/cities/${city}/${slugify(neighborhood)}`}
+                  className="text-[#1C1C1C] hover:text-[#9B2335] transition-colors text-sm py-2"
+                  style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                >
+                  {neighborhood}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* About Section */}
+      <section className="bg-white py-8 md:py-12 border-b border-[#E8E6E1]">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <h2 
+            className="text-2xl md:text-3xl font-bold text-[#1C1C1C] mb-4"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            About Maryland Brewery Directory
+          </h2>
+          <div 
+            className="prose prose-lg text-[#6B6B6B]"
+            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+          >
+            <p>
+              <strong className="text-[#1C1C1C]">Looking for a trusted local brewery?</strong> Since 2024, Maryland Brewery Directory has helped beer enthusiasts find craft breweries across the Old Line State.
+            </p>
+            <p className="mt-4">
+              Brewery enthusiasts are looking for great craft beer experiences. <Link href="/contact" className="text-[#9B2335] hover:text-[#D4A017] transition-colors underline">List your brewery</Link>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Breweries */}
+      {featuredBreweries.length > 0 && (
+        <section className="bg-white py-12 md:py-16 border-b border-[#E8E6E1]">
+          <div className="container mx-auto px-4">
+            <h2 
+              className="text-2xl md:text-3xl font-bold text-[#1C1C1C] mb-8"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
+              Featured Breweries
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredBreweries.map((brewery: any, index: number) => {
+                const rating = brewery.googleRating || brewery.yelpRating || 0;
+                const ratingCount = brewery.googleRatingCount || brewery.yelpRatingCount || 0;
+                const letter = String.fromCharCode(65 + index); // A, B, C, D, E, F
+
+                return (
+                  <div key={brewery.id} className="border border-[#E8E6E1] rounded-lg p-6 hover:shadow-lg transition-shadow">
+                    <div className="flex items-start gap-4 mb-4">
+                      <span className="text-2xl font-bold text-[#9B2335]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                        {letter}
+                      </span>
+                      <div className="flex-1">
+                        <Link 
+                          href={`/breweries/${brewery.slug || brewery.id}`}
+                          className="text-xl font-bold text-[#1C1C1C] hover:text-[#9B2335] transition-colors block mb-2"
+                          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        >
+                          {brewery.name}
+                        </Link>
+                        <p className="text-sm text-[#6B6B6B] mb-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                          {brewery.street && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              {brewery.street}
+                            </span>
+                          )}
+                          {brewery.city && brewery.state && (
+                            <span className="block mt-1">
+                              {brewery.city}, {brewery.state} {brewery.zip}
+                            </span>
+                          )}
+                        </p>
+                        {rating > 0 && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <div className="flex items-center">
+                              <Star className="h-4 w-4 fill-[#D4A017] text-[#D4A017]" />
+                              <span className="ml-1 text-sm font-medium text-[#1C1C1C]">{rating.toFixed(1)}</span>
+                            </div>
+                            {ratingCount > 0 && (
+                              <span className="text-sm text-[#6B6B6B]">
+                                {ratingCount} {ratingCount === 1 ? 'Review' : 'Reviews'}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {brewery.phone && (
+                          <a 
+                            href={`tel:${brewery.phone}`}
+                            className="flex items-center gap-2 text-sm text-[#9B2335] hover:text-[#D4A017] transition-colors mt-2"
+                          >
+                            <Phone className="h-4 w-4" />
+                            {brewery.phone}
+                          </a>
+                        )}
+                        {brewery.website && (
+                          <a 
+                            href={brewery.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-sm text-[#9B2335] hover:text-[#D4A017] transition-colors mt-1"
+                          >
+                            <Globe className="h-4 w-4" />
+                            Visit Website
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    {brewery.description && (
+                      <p 
+                        className="text-sm text-[#6B6B6B] line-clamp-2"
+                        style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                      >
+                        {brewery.description}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* All Breweries */}
+      <section className="bg-white py-12 md:py-16 border-b border-[#E8E6E1]">
+        <div className="container mx-auto px-4">
+          <h2 
+            className="text-2xl md:text-3xl font-bold text-[#1C1C1C] mb-8"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            All Breweries
+          </h2>
+          <div className="space-y-6">
+            {sortedBreweries.map((brewery: any) => {
+              const rating = brewery.googleRating || brewery.yelpRating || 0;
+              const ratingCount = brewery.googleRatingCount || brewery.yelpRatingCount || 0;
+
+              return (
+                <div key={brewery.id} className="border-b border-[#E8E6E1] pb-6 last:border-b-0">
+                  <div className="flex flex-col md:flex-row md:items-start gap-4">
+                    <div className="flex-1">
+                      <Link 
+                        href={`/breweries/${brewery.slug || brewery.id}`}
+                        className="text-xl font-bold text-[#1C1C1C] hover:text-[#9B2335] transition-colors block mb-2"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        {brewery.name}
+                      </Link>
+                      <p className="text-sm text-[#6B6B6B] mb-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                        {brewery.street && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-4 w-4" />
+                            {brewery.street}
+                          </span>
+                        )}
+                        {brewery.city && brewery.state && (
+                          <span className="block mt-1">
+                            {brewery.city}, {brewery.state} {brewery.zip}
+                          </span>
+                        )}
+                      </p>
+                      {rating > 0 && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <div className="flex items-center">
+                            <Star className="h-4 w-4 fill-[#D4A017] text-[#D4A017]" />
+                            <span className="ml-1 text-sm font-medium text-[#1C1C1C]">{rating.toFixed(1)}</span>
+                          </div>
+                          {ratingCount > 0 && (
+                            <span className="text-sm text-[#6B6B6B]">
+                              {ratingCount} {ratingCount === 1 ? 'Review' : 'Reviews'}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {brewery.phone && (
+                        <a 
+                          href={`tel:${brewery.phone}`}
+                          className="flex items-center gap-2 text-sm text-[#9B2335] hover:text-[#D4A017] transition-colors mt-2"
+                        >
+                          <Phone className="h-4 w-4" />
+                          {brewery.phone}
+                        </a>
+                      )}
+                    </div>
+                    {brewery.description && (
+                      <p 
+                        className="text-sm text-[#6B6B6B] md:max-w-md"
+                        style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                      >
+                        {brewery.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Interactive Map */}
+      {breweries.length > 0 && (
+        <section className="bg-white py-12 md:py-16 border-b border-[#E8E6E1]">
+          <div className="container mx-auto px-4">
+            <h2 
+              className="text-2xl md:text-3xl font-bold text-[#1C1C1C] mb-6"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
+              Interactive Map
+            </h2>
+            <CityBreweriesMapSection breweries={breweries as any} zoom={11} />
+          </div>
+        </section>
+      )}
+    </div>
   );
 }

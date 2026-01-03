@@ -59,7 +59,7 @@ export default async function CountiesIndexPage() {
     }
   });
   
-  const items = Array.from(countyCounts.values()).sort((a, b) => b.count - a.count).map(item => ({
+  const items = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name)).map(item => ({
     ...item,
     url: `/counties/${item.slug}/breweries`,
   }));

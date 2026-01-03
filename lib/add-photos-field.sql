@@ -9,3 +9,5 @@ COMMENT ON COLUMN breweries.photos IS 'Array of photo paths stored locally (e.g.
 -- Add GIN index for efficient querying of photos array
 CREATE INDEX IF NOT EXISTS idx_breweries_photos ON breweries USING GIN(photos);
 
+
+

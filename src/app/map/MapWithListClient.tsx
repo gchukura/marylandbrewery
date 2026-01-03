@@ -154,7 +154,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                       <div className="flex-1 min-w-0 grid grid-cols-2 gap-4">
                         {/* Name Column */}
                         <div className="min-w-0">
-                          <h3 className="font-semibold text-gray-900 text-sm mb-1">
+                          <h3 className="font-semibold text-[#9B2335] text-sm mb-1">
                             {brewery.name}
                           </h3>
                           {/* Reviews below name */}

@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   },
 };
 
-const TYPES = ['microbrewery', 'brewpub', 'taproom', 'production', 'nano'] as const;
+const TYPES = ['microbrewery', 'brewpub', 'taproom', 'production', 'nano', 'farm-brewery'] as const;
 
 export const revalidate = 3600;
 

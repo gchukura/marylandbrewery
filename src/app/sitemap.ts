@@ -23,12 +23,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Important static pages
   urls.push({ url: `${BASE_URL}/map`, lastModified: lastMod, priority: 0.8 });
+  urls.push({ url: `${BASE_URL}/best-breweries`, lastModified: lastMod, priority: 0.8 });
   urls.push({ url: `${BASE_URL}/open-now`, lastModified: lastMod, priority: 0.7 });
   urls.push({ url: `${BASE_URL}/contact`, lastModified: lastMod, priority: 0.6 });
   urls.push({ url: `${BASE_URL}/city`, lastModified: lastMod, priority: 0.8 });
   urls.push({ url: `${BASE_URL}/county`, lastModified: lastMod, priority: 0.8 });
   urls.push({ url: `${BASE_URL}/amenities`, lastModified: lastMod, priority: 0.8 });
   urls.push({ url: `${BASE_URL}/type`, lastModified: lastMod, priority: 0.8 });
+  
+  // Region pages
+  const regions = ['eastern-shore', 'western-maryland', 'central-maryland', 'southern-maryland', 'capital-region'];
+  for (const region of regions) {
+    urls.push({ url: `${BASE_URL}/region/${region}`, lastModified: lastMod, priority: 0.7 });
+  }
 
   // Open by day pages
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -70,6 +77,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const a of amenities) {
       urls.push({ url: `${BASE_URL}/city/${citySlug}/${a}`, lastModified: lastMod, priority: 0.5 });
     }
+  }
+
+  // Near attraction pages (only include if attractions exist with nearby breweries)
+  // This will be populated dynamically based on maryland_attractions table
+  // For now, we'll add a few known high-value ones
+  const highValueAttractions = ['deep-creek-lake', 'inner-harbor', 'national-aquarium', 'ocean-city-boardwalk'];
+  for (const attraction of highValueAttractions) {
+    urls.push({ url: `${BASE_URL}/near/${attraction}`, lastModified: lastMod, priority: 0.6 });
   }
 
   return urls;

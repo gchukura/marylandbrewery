@@ -377,12 +377,24 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
             </div>
           )}
 
+          {/* Neighborhood Description Section - Only show on neighborhood pages */}
+          {neighborhood && neighborhood.description && (
+            <div className="bg-white border border-gray-200 rounded-lg p-6 mt-4">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                {neighborhood.name}
+              </h2>
+              <div 
+                className="prose prose-lg text-[#6B6B6B]"
+                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+              >
+                <p>{neighborhood.description}</p>
+              </div>
+            </div>
+          )}
+
           {/* About Section */}
           <div className="bg-white border border-gray-200 rounded-lg p-6 mt-4">
-            <h2 
-              className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-6"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-            >
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
               About Maryland Brewery Directory
             </h2>
             <div 

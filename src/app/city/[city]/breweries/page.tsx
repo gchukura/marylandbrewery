@@ -205,7 +205,7 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
     // Enhance content blocks for Frederick
     contentBlocks.unshift({
       title: "About Frederick's Craft Beer Scene",
-      content: `Frederick, Maryland has emerged as one of the state's premier craft beer destinations. With ${total} breweries, Frederick offers a diverse brewery scene from historic downtown taprooms to modern production facilities. The city's walkable downtown makes it easy to visit multiple breweries in one day, and many breweries feature outdoor patios, live music, and local food options.`,
+      content: `Frederick, Maryland has emerged as one of the state's premier craft beer destinations. With ${breweries.length} breweries, Frederick offers a diverse brewery scene from historic downtown taprooms to modern production facilities. The city's walkable downtown makes it easy to visit multiple breweries in one day, and many breweries feature outdoor patios, live music, and local food options.`,
     });
   } else if (cityName.toLowerCase() === 'ocean city') {
     h1Text = `Breweries in Ocean City, Maryland`;

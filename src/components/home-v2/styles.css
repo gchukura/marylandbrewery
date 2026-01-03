@@ -1,0 +1,114 @@
+/* Heritage Craft Modern Design System */
+
+/* Google Fonts Import - Add to layout or use next/font */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
+
+:root {
+  /* Heritage Color Palette */
+  --md-red: #9B2335;
+  --md-red-dark: #7A1C2A;
+  --md-gold: #D4A017;
+  --md-gold-light: #E8C547;
+  --md-cream: #FAF9F6;
+  --md-cream-dark: #F0EDE8;
+  --md-charcoal: #1C1C1C;
+  --md-warm-gray: #6B6B6B;
+  --md-light-gray: #E8E6E1;
+  
+  /* Typography */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Source Sans 3', -apple-system, sans-serif;
+}
+
+/* Crossbottonée Pattern Background */
+.md-pattern-bg {
+  background-color: var(--md-cream);
+  background-image: 
+    linear-gradient(45deg, var(--md-light-gray) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--md-light-gray) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--md-light-gray) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--md-light-gray) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  opacity: 0.3;
+}
+
+/* Decorative Border - Maryland Style */
+.md-border-accent {
+  border-image: linear-gradient(
+    90deg, 
+    var(--md-red) 0%, 
+    var(--md-red) 25%, 
+    var(--md-gold) 25%, 
+    var(--md-gold) 50%,
+    var(--md-charcoal) 50%,
+    var(--md-charcoal) 75%,
+    var(--md-gold) 75%,
+    var(--md-gold) 100%
+  ) 1;
+}
+
+/* Link Grid Hover Effect */
+.link-grid-item {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.link-grid-item::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: var(--md-gold);
+  transition: height 0.2s ease;
+}
+
+.link-grid-item:hover::before {
+  height: 100%;
+}
+
+.link-grid-item:hover {
+  color: var(--md-red);
+  transform: translateX(4px);
+}
+
+/* Section Divider */
+.section-divider {
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--md-red) 0%,
+    var(--md-red) 50%,
+    var(--md-gold) 50%,
+    var(--md-gold) 100%
+  );
+  max-width: 120px;
+  margin: 0 auto 2rem;
+}
+
+/* Staggered Animation */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-stagger > * {
+  animation: fadeSlideUp 0.5s ease forwards;
+  opacity: 0;
+}
+
+.animate-stagger > *:nth-child(1) { animation-delay: 0.1s; }
+.animate-stagger > *:nth-child(2) { animation-delay: 0.15s; }
+.animate-stagger > *:nth-child(3) { animation-delay: 0.2s; }
+.animate-stagger > *:nth-child(4) { animation-delay: 0.25s; }
+.animate-stagger > *:nth-child(5) { animation-delay: 0.3s; }
+

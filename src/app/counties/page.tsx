@@ -174,7 +174,7 @@ export default async function CountiesIndexPage() {
                 }}
               >
                 <span className="relative inline-block">
-                  {county.name}
+                  {county.name.replace(/\s+County$/i, '')}
                   <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gradient-to-r from-[#9B2335] to-[#D4A017] group-hover:w-full transition-all duration-300" />
                 </span>
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0 h-4 bg-[#D4A017]/20 group-hover:w-1 transition-all duration-300 rounded-r" />

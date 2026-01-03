@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-import NewsletterSignup from "@/components/ui/NewsletterSignup";
+import { ConditionalHeader, ConditionalFooter } from "@/components/layout/ConditionalLayout";
+import ConditionalLayoutClient from "@/components/layout/ConditionalLayoutClient";
 import "./globals.css";
 import "@/styles/design-system.css";
 
@@ -118,19 +117,12 @@ export default function RootLayout({
         <meta name="theme-color" content="#dc2626" />
         <meta name="msapplication-TileColor" content="#dc2626" />
       </head>
-          <body className="min-h-screen bg-gray-50 font-sans antialiased">
-            <div className="flex flex-col min-h-screen">
-              <Header />
-              <main className="flex-1 flex flex-col min-h-0">
-                {children}
-              </main>
-              <div className="mt-auto flex-shrink-0">
-                <NewsletterSignup />
-                <Footer />
-              </div>
-            </div>
-            <Analytics />
-          </body>
+      <body className="min-h-screen bg-gray-50 font-sans antialiased">
+        <ConditionalLayoutClient>
+          {children}
+        </ConditionalLayoutClient>
+        <Analytics />
+      </body>
     </html>
   );
 }

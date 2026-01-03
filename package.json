@@ -48,6 +48,7 @@
     "playwright": "^1.56.1",
     "prettier": "^3.3.0",
     "selenium-webdriver": "^4.39.0",
+    "sharp": "^0.34.5",
     "supabase": "^2.70.5",
     "tailwindcss": "^4",
     "tsx": "^4.20.6",

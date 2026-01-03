@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { getProcessedBreweryData } from '../../../lib/brewery-data';
 import MapWithListClient from './MapWithListClient';
 import PageHero from '@/components/directory/PageHero';
+import { existsSync } from 'fs';
+import { join } from 'path';
 
 export const revalidate = 3600;
 
@@ -52,12 +54,18 @@ export default async function MapPage() {
     { title: 'Browse by Type', url: '/type', count: 0 },
   ];
 
+  // Check for map hero image
+  const mapHeroImagePath = '/map-hero.jpg';
+  const mapHeroImageFile = join(process.cwd(), 'public', 'map-hero.jpg');
+  const hasMapHeroImage = existsSync(mapHeroImageFile);
+
   return (
     <div className="bg-gray-50 min-h-screen">
       <PageHero
         h1="Interactive Brewery Map"
         introText="Explore all Maryland breweries on an interactive map with a filterable directory. Search by name, city, type, or amenities to find the perfect brewery for your visit."
         breadcrumbs={breadcrumbs}
+        heroImage={hasMapHeroImage ? mapHeroImagePath : null}
       />
       <div className="container mx-auto px-4 py-6">
         <MapWithListClient breweries={breweries} />

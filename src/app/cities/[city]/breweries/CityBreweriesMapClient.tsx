@@ -3,7 +3,9 @@
 import { useMemo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { MapPin, Phone, Search, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { slugify } from '@/lib/data-utils';
 import BreweryLogo from '@/components/brewery/BreweryLogo';
 
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
@@ -31,9 +33,25 @@ interface CityBreweriesMapClientProps {
   breweries: any[];
   cityName: string;
   neighborhoods: Neighborhood[];
+  neighborhood?: Neighborhood | null;
+  showNeighborhoods?: boolean;
 }
 
-export default function CityBreweriesMapClient({ breweries, cityName, neighborhoods }: CityBreweriesMapClientProps) {
+// Helper function to calculate distance between two points (Haversine formula)
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 3959; // Earth's radius in miles
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+export default function CityBreweriesMapClient({ breweries, cityName, neighborhoods, neighborhood, showNeighborhoods = true }: CityBreweriesMapClientProps) {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [showAllNeighborhoods, setShowAllNeighborhoods] = useState(false);
@@ -173,6 +191,10 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                           <h3 className="font-semibold text-[#9B2335] text-sm mb-1">
                             {brewery.name}
                           </h3>
+                          {/* Maryland Brewery in City, MD */}
+                          <div className="text-xs font-bold text-gray-700 mt-0.5 mb-1">
+                            Maryland Brewery in {brewery.city}, MD
+                          </div>
                           {/* Reviews below name */}
                           {brewery.googleRating && (
                             <div className="flex items-center gap-1 mt-1">
@@ -180,6 +202,12 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                               <span className="text-xs text-gray-700">
                                 {brewery.googleRating.toFixed(1)}{brewery.googleRatingCount ? ` - ${brewery.googleRatingCount} ${brewery.googleRatingCount === 1 ? 'review' : 'reviews'}` : ''}
                               </span>
+                            </div>
+                          )}
+                          {/* Distance from neighborhood */}
+                          {neighborhood && neighborhood.latitude && neighborhood.longitude && brewery.latitude && brewery.longitude && (
+                            <div className="text-xs text-gray-600 mt-1">
+                              {calculateDistance(neighborhood.latitude, neighborhood.longitude, brewery.latitude, brewery.longitude).toFixed(1)} miles away from {neighborhood.name}, {cityName}, MD
                             </div>
                           )}
                           {(brewery.amenities || brewery.features) && (
@@ -312,19 +340,28 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
           </div>
 
           {/* Neighborhoods Section - Only under map */}
-          {neighborhoods.length > 0 && (
+          {showNeighborhoods && neighborhoods.length > 0 && (
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Neighborhoods in {cityName}, MD</h2>
               <div className="grid grid-cols-2 gap-3">
-                {(showAllNeighborhoods ? neighborhoods : neighborhoods.slice(0, 10)).map((neighborhood) => (
-                  <Link
-                    key={neighborhood.slug || neighborhood.id}
-                    href={neighborhood.url || `#`}
-                    className="text-sm text-gray-700 hover:text-[#9B2335] transition-colors py-2 border-b border-gray-100 last:border-b-0"
-                  >
-                    {neighborhood.name}
-                  </Link>
-                ))}
+                {(showAllNeighborhoods ? neighborhoods : neighborhoods.slice(0, 10)).map((neighborhood) => {
+                  const neighborhoodSlug = neighborhood.slug || slugify(neighborhood.name);
+                  const citySlug = slugify(cityName);
+                  const neighborhoodUrl = `/cities/near/${neighborhoodSlug}-${citySlug}-md`;
+                  return (
+                    <a
+                      key={neighborhood.slug || neighborhood.id}
+                      href={neighborhoodUrl}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        router.push(neighborhoodUrl);
+                      }}
+                      className="text-sm text-gray-700 hover:text-[#9B2335] transition-colors py-2 border-b border-gray-100 last:border-b-0 block cursor-pointer"
+                    >
+                      {neighborhood.name}
+                    </a>
+                  );
+                })}
               </div>
               {neighborhoods.length > 10 && (
                 <button

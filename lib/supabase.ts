@@ -224,6 +224,9 @@ export interface DatabaseNeighborhood {
   state: string;
   url?: string;
   homes_url?: string;
+  latitude?: number;
+  longitude?: number;
+  place_id?: string;
   created_at?: string;
   updated_at?: string;
 }

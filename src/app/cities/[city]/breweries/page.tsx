@@ -112,7 +112,11 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
   const totalBreweries = breweries.length;
 
   // Get neighborhoods for this city from Supabase
-  const neighborhoods = await getNeighborhoodsByCity(cityName);
+  // Filter out neighborhoods where the name matches the city name (case-insensitive)
+  const allNeighborhoods = await getNeighborhoodsByCity(cityName);
+  const neighborhoods = allNeighborhoods.filter(
+    (neighborhood) => neighborhood.name.toLowerCase().trim() !== cityName.toLowerCase().trim()
+  );
 
   // Prepare data for BreweriesByLocationTabs
   const processed = await getProcessedBreweryData();

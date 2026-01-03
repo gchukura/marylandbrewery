@@ -8,7 +8,7 @@ import { Menu, X } from 'lucide-react';
 const NAVIGATION_ITEMS = [
   { label: 'Cities', href: '/cities' },
   { label: 'Counties', href: '/counties' },
-  { label: 'Interactive Map', href: '/map' },
+  { label: 'Brewery Map', href: '/map' },
   { label: 'Blog', href: '/blog' },
   { label: 'Contact', href: '/contact' },
 ];

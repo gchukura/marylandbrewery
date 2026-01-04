@@ -368,7 +368,7 @@ export default async function CityNearBreweriesPage({ params }: { params: Promis
               <li><ChevronRight className="h-4 w-4 mx-2 text-white/70" /></li>
               <li>
                 <Link href={`/cities/near/${slug}/breweries`} className="text-white font-medium drop-shadow-md hover:text-white transition-colors">
-                  Breweries near {cityName}, MD
+                  Near {cityName}, MD
                 </Link>
               </li>
             </ol>

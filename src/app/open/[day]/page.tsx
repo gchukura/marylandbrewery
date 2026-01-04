@@ -76,7 +76,7 @@ export default async function OpenDayPage({ params }: { params: Promise<{ day: s
 
   const dayCapitalized = day.charAt(0).toUpperCase() + day.slice(1);
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Open Now', url: '/open-now', isActive: false },
     { name: `Open on ${dayCapitalized}`, url: `/open/${dayParam}`, isActive: true },
   ];

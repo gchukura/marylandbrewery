@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export default function ContactPage() {
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Contact', url: '/contact', isActive: true },
   ];
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");

@@ -42,7 +42,7 @@ export default async function MapPage() {
   const breweries = processed.breweries as any[];
 
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Brewery Map', url: '/map', isActive: true },
   ];
 

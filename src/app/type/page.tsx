@@ -84,7 +84,7 @@ export default async function TypesIndexPage() {
 
   // Breadcrumbs
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Types', url: '/type', isActive: true },
   ];
 

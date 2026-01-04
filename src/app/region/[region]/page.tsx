@@ -122,7 +122,7 @@ export default async function RegionPage({ params }: { params: Promise<{ region:
 
   // Breadcrumbs
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Regions', url: '/region', isActive: false },
     { name: regionData.name, url: `/region/${region}`, isActive: true },
   ];

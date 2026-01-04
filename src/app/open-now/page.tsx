@@ -72,7 +72,7 @@ export default async function OpenNowPage() {
   const groups = Array.from(byCity.entries()).sort((a,b) => a[0].localeCompare(b[0]));
 
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Open Now', url: '/open-now', isActive: true },
   ];
 

@@ -126,7 +126,7 @@ export default async function AmenitiesIndexPage() {
 
   // Breadcrumbs
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Amenities', url: '/amenities', isActive: true },
   ];
 

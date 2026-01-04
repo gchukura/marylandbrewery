@@ -107,7 +107,7 @@ export default async function CountiesIndexPage() {
                   href="/" 
                   className={`transition-colors ${hasCountiesHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-[#9B2335]'}`}
                 >
-                  Home
+                  Maryland Breweries
                 </Link>
               </li>
               <li><ChevronRight className={`h-4 w-4 mx-2 ${hasCountiesHeroImage ? 'text-white/70' : ''}`} /></li>

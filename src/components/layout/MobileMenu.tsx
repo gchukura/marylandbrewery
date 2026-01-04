@@ -85,7 +85,7 @@ export default function MobileMenu({ navigationItems }: MobileMenuProps) {
                     onClick={closeMenu}
                     className="block px-3 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors font-medium"
                   >
-                    Home
+                    Maryland Breweries
                   </Link>
 
                   {/* All Breweries Link - removed, redirects to homepage */}

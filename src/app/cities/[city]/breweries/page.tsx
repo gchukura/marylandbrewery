@@ -14,13 +14,57 @@ import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTab
 
 // Build all city pages (no limit)
 export async function generateStaticParams() {
-  const cities = await getAllCities();
-  return cities.map((city) => ({ city: slugify(city) }));
+  try {
+    let cities: string[];
+    try {
+      cities = await getAllCities();
+    } catch (error) {
+      // Fallback: get cities directly from processed data if getAllCities fails
+      console.warn('getAllCities failed, falling back to direct fetch:', error);
+      const processed = await getProcessedBreweryData();
+      const citySet = new Set<string>();
+      processed.breweries.forEach((brewery: any) => {
+        if (brewery.city) {
+          citySet.add(brewery.city);
+        }
+      });
+      cities = Array.from(citySet).sort();
+    }
+    
+    if (!cities || cities.length === 0) {
+      console.warn('No cities found, returning empty array');
+      return [];
+    }
+    
+    const params = cities
+      .filter((city: string) => city && city.trim().length > 0)
+      .map((city: string) => ({ city: slugify(city) }));
+    
+    return params;
+  } catch (error) {
+    console.error('Error generating static params for cities:', error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ city: string }> }): Promise<Metadata> {
-  const { city } = await params;
-  const cityName = deslugify(city);
+  const resolvedParams = await params;
+  const city = resolvedParams?.city;
+  if (!city) {
+    // Return default metadata if city is missing (shouldn't happen, but handle gracefully)
+    return {
+      title: 'City Breweries | Maryland Brewery Directory',
+      description: 'Explore craft breweries in Maryland cities.',
+    };
+  }
+  // Handle both regular and -md suffixed routes
+  // Strip -md suffix if present
+  const isMdRoute = city.endsWith('-md');
+  let citySlug = city;
+  if (isMdRoute) {
+    citySlug = citySlug.substring(0, citySlug.length - 3);
+  }
+  const cityName = deslugify(citySlug);
   const breweries = await getBreweriesByCity(cityName);
   const total = breweries.length;
 
@@ -67,8 +111,27 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
 }
 
 export default async function CityBreweriesPage({ params }: { params: Promise<{ city: string }> }) {
-  const { city } = await params;
-  const cityName = deslugify(city);
+  const resolvedParams = await params;
+  const city = resolvedParams?.city;
+  if (!city) {
+    // Return a not found page if city is missing
+    return (
+      <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">City Not Found</h1>
+          <p className="text-lg text-gray-600">The requested city page could not be found.</p>
+        </div>
+      </div>
+    );
+  }
+  // Handle both regular and -md suffixed routes
+  // Strip -md suffix if present
+  const isMdRoute = city.endsWith('-md');
+  let citySlug = city;
+  if (isMdRoute) {
+    citySlug = citySlug.substring(0, citySlug.length - 3);
+  }
+  const cityName = deslugify(citySlug);
   
   // Use the helper function which handles Map serialization properly
   let breweries = await getBreweriesByCity(cityName);
@@ -91,9 +154,9 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
   });
 
   // Get city hero image - prioritize local city image from Pexels, fallback to brewery photo
-  const citySlug = slugify(cityName);
-  const localCityImagePath = `/cities/${citySlug}.jpg`;
-  const localCityImageFile = join(process.cwd(), 'public', 'cities', `${citySlug}.jpg`);
+  const citySlugForImage = slugify(cityName);
+  const localCityImagePath = `/cities/${citySlugForImage}.jpg`;
+  const localCityImageFile = join(process.cwd(), 'public', 'cities', `${citySlugForImage}.jpg`);
   
   // Check if local city image exists
   const hasLocalCityImage = existsSync(localCityImageFile);

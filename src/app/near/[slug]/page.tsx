@@ -144,7 +144,7 @@ export default async function NearAttractionPage({ params }: { params: Promise<{
 
   // Breadcrumbs
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Near Attractions', url: '/near', isActive: false },
     { name: attraction.name, url: `/near/${slug}`, isActive: true },
   ];

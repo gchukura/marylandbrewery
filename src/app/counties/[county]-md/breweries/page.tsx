@@ -231,7 +231,7 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
                   href="/" 
                   className={`transition-colors ${countyHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-[#9B2335]'}`}
                 >
-                  Home
+                  Maryland Breweries
                 </Link>
               </li>
               <li><ChevronRight className={`h-4 w-4 mx-2 ${countyHeroImage ? 'text-white/70' : ''}`} /></li>

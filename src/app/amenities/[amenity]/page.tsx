@@ -111,7 +111,7 @@ export default async function AmenityPage({ params }: { params: Promise<{ amenit
 
   // Breadcrumbs
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Amenities', url: '/amenities', isActive: false },
     { name: label, url: `/amenities/${amenity}`, isActive: true },
   ];

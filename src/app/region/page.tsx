@@ -78,7 +78,7 @@ export default async function RegionsIndexPage() {
 
   // Breadcrumbs
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Regions', url: '/region', isActive: true },
   ];
 

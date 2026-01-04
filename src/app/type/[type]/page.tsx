@@ -118,7 +118,7 @@ export default async function TypePage({ params }: { params: Promise<{ type: str
 
   // Breadcrumbs
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Types', url: '/type', isActive: false },
     { name: typeLabel, url: `/type/${type}`, isActive: true },
   ];

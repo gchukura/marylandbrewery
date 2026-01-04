@@ -103,7 +103,7 @@ export default async function CityAmenityPage({ params }: { params: Promise<{ ci
 
   // Breadcrumbs
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Cities', url: '/cities', isActive: false },
     { name: cityName, url: `/cities/${city}/breweries`, isActive: false },
     { name: amenityLabel, url: `/cities/${city}/${amenity}`, isActive: true },

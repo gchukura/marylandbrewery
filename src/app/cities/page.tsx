@@ -140,7 +140,7 @@ export default async function CitiesIndexPage() {
                   href="/" 
                   className={`transition-colors ${hasCitiesHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-[#9B2335]'}`}
                 >
-                  Home
+                  Maryland Breweries
                 </Link>
               </li>
               <li><ChevronRight className={`h-4 w-4 mx-2 ${hasCitiesHeroImage ? 'text-white/70' : ''}`} /></li>

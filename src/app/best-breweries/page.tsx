@@ -79,7 +79,7 @@ export default async function BestBreweriesPage() {
 
   // Breadcrumbs
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Best Breweries', url: '/best-breweries', isActive: true },
   ];
 

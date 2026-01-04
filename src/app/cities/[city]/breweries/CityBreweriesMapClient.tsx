@@ -212,10 +212,16 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                               </span>
                             </div>
                           )}
-                          {/* Distance from neighborhood */}
+                          {/* Distance from neighborhood or city center */}
                           {neighborhood && neighborhood.latitude && neighborhood.longitude && brewery.latitude && brewery.longitude && (
                             <div className="text-xs text-gray-600 mt-1">
                               {calculateDistance(neighborhood.latitude, neighborhood.longitude, brewery.latitude, brewery.longitude).toFixed(1)} miles away from {neighborhood.name}, {cityName}, MD
+                            </div>
+                          )}
+                          {/* Distance from city center (for city "near" pages) */}
+                          {!neighborhood && brewery.distance !== undefined && (
+                            <div className="text-xs text-gray-600 mt-1">
+                              {brewery.distance.toFixed(1)} miles away from {cityName}, MD
                             </div>
                           )}
                           {(brewery.amenities || brewery.features) && (

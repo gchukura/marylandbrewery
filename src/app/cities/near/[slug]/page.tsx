@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { getProcessedBreweryData, getBreweriesByCity } from '../../../../../lib/brewery-data';
 import { slugify, deslugify } from '@/lib/data-utils';
 import { getNeighborhoodBySlug, getNeighborhoodsByCity } from '../../../../../lib/supabase-client';
@@ -10,6 +11,25 @@ import { join } from 'path';
 import '@/components/home-v2/styles.css';
 import CityBreweriesMapClient from '../../[city]/breweries/CityBreweriesMapClient';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
+
+// Major city coordinates (from brewery-content-utils.ts)
+const MAJOR_CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
+  baltimore: { lat: 39.2904, lng: -76.6122 },
+  annapolis: { lat: 38.9784, lng: -76.4922 },
+  frederick: { lat: 39.4143, lng: -77.4105 },
+  rockville: { lat: 39.0840, lng: -77.1528 },
+  gaithersburg: { lat: 39.1434, lng: -77.2014 },
+  columbia: { lat: 39.2037, lng: -76.8610 },
+  'silver spring': { lat: 38.9907, lng: -77.0261 },
+  towson: { lat: 39.4015, lng: -76.6019 },
+  bethesda: { lat: 38.9847, lng: -77.0947 },
+  'ellicott city': { lat: 39.2673, lng: -76.7983 },
+  westminster: { lat: 39.5754, lng: -76.9958 },
+  cumberland: { lat: 39.6529, lng: -78.7575 },
+  hagerstown: { lat: 39.6418, lng: -77.7200 },
+  salisbury: { lat: 38.3607, lng: -75.5994 },
+  'ocean city': { lat: 38.3365, lng: -75.0849 },
+};
 
 // Helper function to calculate distance between two points (Haversine formula)
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -23,6 +43,9 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
+
+// Note: City coordinate functions moved to [slug]/breweries/page.tsx
+// This route only handles neighborhood slugs
 
 // Helper function to parse neighborhood slug and find the neighborhood
 async function parseNeighborhoodSlug(slug: string): Promise<{ neighborhood: any; cityName: string; citySlug: string } | null> {
@@ -87,6 +110,8 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   
+  // This route only handles neighborhood slugs (not city slugs)
+  // City slugs should use /cities/near/[slug]/breweries route
   const parsed = await parseNeighborhoodSlug(slug);
   if (!parsed) {
     return {
@@ -170,9 +195,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function NeighborhoodBreweriesPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   
+  // This route only handles neighborhood slugs (not city slugs)
+  // City slugs should use /cities/near/[slug]/breweries route
   const parsed = await parseNeighborhoodSlug(slug);
   if (!parsed) {
-    return <div>Neighborhood not found</div>;
+    notFound();
   }
   
   const { neighborhood, cityName, citySlug } = parsed;

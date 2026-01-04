@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import { getProcessedBreweryData } from '../../../lib/brewery-data';
 import MapWithListClient from './MapWithListClient';
 import PageHero from '@/components/directory/PageHero';
@@ -68,7 +69,9 @@ export default async function MapPage() {
         heroImage={hasMapHeroImage ? mapHeroImagePath : null}
       />
       <div className="container mx-auto px-4 py-6">
-        <MapWithListClient breweries={breweries} />
+        <Suspense fallback={<div className="text-center py-8">Loading map...</div>}>
+          <MapWithListClient breweries={breweries} />
+        </Suspense>
       </div>
     </div>
   );

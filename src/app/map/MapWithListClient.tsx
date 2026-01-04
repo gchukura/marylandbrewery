@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { MapPin, Phone, Globe, Search, Filter, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
@@ -20,9 +21,19 @@ interface MapWithListClientProps {
 }
 
 export default function MapWithListClient({ breweries }: MapWithListClientProps) {
-  const [search, setSearch] = useState('');
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+  const [search, setSearch] = useState(initialSearch);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Update search when URL parameter changes
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || '';
+    if (urlSearch !== search) {
+      setSearch(urlSearch);
+    }
+  }, [searchParams, search]);
 
   // Filter breweries
   const filtered = useMemo(() => {
@@ -106,11 +117,20 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
         <div id="brewery-list" className="flex-1 overflow-y-auto min-h-0">
           {filtered.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
-              <p>No breweries found matching your filters.</p>
+              <p className="text-base font-medium mb-2">
+                {search.trim() 
+                  ? `No breweries found matching "${search}"`
+                  : 'No breweries found matching your filters.'}
+              </p>
+              {search.trim() && (
+                <p className="text-sm text-gray-400 mb-4">
+                  Try searching by brewery name or a different city name.
+                </p>
+              )}
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="mt-2 text-red-600 hover:text-red-700 text-sm"
+                  className="mt-2 text-red-600 hover:text-red-700 text-sm font-medium"
                 >
                   Clear filters to see all breweries
                 </button>

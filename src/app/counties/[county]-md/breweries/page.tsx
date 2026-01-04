@@ -21,7 +21,15 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ county: string }> }): Promise<Metadata> {
-  const { county } = await params;
+  const resolvedParams = await params;
+  const county = resolvedParams?.county;
+  if (!county) {
+    // Return default metadata if county is missing (shouldn't happen, but handle gracefully)
+    return {
+      title: 'County Breweries | Maryland Brewery Directory',
+      description: 'Explore craft breweries in Maryland counties.',
+    };
+  }
   // Strip -md suffix to get actual county name
   const countySlugFromParam = county.replace(/-md$/, '');
   const processed = await getProcessedBreweryData();
@@ -63,7 +71,19 @@ export async function generateMetadata({ params }: { params: Promise<{ county: s
 }
 
 export default async function CountyBreweriesPage({ params }: { params: Promise<{ county: string }> }) {
-  const { county } = await params;
+  const resolvedParams = await params;
+  const county = resolvedParams?.county;
+  if (!county) {
+    // Return a not found page if county is missing
+    return (
+      <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">County Not Found</h1>
+          <p className="text-lg text-gray-600">The requested county page could not be found.</p>
+        </div>
+      </div>
+    );
+  }
   // Strip -md suffix to get actual county name
   const countySlugFromParam = county.replace(/-md$/, '');
   const processed = await getProcessedBreweryData();

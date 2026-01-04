@@ -16,6 +16,9 @@ const ALL_MD_COUNTIES = [
   'Prince Georges', 'Queen Annes', 'Somerset', 'St Marys', 'Talbot', 'Washington', 'Wicomico', 'Worcester'
 ];
 
+// Force dynamic rendering to ensure code executes on every request
+export const dynamic = 'force-dynamic';
+
 export async function generateStaticParams() {
   return ALL_MD_COUNTIES.map(c => ({ county: `${slugify(c)}-md` }));
 }
@@ -30,8 +33,23 @@ export async function generateMetadata({ params }: { params: Promise<{ county: s
       description: 'Explore craft breweries in Maryland counties.',
     };
   }
-  // Strip -md suffix to get actual county name
-  const countySlugFromParam = county.replace(/-md$/, '');
+  // CRITICAL: Strip -md suffix to get actual county name
+  // ALWAYS strip -md regardless of method
+  let countySlugFromParam = county;
+  
+  // Force strip -md using multiple methods
+  if (countySlugFromParam.endsWith('-md')) {
+    countySlugFromParam = countySlugFromParam.substring(0, countySlugFromParam.length - 3);
+  } else if (countySlugFromParam.includes('-md')) {
+    // Fallback: use replace if endsWith didn't work
+    countySlugFromParam = countySlugFromParam.replace(/-md$/, '');
+  }
+  
+  // Final safety check - force remove any remaining -md
+  if (countySlugFromParam.includes('-md')) {
+    countySlugFromParam = countySlugFromParam.replace(/-md/g, '');
+  }
+  
   const processed = await getProcessedBreweryData();
   const countyName = deslugify(countySlugFromParam);
   const list = processed.breweries.filter(b => (b as any).county?.toLowerCase() === countyName.toLowerCase());
@@ -73,6 +91,10 @@ export async function generateMetadata({ params }: { params: Promise<{ county: s
 export default async function CountyBreweriesPage({ params }: { params: Promise<{ county: string }> }) {
   const resolvedParams = await params;
   const county = resolvedParams?.county;
+  
+  // DEBUG: Log the input
+  console.log('[COUNTY-MD-PAGE] Raw county param:', county);
+  
   if (!county) {
     // Return a not found page if county is missing
     return (
@@ -84,11 +106,36 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
       </div>
     );
   }
-  // Strip -md suffix to get actual county name
-  const countySlugFromParam = county.replace(/-md$/, '');
+  
+  // CRITICAL: Strip -md suffix to get actual county name
+  // ALWAYS strip -md regardless of method
+  let countySlugFromParam = county;
+  
+  // Force strip -md using multiple methods
+  if (countySlugFromParam.endsWith('-md')) {
+    countySlugFromParam = countySlugFromParam.substring(0, countySlugFromParam.length - 3);
+    console.log('[COUNTY-MD-PAGE] Stripped -md using endsWith:', countySlugFromParam);
+  } else if (countySlugFromParam.includes('-md')) {
+    // Fallback: use replace if endsWith didn't work
+    countySlugFromParam = countySlugFromParam.replace(/-md$/, '');
+    console.log('[COUNTY-MD-PAGE] Stripped -md using replace:', countySlugFromParam);
+  }
+  
+  // Final safety check - force remove any remaining -md
+  if (countySlugFromParam.includes('-md')) {
+    console.error(`[COUNTY-MD-PAGE] ERROR: Still contains -md after strip! Forcing removal.`);
+    countySlugFromParam = countySlugFromParam.replace(/-md/g, '');
+    console.log('[COUNTY-MD-PAGE] After force removal:', countySlugFromParam);
+  }
+  
+  console.log('[COUNTY-MD-PAGE] Final slug before deslugify:', countySlugFromParam);
+  
   const processed = await getProcessedBreweryData();
   const countyName = deslugify(countySlugFromParam);
   const countyKey = countyName.toLowerCase();
+  
+  console.log('[COUNTY-MD-PAGE] County name after deslugify:', countyName);
+  console.log('[COUNTY-MD-PAGE] County key for filtering:', countyKey);
   
   // Optimize filtering - use pre-indexed data if available
   const breweries = processed.breweries.filter(b => {
@@ -237,7 +284,7 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
       {/* Map and List Layout */}
       <section className="bg-white py-8 md:py-12">
         <div className="container mx-auto px-4">
-          <CountyBreweriesMapClient breweries={sortedBreweries} countyName={countyName} />
+          <CountyBreweriesMapClient breweries={sortedBreweries} countyName={countyName} isMdRoute={true} />
         </div>
       </section>
 

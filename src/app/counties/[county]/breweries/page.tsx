@@ -22,8 +22,17 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ county: string }> }): Promise<Metadata> {
   const { county } = await params;
+  
+  // Handle both regular and -md suffixed routes
+  // Strip -md suffix if present
+  const isMdRoute = county.endsWith('-md');
+  let countySlug = county;
+  if (isMdRoute) {
+    countySlug = countySlug.substring(0, countySlug.length - 3);
+  }
+  
   const processed = await getProcessedBreweryData();
-  const countyName = deslugify(county);
+  const countyName = deslugify(countySlug);
   const list = processed.breweries.filter(b => (b as any).county?.toLowerCase() === countyName.toLowerCase());
   const total = list.length;
 
@@ -62,8 +71,17 @@ export async function generateMetadata({ params }: { params: Promise<{ county: s
 
 export default async function CountyBreweriesPage({ params }: { params: Promise<{ county: string }> }) {
   const { county } = await params;
+  
+  // Handle both regular and -md suffixed routes
+  // Strip -md suffix if present
+  const isMdRoute = county.endsWith('-md');
+  let countySlug = county;
+  if (isMdRoute) {
+    countySlug = countySlug.substring(0, countySlug.length - 3);
+  }
+  
   const processed = await getProcessedBreweryData();
-  const countyName = deslugify(county);
+  const countyName = deslugify(countySlug);
   const countyKey = countyName.toLowerCase();
   
   // Optimize filtering - use pre-indexed data if available
@@ -81,9 +99,9 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
   });
 
   // Get county hero image - check for local county image from Pexels
-  const countySlug = slugify(countyName);
-  const localCountyImagePath = `/counties/${countySlug}.jpg`;
-  const localCountyImageFile = join(process.cwd(), 'public', 'counties', `${countySlug}.jpg`);
+  const countySlugForImage = slugify(countyName);
+  const localCountyImagePath = `/counties/${countySlugForImage}.jpg`;
+  const localCountyImageFile = join(process.cwd(), 'public', 'counties', `${countySlugForImage}.jpg`);
   
   // Check if local county image exists
   const hasLocalCountyImage = existsSync(localCountyImageFile);
@@ -178,7 +196,7 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
                   href={`/counties/${county}/breweries`} 
                   className={`font-medium transition-colors ${countyHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-[#1C1C1C] hover:text-[#9B2335]'}`}
                 >
-                  {countyName} County
+                  {isMdRoute ? `${countyName} County, Maryland` : `${countyName} County`}
                 </Link>
               </li>
             </ol>
@@ -193,7 +211,7 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
             }`}
             style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: countyHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
           >
-            {countyName} County Breweries
+            {isMdRoute ? `${countyName} County, Maryland Breweries` : `${countyName} County Breweries`}
           </h1>
 
           {/* Count Display */}
@@ -210,12 +228,12 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
         </div>
       </section>
 
-      {/* Map and List Layout */}
-      <section className="bg-white py-8 md:py-12">
-        <div className="container mx-auto px-4">
-          <CountyBreweriesMapClient breweries={sortedBreweries} countyName={countyName} />
-        </div>
-      </section>
+        {/* Map and List Layout */}
+        <section className="bg-white py-8 md:py-12">
+          <div className="container mx-auto px-4">
+            <CountyBreweriesMapClient breweries={sortedBreweries} countyName={countyName} isMdRoute={isMdRoute} />
+          </div>
+        </section>
 
       {/* Breweries by Location Tabs */}
       <BreweriesByLocationTabs cities={cities} counties={counties} />

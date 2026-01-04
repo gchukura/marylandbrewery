@@ -15,18 +15,32 @@ import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTab
 // Build all city pages with -md suffix
 export async function generateStaticParams() {
   try {
-    const cities = await getAllCities();
+    let cities: string[];
+    try {
+      cities = await getAllCities();
+    } catch (error) {
+      // Fallback: get cities directly from processed data if getAllCities fails
+      console.warn('getAllCities failed, falling back to direct fetch:', error);
+      const processed = await getProcessedBreweryData();
+      const citySet = new Set<string>();
+      processed.breweries.forEach((brewery: any) => {
+        if (brewery.city) {
+          citySet.add(brewery.city);
+        }
+      });
+      cities = Array.from(citySet).sort();
+    }
+    
     if (!cities || cities.length === 0) {
       console.warn('No cities found, returning empty array');
       return [];
     }
-    return cities.map((city: string) => {
-      if (!city) {
-        console.warn('Empty city name found, skipping');
-        return null;
-      }
-      return { city: `${slugify(city)}-md` };
-    }).filter((param): param is { city: string } => param !== null);
+    
+    const params = cities
+      .filter((city: string) => city && city.trim().length > 0)
+      .map((city: string) => ({ city: `${slugify(city)}-md` }));
+    
+    return params;
   } catch (error) {
     console.error('Error generating static params for cities:', error);
     return [];
@@ -34,9 +48,14 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ city: string }> }): Promise<Metadata> {
-  const { city } = await params;
+  const resolvedParams = await params;
+  const city = resolvedParams?.city;
   if (!city) {
-    throw new Error('City parameter is required');
+    // Return default metadata if city is missing (shouldn't happen, but handle gracefully)
+    return {
+      title: 'City Breweries | Maryland Brewery Directory',
+      description: 'Explore craft breweries in Maryland cities.',
+    };
   }
   // Strip -md suffix to get actual city name
   const citySlugFromParam = city.replace(/-md$/, '');
@@ -87,9 +106,18 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
 }
 
 export default async function CityBreweriesPage({ params }: { params: Promise<{ city: string }> }) {
-  const { city } = await params;
+  const resolvedParams = await params;
+  const city = resolvedParams?.city;
   if (!city) {
-    throw new Error('City parameter is required');
+    // Return a not found page if city is missing
+    return (
+      <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">City Not Found</h1>
+          <p className="text-lg text-gray-600">The requested city page could not be found.</p>
+        </div>
+      </div>
+    );
   }
   // Strip -md suffix to get actual city name
   const citySlugFromParam = city.replace(/-md$/, '');

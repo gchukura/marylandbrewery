@@ -211,7 +211,7 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
             }`}
             style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: countyHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
           >
-            {isMdRoute ? `${countyName} County, Maryland Breweries` : `${countyName} County Breweries`}
+            {isMdRoute ? `Breweries in ${countyName} County, Maryland` : `Breweries in ${countyName} County`}
           </h1>
 
           {/* Count Display */}

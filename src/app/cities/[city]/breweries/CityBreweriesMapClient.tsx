@@ -134,8 +134,12 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
 
           {/* Results Count */}
           <div className="mt-3 text-sm text-gray-600">
-            Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries in {cityName}
-            {filtered.length !== breweries.length && ` (filtered from ${breweries.length} total)`}
+            {neighborhood ? (
+              <>Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries near {neighborhood.name}, {cityName}, MD</>
+            ) : (
+              <>Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries in {cityName}
+              {filtered.length !== breweries.length && ` (filtered from ${breweries.length} total)`}</>
+            )}
           </div>
         </div>
 

@@ -161,6 +161,12 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                           <h3 className="font-semibold text-[#9B2335] text-sm mb-1">
                             {brewery.name}
                           </h3>
+                          {/* Maryland Brewery in City, MD */}
+                          {brewery.city && (
+                            <div className="text-xs font-bold text-gray-700 mt-0.5 mb-1">
+                              Maryland Brewery in {brewery.city}, MD
+                            </div>
+                          )}
                           {/* Reviews below name */}
                           {brewery.googleRating && (
                             <div className="flex items-center gap-1 mt-1">

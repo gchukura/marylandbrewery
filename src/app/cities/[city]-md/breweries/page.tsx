@@ -14,12 +14,30 @@ import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTab
 
 // Build all city pages with -md suffix
 export async function generateStaticParams() {
-  const cities = await getAllCities();
-  return cities.map((city: string) => ({ city: `${slugify(city)}-md` }));
+  try {
+    const cities = await getAllCities();
+    if (!cities || cities.length === 0) {
+      console.warn('No cities found, returning empty array');
+      return [];
+    }
+    return cities.map((city: string) => {
+      if (!city) {
+        console.warn('Empty city name found, skipping');
+        return null;
+      }
+      return { city: `${slugify(city)}-md` };
+    }).filter((param): param is { city: string } => param !== null);
+  } catch (error) {
+    console.error('Error generating static params for cities:', error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ city: string }> }): Promise<Metadata> {
   const { city } = await params;
+  if (!city) {
+    throw new Error('City parameter is required');
+  }
   // Strip -md suffix to get actual city name
   const citySlugFromParam = city.replace(/-md$/, '');
   const cityName = deslugify(citySlugFromParam);
@@ -70,6 +88,9 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
 
 export default async function CityBreweriesPage({ params }: { params: Promise<{ city: string }> }) {
   const { city } = await params;
+  if (!city) {
+    throw new Error('City parameter is required');
+  }
   // Strip -md suffix to get actual city name
   const citySlugFromParam = city.replace(/-md$/, '');
   const cityName = deslugify(citySlugFromParam);

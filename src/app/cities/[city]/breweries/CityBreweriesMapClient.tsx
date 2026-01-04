@@ -106,7 +106,7 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
         {/* Left Side - Filterable List */}
         <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[600px] lg:h-[700px]">
         {/* Filter Header */}
-        <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+        <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900">Brewery Directory</h2>
             {hasActiveFilters && (
@@ -162,6 +162,7 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                     key={brewery.id}
                     href={`/breweries/${slug}`}
                     className="block p-4"
+                    style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                   >
                     <div className="flex items-start gap-3">
                       {/* Logo on the left */}

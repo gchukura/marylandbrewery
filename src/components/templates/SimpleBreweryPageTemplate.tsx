@@ -329,25 +329,27 @@ export default function SimpleBreweryPageTemplate({
               : brewery.photoUrl;
             
             return heroImage ? (
-              <div className="relative w-full h-64 md:h-96">
-                {heroImage.startsWith('http') ? (
-                  <img 
-                    src={heroImage} 
-                    alt={`${brewery.name} exterior`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Image
-                    src={heroImage}
-                    alt={`${brewery.name} exterior`}
-                    fill
-                    className="object-cover"
-                    sizes="100vw"
-                    priority
-                  />
-                )}
-                {/* Optional overlay gradient for better text readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+              <div className="relative w-full py-12 md:py-16">
+                <div className="absolute inset-0">
+                  {heroImage.startsWith('http') ? (
+                    <img 
+                      src={heroImage} 
+                      alt={`${brewery.name} exterior`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Image
+                      src={heroImage}
+                      alt={`${brewery.name} exterior`}
+                      fill
+                      className="object-cover"
+                      sizes="100vw"
+                      priority
+                    />
+                  )}
+                  {/* Optional overlay gradient for better text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                </div>
               </div>
             ) : null;
           })()}

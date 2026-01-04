@@ -55,7 +55,7 @@ export default function HeroV2() {
             className="text-center text-lg md:text-xl text-[#6B6B6B] max-w-2xl mx-auto mb-10"
             style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
-            A local curated directory of craft breweries in the state of Maryland. Find a brewery for your next event, outing, or place to hang with family and friends
+            A local curated directory of craft breweries in the state of Maryland. Find a brewery for your next event, outing, or place to hang with family and friends.
           </p>
 
           {/* Search Bar */}

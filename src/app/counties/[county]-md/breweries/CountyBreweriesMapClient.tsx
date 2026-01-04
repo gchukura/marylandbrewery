@@ -3,9 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { MapPin, Phone, Search, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { slugify } from '@/lib/data-utils';
 import BreweryLogo from '@/components/brewery/BreweryLogo';
 
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
@@ -17,47 +15,14 @@ const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), {
   )
 });
 
-interface Neighborhood {
-  id?: string;
-  name: string;
-  slug: string;
-  description?: string;
-  city?: string;
-  county?: string;
-  state: string;
-  url?: string;
-  homes_url?: string;
-  latitude?: number;
-  longitude?: number;
-  place_id?: string;
-}
-
-interface CityBreweriesMapClientProps {
+interface CountyBreweriesMapClientProps {
   breweries: any[];
-  cityName: string;
-  neighborhoods: Neighborhood[];
-  neighborhood?: Neighborhood | null;
-  showNeighborhoods?: boolean;
+  countyName: string;
 }
 
-// Helper function to calculate distance between two points (Haversine formula)
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 3959; // Earth's radius in miles
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-export default function CityBreweriesMapClient({ breweries, cityName, neighborhoods, neighborhood, showNeighborhoods = true }: CityBreweriesMapClientProps) {
-  const router = useRouter();
+export default function CountyBreweriesMapClient({ breweries, countyName }: CountyBreweriesMapClientProps) {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [showAllNeighborhoods, setShowAllNeighborhoods] = useState(false);
   const itemsPerPage = 10;
 
   // Filter breweries
@@ -134,12 +99,8 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
 
           {/* Results Count */}
           <div className="mt-3 text-sm text-gray-600">
-            {neighborhood ? (
-              <>Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries near {neighborhood.name}, {cityName}, MD</>
-            ) : (
-              <>Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries in {cityName}
-              {filtered.length !== breweries.length && ` (filtered from ${breweries.length} total)`}</>
-            )}
+            Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries in {countyName} County
+            {filtered.length !== breweries.length && ` (filtered from ${breweries.length} total)`}
           </div>
         </div>
 
@@ -199,10 +160,6 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                           <h3 className="font-semibold text-[#9B2335] text-sm mb-1">
                             {brewery.name}
                           </h3>
-                          {/* Maryland Brewery in City, MD */}
-                          <div className="text-xs font-bold text-gray-700 mt-0.5 mb-1">
-                            Maryland Brewery in {brewery.city}, MD
-                          </div>
                           {/* Reviews below name */}
                           {brewery.googleRating && (
                             <div className="flex items-center gap-1 mt-1">
@@ -210,12 +167,6 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                               <span className="text-xs text-gray-700">
                                 {brewery.googleRating.toFixed(1)}{brewery.googleRatingCount ? ` - ${brewery.googleRatingCount} ${brewery.googleRatingCount === 1 ? 'review' : 'reviews'}` : ''}
                               </span>
-                            </div>
-                          )}
-                          {/* Distance from neighborhood */}
-                          {neighborhood && neighborhood.latitude && neighborhood.longitude && brewery.latitude && brewery.longitude && (
-                            <div className="text-xs text-gray-600 mt-1">
-                              {calculateDistance(neighborhood.latitude, neighborhood.longitude, brewery.latitude, brewery.longitude).toFixed(1)} miles away from {neighborhood.name}, {cityName}, MD
                             </div>
                           )}
                           {(brewery.amenities || brewery.features) && (
@@ -337,7 +288,7 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                   breweries={filtered as any} 
                   height="100%" 
                   showClusters={true}
-                  zoom={11}
+                  zoom={9}
                 />
               ) : (
                 <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center text-sm text-gray-600 px-4">
@@ -347,59 +298,12 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
             </div>
           </div>
 
-          {/* Neighborhoods Section - Only under map */}
-          {showNeighborhoods && neighborhoods.length > 0 && (
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Neighborhoods in {cityName}, MD</h2>
-              <div className="grid grid-cols-2 gap-3">
-                {(showAllNeighborhoods ? neighborhoods : neighborhoods.slice(0, 10)).map((neighborhood) => {
-                  const neighborhoodSlug = neighborhood.slug || slugify(neighborhood.name);
-                  const citySlug = slugify(cityName);
-                  const neighborhoodUrl = `/cities/near/${neighborhoodSlug}-${citySlug}-md`;
-                  return (
-                    <a
-                      key={neighborhood.slug || neighborhood.id}
-                      href={neighborhoodUrl}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        router.push(neighborhoodUrl);
-                      }}
-                      className="text-sm text-gray-700 hover:text-[#9B2335] transition-colors py-2 border-b border-gray-100 last:border-b-0 block cursor-pointer"
-                    >
-                      {neighborhood.name}
-                    </a>
-                  );
-                })}
-              </div>
-              {neighborhoods.length > 10 && (
-                <button
-                  onClick={() => setShowAllNeighborhoods(!showAllNeighborhoods)}
-                  className="mt-4 text-sm text-[#9B2335] hover:text-[#7A1C2A] font-medium transition-colors"
-                >
-                  {showAllNeighborhoods ? 'Show less' : 'Show more'}
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Neighborhood Description Section - Only show on neighborhood pages */}
-          {neighborhood && neighborhood.description && (
-            <div className="bg-white border border-gray-200 rounded-lg p-6 mt-4">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                {neighborhood.name}
-              </h2>
-              <div 
-                className="prose prose-lg text-[#6B6B6B]"
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-              >
-                <p>{neighborhood.description}</p>
-              </div>
-            </div>
-          )}
-
           {/* About Section */}
           <div className="bg-white border border-gray-200 rounded-lg p-6 mt-4">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <h2 
+              className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-6"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
               About Maryland Brewery Directory
             </h2>
             <div 

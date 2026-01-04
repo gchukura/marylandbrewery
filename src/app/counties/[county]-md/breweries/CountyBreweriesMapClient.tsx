@@ -18,9 +18,10 @@ const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), {
 interface CountyBreweriesMapClientProps {
   breweries: any[];
   countyName: string;
+  isMdRoute?: boolean;
 }
 
-export default function CountyBreweriesMapClient({ breweries, countyName }: CountyBreweriesMapClientProps) {
+export default function CountyBreweriesMapClient({ breweries, countyName, isMdRoute = false }: CountyBreweriesMapClientProps) {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -99,7 +100,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName }: Coun
 
           {/* Results Count */}
           <div className="mt-3 text-sm text-gray-600">
-            Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries in {countyName} County
+            Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries in {countyName} County{isMdRoute ? ', Maryland' : ''}
             {filtered.length !== breweries.length && ` (filtered from ${breweries.length} total)`}
           </div>
         </div>

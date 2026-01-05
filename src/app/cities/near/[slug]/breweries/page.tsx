@@ -211,7 +211,9 @@ export default async function CityNearBreweriesPage({ params }: { params: Promis
               breweries={sortedBreweries} 
               cityName={cityName} 
               neighborhoods={[]}
+              neighborhood={null}
               showNeighborhoods={false}
+              isNearPage={true}
             />
           </div>
         </section>
@@ -399,7 +401,9 @@ export default async function CityNearBreweriesPage({ params }: { params: Promis
             breweries={sortedBreweries} 
             cityName={cityName} 
             neighborhoods={[]}
+            neighborhood={null}
             showNeighborhoods={false}
+            isNearPage={true}
           />
         </div>
       </section>

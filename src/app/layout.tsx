@@ -117,7 +117,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#dc2626" />
         <meta name="msapplication-TileColor" content="#dc2626" />
       </head>
-      <body className="min-h-screen bg-gray-50 font-sans antialiased">
+      <body className="min-h-screen bg-gray-50 antialiased" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
         <ConditionalLayoutClient>
           {children}
         </ConditionalLayoutClient>

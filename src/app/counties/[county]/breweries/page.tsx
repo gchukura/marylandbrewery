@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { getProcessedBreweryData } from '../../../../../lib/brewery-data';
-import { slugify, deslugify } from '@/lib/data-utils';
+import { slugify, normalizeCountyName, isValidCountySlug, ALL_MD_COUNTIES } from '@/lib/data-utils';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
@@ -9,12 +10,6 @@ import { join } from 'path';
 import '@/components/home-v2/styles.css';
 import CountyBreweriesMapClient from './CountyBreweriesMapClient';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
-
-const ALL_MD_COUNTIES = [
-  'Allegany', 'Anne Arundel', 'Baltimore', 'Calvert', 'Caroline', 'Carroll', 'Cecil', 'Charles',
-  'Dorchester', 'Frederick', 'Garrett', 'Harford', 'Howard', 'Kent', 'Montgomery',
-  'Prince Georges', 'Queen Annes', 'Somerset', 'St Marys', 'Talbot', 'Washington', 'Wicomico', 'Worcester'
-];
 
 export async function generateStaticParams() {
   return ALL_MD_COUNTIES.map(c => ({ county: slugify(c) }));
@@ -31,9 +26,26 @@ export async function generateMetadata({ params }: { params: Promise<{ county: s
     countySlug = countySlug.substring(0, countySlug.length - 3);
   }
   
+  // Validate county slug
+  if (!isValidCountySlug(countySlug)) {
+    return {
+      title: 'County Not Found',
+    };
+  }
+  
+  const countyName = normalizeCountyName(countySlug);
+  if (!countyName) {
+    return {
+      title: 'County Not Found',
+    };
+  }
+  
   const processed = await getProcessedBreweryData();
-  const countyName = deslugify(countySlug);
-  const list = processed.breweries.filter(b => (b as any).county?.toLowerCase() === countyName.toLowerCase());
+  const countyKey = countyName.toLowerCase();
+  const list = processed.breweries.filter(b => {
+    const breweryCounty = (b as any).county;
+    return breweryCounty && breweryCounty.toLowerCase() === countyKey;
+  });
   const total = list.length;
 
   const title = `${countyName} County Breweries | ${total} in MD`;
@@ -80,8 +92,17 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
     countySlug = countySlug.substring(0, countySlug.length - 3);
   }
   
+  // Validate county slug - return 404 if invalid
+  if (!isValidCountySlug(countySlug)) {
+    notFound();
+  }
+  
+  const countyName = normalizeCountyName(countySlug);
+  if (!countyName) {
+    notFound();
+  }
+  
   const processed = await getProcessedBreweryData();
-  const countyName = deslugify(countySlug);
   const countyKey = countyName.toLowerCase();
   
   // Optimize filtering - use pre-indexed data if available
@@ -89,6 +110,11 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
     const breweryCounty = (b as any).county;
     return breweryCounty && breweryCounty.toLowerCase() === countyKey;
   });
+  
+  // Return 404 if no breweries found (invalid county or county with no breweries)
+  if (breweries.length === 0) {
+    notFound();
+  }
   
   // Sort breweries by rating (highest first), then by name
   const sortedBreweries = [...breweries].sort((a: any, b: any) => {

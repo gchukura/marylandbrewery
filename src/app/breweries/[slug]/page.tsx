@@ -318,9 +318,10 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     outdoorSeating: (brewery as any).outdoorSeating,
   });
 
-  // Fetch actual review count from database
-  const reviewData = await getBreweryReviews(brewery.id, 1, 0);
+  // Fetch all reviews from database (Google Places API only returns max 5 reviews per place)
+  const reviewData = await getBreweryReviews(brewery.id, 100, 0); // Get up to 100 reviews (though Google only provides ~5)
   const actualReviewCount = reviewData.total;
+  const allReviews = reviewData.reviews;
 
   // Fetch beers for this brewery
   const { data: beersData } = await supabase
@@ -397,6 +398,8 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
       computed={computed}
       aboutContent={aboutContent}
       articles={articles}
+      reviews={allReviews}
+      totalReviews={actualReviewCount}
     />
   );
 }

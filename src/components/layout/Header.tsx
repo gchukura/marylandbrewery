@@ -35,7 +35,11 @@ export default function Header() {
               {/* Text Logo - using Source Sans 3 from design system */}
               <span 
                 className="text-white whitespace-nowrap text-xl font-normal"
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                style={{ 
+                  fontFamily: "'Source Sans 3', sans-serif",
+                  letterSpacing: 'normal',
+                  fontSize: '1.25rem'
+                }}
               >
                 MarylandBrewery.com
               </span>
@@ -44,14 +48,18 @@ export default function Header() {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-6">
               {NAVIGATION_ITEMS.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="text-[#E5E7EB] hover:text-white transition-colors py-2 font-medium text-sm"
-                  style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-                >
-                  {item.label}
-                </Link>
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="text-[#E5E7EB] hover:text-white transition-colors py-2 font-medium text-sm"
+                    style={{ 
+                      fontFamily: "'Source Sans 3', sans-serif",
+                      letterSpacing: 'normal',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    {item.label}
+                  </Link>
               ))}
             </nav>
 
@@ -73,8 +81,12 @@ export default function Header() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="block px-4 py-3 text-white hover:text-[#D4A017] transition-colors font-medium"
-                    style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                    className="block px-4 py-3 text-white hover:text-[#D4A017] transition-colors font-medium text-sm"
+                    style={{ 
+                      fontFamily: "'Source Sans 3', sans-serif",
+                      letterSpacing: 'normal',
+                      fontSize: '0.875rem'
+                    }}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {item.label}

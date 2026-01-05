@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { getProcessedBreweryData } from '../../../../../lib/brewery-data';
-import { slugify, deslugify } from '@/lib/data-utils';
+import { slugify, normalizeCountyName, isValidCountySlug, ALL_MD_COUNTIES } from '@/lib/data-utils';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
@@ -9,12 +10,6 @@ import { join } from 'path';
 import '@/components/home-v2/styles.css';
 import CountyBreweriesMapClient from './CountyBreweriesMapClient';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
-
-const ALL_MD_COUNTIES = [
-  'Allegany', 'Anne Arundel', 'Baltimore', 'Calvert', 'Caroline', 'Carroll', 'Cecil', 'Charles',
-  'Dorchester', 'Frederick', 'Garrett', 'Harford', 'Howard', 'Kent', 'Montgomery',
-  'Prince Georges', 'Queen Annes', 'Somerset', 'St Marys', 'Talbot', 'Washington', 'Wicomico', 'Worcester'
-];
 
 // Force dynamic rendering to ensure code executes on every request
 export const dynamic = 'force-dynamic';
@@ -50,9 +45,26 @@ export async function generateMetadata({ params }: { params: Promise<{ county: s
     countySlugFromParam = countySlugFromParam.replace(/-md/g, '');
   }
   
+  // Validate county slug
+  if (!isValidCountySlug(countySlugFromParam)) {
+    return {
+      title: 'County Not Found',
+    };
+  }
+  
+  const countyName = normalizeCountyName(countySlugFromParam);
+  if (!countyName) {
+    return {
+      title: 'County Not Found',
+    };
+  }
+  
   const processed = await getProcessedBreweryData();
-  const countyName = deslugify(countySlugFromParam);
-  const list = processed.breweries.filter(b => (b as any).county?.toLowerCase() === countyName.toLowerCase());
+  const countyKey = countyName.toLowerCase();
+  const list = processed.breweries.filter(b => {
+    const breweryCounty = (b as any).county;
+    return breweryCounty && breweryCounty.toLowerCase() === countyKey;
+  });
   const total = list.length;
 
   const title = `${countyName} County Breweries | ${total} in MD`;
@@ -128,20 +140,38 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
     console.log('[COUNTY-MD-PAGE] After force removal:', countySlugFromParam);
   }
   
-  console.log('[COUNTY-MD-PAGE] Final slug before deslugify:', countySlugFromParam);
+  console.log('[COUNTY-MD-PAGE] Final slug before normalization:', countySlugFromParam);
   
-  const processed = await getProcessedBreweryData();
-  const countyName = deslugify(countySlugFromParam);
+  // Validate county slug - return 404 if invalid
+  if (!isValidCountySlug(countySlugFromParam)) {
+    console.log('[COUNTY-MD-PAGE] Invalid county slug, returning 404');
+    notFound();
+  }
+  
+  const countyName = normalizeCountyName(countySlugFromParam);
+  if (!countyName) {
+    console.log('[COUNTY-MD-PAGE] Could not normalize county name, returning 404');
+    notFound();
+  }
+  
   const countyKey = countyName.toLowerCase();
   
-  console.log('[COUNTY-MD-PAGE] County name after deslugify:', countyName);
+  console.log('[COUNTY-MD-PAGE] County name after normalization:', countyName);
   console.log('[COUNTY-MD-PAGE] County key for filtering:', countyKey);
+  
+  const processed = await getProcessedBreweryData();
   
   // Optimize filtering - use pre-indexed data if available
   const breweries = processed.breweries.filter(b => {
     const breweryCounty = (b as any).county;
     return breweryCounty && breweryCounty.toLowerCase() === countyKey;
   });
+  
+  // Return 404 if no breweries found (invalid county or county with no breweries)
+  if (breweries.length === 0) {
+    console.log('[COUNTY-MD-PAGE] No breweries found, returning 404');
+    notFound();
+  }
   
   // Sort breweries by rating (highest first), then by name
   const sortedBreweries = [...breweries].sort((a: any, b: any) => {

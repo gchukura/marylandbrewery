@@ -38,6 +38,7 @@ interface CityBreweriesMapClientProps {
   neighborhoods: Neighborhood[];
   neighborhood?: Neighborhood | null;
   showNeighborhoods?: boolean;
+  isNearPage?: boolean; // Flag to indicate if this is a "near" page
 }
 
 // Helper function to calculate distance between two points (Haversine formula)
@@ -53,7 +54,7 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 }
 
-export default function CityBreweriesMapClient({ breweries, cityName, neighborhoods, neighborhood, showNeighborhoods = true }: CityBreweriesMapClientProps) {
+export default function CityBreweriesMapClient({ breweries, cityName, neighborhoods, neighborhood, showNeighborhoods = true, isNearPage = false }: CityBreweriesMapClientProps) {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -134,12 +135,16 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
 
           {/* Results Count */}
           <div className="mt-3 text-sm text-gray-600">
-            {neighborhood ? (
-              <>Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries near {neighborhood.name}, {cityName}, MD</>
+            {isNearPage ? (
+              neighborhood ? (
+                <>Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries near {neighborhood.name}, {cityName}, MD</>
+              ) : (
+                <>Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries near {cityName}, MD</>
+              )
             ) : (
-              <>Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries in {cityName}
-              {filtered.length !== breweries.length && ` (filtered from ${breweries.length} total)`}</>
+              <>Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries in {cityName}, MD</>
             )}
+            {filtered.length !== breweries.length && ` (filtered from ${breweries.length} total)`}
           </div>
         </div>
 
@@ -212,14 +217,14 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                               </span>
                             </div>
                           )}
-                          {/* Distance from neighborhood or city center */}
+                          {/* Distance from neighborhood or city */}
                           {neighborhood && neighborhood.latitude && neighborhood.longitude && brewery.latitude && brewery.longitude && (
                             <div className="text-xs text-gray-600 mt-1">
                               {calculateDistance(neighborhood.latitude, neighborhood.longitude, brewery.latitude, brewery.longitude).toFixed(1)} miles away from {neighborhood.name}, {cityName}, MD
                             </div>
                           )}
-                          {/* Distance from city center (for city "near" pages) */}
-                          {!neighborhood && brewery.distance !== undefined && (
+                          {/* Distance from city (for city "near" pages) */}
+                          {isNearPage && !neighborhood && brewery.distance !== undefined && (
                             <div className="text-xs text-gray-600 mt-1">
                               {brewery.distance.toFixed(1)} miles away from {cityName}, MD
                             </div>

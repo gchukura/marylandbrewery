@@ -147,6 +147,10 @@ interface SimpleBreweryPageTemplateProps {
   // News articles
   articles?: BreweryArticle[];
   
+  // Reviews (fetched server-side)
+  reviews?: any[];
+  totalReviews?: number;
+  
   // Computed values for enhanced features
   computed?: {
     isOpenNow: boolean;
@@ -218,6 +222,8 @@ export default function SimpleBreweryPageTemplateV2({
   computed,
   aboutContent,
   articles,
+  reviews = [],
+  totalReviews = 0,
 }: SimpleBreweryPageTemplateProps) {
   
   // Use computed values if available, otherwise fall back to utility functions
@@ -1048,6 +1054,8 @@ export default function SimpleBreweryPageTemplateV2({
           reviewsPerPage={5}
           placeId={brewery.placeId}
           totalGoogleReviews={brewery.googleRatingCount}
+          reviews={reviews || []}
+          totalReviews={totalReviews || 0}
         />
       </div>
     </>

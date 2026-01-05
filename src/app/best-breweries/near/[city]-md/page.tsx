@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProcessedBreweryData, getBreweriesByCity } from '../../../../../../lib/brewery-data';
+import { getProcessedBreweryData, getBreweriesByCity } from '../../../../../lib/brewery-data';
 import { slugify, deslugify } from '@/lib/data-utils';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
@@ -8,10 +8,10 @@ import Image from 'next/image';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import '@/components/home-v2/styles.css';
-import CityBreweriesMapClient from '../../../[city]/breweries/CityBreweriesMapClient';
+import CityBreweriesMapClient from '../../../cities/[city]/breweries/CityBreweriesMapClient';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
-// Major city coordinates (from brewery-content-utils.ts)
+// Major city coordinates
 const MAJOR_CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
   baltimore: { lat: 39.2904, lng: -76.6122 },
   annapolis: { lat: 38.9784, lng: -76.4922 },
@@ -30,9 +30,8 @@ const MAJOR_CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
   'ocean city': { lat: 38.3365, lng: -75.0849 },
 };
 
-// Helper function to calculate distance between two points (Haversine formula)
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 3959; // Earth's radius in miles
+  const R = 3959;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = 
@@ -43,108 +42,91 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 }
 
-// Get city coordinates - use major city coordinates or average of city breweries
 async function getCityCoordinates(cityName: string): Promise<{ lat: number; lng: number } | null> {
   const cityKey = cityName.toLowerCase().trim();
-  
-  // Check major cities first
   if (MAJOR_CITY_COORDINATES[cityKey]) {
     return MAJOR_CITY_COORDINATES[cityKey];
   }
-  
-  // Fallback: calculate average from city breweries
   const cityBreweries = await getBreweriesByCity(cityName);
   const breweriesWithCoords = cityBreweries.filter((b: any) => b.latitude && b.longitude);
-  
   if (breweriesWithCoords.length === 0) {
     return null;
   }
-  
   const avgLat = breweriesWithCoords.reduce((sum: number, b: any) => sum + b.latitude, 0) / breweriesWithCoords.length;
   const avgLng = breweriesWithCoords.reduce((sum: number, b: any) => sum + b.longitude, 0) / breweriesWithCoords.length;
-  
   return { lat: avgLat, lng: avgLng };
+}
+
+function calculateBreweryScore(brewery: any): number {
+  const rating = brewery.googleRating || 0;
+  const reviewCount = brewery.googleRatingCount || 0;
+  const ratingScore = rating * 20;
+  const reviewScore = reviewCount > 0 ? Math.log10(reviewCount) * 10 : 0;
+  return ratingScore + reviewScore;
 }
 
 // Check if slug is a city slug (simple name, 1-2 words, optionally ending in -md)
 function isCitySlug(slug: string): boolean {
   const parts = slug.split('-');
-  // Remove -md suffix if present
   const slugWithoutMd = slug.endsWith('-md') ? slug.substring(0, slug.length - 3) : slug;
   const partsWithoutMd = slugWithoutMd.split('-');
-  
-  // City slugs are typically 1-2 words (1-2 parts)
   return partsWithoutMd.length <= 2;
 }
 
 export async function generateStaticParams() {
-  // For now, return empty array - pages will be generated on-demand
   return [];
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ city: string }> }): Promise<Metadata> {
   const resolvedParams = await params;
-  const slug = resolvedParams?.slug;
-  if (!slug) {
+  const city = resolvedParams?.city;
+  
+  if (!city || !isCitySlug(city)) {
     return {
-      title: 'City Not Found',
+      title: 'Location Not Found',
     };
   }
-  
-  // Only handle city slugs for /breweries path
-  if (!isCitySlug(slug)) {
+
+  // This route only handles -md suffixed city slugs
+  if (!city.endsWith('-md')) {
     notFound();
   }
-  
-  // Handle as city slug
-  const isMdRoute = slug.endsWith('-md');
-  const citySlug = isMdRoute ? slug.substring(0, slug.length - 3) : slug;
+
+  const citySlug = city.substring(0, city.length - 3);
   const cityName = deslugify(citySlug);
   const cityCoords = await getCityCoordinates(cityName);
   
   if (!cityCoords) {
     return {
-      title: `Breweries near ${cityName}, MD`,
-      description: `Find breweries near ${cityName}, Maryland.`,
+      title: `Best Breweries near ${cityName}, MD`,
+      description: `Find the best breweries near ${cityName}, Maryland.`,
     };
   }
   
-  // Get all breweries to find those within 10 miles
   const processed = await getProcessedBreweryData();
   const allBreweries = processed.breweries;
   
-    const filteredBreweries = allBreweries.filter((brewery: any) => {
-      // Must have valid coordinates
-      if (!brewery.latitude || !brewery.longitude) return false;
-      
-      // Validate coordinate ranges (rough bounds for Maryland)
-      if (brewery.latitude < 37 || brewery.latitude > 40 || 
-          brewery.longitude < -80 || brewery.longitude > -75) {
-        return false; // Invalid coordinates
-      }
-      
-      const distance = calculateDistance(
-        cityCoords.lat,
-        cityCoords.lng,
-        brewery.latitude,
-        brewery.longitude
-      );
-      
-      // Strictly within 10 miles
-      return distance <= 10;
-    });
+  const filteredBreweries = allBreweries.filter((brewery: any) => {
+    if (!brewery.latitude || !brewery.longitude) return false;
+    if (brewery.latitude < 37 || brewery.latitude > 40 || 
+        brewery.longitude < -80 || brewery.longitude > -75) {
+      return false;
+    }
+    const distance = calculateDistance(cityCoords.lat, cityCoords.lng, brewery.latitude, brewery.longitude);
+    return distance <= 10.01;
+  });
   
-  const title = `Breweries near ${cityName}, MD | ${filteredBreweries.length} Craft Breweries`;
-  const description = `Find ${filteredBreweries.length} breweries within 10 miles of ${cityName}, Maryland. Discover craft breweries near this Maryland city.`;
-  
+  const title = `Best Breweries near ${cityName}, MD | Top-Rated Craft Breweries`;
+  const description = `Find the best breweries within 10 miles of ${cityName}, Maryland ranked by ratings and reviews. Discover ${filteredBreweries.length} breweries near ${cityName}.`;
+
   return {
     title,
     description,
-    alternates: { canonical: `/cities/near/${slug}/breweries` },
+    alternates: { canonical: `/best-breweries/near/${city}` },
     openGraph: {
       title,
       description,
-      url: `https://www.marylandbrewery.com/cities/near/${slug}/breweries`,
+      url: `https://www.marylandbrewery.com/best-breweries/near/${city}`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [
@@ -152,7 +134,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
           url: '/og-image.jpg',
           width: 1200,
           height: 630,
-          alt: `Breweries near ${cityName}, MD`,
+          alt: `Best Breweries near ${cityName}, MD`,
         },
       ],
     },
@@ -165,115 +147,56 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export default async function CityNearBreweriesPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function BestBreweriesNearCityMdPage({ params }: { params: Promise<{ city: string }> }) {
   const resolvedParams = await params;
-  const slug = resolvedParams?.slug;
-  if (!slug) {
+  const city = resolvedParams?.city;
+  
+  if (!city || !isCitySlug(city)) {
     notFound();
   }
-  
-  // Only handle city slugs for /breweries path
-  if (!isCitySlug(slug)) {
+
+  // This route only handles -md suffixed city slugs
+  if (!city.endsWith('-md')) {
     notFound();
   }
-  
-  // Handle as city slug
-  const isMdRoute = slug.endsWith('-md');
-  const citySlug = isMdRoute ? slug.substring(0, slug.length - 3) : slug;
+
+  const citySlug = city.substring(0, city.length - 3);
   const cityName = deslugify(citySlug);
   const cityCoords = await getCityCoordinates(cityName);
   
   if (!cityCoords) {
-    // Fallback: show city breweries if no coordinates
-    const cityBreweries = await getBreweriesByCity(cityName);
-    const sortedBreweries = [...cityBreweries].sort((a: any, b: any) => {
-      const aRating = a.googleRating || a.yelpRating || 0;
-      const bRating = b.googleRating || b.yelpRating || 0;
-      if (bRating !== aRating) return bRating - aRating;
-      return (a.name || '').localeCompare(b.name || '');
-    });
-    
-    return (
-      <div className="min-h-screen bg-[#FAF9F6]">
-        <section className="bg-white border-b-4 border-[#9B2335] py-12 md:py-16">
-          <div className="container mx-auto px-4">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-              Breweries in {cityName}, MD
-            </h1>
-            <p className="text-lg md:text-xl mb-6">
-              <strong>{sortedBreweries.length}</strong> {sortedBreweries.length === 1 ? 'brewery' : 'breweries'} found.
-            </p>
-          </div>
-        </section>
-        <section className="bg-white py-8 md:py-12">
-          <div className="container mx-auto px-4">
-            <CityBreweriesMapClient 
-              breweries={sortedBreweries} 
-              cityName={cityName} 
-              neighborhoods={[]}
-              neighborhood={null}
-              showNeighborhoods={false}
-              isNearPage={true}
-            />
-          </div>
-        </section>
-      </div>
-    );
+    notFound();
   }
   
-  // Get all breweries to find those within 10 miles
   const processed = await getProcessedBreweryData();
   const allBreweries = processed.breweries;
   
-  // Filter breweries within 10 miles of city center
   const filteredBreweries = allBreweries
     .filter((brewery: any) => {
-      // Must have valid coordinates
       if (!brewery.latitude || !brewery.longitude) return false;
-      
-      // Validate coordinate ranges (rough bounds for Maryland)
       if (brewery.latitude < 37 || brewery.latitude > 40 || 
           brewery.longitude < -80 || brewery.longitude > -75) {
-        return false; // Invalid coordinates
+        return false;
       }
-      
-      const distance = calculateDistance(
-        cityCoords.lat,
-        cityCoords.lng,
-        brewery.latitude,
-        brewery.longitude
-      );
-      
-      // Strictly within 10 miles (with small buffer for floating point precision)
+      const distance = calculateDistance(cityCoords.lat, cityCoords.lng, brewery.latitude, brewery.longitude);
       return distance <= 10.01;
     })
     .map((brewery: any) => {
-      // Recalculate distance to ensure accuracy
-      const distance = calculateDistance(
-        cityCoords.lat,
-        cityCoords.lng,
-        brewery.latitude,
-        brewery.longitude
-      );
+      const distance = calculateDistance(cityCoords.lat, cityCoords.lng, brewery.latitude, brewery.longitude);
       return {
         ...brewery,
-        distance: Math.round(distance * 10) / 10, // Round to 1 decimal place
+        distance: Math.round(distance * 10) / 10,
       };
     })
-    .filter((brewery: any) => {
-      // Final strict check - must be within 10 miles
-      return brewery.distance <= 10;
-    })
-    .sort((a: any, b: any) => a.distance - b.distance);
-  
-  // Sort by rating (highest first), then by distance
-  const sortedBreweries = [...filteredBreweries].sort((a: any, b: any) => {
-    const aRating = a.googleRating || a.yelpRating || 0;
-    const bRating = b.googleRating || b.yelpRating || 0;
-    if (bRating !== aRating) return bRating - aRating;
-    return a.distance - b.distance;
-  });
-  
+    .filter((brewery: any) => brewery.distance <= 10);
+
+  const breweriesWithScores = filteredBreweries
+    .map((brewery: any) => ({
+      ...brewery,
+      score: calculateBreweryScore(brewery),
+    }))
+    .sort((a: any, b: any) => b.score - a.score);
+
   // Get city hero image
   const citySlugForImage = slugify(cityName);
   const localCityImagePath = `/cities/${citySlugForImage}.jpg`;
@@ -281,14 +204,14 @@ export default async function CityNearBreweriesPage({ params }: { params: Promis
   const hasLocalCityImage = existsSync(localCityImageFile);
   
   // Get brewery fallback image
-  const breweryFallbackImage = sortedBreweries.length > 0 
-    ? (sortedBreweries[0].photos && sortedBreweries[0].photos.length > 0
-        ? sortedBreweries[0].photos[0]
-        : sortedBreweries[0].photoUrl)
+  const breweryFallbackImage = breweriesWithScores.length > 0 
+    ? (breweriesWithScores[0].photos && breweriesWithScores[0].photos.length > 0
+        ? breweriesWithScores[0].photos[0]
+        : breweriesWithScores[0].photoUrl)
     : null;
   
   const cityHeroImage = hasLocalCityImage ? localCityImagePath : breweryFallbackImage;
-  
+
   // Prepare data for BreweriesByLocationTabs
   const cityCounts = new Map<string, { name: string; slug: string; count: number }>();
   processed.breweries.forEach((brewery: any) => {
@@ -317,7 +240,7 @@ export default async function CityNearBreweriesPage({ params }: { params: Promis
     }
   });
   const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
-  
+
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
       {/* Hero Section */}
@@ -328,13 +251,13 @@ export default async function CityNearBreweriesPage({ params }: { params: Promis
             {cityHeroImage.startsWith('http') ? (
               <img 
                 src={cityHeroImage} 
-                alt={`Breweries near ${cityName}, MD`}
+                alt={`Best breweries near ${cityName}, MD`}
                 className="w-full h-full object-cover"
               />
             ) : (
               <Image
                 src={cityHeroImage}
-                alt={`Breweries near ${cityName}, MD`}
+                alt={`Best breweries near ${cityName}, MD`}
                 fill
                 className="object-cover"
                 sizes="100vw"
@@ -369,7 +292,7 @@ export default async function CityNearBreweriesPage({ params }: { params: Promis
               </li>
               <li><ChevronRight className="h-4 w-4 mx-2 text-white/70" /></li>
               <li>
-                <Link href={`/cities/near/${slug}/breweries`} className="text-white font-medium drop-shadow-md hover:text-white transition-colors">
+                <Link href={`/best-breweries/near/${city}`} className="text-white font-medium drop-shadow-md hover:text-white transition-colors">
                   Near {cityName}, MD
                 </Link>
               </li>
@@ -381,7 +304,7 @@ export default async function CityNearBreweriesPage({ params }: { params: Promis
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-lg"
             style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
           >
-            Breweries near {cityName}, MD
+            Best Breweries near {cityName}, MD
           </h1>
 
           {/* Count Display */}
@@ -389,7 +312,7 @@ export default async function CityNearBreweriesPage({ params }: { params: Promis
             className="text-lg md:text-xl text-white/95 mb-6 drop-shadow-md"
             style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
-            <strong className="text-white font-semibold">{sortedBreweries.length}</strong> {sortedBreweries.length === 1 ? 'brewery' : 'breweries'} found within 10 miles.
+            <strong className="text-white font-semibold">{filteredBreweries.length}</strong> {filteredBreweries.length === 1 ? 'brewery' : 'breweries'} found.
           </p>
         </div>
       </section>
@@ -398,7 +321,7 @@ export default async function CityNearBreweriesPage({ params }: { params: Promis
       <section className="bg-white py-8 md:py-12">
         <div className="container mx-auto px-4">
           <CityBreweriesMapClient 
-            breweries={sortedBreweries} 
+            breweries={breweriesWithScores} 
             cityName={cityName} 
             neighborhoods={[]}
             neighborhood={null}
@@ -413,4 +336,3 @@ export default async function CityNearBreweriesPage({ params }: { params: Promis
     </div>
   );
 }
-

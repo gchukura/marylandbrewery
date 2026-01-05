@@ -64,9 +64,8 @@ function computeBestBreweriesStats(breweries: any[]) {
 export default async function BestBreweriesPage() {
   const processed = await getProcessedBreweryData();
   
-  // Filter breweries with ratings and calculate scores
+  // Calculate scores for all breweries
   const breweriesWithScores = processed.breweries
-    .filter((brewery: any) => brewery.googleRating && brewery.googleRatingCount && brewery.googleRatingCount > 0)
     .map((brewery: any) => ({
       ...brewery,
       score: calculateBreweryScore(brewery),

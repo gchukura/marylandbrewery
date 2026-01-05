@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -21,68 +21,28 @@ interface BreweryReviewsProps {
   reviewsPerPage?: number;
   placeId?: string; // Google Place ID for linking to full reviews
   totalGoogleReviews?: number; // Total review count from Google
+  reviews: Review[]; // Reviews fetched server-side
+  totalReviews: number; // Total review count
 }
 
 const MAX_PREVIEW_LENGTH = 250; // Character limit for preview
 
-export default function BreweryReviews({ breweryId, reviewsPerPage = 5, placeId, totalGoogleReviews }: BreweryReviewsProps) {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [totalReviews, setTotalReviews] = useState(0);
+export default function BreweryReviews({ 
+  breweryId, 
+  reviewsPerPage = 5, 
+  placeId, 
+  totalGoogleReviews,
+  reviews: allReviews,
+  totalReviews
+}: BreweryReviewsProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [expandedReviews, setExpandedReviews] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchReviews() {
-      setLoading(true);
-      try {
-        const offset = (currentPage - 1) * reviewsPerPage;
-        const response = await fetch(`/api/reviews?breweryId=${breweryId}&limit=${reviewsPerPage}&offset=${offset}`);
-        const data = await response.json();
-        
-        if (cancelled) return;
-
-        // Deduplicate reviews by content (review_timestamp + reviewer_name + review_text) in case of duplicates
-        // Use the same deduplication logic as the server-side function
-        const uniqueReviewsMap = new Map<string, Review>();
-        
-        (data.reviews || []).forEach((review: Review) => {
-          const timestamp = review.review_timestamp || 0;
-          const reviewerName = (review.reviewer_name || '').toLowerCase().trim();
-          const reviewTextSnippet = (review.review_text || '').substring(0, 100).toLowerCase().trim();
-          const duplicateKey = `${timestamp}|${reviewerName}|${reviewTextSnippet}`;
-          
-          // Only add if we haven't seen this exact review before
-          if (!uniqueReviewsMap.has(duplicateKey)) {
-            uniqueReviewsMap.set(duplicateKey, review);
-          }
-        });
-        
-        const uniqueReviews = Array.from(uniqueReviewsMap.values());
-
-        setReviews(uniqueReviews);
-        setTotalReviews(data.total || 0);
-      } catch (error) {
-        if (!cancelled) {
-          console.error('Failed to fetch reviews:', error);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
-    fetchReviews();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [breweryId, currentPage, reviewsPerPage]);
-
+  // Calculate pagination from the reviews array
   const totalPages = Math.ceil(totalReviews / reviewsPerPage);
+  const startIndex = (currentPage - 1) * reviewsPerPage;
+  const endIndex = startIndex + reviewsPerPage;
+  const paginatedReviews = allReviews.slice(startIndex, endIndex);
 
   const renderStars = (rating: number | null) => {
     if (!rating) return null;
@@ -154,16 +114,7 @@ export default function BreweryReviews({ breweryId, reviewsPerPage = 5, placeId,
     return lastSpace > 0 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
   };
 
-  if (loading && currentPage === 1) {
-    return (
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold text-black mb-6">Reviews</h2>
-        <div className="text-gray-600">Loading reviews...</div>
-      </div>
-    );
-  }
-
-  if (totalReviews === 0) {
+  if (totalReviews === 0 || allReviews.length === 0) {
     return null;
   }
 
@@ -174,7 +125,7 @@ export default function BreweryReviews({ breweryId, reviewsPerPage = 5, placeId,
       </h2>
 
       <div className="space-y-6">
-        {reviews.map((review) => (
+        {paginatedReviews.map((review) => (
           <div key={review.id} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
             <div className="flex items-center gap-3 mb-2">
               <h3 className="font-semibold text-black">
@@ -212,7 +163,7 @@ export default function BreweryReviews({ breweryId, reviewsPerPage = 5, placeId,
           <Button
             variant="outline"
             onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-            disabled={currentPage === 1 || loading}
+            disabled={currentPage === 1}
           >
             Previous
           </Button>
@@ -222,7 +173,7 @@ export default function BreweryReviews({ breweryId, reviewsPerPage = 5, placeId,
           <Button
             variant="outline"
             onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-            disabled={currentPage === totalPages || loading}
+            disabled={currentPage === totalPages}
           >
             Next
           </Button>

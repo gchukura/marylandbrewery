@@ -303,9 +303,10 @@ export default async function BreweryPageTest({ params }: BreweryPageProps) {
   const title = `${brewery.name} - ${brewery.city}, MD`;
   const metaDescription = `${brewery.name} in ${brewery.city}, Maryland. ${brewery.description || `Discover this ${(brewery as any).type || 'brewery'} in the Old Line State.`}`;
 
-  // Fetch actual review count from database
-  const reviewData = await getBreweryReviews(brewery.id, 1, 0);
+  // Fetch all reviews from database (Google Places API only returns max 5 reviews per place)
+  const reviewData = await getBreweryReviews(brewery.id, 100, 0); // Get up to 100 reviews (though Google only provides ~5)
   const actualReviewCount = reviewData.total;
+  const allReviews = reviewData.reviews;
 
   // Fetch beers for this brewery
   const { data: beersData } = await supabase
@@ -396,6 +397,8 @@ export default async function BreweryPageTest({ params }: BreweryPageProps) {
       computed={computed}
       aboutContent={aboutContent}
       articles={articles}
+      reviews={allReviews}
+      totalReviews={actualReviewCount}
     />
   );
 }

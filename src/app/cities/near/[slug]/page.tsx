@@ -394,6 +394,7 @@ export default async function NeighborhoodBreweriesPage({ params }: { params: Pr
             neighborhoods={[]}
             neighborhood={neighborhood}
             showNeighborhoods={false}
+            isNearPage={true}
           />
         </div>
       </section>

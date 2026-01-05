@@ -144,6 +144,10 @@ interface SimpleBreweryPageTemplateProps {
   aboutContent?: string;
   relatedPages: RelatedPage[];
   
+  // Reviews (fetched server-side)
+  reviews?: any[];
+  totalReviews?: number;
+  
   // News articles
   articles?: BreweryArticle[];
   
@@ -218,6 +222,8 @@ export default function SimpleBreweryPageTemplate({
   computed,
   aboutContent,
   articles,
+  reviews = [],
+  totalReviews = 0,
 }: SimpleBreweryPageTemplateProps) {
   
   // Use computed values if available, otherwise fall back to utility functions
@@ -328,30 +334,32 @@ export default function SimpleBreweryPageTemplate({
               ? brewery.photos[0] 
               : brewery.photoUrl;
             
-            return heroImage ? (
+            return (
               <div className="relative w-full py-12 md:py-16">
-                <div className="absolute inset-0">
-                  {heroImage.startsWith('http') ? (
-                    <img 
-                      src={heroImage} 
-                      alt={`${brewery.name} exterior`}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Image
-                      src={heroImage}
-                      alt={`${brewery.name} exterior`}
-                      fill
-                      className="object-cover"
-                      sizes="100vw"
-                      priority
-                    />
-                  )}
-                  {/* Optional overlay gradient for better text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                </div>
+                {heroImage ? (
+                  <div className="absolute inset-0">
+                    {heroImage.startsWith('http') ? (
+                      <img 
+                        src={heroImage} 
+                        alt={`${brewery.name} exterior`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Image
+                        src={heroImage}
+                        alt={`${brewery.name} exterior`}
+                        fill
+                        className="object-cover"
+                        sizes="100vw"
+                        priority
+                      />
+                    )}
+                    {/* Optional overlay gradient for better text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                  </div>
+                ) : null}
               </div>
-            ) : null;
+            );
           })()}
           
           {/* Logo overlapping into header (Bimmershops style) */}
@@ -407,10 +415,15 @@ export default function SimpleBreweryPageTemplate({
             {/* Main Content - Center Column */}
             <div className="lg:col-span-7">
               {/* Business Name */}
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">{brewery.name}</h1>
+              <h1 
+                className="text-4xl font-bold text-gray-900 mb-2"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              >
+                {brewery.name}
+              </h1>
               
               {/* City, State, Rating, and Website Link on same line */}
-              <div className="mb-6 flex items-center gap-8 flex-wrap">
+              <div className="mb-6 flex items-center gap-8 flex-wrap" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                 <div className="text-gray-600 text-lg">
                   {brewery.city}, {brewery.state}
                 </div>
@@ -422,26 +435,27 @@ export default function SimpleBreweryPageTemplate({
                           key={i}
                           className={`h-5 w-5 ${
                             i < Math.round(brewery.googleRating!)
-                              ? 'fill-yellow-400 text-yellow-400'
+                              ? 'fill-[#D4A017] text-[#D4A017]'
                               : 'text-gray-300'
                           }`}
                         />
                       ))}
                     </div>
-                    <span className="text-lg font-semibold">{brewery.googleRating.toFixed(1)}</span>
-                    <span className="text-gray-500 text-sm">
+                    <span className="text-lg font-semibold" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{brewery.googleRating.toFixed(1)}</span>
+                    <span className="text-gray-500 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                       ({(brewery as any).actualReviewCount || brewery.googleRatingCount || 0})
                     </span>
                   </div>
                 )}
                 {brewery.website && (
-                  <div className="flex items-center gap-2 text-red-600 hover:text-red-700">
+                  <div className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
                     <Globe className="h-5 w-5" />
                     <a
                       href={brewery.website}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-lg font-medium hover:underline"
+                      style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                     >
                       Visit our Website
                     </a>
@@ -454,15 +468,20 @@ export default function SimpleBreweryPageTemplate({
               
               {/* About Section - Enhanced */}
               <section className="mb-8">
-                <h2 className="text-2xl font-bold text-black mb-4">About Brewery</h2>
+                <h2 
+                  className="text-2xl font-bold text-black mb-4"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  About Brewery
+                </h2>
                 
                 {/* Primary Description - Generated from review themes */}
                 {aboutContent ? (
-                  <p className="text-gray-700 mb-4 leading-relaxed text-lg">{aboutContent}</p>
+                  <p className="text-gray-700 mb-4 leading-relaxed text-lg" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{aboutContent}</p>
                 ) : brewery.description ? (
-                  <p className="text-gray-700 mb-4 leading-relaxed text-lg">{brewery.description}</p>
+                  <p className="text-gray-700 mb-4 leading-relaxed text-lg" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{brewery.description}</p>
                 ) : (
-                  <p className="text-gray-700 mb-4 leading-relaxed text-lg">
+                  <p className="text-gray-700 mb-4 leading-relaxed text-lg" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                     {brewery.name} is a {Array.isArray(brewery.type) ? brewery.type.join(' and ').toLowerCase() : (brewery.type || 'brewery').toLowerCase()} located in {brewery.city}, {brewery.county} County, Maryland.
                     {brewery.amenities && brewery.amenities.length > 0 && (
                       <> Featuring {brewery.amenities.slice(0, 3).join(', ').toLowerCase()}, this local brewery welcomes craft beer enthusiasts.</>
@@ -473,8 +492,13 @@ export default function SimpleBreweryPageTemplate({
                 {/* Awards - If available */}
                 {brewery.awards && brewery.awards.length > 0 && (
                   <>
-                    <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Awards & Recognition</h3>
-                    <ul className="list-disc list-inside text-gray-700">
+                    <h3 
+                      className="text-xl font-semibold text-gray-900 mt-6 mb-3"
+                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    >
+                      Awards & Recognition
+                    </h3>
+                    <ul className="list-disc list-inside text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                       {brewery.awards.map((award, index) => (
                         <li key={index}>{award}</li>
                       ))}
@@ -506,14 +530,19 @@ export default function SimpleBreweryPageTemplate({
               {/* Amenities Section - Bimmershops Style */}
               {brewery.amenities && brewery.amenities.length > 0 && (
                 <div className="mb-8">
-                  <h2 className="text-2xl font-bold text-black mb-4">Amenities</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <h2 
+                    className="text-2xl font-bold text-black mb-4"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Amenities
+                  </h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                     {brewery.amenities.map((amenity: string, index: number) => (
                       <div key={index} className="flex items-center gap-2 text-gray-700">
-                        <CheckCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
+                        <CheckCircle className="h-4 w-4 text-[#9B2335] flex-shrink-0" />
                         <Link 
                           href={`/amenities/${amenity.toLowerCase().replace(/\s+/g, '-')}`}
-                          className="text-red-600 hover:text-red-800 hover:underline text-sm"
+                          className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline text-sm"
                         >
                           {amenity}
                         </Link>
@@ -526,20 +555,25 @@ export default function SimpleBreweryPageTemplate({
               {/* Beers Table */}
               {brewery.beers && brewery.beers.length > 0 && (
                 <div className="mb-8">
-                  <h2 className="text-2xl font-bold text-black mb-4">Beers Brewed</h2>
+                  <h2 
+                    className="text-2xl font-bold text-black mb-4"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Beers Brewed
+                  </h2>
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                       <thead>
-                        <tr className="bg-red-600 text-white">
+                        <tr className="bg-[#9B2335] text-white" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                           <th className="text-left py-3 px-4 font-bold">Name</th>
                           <th className="text-left py-3 px-4 font-bold">Style</th>
                           <th className="text-left py-3 px-4 font-bold">ABV</th>
                           <th className="text-left py-3 px-4 font-bold">Availability</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                         {brewery.beers.map((beer: BeerType, index: number) => (
-                          <tr key={index} className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-yellow-50' : 'bg-white'}`}>
+                          <tr key={index} className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-[#FAF9F6]' : 'bg-white'}`}>
                             <td className="py-3 px-4 font-semibold text-gray-900">{beer.name}</td>
                             <td className="py-3 px-4 text-gray-700">{beer.style}</td>
                             <td className="py-3 px-4 text-gray-700">{formatABV(beer.abv)}</td>
@@ -557,14 +591,19 @@ export default function SimpleBreweryPageTemplate({
               {/* Brewery Type */}
               {brewery.type && (
                 <div>
-                  <h3 className="text-xl font-bold text-black mb-3">Brewery Type</h3>
-                  <div className="text-gray-700">
+                  <h3 
+                    className="text-xl font-bold text-black mb-3"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Brewery Type
+                  </h3>
+                  <div className="text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                     {Array.isArray(brewery.type) 
                       ? brewery.type.map((type: string, index: number) => (
                           <span key={index}>
                             <Link 
                               href={`/type/${type.toLowerCase().replace(/\s+/g, '-')}`}
-                              className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                              className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
                             >
                               {type}
                             </Link>
@@ -574,7 +613,7 @@ export default function SimpleBreweryPageTemplate({
                       : (
                           <Link 
                             href={`/type/${brewery.type.toLowerCase().replace(/\s+/g, '-')}`}
-                            className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                            className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
                           >
                             {brewery.type}
                           </Link>
@@ -586,10 +625,15 @@ export default function SimpleBreweryPageTemplate({
               {/* Links to Articles */}
               {brewery.articles && brewery.articles.length > 0 && (
                 <div>
-                  <h3 className="text-xl font-bold text-black mb-3">Articles</h3>
-                  <div className="space-y-2">
+                  <h3 
+                    className="text-xl font-bold text-black mb-3"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Articles
+                  </h3>
+                  <div className="space-y-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                     {brewery.articles.map((article: Article, index: number) => (
-                      <a key={index} href={article.url} target="_blank" rel="noopener noreferrer" className="block text-red-600 hover:text-red-700">
+                      <a key={index} href={article.url} target="_blank" rel="noopener noreferrer" className="block text-[#9B2335] hover:text-[#7A1C2A]">
                         {article.title}
                       </a>
                     ))}
@@ -599,28 +643,33 @@ export default function SimpleBreweryPageTemplate({
 
               {/* Social Media */}
               <div>
-                <h3 className="text-xl font-bold text-black mb-3">Social Media</h3>
-                <div className="space-y-2">
+                <h3 
+                  className="text-xl font-bold text-black mb-3"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  Social Media
+                </h3>
+                <div className="space-y-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                   {brewery.socialMedia?.facebook && (
-                    <a href={brewery.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-red-600 hover:text-red-700">
+                    <a href={brewery.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
                       <img src={getSocialMediaIcon('facebook')} alt={`${brewery.name} on Facebook`} className="h-4 w-4" />
                       Facebook
                     </a>
                   )}
                   {brewery.socialMedia?.twitter && (
-                    <a href={brewery.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-red-600 hover:text-red-700">
+                    <a href={brewery.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
                       <img src={getSocialMediaIcon('twitter')} alt={`${brewery.name} on Twitter`} className="h-4 w-4" />
                       Twitter
                     </a>
                   )}
                   {brewery.socialMedia?.instagram && (
-                    <a href={brewery.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-red-600 hover:text-red-700">
+                    <a href={brewery.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
                       <img src={getSocialMediaIcon('instagram')} alt={`${brewery.name} on Instagram`} className="h-4 w-4" />
                       Instagram
                     </a>
                   )}
                   {brewery.socialMedia?.untappd && (
-                    <a href={brewery.socialMedia.untappd} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-red-600 hover:text-red-700">
+                    <a href={brewery.socialMedia.untappd} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
                       <img src={getSocialMediaIcon('untappd')} alt={`${brewery.name} on Untappd`} className="h-4 w-4" />
                       Untappd
                     </a>
@@ -631,16 +680,21 @@ export default function SimpleBreweryPageTemplate({
                 {/* Visitor Information */}
                   {(brewery.allowsVisitors !== undefined || brewery.offersTours !== undefined || brewery.beerToGo !== undefined || brewery.hasMerch !== undefined || brewery.food || brewery.otherDrinks || brewery.parking || brewery.dogFriendly || brewery.outdoorSeating) && (
                     <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Visitor Information</h3>
-                      <div className="space-y-2">
+                      <h3 
+                        className="text-xl font-bold text-black mb-3"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Visitor Information
+                      </h3>
+                      <div className="space-y-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                         {brewery.allowsVisitors !== undefined && (
                           <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4 text-red-600" />
+                            <Users className="h-4 w-4 text-[#9B2335]" />
                             <span className="text-gray-700">
                               {brewery.allowsVisitors ? (
                                 <Link 
                                   href="/amenities/visitors-welcome"
-                                  className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                                  className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
                                 >
                                   Visitors Welcome
                                 </Link>
@@ -650,12 +704,12 @@ export default function SimpleBreweryPageTemplate({
                         )}
                         {brewery.offersTours !== undefined && (
                           <div className="flex items-center gap-2">
-                            <Map className="h-4 w-4 text-red-600" />
+                            <Map className="h-4 w-4 text-[#9B2335]" />
                             <span className="text-gray-700">
                               {brewery.offersTours ? (
                                 <Link 
                                   href="/amenities/tours"
-                                  className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                                  className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
                                 >
                                   Tours Available
                                 </Link>
@@ -665,12 +719,12 @@ export default function SimpleBreweryPageTemplate({
                         )}
                         {brewery.beerToGo !== undefined && (
                           <div className="flex items-center gap-2">
-                            <ShoppingBag className="h-4 w-4 text-red-600" />
+                            <ShoppingBag className="h-4 w-4 text-[#9B2335]" />
                             <span className="text-gray-700">
                               {brewery.beerToGo ? (
                                 <Link 
                                   href="/amenities/beer-to-go"
-                                  className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                                  className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
                                 >
                                   Beer To Go Available
                                 </Link>
@@ -680,12 +734,12 @@ export default function SimpleBreweryPageTemplate({
                         )}
                         {brewery.hasMerch !== undefined && (
                           <div className="flex items-center gap-2">
-                            <Shirt className="h-4 w-4 text-red-600" />
+                            <Shirt className="h-4 w-4 text-[#9B2335]" />
                             <span className="text-gray-700">
                               {brewery.hasMerch ? (
                                 <Link 
                                   href="/amenities/merchandise"
-                                  className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                                  className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
                                 >
                                   Merchandise Available
                                 </Link>
@@ -695,7 +749,7 @@ export default function SimpleBreweryPageTemplate({
                         )}
                         {brewery.food && (
                           <div className="flex items-center gap-2">
-                            <Utensils className="h-4 w-4 text-red-600" />
+                            <Utensils className="h-4 w-4 text-[#9B2335]" />
                             <span className="text-gray-700">
                               {brewery.food.split(',').map((foodItem: string, index: number) => {
                                 const foodItems = brewery.food?.split(',') || [];
@@ -703,7 +757,7 @@ export default function SimpleBreweryPageTemplate({
                                   <span key={index}>
                                     <Link 
                                       href={`/amenities/${foodItem.trim().toLowerCase().replace(/\s+/g, '-')}`}
-                                      className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                                      className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
                                     >
                                       {foodItem.trim()}
                                     </Link>
@@ -716,11 +770,11 @@ export default function SimpleBreweryPageTemplate({
                         )}
                         {brewery.otherDrinks && (
                           <div className="flex items-center gap-2">
-                            <Coffee className="h-4 w-4 text-red-600" />
+                            <Coffee className="h-4 w-4 text-[#9B2335]" />
                             <span className="text-gray-700">
                               <Link 
                                 href="/amenities/other-drinks"
-                                className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                                className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
                               >
                                 Other Drinks
                               </Link>
@@ -729,11 +783,11 @@ export default function SimpleBreweryPageTemplate({
                         )}
                         {brewery.parking && (
                           <div className="flex items-center gap-2">
-                            <Car className="h-4 w-4 text-red-600" />
+                            <Car className="h-4 w-4 text-[#9B2335]" />
                             <span className="text-gray-700">
                               <Link 
                                 href="/amenities/parking"
-                                className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                                className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
                               >
                                 Parking
                               </Link>
@@ -742,11 +796,11 @@ export default function SimpleBreweryPageTemplate({
                         )}
                         {brewery.dogFriendly && (
                           <div className="flex items-center gap-2">
-                            <Dog className="h-4 w-4 text-red-600" />
+                            <Dog className="h-4 w-4 text-[#9B2335]" />
                             <span className="text-gray-700">
                               <Link 
                                 href="/amenities/dog-friendly"
-                                className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                                className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
                               >
                                 Dog Friendly
                               </Link>
@@ -755,11 +809,11 @@ export default function SimpleBreweryPageTemplate({
                         )}
                         {brewery.outdoorSeating && (
                           <div className="flex items-center gap-2">
-                            <Utensils className="h-4 w-4 text-red-600" />
+                            <Utensils className="h-4 w-4 text-[#9B2335]" />
                             <span className="text-gray-700">
                               <Link 
                                 href="/amenities/outdoor-seating"
-                                className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                                className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
                               >
                                 Outdoor Seating
                               </Link>
@@ -773,14 +827,19 @@ export default function SimpleBreweryPageTemplate({
                   {/* Features/Amenities */}
                   {brewery.amenities && brewery.amenities.length > 0 && (
                     <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Features & Amenities</h3>
-                      <div className="space-y-2">
+                      <h3 
+                        className="text-xl font-bold text-black mb-3"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Features & Amenities
+                      </h3>
+                      <div className="space-y-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                         {brewery.amenities.map((amenity: string, index: number) => (
                           <div key={index} className="flex items-center gap-2">
                             {getAmenityIcon(amenity)}
                             <Link 
                               href={`/amenities/${amenity.toLowerCase().replace(/\s+/g, '-')}`}
-                              className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                              className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
                             >
                               {amenity}
                             </Link>
@@ -793,7 +852,12 @@ export default function SimpleBreweryPageTemplate({
                   {/* Memberships */}
                   {brewery.memberships && brewery.memberships.length > 0 && (
                     <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Memberships</h3>
+                      <h3 
+                        className="text-xl font-bold text-black mb-3"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Memberships
+                      </h3>
                       <div className="flex flex-wrap gap-4">
                         {brewery.memberships.map((membership: Membership, index: number) => {
                           const membershipIcon = getMembershipIcon(membership.name);
@@ -821,16 +885,26 @@ export default function SimpleBreweryPageTemplate({
               {/* Opening Date */}
               {(brewery.openingDate || brewery.openedDate) && (
                 <div>
-                  <h3 className="text-xl font-bold text-black mb-3">Opening Date</h3>
-                  <div className="text-gray-700">{brewery.openingDate || brewery.openedDate}</div>
+                  <h3 
+                    className="text-xl font-bold text-black mb-3"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Opening Date
+                  </h3>
+                  <div className="text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{brewery.openingDate || brewery.openedDate}</div>
                 </div>
               )}
 
                   {/* Awards */}
                   {brewery.awards && brewery.awards.length > 0 && (
                     <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Awards</h3>
-                      <div className="space-y-1">
+                      <h3 
+                        className="text-xl font-bold text-black mb-3"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Awards
+                      </h3>
+                      <div className="space-y-1" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                         {brewery.awards.map((award: string, index: number) => (
                           <div key={index} className="text-gray-700">🏆 {award}</div>
                         ))}
@@ -841,8 +915,13 @@ export default function SimpleBreweryPageTemplate({
                   {/* Certifications */}
                   {brewery.certifications && brewery.certifications.length > 0 && (
                     <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Certifications</h3>
-                      <div className="space-y-1">
+                      <h3 
+                        className="text-xl font-bold text-black mb-3"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Certifications
+                      </h3>
+                      <div className="space-y-1" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                         {brewery.certifications.map((cert: string, index: number) => (
                           <div key={index} className="text-gray-700">📜 {cert}</div>
                         ))}
@@ -853,8 +932,13 @@ export default function SimpleBreweryPageTemplate({
                   {/* Special Events */}
                   {brewery.specialEvents && brewery.specialEvents.length > 0 && (
                     <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Special Events</h3>
-                      <div className="space-y-1">
+                      <h3 
+                        className="text-xl font-bold text-black mb-3"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Special Events
+                      </h3>
+                      <div className="space-y-1" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                         {brewery.specialEvents.map((event: string, index: number) => (
                           <div key={index} className="text-gray-700">🎉 {event}</div>
                         ))}
@@ -865,8 +949,13 @@ export default function SimpleBreweryPageTemplate({
                   {/* Last Updated */}
                   {brewery.lastUpdated && (
                     <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Last Updated</h3>
-                      <div className="text-gray-700">{
+                      <h3 
+                        className="text-xl font-bold text-black mb-3"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Last Updated
+                      </h3>
+                      <div className="text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{
                         (() => {
                           const date = new Date(brewery.lastUpdated);
                           const month = date.toLocaleDateString('en-US', { month: 'long' });
@@ -891,14 +980,14 @@ export default function SimpleBreweryPageTemplate({
                       className="inline-flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded text-lg transition-colors"
                     >
                       <Phone className="h-5 w-5" />
-                      {brewery.phone}
+                      <span style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{brewery.phone}</span>
                     </a>
                   </div>
                 )}
                 
                 {/* Open/Closed Status - Moved from main content, centered */}
                 {computed && (computed.isOpenNow !== undefined) && (
-                  <div className="mb-4 text-center">
+                  <div className="mb-4 text-center" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                     {computed.isOpenNow ? (
                       <span className="text-sm text-gray-600">
                         <span className="font-bold">Open</span>
@@ -939,8 +1028,13 @@ export default function SimpleBreweryPageTemplate({
                 
                 {/* Address */}
                 <div className="mb-4">
-                  <h3 className="text-lg font-bold text-black mb-3">Address</h3>
-                  <div className="flex items-start gap-2">
+                  <h3 
+                    className="text-lg font-bold text-black mb-3"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Address
+                  </h3>
+                  <div className="flex items-start gap-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                     <MapPin className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
                     <div className="text-gray-700">
                       <div className="text-sm">{brewery.street}</div>
@@ -952,8 +1046,13 @@ export default function SimpleBreweryPageTemplate({
                 {/* Hours of Operation Section */}
                 {brewery.hours && (
                   <div className="mb-4">
-                    <h3 className="text-lg font-bold text-black mb-3">Hours of Operation</h3>
-                    <ul className="space-y-1 text-sm">
+                    <h3 
+                      className="text-lg font-bold text-black mb-3"
+                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    >
+                      Hours of Operation
+                    </h3>
+                    <ul className="space-y-1 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                       {(() => {
                         // Group Monday-Friday if they have the same hours
                         const mondayHours = brewery.hours?.monday;
@@ -974,8 +1073,8 @@ export default function SimpleBreweryPageTemplate({
                         if (allWeekdaysSame) {
                           hoursList.push(
                             <li key="weekdays" className="flex items-center">
-                              <span className="font-medium text-gray-900 w-32 text-sm">Monday - Friday</span>
-                              <span className="text-gray-700 ml-2 text-sm">
+                              <span className="font-medium text-gray-900 w-32 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Monday - Friday</span>
+                              <span className="text-gray-700 ml-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                                 {mondayHours && mondayHours !== 'Closed' ? formatHoursString(mondayHours) : 'Closed'}
                               </span>
                             </li>
@@ -987,8 +1086,8 @@ export default function SimpleBreweryPageTemplate({
                             const hours = brewery.hours?.[day as keyof typeof brewery.hours];
                             hoursList.push(
                               <li key={day} className="flex items-center">
-                                <span className="font-medium text-gray-900 w-32 text-sm">{dayName}</span>
-                                <span className="text-gray-700 ml-2 text-sm">
+                                <span className="font-medium text-gray-900 w-32 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{dayName}</span>
+                                <span className="text-gray-700 ml-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                                   {hours && hours !== 'Closed' ? formatHoursString(hours) : 'Closed'}
                                 </span>
                               </li>
@@ -1001,8 +1100,8 @@ export default function SimpleBreweryPageTemplate({
                         if (satHours !== undefined) {
                           hoursList.push(
                             <li key="saturday" className="flex items-center">
-                              <span className="font-medium text-gray-900 w-32 text-sm">Saturday</span>
-                              <span className="text-gray-700 ml-2 text-sm">
+                              <span className="font-medium text-gray-900 w-32 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Saturday</span>
+                              <span className="text-gray-700 ml-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                                 {satHours && satHours !== 'Closed' ? formatHoursString(satHours) : 'Closed'}
                               </span>
                             </li>
@@ -1014,8 +1113,8 @@ export default function SimpleBreweryPageTemplate({
                         if (sunHours !== undefined) {
                           hoursList.push(
                             <li key="sunday" className="flex items-center">
-                              <span className="font-medium text-gray-900 w-32 text-sm">Sunday</span>
-                              <span className="text-gray-700 ml-2 text-sm">
+                              <span className="font-medium text-gray-900 w-32 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Sunday</span>
+                              <span className="text-gray-700 ml-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                                 {sunHours && sunHours !== 'Closed' ? formatHoursString(sunHours) : 'Closed'}
                               </span>
                             </li>
@@ -1048,6 +1147,8 @@ export default function SimpleBreweryPageTemplate({
           reviewsPerPage={5}
           placeId={brewery.placeId}
           totalGoogleReviews={brewery.googleRatingCount}
+          reviews={reviews}
+          totalReviews={totalReviews}
         />
       </div>
     </>

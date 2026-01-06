@@ -1,29 +1,72 @@
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
-import { getProcessedBreweryData } from '../../../../lib/brewery-data';
+import { getProcessedBreweryData, getAllTypes } from '../../../../lib/brewery-data';
 import { slugify, deslugify } from '@/lib/data-utils';
 import { generateTypeContentBlocks } from '@/lib/content-generators';
 
-const TYPES = ['microbrewery', 'brewpub', 'taproom', 'production', 'nano', 'farm-brewery'] as const;
+/**
+ * Get all unique brewery types from the data and generate slugs
+ */
+async function getAllTypeSlugs(): Promise<string[]> {
+  const types = await getAllTypes();
+  return types.map(type => slugify(type));
+}
+
+/**
+ * Normalize type name from slug - handles variations
+ */
+function normalizeTypeName(slug: string, allTypes: string[]): string | null {
+  const slugLower = slug.toLowerCase();
+  
+  // Try exact match first
+  const exactMatch = allTypes.find(t => slugify(t).toLowerCase() === slugLower);
+  if (exactMatch) return exactMatch;
+  
+  // Try case-insensitive match
+  const caseInsensitiveMatch = allTypes.find(t => t.toLowerCase() === slugLower);
+  if (caseInsensitiveMatch) return caseInsensitiveMatch;
+  
+  // Try deslugify and match
+  const deslugified = deslugify(slug);
+  const deslugifiedMatch = allTypes.find(t => t.toLowerCase() === deslugified.toLowerCase());
+  if (deslugifiedMatch) return deslugifiedMatch;
+  
+  return null;
+}
 
 export async function generateStaticParams() {
-  return TYPES.map((t) => ({ type: t }));
+  const typeSlugs = await getAllTypeSlugs();
+  return typeSlugs.map((slug) => ({ type: slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ type: string }> }): Promise<Metadata> {
   const { type } = await params;
   const processed = await getProcessedBreweryData();
-  const typeKey = type.toLowerCase();
+  const allTypes = processed.types;
+  
+  const normalizedType = normalizeTypeName(type, allTypes);
+  if (!normalizedType) {
+    return {
+      title: 'Brewery Type Not Found',
+    };
+  }
+  
+  const typeKey = normalizedType.toLowerCase();
   const breweries = processed.breweries.filter((b) => {
     if (Array.isArray(b.type)) {
-      return b.type.some(type => type.toLowerCase() === typeKey);
+      return b.type.some(t => t.toLowerCase() === typeKey);
     }
     return b.type?.toLowerCase() === typeKey;
   });
-  const typeLabel = deslugify(type);
+  
+  const typeLabel = normalizedType;
   const typeLabelLower = typeLabel.toLowerCase();
   const title = `${typeLabel} Breweries in MD | ${breweries.length}`;
-  const description = `Explore ${breweries.length} ${typeLabelLower} breweries across Maryland. Find top ${typeLabelLower} breweries in Baltimore, Annapolis, Frederick, and other cities. Complete guide to ${typeLabelLower} breweries in the Old Line State with hours, amenities, and visitor information.`;
+  const description = breweries.length > 0
+    ? `Explore ${breweries.length} ${typeLabelLower} breweries across Maryland. Find top ${typeLabelLower} breweries in Baltimore, Annapolis, Frederick, and other cities. Complete guide to ${typeLabelLower} breweries in the Old Line State with hours, amenities, and visitor information.`
+    : `Discover Maryland's craft beer scene. While ${typeLabelLower} breweries aren't listed yet, check other brewery types for great craft beer options.`;
+  
   return {
     title,
     description,
@@ -55,27 +98,29 @@ export async function generateMetadata({ params }: { params: Promise<{ type: str
 export default async function TypePage({ params }: { params: Promise<{ type: string }> }) {
   const { type } = await params;
   const processed = await getProcessedBreweryData();
-  const typeKey = type.toLowerCase();
-  const typeLabel = deslugify(type);
+  const allTypes = processed.types;
   
-  // Special handling for farm-brewery (may not be in type field, check name/description)
+  // Normalize type name from slug
+  const normalizedType = normalizeTypeName(type, allTypes);
+  if (!normalizedType) {
+    notFound();
+  }
+  
+  const typeKey = normalizedType.toLowerCase();
+  const typeLabel = normalizedType;
+  
+  // Filter breweries by type
   const breweries = processed.breweries.filter((b) => {
-    if (typeKey === 'farm-brewery' || typeKey === 'farm brewery') {
-      // Check if brewery name or description contains "farm"
-      const nameMatch = b.name?.toLowerCase().includes('farm');
-      const descMatch = b.description?.toLowerCase().includes('farm');
-      const typeMatch = Array.isArray(b.type) 
-        ? b.type.some(t => t.toLowerCase().includes('farm'))
-        : b.type?.toLowerCase().includes('farm');
-      return nameMatch || descMatch || typeMatch;
-    }
-    
-    // Standard type matching
     if (Array.isArray(b.type)) {
-      return b.type.some(type => type.toLowerCase() === typeKey);
+      return b.type.some(t => t.toLowerCase() === typeKey);
     }
     return b.type?.toLowerCase() === typeKey;
   });
+  
+  // Return 404 if no breweries found
+  if (breweries.length === 0) {
+    notFound();
+  }
 
   // Top cities by this type
   const cityCounts = new Map<string, number>();
@@ -134,22 +179,28 @@ export default async function TypePage({ params }: { params: Promise<{ type: str
     count,
   }));
 
-  // Other types
-  const otherTypes = TYPES.filter((t) => t !== type)
-    .slice(0, 3)
+  // Other types - get top 3 types by count (excluding current type)
+  const otherTypes = allTypes
+    .filter((t) => t.toLowerCase() !== typeKey)
     .map((t) => {
+      const tKey = t.toLowerCase();
       const typeBreweries = processed.breweries.filter((b) => {
         if (Array.isArray(b.type)) {
-          return b.type.some(type => type.toLowerCase() === t);
+          return b.type.some(bt => bt.toLowerCase() === tKey);
         }
-        return b.type?.toLowerCase() === t;
+        return b.type?.toLowerCase() === tKey;
       });
       return {
-        title: `${deslugify(t)} Breweries`,
-        url: `/type/${t}`,
+        title: `${t} Breweries`,
+        url: `/type/${slugify(t)}`,
         count: typeBreweries.length,
+        type: t,
       };
-    });
+    })
+    .filter(item => item.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3)
+    .map(({ title, url, count }) => ({ title, url, count }));
 
   const relatedPages = [...topCities, ...otherTypes];
 

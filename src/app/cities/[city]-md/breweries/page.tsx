@@ -80,11 +80,11 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   return {
     title,
     description,
-    alternates: { canonical: `/cities/${city}/breweries` },
+    alternates: { canonical: `/cities/${citySlugFromParam}/breweries` },
     openGraph: {
       title,
       description,
-      url: `https://www.marylandbrewery.com/cities/${city}/breweries`,
+      url: `https://www.marylandbrewery.com/cities/${citySlugFromParam}/breweries`,
       siteName: 'Maryland Brewery Directory',
       type: 'website',
       images: [

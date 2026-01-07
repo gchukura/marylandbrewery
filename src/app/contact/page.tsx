@@ -96,7 +96,7 @@ export default function ContactPage() {
             <div className="font-semibold text-gray-900">Interactive Map</div>
             <div className="text-sm text-gray-600 mt-1">Find breweries near you</div>
           </Link>
-          <Link href="/city" className="bg-white rounded-lg p-4 border border-gray-200 hover:border-red-500 hover:shadow-md transition-all">
+          <Link href="/cities" className="bg-white rounded-lg p-4 border border-gray-200 hover:border-red-500 hover:shadow-md transition-all">
             <div className="font-semibold text-gray-900">Browse by City</div>
             <div className="text-sm text-gray-600 mt-1">Explore all cities</div>
           </Link>

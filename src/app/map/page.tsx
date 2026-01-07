@@ -49,8 +49,8 @@ export default async function MapPage() {
   // Related pages for internal linking
   const relatedPages = [
     { title: 'Open Now', url: '/open-now', count: processed.breweries.length },
-    { title: 'All Cities', url: '/city', count: processed.cities.length },
-    { title: 'All Counties', url: '/county', count: processed.counties.length },
+    { title: 'All Cities', url: '/cities', count: processed.cities.length },
+    { title: 'All Counties', url: '/counties', count: processed.counties.length },
     { title: 'Browse by Amenity', url: '/amenities', count: 0 },
     { title: 'Browse by Type', url: '/type', count: 0 },
   ];

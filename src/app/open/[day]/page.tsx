@@ -85,7 +85,7 @@ export default async function OpenDayPage({ params }: { params: Promise<{ day: s
   const relatedPages = [
     { title: 'Open Now', url: '/open-now', count: processed.breweries.length },
     { title: 'Interactive Map', url: '/map', count: processed.breweries.length },
-    { title: 'All Cities', url: '/city', count: processed.cities.length },
+    { title: 'All Cities', url: '/cities', count: processed.cities.length },
   ];
 
   return (

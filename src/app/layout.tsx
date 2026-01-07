@@ -62,9 +62,10 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  verification: {
-    google: "your-google-verification-code",
-  },
+  // Note: Add Google Search Console verification code here after verifying the site
+  // verification: {
+  //   google: "YOUR_GOOGLE_VERIFICATION_CODE",
+  // },
 };
 
 export const viewport = {
@@ -78,6 +79,35 @@ export const viewport = {
   ],
 };
 
+// WebSite schema for sitelinks search box in Google
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Maryland Brewery Directory',
+  url: 'https://www.marylandbrewery.com',
+  description: 'Your complete guide to craft breweries across Maryland',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: 'https://www.marylandbrewery.com/map?search={search_term_string}'
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
+
+// Organization schema for brand recognition
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Maryland Brewery Directory',
+  url: 'https://www.marylandbrewery.com',
+  logo: 'https://www.marylandbrewery.com/logo.png',
+  sameAs: [
+    'https://twitter.com/marylandbrewery'
+  ]
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -86,6 +116,20 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
+        {/* WebSite Schema for Sitelinks Search Box */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteSchema),
+          }}
+        />
+        {/* Organization Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema),
+          }}
+        />
         {/* Google Analytics 4 */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-KRN6QNRSFX"></script>
         <script

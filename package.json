@@ -11,6 +11,8 @@
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
+    "lint:links": "npx tsx scripts/validate-internal-links.ts",
+    "lint:links:deployed": "linkinator https://www.marylandbrewery.com --recurse --skip 'maps.googleapis.com|google.com|facebook.com|instagram.com|twitter.com|yelp.com|untappd.com' --timeout 30000",
     "format": "prettier --write .",
     "postinstall": "node scripts/ensure-lightningcss-binary.js"
   },
@@ -45,6 +47,7 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "15.5.4",
     "lightningcss": "^1.30.1",
+    "linkinator": "^7.5.3",
     "playwright": "^1.56.1",
     "prettier": "^3.3.0",
     "selenium-webdriver": "^4.39.0",

@@ -58,7 +58,6 @@ const AMENITY_ALIASES: Record<string, string> = {
   'dog-friendly': 'Pet Friendly',
   'pet-friendly': 'Pet Friendly',
   'beer-to-go': 'Beer To Go',
-  'beer-to-go': 'Beer To Go',
   'outdoor-seating': 'Outdoor Seating',
   'full-kitchen': 'Full Kitchen',
   'live-music': 'Live Music',

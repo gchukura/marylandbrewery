@@ -398,7 +398,7 @@ export default function SimpleBreweryPageTemplate({
       return brewery.hasMerch === true;
     }
     if (lowerName === 'parking') {
-      return brewery.parking === true || brewery.parking === 'yes';
+      return !!brewery.parking && brewery.parking.toLowerCase() === 'yes';
     }
     if (lowerName === 'pet friendly' || lowerName === 'dog friendly') {
       return brewery.dogFriendly === true;

@@ -159,7 +159,8 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                     {/* Logo */}
                     <div className="flex-shrink-0">
                       <BreweryLogo 
-                        brewery={brewery} 
+                        logo={brewery.logo || ''}
+                        breweryName={brewery.name}
                         size="md"
                         className="rounded-lg"
                       />

@@ -13,6 +13,7 @@
     "lint:fix": "eslint --fix",
     "lint:links": "npx tsx scripts/validate-internal-links.ts",
     "lint:links:deployed": "linkinator https://www.marylandbrewery.com --recurse --skip 'maps.googleapis.com|google.com|facebook.com|instagram.com|twitter.com|yelp.com|untappd.com' --timeout 30000",
+    "indexnow": "npx tsx scripts/submit-indexnow.ts",
     "format": "prettier --write .",
     "postinstall": "node scripts/ensure-lightningcss-binary.js"
   },
@@ -32,7 +33,8 @@
     "react-dom": "19.1.0",
     "rss-parser": "^3.13.0",
     "schema-dts": "^1.1.5",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -41,6 +43,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/selenium-webdriver": "^4.35.4",
+    "@types/xml2js": "^0.4.14",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "dotenv": "^17.2.3",

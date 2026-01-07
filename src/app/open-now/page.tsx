@@ -79,7 +79,7 @@ export default async function OpenNowPage() {
   // Related pages for internal linking
   const relatedPages = [
     { title: 'Interactive Map', url: '/map', count: processed.breweries.length },
-    { title: 'All Cities', url: '/city', count: processed.cities.length },
+    { title: 'All Cities', url: '/cities', count: processed.cities.length },
     { title: 'Browse by Amenity', url: '/amenities', count: 0 },
   ];
 

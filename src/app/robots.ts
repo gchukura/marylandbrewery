@@ -20,31 +20,8 @@ export default function robots(): MetadataRoute.Robots {
           '/test-simple-programmatic',
           '/test-templates',
           
-          // Next.js internal files and static assets (blocks CSS, JS, fonts, images)
-          '/_next/static',
-          '/_next/image',
+          // Next.js HMR (dev only)
           '/_next/webpack-hmr',
-          
-          // Static asset directories (if any exist in public)
-          '/static',
-          
-          // Manifest and other non-content files
-          '/manifest.json',
-        ],
-      },
-      // Allow Googlebot to access static assets for proper rendering
-      {
-        userAgent: 'Googlebot',
-        allow: '/',
-        disallow: [
-          '/admin',
-          '/api',
-          '/test-',
-          '/simple-test',
-          '/test-brewery',
-          '/test-programmatic',
-          '/test-simple-programmatic',
-          '/test-templates',
         ],
       },
     ],

@@ -157,6 +157,8 @@ export function generateBreweryStructuredData(brewery: {
   longitude: number;
   hours?: Record<string, string>;
   description?: string;
+  googleRating?: number;
+  googleRatingCount?: number;
 }) {
   const structuredData: any = {
     '@context': 'https://schema.org',
@@ -196,17 +198,61 @@ export function generateBreweryStructuredData(brewery: {
     };
   }
   
+  // Add aggregate rating if available (for rich snippets with star ratings)
+  if (brewery.googleRating && brewery.googleRating > 0) {
+    structuredData.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: brewery.googleRating,
+      reviewCount: brewery.googleRatingCount || 1,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
+  
+  // Add opening hours specification for "Open Now" rich snippets
   if (brewery.hours) {
-    const openingHours = Object.entries(brewery.hours)
-      .filter(([_, hours]) => hours && hours !== 'Closed' && hours.trim())
+    const dayMapping: Record<string, string> = {
+      sunday: 'Sunday',
+      monday: 'Monday',
+      tuesday: 'Tuesday',
+      wednesday: 'Wednesday',
+      thursday: 'Thursday',
+      friday: 'Friday',
+      saturday: 'Saturday',
+    };
+
+    const openingHoursSpec = Object.entries(brewery.hours)
+      .filter(([_, hours]) => hours && hours.toLowerCase() !== 'closed' && hours.trim())
       .map(([day, hours]) => {
-        // Format: Mo 10:00-22:00
-        const dayAbbr = day.substring(0, 2);
-        return `${dayAbbr} ${hours}`;
-      });
-    
-    if (openingHours.length > 0) {
-      structuredData.openingHours = openingHours.join(', ');
+        // Parse hours like "11:00 AM – 9:00 PM" or "2:00 – 9:00 PM"
+        const match = hours.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?\s*[–—-]\s*(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+        if (!match) return null;
+
+        const [, openHour, openMin, openAmPm, closeHour, closeMin, closeAmPm] = match;
+        
+        // Convert to 24-hour format for schema
+        let openHour24 = parseInt(openHour, 10);
+        let closeHour24 = parseInt(closeHour, 10);
+        
+        const openPeriod = (openAmPm || closeAmPm || 'PM').toUpperCase();
+        const closePeriod = (closeAmPm || 'PM').toUpperCase();
+        
+        if (openPeriod === 'PM' && openHour24 !== 12) openHour24 += 12;
+        if (openPeriod === 'AM' && openHour24 === 12) openHour24 = 0;
+        if (closePeriod === 'PM' && closeHour24 !== 12) closeHour24 += 12;
+        if (closePeriod === 'AM' && closeHour24 === 12) closeHour24 = 0;
+
+        return {
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: dayMapping[day] || day,
+          opens: `${openHour24.toString().padStart(2, '0')}:${openMin}`,
+          closes: `${closeHour24.toString().padStart(2, '0')}:${closeMin}`,
+        };
+      })
+      .filter(Boolean);
+
+    if (openingHoursSpec.length > 0) {
+      structuredData.openingHoursSpecification = openingHoursSpec;
     }
   }
   

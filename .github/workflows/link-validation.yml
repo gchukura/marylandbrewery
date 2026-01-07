@@ -1,0 +1,71 @@
+name: Link Validation
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  validate-internal-links:
+    name: Validate Internal Links
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate internal links
+        run: npm run lint:links
+
+  # Optional: Run linkinator on deployed preview (for Vercel deployments)
+  validate-deployed-links:
+    name: Validate Deployed Links
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: validate-internal-links
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Wait for Vercel Preview
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
+        id: wait-for-preview
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          max_timeout: 300
+        continue-on-error: true
+
+      - name: Check deployed links with Linkinator
+        if: steps.wait-for-preview.outputs.url != ''
+        run: |
+          npx linkinator ${{ steps.wait-for-preview.outputs.url }} \
+            --recurse \
+            --skip "maps.googleapis.com|google.com|facebook.com|instagram.com|twitter.com|yelp.com|untappd.com" \
+            --timeout 30000 \
+            --verbosity error
+        continue-on-error: true
+

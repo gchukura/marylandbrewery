@@ -103,7 +103,7 @@ export default function FooterV2() {
         {/* Bottom Bar */}
         <div className="border-t border-[#2A2A2A] pt-4">
           <div 
-            className="text-xs text-[#9CA3AF]"
+            className="text-xs text-[#9CA3AF] text-center"
             style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
             © {currentYear} MarylandBrewery.com. This site is for information purposes only and not affiliated with any of the companies mentioned. Enjoy responsibly!

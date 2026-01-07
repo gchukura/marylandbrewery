@@ -123,7 +123,7 @@
 
 1. **Root Layout** (`src/app/layout.tsx`)
    - Length: 158 characters
-   - Content: "Discover the best craft breweries across Maryland. Find breweries, events, and more in the Old Line State. Complete guide to Maryland's craft beer scene."
+   - Content: "Discover the best craft breweries across Maryland. Find breweries, events, and more across the state. Complete guide to Maryland's craft beer scene."
    - ✅ Proper length, descriptive, includes keywords
 
 2. **Brewery Detail Pages** (`src/app/breweries/[slug]/page.tsx`)
@@ -188,7 +188,7 @@
 6. **City Index Page** (`src/app/city/page.tsx`)
    - **Status:** No metadata export
    - **Issue:** Missing meta description
-   - **Recommendation:** Add metadata with description like "Browse all Maryland cities with breweries. Find breweries by city across the Old Line State."
+   - **Recommendation:** Add metadata with description like "Browse all Maryland cities with breweries. Find breweries by city across the state."
 
 7. **County Index Page** (`src/app/county/page.tsx`)
    - **Status:** No metadata export
@@ -203,7 +203,7 @@
    - Current: "Explore {count} {type} breweries across Maryland, including top cities and notable venues."
    - Length: ~85-95 characters (varies by type)
    - **Issue:** Too short, missing location specificity
-   - **Recommendation:** Expand to 150-160 characters, e.g., "Explore {count} {type} breweries across Maryland. Find top {type} breweries in Baltimore, Annapolis, Frederick, and other cities. Complete guide to {type} breweries in the Old Line State."
+   - **Recommendation:** Expand to 150-160 characters, e.g., "Explore {count} {type} breweries across Maryland. Find top {type} breweries in Baltimore, Annapolis, Frederick, and other cities. Complete guide to {type} breweries across the state."
 
 2. **Amenity Pages** (`src/app/amenities/[amenity]/page.tsx`, line 29)
    - Current: "{pct}% of Maryland breweries offer {amenity}. Explore {count} breweries with {amenity} across Maryland."

@@ -301,7 +301,7 @@ export default async function BreweryPageTest({ params }: BreweryPageProps) {
   ];
 
   const title = `${brewery.name} - ${brewery.city}, MD`;
-  const metaDescription = `${brewery.name} in ${brewery.city}, Maryland. ${brewery.description || `Discover this ${(brewery as any).type || 'brewery'} in the Old Line State.`}`;
+  const metaDescription = `${brewery.name} in ${brewery.city}, Maryland. ${brewery.description || `Discover this ${(brewery as any).type || 'brewery'} in Maryland.`}`;
 
   // Fetch all reviews from database (Google Places API only returns max 5 reviews per place)
   const reviewData = await getBreweryReviews(brewery.id, 100, 0); // Get up to 100 reviews (though Google only provides ~5)

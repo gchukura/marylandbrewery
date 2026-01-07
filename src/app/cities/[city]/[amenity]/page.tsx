@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
       type: 'website',
       images: [
         {
-          url: '/og-image.jpg',
+          url: '/opengraph-image',
           width: 1200,
           height: 630,
           alt: `${amenityLabel} Breweries in ${cityName}`,
@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
       card: 'summary_large_image',
       title,
       description,
-      images: ['/og-image.jpg'],
+      images: ['/opengraph-image'],
     },
   };
 }

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/opengraph-image',
         width: 1200,
         height: 630,
         alt: 'Best Breweries in Maryland',
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Best Breweries in Maryland | Top-Rated Craft Breweries',
     description: 'Discover the best breweries in Maryland ranked by ratings and reviews.',
-    images: ['/og-image.jpg'],
+    images: ['/opengraph-image'],
   },
 };
 

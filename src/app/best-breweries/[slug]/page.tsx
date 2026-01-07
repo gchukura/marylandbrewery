@@ -133,7 +133,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         type: 'website',
         images: [
           {
-            url: '/og-image.jpg',
+            url: '/opengraph-image',
             width: 1200,
             height: 630,
             alt: `Best Breweries in ${neighborhood.name}, ${cityName}, MD`,
@@ -144,7 +144,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         card: 'summary_large_image',
         title,
         description,
-        images: ['/og-image.jpg'],
+        images: ['/opengraph-image'],
       },
     };
   }
@@ -185,7 +185,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         type: 'website',
         images: [
           {
-            url: '/og-image.jpg',
+            url: '/opengraph-image',
             width: 1200,
             height: 630,
             alt: `Best Breweries in ${cityName}, MD`,
@@ -196,7 +196,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         card: 'summary_large_image',
         title,
         description,
-        images: ['/og-image.jpg'],
+        images: ['/opengraph-image'],
       },
     };
   }
@@ -237,7 +237,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         type: 'website',
         images: [
           {
-            url: '/og-image.jpg',
+            url: '/opengraph-image',
             width: 1200,
             height: 630,
             alt: `Best Breweries in ${normalizedCountyName} County, MD`,
@@ -248,7 +248,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         card: 'summary_large_image',
         title,
         description,
-        images: ['/og-image.jpg'],
+        images: ['/opengraph-image'],
       },
     };
     }
@@ -287,7 +287,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         type: 'website',
         images: [
           {
-            url: '/og-image.jpg',
+            url: '/opengraph-image',
             width: 1200,
             height: 630,
             alt: `Best Breweries in ${regionData.name}${isMdRoute ? ', MD' : ''}`,
@@ -298,7 +298,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         card: 'summary_large_image',
         title,
         description,
-        images: ['/og-image.jpg'],
+        images: ['/opengraph-image'],
       },
     };
   }

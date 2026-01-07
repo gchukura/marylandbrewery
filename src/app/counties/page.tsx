@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/opengraph-image',
         width: 1200,
         height: 630,
         alt: 'Maryland Brewery Directory - Counties',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Maryland Counties with Breweries - Browse by County',
     description: 'Browse all 24 Maryland counties with breweries. Find breweries by county across Maryland.',
-    images: ['/og-image.jpg'],
+    images: ['/opengraph-image'],
   },
 };
 
@@ -198,7 +198,7 @@ export default async function CountiesIndexPage() {
             style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
             <p>
-              Maryland Brewery Directory is your complete guide to craft breweries across the Old Line State. 
+              Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 
               We connect beer enthusiasts with local breweries, providing detailed information about locations, 
               hours, amenities, and beer selections.
             </p>

@@ -37,14 +37,14 @@ export default function Header() {
               <Image
                 src="/logo-emblem.svg"
                 alt="Maryland Brewery"
-                width={112}
-                height={112}
-                className="h-28 w-28 object-contain"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain"
                 priority
               />
               {/* Text Logo - using Source Sans 3 from design system */}
               <span 
-                className="text-white whitespace-nowrap text-xl font-semibold -ml-6"
+                className="text-white whitespace-nowrap text-xl font-semibold ml-1"
                 style={{ 
                   fontFamily: "'Source Sans 3', sans-serif",
                   letterSpacing: 'normal',

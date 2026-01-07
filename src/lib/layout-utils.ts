@@ -31,7 +31,7 @@ export function createPageMetadata({
   description,
   path,
   keywords = [],
-  image = '/og-image.jpg',
+  image = '/opengraph-image',
   type = 'website'
 }: {
   title: string;

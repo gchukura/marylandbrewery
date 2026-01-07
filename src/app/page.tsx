@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/opengraph-image',
         width: 1200,
         height: 630,
         alt: 'Maryland Brewery Directory - Craft Breweries Across Maryland',
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Maryland Brewery Directory | Craft Breweries Across Maryland',
     description: 'Discover the best craft breweries across Maryland. Find breweries by city, county, type, and amenities.',
-    images: ['/og-image.jpg'],
+    images: ['/opengraph-image'],
   },
 };
 

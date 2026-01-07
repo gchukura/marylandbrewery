@@ -11,6 +11,18 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/region',
   },
+  openGraph: {
+    title: 'Maryland Brewery Regions | Explore Breweries by Region',
+    description: 'Discover Maryland breweries organized by region: Eastern Shore, Western Maryland, Central Maryland, Southern Maryland, and the Capital Region. Plan your regional brewery tour.',
+    url: 'https://www.marylandbrewery.com/region',
+    siteName: 'Maryland Brewery Directory',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Maryland Brewery Regions | Explore Breweries by Region',
+    description: 'Discover Maryland breweries organized by region: Eastern Shore, Western Maryland, Central Maryland, Southern Maryland, and the Capital Region. Plan your regional brewery tour.',
+  },
 };
 
 const MARYLAND_REGIONS = [

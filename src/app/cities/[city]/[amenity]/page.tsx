@@ -1,9 +1,15 @@
 import { Metadata } from 'next';
-import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
+import { notFound } from 'next/navigation';
 import { getProcessedBreweryData } from '../../../../../lib/brewery-data';
-import { slugify, deslugify, isOpenNow } from '@/lib/data-utils';
-import { generateComboIntroText } from '@/lib/content-generators';
-import { truncateTitle, optimizeDescription } from '@/lib/seo-utils';
+import { slugify, deslugify } from '@/lib/data-utils';
+import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
+import Image from 'next/image';
+import { existsSync } from 'fs';
+import { join } from 'path';
+import '@/components/home-v2/styles.css';
+import CityAmenityMapClient from './CityAmenityMapClient';
+import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 const AMENITY_SLUGS = [
   'dog-friendly', 'outdoor-seating', 'live-music', 'food-trucks', 'full-kitchen', 'beer-garden',
@@ -16,14 +22,33 @@ function normalizeAmenityLabel(slug: string): string {
 
 export async function generateStaticParams() {
   const processed = await getProcessedBreweryData();
-  const cities = processed.cities; // already unique and normalized to display case
-
+  
+  // Only generate pages for city+amenity combinations that have at least one brewery
   const combinations: { city: string; amenity: string }[] = [];
-  for (const city of cities) {
-    for (const amenity of AMENITY_SLUGS) {
-      combinations.push({ city: slugify(city), amenity });
+  
+  for (const amenitySlug of AMENITY_SLUGS) {
+    const amenityLabel = normalizeAmenityLabel(amenitySlug).toLowerCase();
+    
+    // Group breweries by city that have this amenity
+    const citiesWithAmenity = new Set<string>();
+    
+    for (const brewery of processed.breweries) {
+      const amenities = (brewery as any).amenities || (brewery as any).features || [];
+      const hasAmenity = amenities.some((a: string) => 
+        a.toLowerCase().includes(amenityLabel)
+      );
+      
+      if (hasAmenity && brewery.city) {
+        citiesWithAmenity.add(brewery.city);
+      }
+    }
+    
+    // Add combinations for cities that have this amenity
+    for (const city of citiesWithAmenity) {
+      combinations.push({ city: slugify(city), amenity: amenitySlug });
     }
   }
+  
   return combinations;
 }
 
@@ -35,7 +60,6 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   const amenityLabel = normalizeAmenityLabel(amenity);
   const amenityKey = amenityLabel.toLowerCase();
 
-  // Optimize: use pre-indexed city data if available
   const cityBreweries: any[] = (processed.byCity instanceof Map 
     ? processed.byCity.get(cityKey)
     : (processed.byCity as any)?.[cityKey]) || [];
@@ -43,10 +67,10 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
     (b: any) => ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey))
   );
 
-  const title = `${amenityLabel} in ${cityName}, MD | ${breweries.length}`;
+  const title = `${amenityLabel} Breweries in ${cityName}, MD | ${breweries.length} Options`;
   
   const description = breweries.length > 0
-    ? `Find ${breweries.length} breweries with ${amenityLabel.toLowerCase()} in ${cityName}, Maryland. Explore local taprooms and brewpubs offering ${amenityLabel.toLowerCase()} with detailed hours, locations, and visitor information. Plan your ${cityName} brewery tour today!`
+    ? `Find ${breweries.length} breweries with ${amenityLabel.toLowerCase()} in ${cityName}, Maryland. Explore local taprooms and brewpubs offering ${amenityLabel.toLowerCase()} with detailed hours, locations, and visitor information.`
     : `Discover ${cityName}'s craft beer scene. While no breweries currently list ${amenityLabel.toLowerCase()}, check nearby cities for similar options or explore other amenities in ${cityName}, Maryland.`;
 
   return {
@@ -84,91 +108,167 @@ export default async function CityAmenityPage({ params }: { params: Promise<{ ci
   const amenityLabel = normalizeAmenityLabel(amenity);
   const amenityKey = amenityLabel.toLowerCase();
 
+  // Filter breweries by city and amenity
   const breweries = processed.breweries.filter(
     (b: any) => b.city.toLowerCase() === cityName.toLowerCase() &&
       (((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey)))
   );
 
-  // Stats
-  const openNow = breweries.filter((b) => isOpenNow(b)).length;
-  const stats = [
-    { label: 'Total Breweries', value: breweries.length },
-    { label: 'Open Today', value: openNow },
-    { label: 'In This City', value: cityName },
-    { label: 'With This Amenity', value: amenityLabel },
-  ];
-
-  // Intro text
-  const introText = generateComboIntroText(cityName, amenityLabel, breweries.length);
-
-  // Breadcrumbs
-  const breadcrumbs = [
-    { name: 'Maryland Breweries', url: '/', isActive: false },
-    { name: 'Cities', url: '/cities', isActive: false },
-    { name: cityName, url: `/cities/${city}/breweries`, isActive: false },
-    { name: amenityLabel, url: `/cities/${city}/${amenity}`, isActive: true },
-  ];
-
-  // Content blocks - simplified for combo pages
-  const contentBlocks = [
-    {
-      title: `About ${amenityLabel} in ${cityName}`,
-      content: `${cityName} offers ${breweries.length} breweries with ${amenityLabel.toLowerCase()}, providing convenient options for craft beer enthusiasts seeking this specific amenity. These breweries enhance the local craft beer scene by offering ${amenityLabel.toLowerCase()} alongside quality beer.`
-    },
-    {
-      title: 'What to Expect',
-      content: `When visiting ${cityName} breweries with ${amenityLabel.toLowerCase()}, you can expect a welcoming atmosphere that combines craft beer with this popular amenity. Most breweries clearly indicate their ${amenityLabel.toLowerCase()} offerings, making it easy to plan your visit.`
-    }
-  ];
-
-  // Related pages - optimized for performance
-  const cityBreweriesForCount: any[] = (processed.byCity instanceof Map 
-    ? processed.byCity.get(cityName.toLowerCase())
-    : (processed.byCity as any)?.[cityName.toLowerCase()]) || [];
-  const cityBreweryCount = cityBreweriesForCount.length;
-  
-  // Pre-filter breweries with this amenity for efficiency
-  const amenityBreweries = processed.breweries.filter((b: any) => 
-    ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey))
-  );
-  const amenityCount = amenityBreweries.length;
-  
-  // Nearby cities - limit processing
-  const cityToCount = new Map<string, number>();
-  for (const b of amenityBreweries) {
-    if (b.city.toLowerCase() !== cityName.toLowerCase()) {
-      cityToCount.set(b.city, (cityToCount.get(b.city) || 0) + 1);
-    }
+  // Return 404 if no breweries match this city+amenity combination
+  if (breweries.length === 0) {
+    notFound();
   }
-  const nearby = Array.from(cityToCount.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 4)
-    .map(([city, count]) => ({
-      title: `${city} ${amenityLabel} Breweries`,
-        url: `/cities/${slugify(city)}/${amenity}`,
-      count,
-    }));
 
-  const relatedPages = [
-    { title: `All ${cityName} Breweries`, url: `/cities/${city}/breweries`, count: cityBreweryCount },
-    { title: `${amenityLabel} Breweries (Statewide)`, url: `/amenities/${amenity}`, count: amenityCount },
-    ...nearby,
-  ];
+  // Sort breweries by rating (highest first), then by name
+  const sortedBreweries = [...breweries].sort((a: any, b: any) => {
+    const aRating = a.googleRating || a.yelpRating || 0;
+    const bRating = b.googleRating || b.yelpRating || 0;
+    if (bRating !== aRating) return bRating - aRating;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  // Get city hero image - prioritize local city image, fallback to brewery photo
+  const citySlugForImage = slugify(cityName);
+  const localCityImagePath = `/cities/${citySlugForImage}.jpg`;
+  const localCityImageFile = join(process.cwd(), 'public', 'cities', `${citySlugForImage}.jpg`);
+  
+  const hasLocalCityImage = existsSync(localCityImageFile);
+  
+  const breweryFallbackImage = sortedBreweries.length > 0 
+    ? (sortedBreweries[0].photos && sortedBreweries[0].photos.length > 0
+        ? sortedBreweries[0].photos[0]
+        : sortedBreweries[0].photoUrl)
+    : null;
+  
+  const cityHeroImage = hasLocalCityImage ? localCityImagePath : breweryFallbackImage;
+
+  const totalBreweries = breweries.length;
+
+  // Prepare data for BreweriesByLocationTabs
+  const cityCounts = new Map<string, { name: string; slug: string; count: number }>();
+  processed.breweries.forEach((brewery: any) => {
+    if (brewery.city) {
+      const slug = slugify(brewery.city);
+      const existing = cityCounts.get(slug);
+      if (existing) {
+        existing.count++;
+      } else {
+        cityCounts.set(slug, { name: brewery.city, slug, count: 1 });
+      }
+    }
+  });
+  const cities = Array.from(cityCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
+
+  const countyCounts = new Map<string, { name: string; slug: string; count: number }>();
+  processed.breweries.forEach((brewery: any) => {
+    if (brewery.county) {
+      const slug = slugify(brewery.county);
+      const existing = countyCounts.get(slug);
+      if (existing) {
+        existing.count++;
+      } else {
+        countyCounts.set(slug, { name: `${brewery.county} County`, slug, count: 1 });
+      }
+    }
+  });
+  const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <DirectoryPageTemplate
-      h1={`${amenityLabel} Breweries in ${cityName}, Maryland`}
-      introText={introText}
-      breadcrumbs={breadcrumbs}
-      breweries={breweries as any}
-      stats={stats}
-      contentBlocks={contentBlocks}
-      relatedPages={relatedPages}
-      pageType="amenity"
-      showMap={true}
-      showStats={true}
-      showTable={true}
-      mapZoom={11}
-    />
+    <div className="min-h-screen bg-[#FAF9F6]">
+      {/* Hero Section */}
+      <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
+        {/* City Hero Image Background */}
+        {cityHeroImage && (
+          <div className="absolute inset-0">
+            {cityHeroImage.startsWith('http') ? (
+              <img 
+                src={cityHeroImage} 
+                alt={`${amenityLabel} breweries in ${cityName}`}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Image
+                src={cityHeroImage}
+                alt={`${amenityLabel} breweries in ${cityName}`}
+                fill
+                className="object-cover"
+                sizes="100vw"
+                priority
+                unoptimized={false}
+              />
+            )}
+            {/* Dark overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+          </div>
+        )}
+        
+        {/* Pattern overlay (only if no hero image) */}
+        {!cityHeroImage && (
+          <div className="absolute inset-0 md-pattern-bg pointer-events-none" />
+        )}
+        
+        <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
+          {/* Breadcrumbs */}
+          <nav className="mb-6" aria-label="Breadcrumb">
+            <ol className="flex items-center flex-wrap gap-2 text-sm text-white/90" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+              <li>
+                <Link href="/" className="hover:text-white transition-colors drop-shadow-md">
+                  Maryland Breweries
+                </Link>
+              </li>
+              <li><ChevronRight className="h-4 w-4 mx-2 text-white/70" /></li>
+              <li>
+                <Link href="/cities" className="hover:text-white transition-colors drop-shadow-md">
+                  Cities
+                </Link>
+              </li>
+              <li><ChevronRight className="h-4 w-4 mx-2 text-white/70" /></li>
+              <li>
+                <Link href={`/cities/${city}/breweries`} className="hover:text-white transition-colors drop-shadow-md">
+                  {cityName}
+                </Link>
+              </li>
+              <li><ChevronRight className="h-4 w-4 mx-2 text-white/70" /></li>
+              <li>
+                <span className="text-white font-medium drop-shadow-md">
+                  {amenityLabel}
+                </span>
+              </li>
+            </ol>
+          </nav>
+
+          {/* H1 Title */}
+          <h1 
+            className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-lg"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
+          >
+            {amenityLabel} Breweries in {cityName}, MD
+          </h1>
+
+          {/* Count Display */}
+          <p 
+            className="text-lg md:text-xl text-white/95 mb-6 drop-shadow-md"
+            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+          >
+            <strong className="text-white font-semibold">{totalBreweries}</strong> {totalBreweries === 1 ? 'brewery' : 'breweries'} with {amenityLabel.toLowerCase()} found.
+          </p>
+        </div>
+      </section>
+
+      {/* Map and List Layout */}
+      <section className="bg-white py-8 md:py-12">
+        <div className="container mx-auto px-4">
+          <CityAmenityMapClient 
+            breweries={sortedBreweries} 
+            cityName={cityName} 
+            amenityLabel={amenityLabel}
+            amenitySlug={amenity}
+          />
+        </div>
+      </section>
+
+      {/* Breweries by Location Tabs */}
+      <BreweriesByLocationTabs cities={cities} counties={counties} />
+    </div>
   );
 }

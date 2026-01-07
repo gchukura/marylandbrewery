@@ -49,11 +49,45 @@ async function getAllAmenitySlugs(): Promise<string[]> {
 }
 
 /**
+ * Amenity alias mappings for common URL variations
+ * Maps old/alternative slugs to actual database amenity names
+ */
+const AMENITY_ALIASES: Record<string, string> = {
+  'in-house': 'Full Kitchen',
+  'visitors-welcome': 'Allows Visitors',
+  'dog-friendly': 'Pet Friendly',
+  'pet-friendly': 'Pet Friendly',
+  'beer-to-go': 'Beer To Go',
+  'beer-to-go': 'Beer To Go',
+  'outdoor-seating': 'Outdoor Seating',
+  'full-kitchen': 'Full Kitchen',
+  'live-music': 'Live Music',
+  'food-trucks': 'Food Trucks',
+  'private-events': 'Private Events',
+  'growler-fills': 'Growler Fills',
+  'crowler-machine': 'Crowler Machine',
+  'wheelchair-accessible': 'Wheelchair Accessible',
+  'family-friendly': 'Family Friendly',
+  'group-friendly': 'Group Friendly',
+};
+
+/**
  * Find matching amenity from the database given a URL slug
  * Returns the original amenity string from the database if found
  */
 function findMatchingAmenity(slug: string, allAmenities: string[]): string | null {
   const slugLower = slug.toLowerCase();
+  
+  // First check aliases
+  if (AMENITY_ALIASES[slugLower]) {
+    const aliasedName = AMENITY_ALIASES[slugLower];
+    // Check if the aliased name exists in the database
+    for (const amenity of allAmenities) {
+      if (amenity.toLowerCase() === aliasedName.toLowerCase()) {
+        return amenity;
+      }
+    }
+  }
   
   // Try to find an amenity whose slugified form matches the URL slug
   for (const amenity of allAmenities) {

@@ -8,6 +8,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 
 // Static navigation data - simplified to match v2 design
@@ -26,15 +27,24 @@ export default function Header() {
     <>
       <header className="bg-[#9B2335] sticky top-0 z-50">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link 
               href="/" 
-              className="flex items-center hover:opacity-90 transition-opacity"
+              className="flex items-center gap-0 hover:opacity-90 transition-opacity"
             >
+              {/* Logo Emblem */}
+              <Image
+                src="/logo-emblem.svg"
+                alt="Maryland Brewery"
+                width={112}
+                height={112}
+                className="h-28 w-28 object-contain"
+                priority
+              />
               {/* Text Logo - using Source Sans 3 from design system */}
               <span 
-                className="text-white whitespace-nowrap text-xl font-normal"
+                className="text-white whitespace-nowrap text-xl font-semibold -ml-6"
                 style={{ 
                   fontFamily: "'Source Sans 3', sans-serif",
                   letterSpacing: 'normal',
@@ -51,7 +61,7 @@ export default function Header() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="text-[#E5E7EB] hover:text-white transition-colors py-2 font-medium text-sm"
+                    className="text-white hover:text-white transition-colors py-2 font-medium text-sm"
                     style={{ 
                       fontFamily: "'Source Sans 3', sans-serif",
                       letterSpacing: 'normal',

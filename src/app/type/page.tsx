@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { getProcessedBreweryData } from '../../../lib/brewery-data';
 import { slugify, deslugify } from '@/lib/data-utils';
 import IndexPageTemplate from '@/components/directory/IndexPageTemplate';
+import { existsSync } from 'fs';
+import { join } from 'path';
 
 export const metadata: Metadata = {
   title: 'Brewery Types - Maryland Brewery Directory',
@@ -88,11 +90,17 @@ export default async function TypesIndexPage() {
     { name: 'Types', url: '/type', isActive: true },
   ];
 
+  // Check for hero image
+  const typeHeroImagePath = '/cities-hero.jpg';
+  const typeHeroImageFile = join(process.cwd(), 'public', 'cities-hero.jpg');
+  const hasTypeHeroImage = existsSync(typeHeroImageFile);
+
   return (
     <IndexPageTemplate
       h1="Brewery Types in Maryland"
       introText="Browse Maryland breweries by their type and business model. From small-batch microbreweries to full-service brewpubs, production facilities, and intimate taprooms, discover the diverse range of brewery types across the Old Line State. Each type offers a unique experience, from traditional brewing operations to modern tasting rooms."
       breadcrumbs={breadcrumbs}
+      heroImage={hasTypeHeroImage ? typeHeroImagePath : null}
       items={items}
       stats={stats}
       groupedItems={grouped}

@@ -54,6 +54,7 @@ export default function ContactPage() {
         h1="Contact Us"
         introText="Have a question or suggestion? Send us a note and we'll get back to you. Help us keep Maryland's craft brewery directory accurate and comprehensive."
         breadcrumbs={breadcrumbs}
+        heroImage="/cities-hero.jpg"
       />
       
       <div className="max-w-2xl mx-auto px-4 py-12">

@@ -108,14 +108,10 @@ export default function RootLayout({
         />
         {/* Ahrefs Analytics */}
         <script src="https://analytics.ahrefs.com/analytics.js" data-key="feHAts9QQBm4W+I9itRXzg" async></script>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        {/* Favicons handled by Next.js from /src/app/icon.png, favicon.ico, apple-icon.png */}
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#dc2626" />
-        <meta name="msapplication-TileColor" content="#dc2626" />
+        <meta name="theme-color" content="#9B2335" />
+        <meta name="msapplication-TileColor" content="#9B2335" />
       </head>
       <body className="min-h-screen bg-gray-50 antialiased" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
         <ConditionalLayoutClient>

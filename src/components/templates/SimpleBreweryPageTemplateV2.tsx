@@ -416,29 +416,30 @@ export default function SimpleBreweryPageTemplateV2({
     return false;
   };
 
-  // Helper function to build all amenities list (available and unavailable)
+  // Helper function to build all amenities list (limited to database columns)
   const buildAllAmenitiesList = () => {
-    // Start with COMMON_AMENITIES
-    const allAmenities = [...COMMON_AMENITIES];
-    
-    // Add additional amenities that might not be in COMMON_AMENITIES
-    const additionalAmenities = [
+    // Only show amenities that correspond to actual database columns
+    // Based on: allows_visitors, offers_tours, beer_to_go, has_merch, dog_friendly,
+    // outdoor_seating, food, other_drinks, parking, and the amenities array
+    const databaseAmenities = [
       'Allows Visitors',
+      'Tours',
       'Beer To Go',
+      'Merchandise',
+      'Pet Friendly',
+      'Outdoor Seating',
+      'Parking',
       'Other Drinks',
-      'Full Kitchen',
-      'In-House Kitchen'
+      // Food-related - will be handled separately based on food column value
+      'Food',
+      'Food Trucks',
+      'Full Kitchen'
     ];
     
-    // Combine and deduplicate
-    const combined = [...allAmenities];
-    additionalAmenities.forEach(amenity => {
-      if (!combined.some(a => a.toLowerCase() === amenity.toLowerCase())) {
-        combined.push(amenity);
-      }
-    });
+    // Start with database column amenities
+    const combined = [...databaseAmenities];
     
-    // Also add any amenities from the brewery's amenities array that aren't in the list
+    // Add any amenities from the brewery's amenities array that aren't already in the list
     if (brewery.amenities) {
       brewery.amenities.forEach(amenity => {
         if (!combined.some(a => a.toLowerCase() === amenity.toLowerCase())) {

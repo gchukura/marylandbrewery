@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities } from '../../lib/brewery-data';
-import { slugify, ALL_MD_COUNTIES } from '../lib/data-utils';
+import { slugify, ALL_MD_COUNTIES, normalizeCountyName } from '../lib/data-utils';
 import { supabase } from '../../lib/supabase';
 
 const BASE_URL = 'https://www.marylandbrewery.com';
@@ -37,7 +37,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const allAmenities = await getAllAmenities();
   const allTypes = await getAllTypes();
   const neighborhoods = await getAllNeighborhoods();
-  const counties = Array.from(new Set(processed.breweries.map((b) => (b as any).county).filter(Boolean))) as string[];
+  
+  // Get counties from breweries and filter to only valid Maryland counties
+  const rawCounties = Array.from(new Set(processed.breweries.map((b) => (b as any).county).filter(Boolean))) as string[];
+  const counties = rawCounties.filter(county => {
+    const slug = slugify(county);
+    return normalizeCountyName(slug) !== null || ALL_MD_COUNTIES.some(c => c.toLowerCase() === county.toLowerCase());
+  });
   
   // Convert amenity names to slugs
   const amenitySlugs = allAmenities.map(amenity => slugify(amenity));

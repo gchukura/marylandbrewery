@@ -35,6 +35,7 @@ const COUNTY_NAME_MAP: Record<string, string> = {
   'allegany': 'Allegany',
   'anne-arundel': 'Anne Arundel',
   'baltimore': 'Baltimore',
+  'baltimore-city': 'Baltimore City',
   'calvert': 'Calvert',
   'caroline': 'Caroline',
   'carroll': 'Carroll',
@@ -54,6 +55,8 @@ const COUNTY_NAME_MAP: Record<string, string> = {
   'somerset': 'Somerset',
   'st-marys': "St. Mary's",
   'st-mary': "St. Mary's",
+  'saint-marys': "St. Mary's",
+  'saint-mary': "St. Mary's",
   'talbot': 'Talbot',
   'washington': 'Washington',
   'wicomico': 'Wicomico',
@@ -64,7 +67,7 @@ const COUNTY_NAME_MAP: Record<string, string> = {
  * All valid Maryland county names (canonical forms)
  */
 export const ALL_MD_COUNTIES = [
-  'Allegany', 'Anne Arundel', 'Baltimore', 'Calvert', 'Caroline', 'Carroll', 'Cecil', 'Charles',
+  'Allegany', 'Anne Arundel', 'Baltimore', 'Baltimore City', 'Calvert', 'Caroline', 'Carroll', 'Cecil', 'Charles',
   'Dorchester', 'Frederick', 'Garrett', 'Harford', 'Howard', 'Kent', 'Montgomery',
   "Prince George's", "Queen Anne's", 'Somerset', "St. Mary's", 'Talbot', 'Washington', 'Wicomico', 'Worcester'
 ];

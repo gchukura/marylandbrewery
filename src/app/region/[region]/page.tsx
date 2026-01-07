@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: { params: Promise<{ region: s
       type: 'website',
       images: [
         {
-          url: '/og-image.jpg',
+          url: '/opengraph-image',
           width: 1200,
           height: 630,
           alt: `${regionData.name} Breweries`,
@@ -79,7 +79,7 @@ export async function generateMetadata({ params }: { params: Promise<{ region: s
       card: 'summary_large_image',
       title,
       description,
-      images: ['/og-image.jpg'],
+      images: ['/opengraph-image'],
     },
   };
 }

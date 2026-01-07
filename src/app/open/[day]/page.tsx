@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: { params: Promise<{ day: stri
       type: 'website',
       images: [
         {
-          url: '/og-image.jpg',
+          url: '/opengraph-image',
           width: 1200,
           height: 630,
           alt: `Maryland Brewery Directory - Open on ${day}`,
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: { params: Promise<{ day: stri
       card: 'summary_large_image',
       title: `Breweries Open on ${day} - Maryland Brewery Directory`,
       description: `Find ${list.length} Maryland breweries open on ${day}. Complete list of breweries with hours for ${day}.`,
-      images: ['/og-image.jpg'],
+      images: ['/opengraph-image'],
     },
   };
 }

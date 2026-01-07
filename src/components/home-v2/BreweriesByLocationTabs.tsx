@@ -29,18 +29,27 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
     setIsVisible(true);
   }, []);
 
-  // Organize cities into columns (5 columns like bimmershops)
-  const citiesPerColumn = Math.ceil(cities.length / 5);
+  // Sort cities alphabetically by name
+  const sortedCities = [...cities].sort((a, b) => a.name.localeCompare(b.name));
+  
+  // Sort counties alphabetically by name (without "County" suffix for sorting)
+  const sortedCounties = [...counties].sort((a, b) => 
+    a.name.replace(/\s+County$/i, '').localeCompare(b.name.replace(/\s+County$/i, ''))
+  );
+
+  // Organize cities into columns (5 columns)
+  // Reading order: down column 1, then down column 2, etc. (alphabetical progression)
+  const citiesPerColumn = Math.ceil(sortedCities.length / 5);
   const cityColumns: CityData[][] = [];
   for (let i = 0; i < 5; i++) {
-    cityColumns.push(cities.slice(i * citiesPerColumn, (i + 1) * citiesPerColumn));
+    cityColumns.push(sortedCities.slice(i * citiesPerColumn, (i + 1) * citiesPerColumn));
   }
 
   // Organize counties into columns (5 columns)
-  const countiesPerColumn = Math.ceil(counties.length / 5);
+  const countiesPerColumn = Math.ceil(sortedCounties.length / 5);
   const countyColumns: CountyData[][] = [];
   for (let i = 0; i < 5; i++) {
-    countyColumns.push(counties.slice(i * countiesPerColumn, (i + 1) * countiesPerColumn));
+    countyColumns.push(sortedCounties.slice(i * countiesPerColumn, (i + 1) * countiesPerColumn));
   }
 
   return (

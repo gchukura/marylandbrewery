@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { MapPin, Phone, Search, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { slugify } from '@/lib/data-utils';
 import BreweryLogo from '@/components/brewery/BreweryLogo';
 
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
@@ -15,14 +16,13 @@ const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), {
   )
 });
 
-interface CountyBreweriesMapClientProps {
+interface TypeBreweriesMapClientProps {
   breweries: any[];
-  countyName: string;
-  isMdRoute?: boolean;
-  isRegion?: boolean;
+  typeName: string;
+  typeDefinition?: string;
 }
 
-export default function CountyBreweriesMapClient({ breweries, countyName, isMdRoute = false, isRegion = false }: CountyBreweriesMapClientProps) {
+export default function TypeBreweriesMapClient({ breweries, typeName, typeDefinition }: TypeBreweriesMapClientProps) {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -75,7 +75,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
         {/* Filter Header */}
         <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Brewery Directory</h2>
+            <h2 className="text-xl font-bold text-gray-900">{typeName} Directory</h2>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
@@ -101,7 +101,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
 
           {/* Results Count */}
           <div className="mt-3 text-sm text-gray-600">
-            Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries in {isRegion ? countyName : `${countyName} County`}{isMdRoute ? (isRegion ? ', MD' : ', Maryland') : ''}
+            Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} {typeName.toLowerCase()} breweries in Maryland
             {filtered.length !== breweries.length && ` (filtered from ${breweries.length} total)`}
           </div>
         </div>
@@ -163,11 +163,9 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                             {brewery.name}
                           </h3>
                           {/* Maryland Brewery in City, MD */}
-                          {brewery.city && (
-                            <div className="text-xs font-bold text-gray-700 mt-0.5 mb-1">
-                              Maryland Brewery in {brewery.city}, MD
-                            </div>
-                          )}
+                          <div className="text-xs font-bold text-gray-700 mt-0.5 mb-1">
+                            {typeName} in {brewery.city}, MD
+                          </div>
                           {/* Reviews below name */}
                           {brewery.googleRating && (
                             <div className="flex items-center gap-1 mt-1">
@@ -296,7 +294,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                   breweries={filtered as any} 
                   height="100%" 
                   showClusters={true}
-                  zoom={9}
+                  zoom={8}
                 />
               ) : (
                 <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center text-sm text-gray-600 px-4">
@@ -306,12 +304,22 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
             </div>
           </div>
 
+          {/* Type Definition Section */}
+          {typeDefinition && (
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">What is a {typeName}?</h2>
+              <div 
+                className="prose prose-lg text-[#6B6B6B]"
+                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+              >
+                <p>{typeDefinition}</p>
+              </div>
+            </div>
+          )}
+
           {/* About Section */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 mt-4">
-            <h2 
-              className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-6"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-            >
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
               About Maryland Brewery Directory
             </h2>
             <div 

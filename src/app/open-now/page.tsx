@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/opengraph-image',
         width: 1200,
         height: 630,
         alt: 'Maryland Brewery Directory - Open Now',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Breweries Open Now - Maryland Brewery Directory',
     description: 'Find Maryland breweries currently open. Real-time list of breweries open now across the state.',
-    images: ['/og-image.jpg'],
+    images: ['/opengraph-image'],
   },
 };
 

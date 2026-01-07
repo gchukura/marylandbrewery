@@ -10,19 +10,19 @@ import '@/components/home-v2/styles.css';
 
 export const metadata: Metadata = {
   title: 'Maryland Cities with Breweries - Browse by City',
-  description: 'Browse all Maryland cities with breweries. Find breweries by city across the Old Line State. Explore Baltimore, Annapolis, Frederick, and more.',
+  description: 'Browse all Maryland cities with breweries. Find breweries by city across the state. Explore Baltimore, Annapolis, Frederick, and more.',
   alternates: {
     canonical: '/cities',
   },
   openGraph: {
     title: 'Maryland Cities with Breweries - Browse by City',
-    description: 'Browse all Maryland cities with breweries. Find breweries by city across the Old Line State.',
+    description: 'Browse all Maryland cities with breweries. Find breweries by city across the state.',
     url: 'https://www.marylandbrewery.com/cities',
     siteName: 'Maryland Brewery Directory',
     type: 'website',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/opengraph-image',
         width: 1200,
         height: 630,
         alt: 'Maryland Brewery Directory - Cities',
@@ -32,8 +32,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Maryland Cities with Breweries - Browse by City',
-    description: 'Browse all Maryland cities with breweries. Find breweries by city across the Old Line State.',
-    images: ['/og-image.jpg'],
+    description: 'Browse all Maryland cities with breweries. Find breweries by city across the state.',
+    images: ['/opengraph-image'],
   },
 };
 
@@ -231,7 +231,7 @@ export default async function CitiesIndexPage() {
             style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
             <p>
-              Maryland Brewery Directory is your complete guide to craft breweries across the Old Line State. 
+              Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 
               We connect beer enthusiasts with local breweries, providing detailed information about locations, 
               hours, amenities, and beer selections.
             </p>

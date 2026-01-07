@@ -32,7 +32,7 @@ export default function OurStoryPage() {
               MarylandBrewery.com was created to celebrate and support Maryland's vibrant craft beer community. We're passionate about connecting craft beer enthusiasts with the amazing breweries that make Maryland's beer scene special.
             </p>
             <p className="text-gray-700 mb-4">
-              Our mission is simple: make it easy for people to discover, explore, and enjoy Maryland's craft breweries. Whether you're a local looking for a new favorite spot or a visitor exploring the Old Line State, we want to help you find the perfect brewery experience.
+              Our mission is simple: make it easy for people to discover, explore, and enjoy Maryland's craft breweries. Whether you're a local looking for a new favorite spot or a visitor exploring the state, we want to help you find the perfect brewery experience.
             </p>
           </section>
 

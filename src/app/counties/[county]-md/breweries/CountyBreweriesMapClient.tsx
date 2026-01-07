@@ -318,7 +318,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
               style={{ fontFamily: "'Source Sans 3', sans-serif" }}
             >
               <p>
-                Maryland Brewery Directory is your complete guide to craft breweries across the Old Line State. 
+                Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 
                 We connect beer enthusiasts with local breweries, providing detailed information about locations, 
                 hours, amenities, and beer selections.
               </p>

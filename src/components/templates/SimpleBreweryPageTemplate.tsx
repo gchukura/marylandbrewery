@@ -407,7 +407,7 @@ export default function SimpleBreweryPageTemplate({
       return brewery.outdoorSeating === true;
     }
     if (lowerName === 'other drinks') {
-      return brewery.otherDrinks === true || brewery.otherDrinks === 'yes';
+      return !!brewery.otherDrinks && brewery.otherDrinks.toLowerCase() === 'yes';
     }
     if (lowerName.includes('food')) {
       return !!brewery.food;

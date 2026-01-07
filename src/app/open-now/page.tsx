@@ -89,6 +89,7 @@ export default async function OpenNowPage() {
         h1="Breweries Open Now"
         introText="Find Maryland breweries currently open right now. Real-time list of breweries open across the state with current hours and closing times. Updated hourly."
         breadcrumbs={breadcrumbs}
+        heroImage="/cities-hero.jpg"
       />
       
       <div className="container mx-auto px-4 py-10">

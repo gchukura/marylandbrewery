@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import IndexPageTemplate from '@/components/directory/IndexPageTemplate';
 import { slugify } from '@/lib/data-utils';
 import { getProcessedBreweryData } from '../../../lib/brewery-data';
+import { existsSync } from 'fs';
+import { join } from 'path';
 
 export const metadata: Metadata = {
   title: 'Maryland Brewery Regions | Explore Breweries by Region',
@@ -82,11 +84,17 @@ export default async function RegionsIndexPage() {
     { name: 'Regions', url: '/region', isActive: true },
   ];
 
+  // Check for hero image
+  const regionHeroImagePath = '/cities-hero.jpg';
+  const regionHeroImageFile = join(process.cwd(), 'public', 'cities-hero.jpg');
+  const hasRegionHeroImage = existsSync(regionHeroImageFile);
+
   return (
     <IndexPageTemplate
       h1="Maryland Brewery Regions"
       introText="Explore Maryland's craft breweries organized by region. Each region offers unique brewery experiences, from waterfront locations on the Eastern Shore to mountain views in Western Maryland."
       breadcrumbs={breadcrumbs}
+      heroImage={hasRegionHeroImage ? regionHeroImagePath : null}
       items={items}
       stats={stats}
       groupedItems={{}}

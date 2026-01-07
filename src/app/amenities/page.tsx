@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { getProcessedBreweryData } from '../../../lib/brewery-data';
 import { slugify } from '@/lib/data-utils';
 import IndexPageTemplate from '@/components/directory/IndexPageTemplate';
+import { existsSync } from 'fs';
+import { join } from 'path';
 
 export const metadata: Metadata = {
   title: 'Brewery Amenities & Features - Maryland Brewery Directory',
@@ -130,11 +132,17 @@ export default async function AmenitiesIndexPage() {
     { name: 'Amenities', url: '/amenities', isActive: true },
   ];
 
+  // Check for hero image
+  const amenitiesHeroImagePath = '/cities-hero.jpg';
+  const amenitiesHeroImageFile = join(process.cwd(), 'public', 'cities-hero.jpg');
+  const hasAmenitiesHeroImage = existsSync(amenitiesHeroImageFile);
+
   return (
     <IndexPageTemplate
       h1="Brewery Amenities & Features"
       introText="Browse Maryland breweries by the amenities and features they offer. From dog-friendly patios to live music venues, find breweries that match your preferences. Whether you're looking for food options, outdoor seating, tours, or take-home options, discover breweries that provide the experience you're seeking."
       breadcrumbs={breadcrumbs}
+      heroImage={hasAmenitiesHeroImage ? amenitiesHeroImagePath : null}
       items={items}
       stats={stats}
       groupedItems={grouped}

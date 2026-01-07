@@ -11,25 +11,27 @@ import { DatabaseNeighborhood } from '../../lib/supabase';
 
 /**
  * Check if a slug matches the neighborhood pattern
- * Neighborhood slugs: 3+ parts ending with -md
- * Example: "edgemoor-bethesda-md"
+ * Neighborhood slugs: 4+ parts ending with -md (neighborhood + city + md)
+ * Example: "edgemoor-bethesda-md" (3 parts min: neighborhood-city-md)
+ * Note: Since cities can have up to 3 words, neighborhoods need at least 4 parts
  */
 export function isNeighborhoodSlug(slug: string): boolean {
   const parts = slug.split('-');
-  // Must have 3+ parts and end with -md
-  return parts.length >= 3 && slug.endsWith('-md');
+  // Must have 4+ parts and end with -md
+  // This ensures we don't confuse 3-word cities like "havre-de-grace" with neighborhoods
+  return parts.length >= 4 && slug.endsWith('-md');
 }
 
 /**
  * Check if a slug matches the city pattern
- * City slugs: 1-2 parts, optionally ending with -md
- * Example: "bethesda" or "bethesda-md"
+ * City slugs: 1-3 parts, optionally ending with -md
+ * Examples: "bethesda", "bethesda-md", "silver-spring", "havre-de-grace"
  */
 export function isCitySlug(slug: string): boolean {
-  const parts = slug.split('-');
   const slugWithoutMd = slug.endsWith('-md') ? slug.substring(0, slug.length - 3) : slug;
   const partsWithoutMd = slugWithoutMd.split('-');
-  return partsWithoutMd.length <= 2;
+  // Allow up to 3-word city names (e.g., "havre-de-grace", "prince-fredericktown")
+  return partsWithoutMd.length <= 3;
 }
 
 /**

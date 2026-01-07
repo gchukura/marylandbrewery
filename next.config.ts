@@ -67,6 +67,12 @@ const nextConfig: NextConfig = {
         destination: '/counties/:path*',
         permanent: true,
       },
+      // Redirect double-slash city amenity URLs to amenity pages
+      {
+        source: '/cities//:amenity',
+        destination: '/amenities/:amenity',
+        permanent: true,
+      },
     ];
   },
   async headers() {

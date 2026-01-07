@@ -14,9 +14,13 @@ interface PageHeroProps {
   introText: string;
   breadcrumbs: BreadcrumbItem[];
   heroImage?: string | null;
+  heroImageAlt?: string;
 }
 
-export default function PageHero({ h1, introText, breadcrumbs, heroImage }: PageHeroProps) {
+export default function PageHero({ h1, introText, breadcrumbs, heroImage, heroImageAlt }: PageHeroProps) {
+  // Generate descriptive alt text from h1 if not provided
+  const altText = heroImageAlt || `${h1} - Maryland Brewery Directory`;
+  
   return (
     <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
       {/* Hero Image Background */}
@@ -25,13 +29,13 @@ export default function PageHero({ h1, introText, breadcrumbs, heroImage }: Page
           {heroImage.startsWith('http') ? (
             <img 
               src={heroImage} 
-              alt=""
+              alt={altText}
               className="w-full h-full object-cover"
             />
           ) : (
             <Image
               src={heroImage}
-              alt=""
+              alt={altText}
               fill
               className="object-cover"
               sizes="100vw"

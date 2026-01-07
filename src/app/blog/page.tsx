@@ -8,6 +8,18 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/blog',
   },
+  openGraph: {
+    title: 'Blog - Coming Soon | Maryland Brewery Directory',
+    description: 'The Maryland Brewery Directory blog is coming soon. Stay tuned for brewery news, craft beer guides, and stories from Maryland\'s thriving beer scene.',
+    url: 'https://www.marylandbrewery.com/blog',
+    siteName: 'Maryland Brewery Directory',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Blog - Coming Soon | Maryland Brewery Directory',
+    description: 'The Maryland Brewery Directory blog is coming soon. Stay tuned for brewery news, craft beer guides, and stories from Maryland\'s thriving beer scene.',
+  },
 };
 
 export default function BlogPage() {

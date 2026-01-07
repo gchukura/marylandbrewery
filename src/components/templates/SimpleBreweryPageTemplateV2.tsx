@@ -35,7 +35,7 @@ import {
   Beer,
   Shirt
 } from 'lucide-react';
-import { Brewery, Beer as BeerType, Article, Membership, BreweryArticle } from '@/types/brewery';
+import { Brewery, Beer as BeerType, Article, Membership, BreweryArticle, COMMON_AMENITIES } from '@/types/brewery';
 import { BreadcrumbItem, RelatedPage } from '@/types/seo';
 import GoogleMap from '../maps/GoogleMap';
 import BreweryReviews from '../brewery/BreweryReviews';
@@ -360,14 +360,105 @@ export default function SimpleBreweryPageTemplateV2({
   // Helper function to get amenity icon
   const getAmenityIcon = (amenity: string) => {
     const lowerAmenity = amenity.toLowerCase();
-    if (lowerAmenity.includes('dog') || lowerAmenity.includes('pet')) return <Dog className="h-4 w-4" />;
-    if (lowerAmenity.includes('wifi') || lowerAmenity.includes('internet')) return <Wifi className="h-4 w-4" />;
-    if (lowerAmenity.includes('food') || lowerAmenity.includes('kitchen')) return <Utensils className="h-4 w-4" />;
-    if (lowerAmenity.includes('music') || lowerAmenity.includes('live')) return <Music className="h-4 w-4" />;
-    if (lowerAmenity.includes('parking')) return <Car className="h-4 w-4" />;
-    if (lowerAmenity.includes('merchandise') || lowerAmenity.includes('shop')) return <ShoppingBag className="h-4 w-4" />;
-    if (lowerAmenity.includes('truck') || lowerAmenity.includes('food truck')) return <Truck className="h-4 w-4" />;
-    return <CheckCircle className="h-4 w-4" />;
+    if (lowerAmenity.includes('dog') || lowerAmenity.includes('pet')) return <Dog className="h-4 w-4 text-red-600" />;
+    if (lowerAmenity.includes('wifi') || lowerAmenity.includes('internet')) return <Wifi className="h-4 w-4 text-red-600" />;
+    if (lowerAmenity.includes('food') || lowerAmenity.includes('kitchen')) return <Utensils className="h-4 w-4 text-red-600" />;
+    if (lowerAmenity.includes('music') || lowerAmenity.includes('live')) return <Music className="h-4 w-4 text-red-600" />;
+    if (lowerAmenity.includes('parking')) return <Car className="h-4 w-4 text-red-600" />;
+    if (lowerAmenity.includes('merchandise') || lowerAmenity.includes('shop')) return <ShoppingBag className="h-4 w-4 text-red-600" />;
+    if (lowerAmenity.includes('truck') || lowerAmenity.includes('food truck')) return <Truck className="h-4 w-4 text-red-600" />;
+    if (lowerAmenity.includes('visitor') || lowerAmenity.includes('allows')) return <Users className="h-4 w-4 text-red-600" />;
+    if (lowerAmenity.includes('tour')) return <Map className="h-4 w-4 text-red-600" />;
+    if (lowerAmenity.includes('beer to go') || lowerAmenity.includes('beer-to-go')) return <ShoppingBag className="h-4 w-4 text-red-600" />;
+    if (lowerAmenity.includes('outdoor') || lowerAmenity.includes('patio')) return <Utensils className="h-4 w-4 text-red-600" />;
+    if (lowerAmenity.includes('drink') && !lowerAmenity.includes('beer')) return <Coffee className="h-4 w-4 text-red-600" />;
+    return <CheckCircle className="h-4 w-4 text-red-600" />;
+  };
+
+  // Helper function to check if brewery has a specific amenity
+  const hasAmenity = (amenityName: string): boolean => {
+    const lowerName = amenityName.toLowerCase();
+    
+    // Check amenities array
+    if (brewery.amenities && brewery.amenities.some(a => a.toLowerCase() === lowerName)) {
+      return true;
+    }
+    
+    // Check boolean fields and special cases
+    if (lowerName === 'allows visitors' || lowerName === 'visitors welcome') {
+      return brewery.allowsVisitors === true;
+    }
+    if (lowerName === 'tours') {
+      return brewery.offersTours === true;
+    }
+    if (lowerName === 'beer to go') {
+      return brewery.beerToGo === true;
+    }
+    if (lowerName === 'merchandise') {
+      return brewery.hasMerch === true;
+    }
+    if (lowerName === 'parking') {
+      return brewery.parking === true || brewery.parking === 'yes';
+    }
+    if (lowerName === 'pet friendly' || lowerName === 'dog friendly') {
+      return brewery.dogFriendly === true;
+    }
+    if (lowerName === 'outdoor seating') {
+      return brewery.outdoorSeating === true;
+    }
+    if (lowerName === 'other drinks') {
+      return brewery.otherDrinks === true || brewery.otherDrinks === 'yes';
+    }
+    if (lowerName.includes('food')) {
+      return !!brewery.food;
+    }
+    
+    return false;
+  };
+
+  // Helper function to build all amenities list (available and unavailable)
+  const buildAllAmenitiesList = () => {
+    // Start with COMMON_AMENITIES
+    const allAmenities = [...COMMON_AMENITIES];
+    
+    // Add additional amenities that might not be in COMMON_AMENITIES
+    const additionalAmenities = [
+      'Allows Visitors',
+      'Beer To Go',
+      'Other Drinks',
+      'Full Kitchen',
+      'In-House Kitchen'
+    ];
+    
+    // Combine and deduplicate
+    const combined = [...allAmenities];
+    additionalAmenities.forEach(amenity => {
+      if (!combined.some(a => a.toLowerCase() === amenity.toLowerCase())) {
+        combined.push(amenity);
+      }
+    });
+    
+    // Also add any amenities from the brewery's amenities array that aren't in the list
+    if (brewery.amenities) {
+      brewery.amenities.forEach(amenity => {
+        if (!combined.some(a => a.toLowerCase() === amenity.toLowerCase())) {
+          combined.push(amenity);
+        }
+      });
+    }
+    
+    // Sort alphabetically
+    combined.sort((a, b) => a.localeCompare(b));
+    
+    return combined.map(amenity => {
+      const hasIt = hasAmenity(amenity);
+      const slug = amenity.toLowerCase().replace(/\s+/g, '-');
+      return {
+        name: amenity,
+        url: `/amenities/${slug}`,
+        hasIt
+      };
+    });
   };
 
   return (
@@ -478,26 +569,63 @@ export default function SimpleBreweryPageTemplateV2({
                 <div className="text-gray-600 text-lg">
                   {brewery.city}, {brewery.state}
                 </div>
-                {brewery.googleRating && (
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-5 w-5 ${
-                            i < Math.round(brewery.googleRating!)
-                              ? 'fill-yellow-400 text-yellow-400'
-                              : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
+                {(() => {
+                  // Calculate the rating to display - use combined average if both Google and Yelp exist
+                  const hasGoogle = brewery.googleRating && brewery.googleRating > 0 && brewery.googleRatingCount && brewery.googleRatingCount > 0;
+                  const hasYelp = (brewery as any).yelpRating && (brewery as any).yelpRating > 0 && (brewery as any).yelpRatingCount && (brewery as any).yelpRatingCount > 0;
+                  
+                  let displayRating: number | null = null;
+                  let totalReviewCount = 0;
+                  
+                  if (hasGoogle && hasYelp) {
+                    // Calculate combined weighted average to match about content
+                    const totalReviews = brewery.googleRatingCount! + (brewery as any).yelpRatingCount!;
+                    displayRating = (brewery.googleRating! * brewery.googleRatingCount! + (brewery as any).yelpRating! * (brewery as any).yelpRatingCount!) / totalReviews;
+                    totalReviewCount = totalReviews;
+                  } else if (hasGoogle) {
+                    displayRating = brewery.googleRating!;
+                    totalReviewCount = (brewery as any).actualReviewCount || brewery.googleRatingCount || 0;
+                  } else if (hasYelp) {
+                    displayRating = (brewery as any).yelpRating!;
+                    totalReviewCount = (brewery as any).yelpRatingCount || 0;
+                  }
+                  
+                  if (!displayRating) return null;
+                  
+                  return (
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => {
+                          const fullStars = Math.floor(displayRating!);
+                          const hasHalfStar = displayRating! % 1 >= 0.25 && displayRating! % 1 < 0.75;
+                          const isFull = i < fullStars;
+                          const isHalf = i === fullStars && hasHalfStar;
+                          
+                          return (
+                            <div key={i} className="relative h-5 w-5 flex-shrink-0">
+                              {/* Base empty star */}
+                              <Star className="h-5 w-5 absolute text-gray-300" />
+                              {/* Full star overlay */}
+                              {isFull && (
+                                <Star className="h-5 w-5 absolute fill-yellow-400 text-yellow-400" />
+                              )}
+                              {/* Half star overlay */}
+                              {isHalf && (
+                                <div className="absolute overflow-hidden" style={{ width: '50%' }}>
+                                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <span className="text-lg font-semibold">{displayRating.toFixed(1)}</span>
+                      <span className="text-gray-500 text-sm">
+                        ({totalReviewCount})
+                      </span>
                     </div>
-                    <span className="text-lg font-semibold">{brewery.googleRating.toFixed(1)}</span>
-                    <span className="text-gray-500 text-sm">
-                      ({(brewery as any).actualReviewCount || brewery.googleRatingCount || 0})
-                    </span>
-                  </div>
-                )}
+                  );
+                })()}
                 {brewery.website && (
                   <div className="flex items-center gap-2 text-red-600 hover:text-red-700">
                     <Globe className="h-5 w-5" />
@@ -566,26 +694,6 @@ export default function SimpleBreweryPageTemplateV2({
                   ) : null;
                 })()}
               </section>
-
-              {/* Amenities Section - Bimmershops Style */}
-              {brewery.amenities && brewery.amenities.length > 0 && (
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold text-black mb-4">Amenities</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {brewery.amenities.map((amenity: string, index: number) => (
-                      <div key={index} className="flex items-center gap-2 text-gray-700">
-                        <CheckCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
-                        <Link 
-                          href={`/amenities/${amenity.toLowerCase().replace(/\s+/g, '-')}`}
-                          className="text-red-600 hover:text-red-800 hover:underline text-sm"
-                        >
-                          {amenity}
-                        </Link>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Beers Table */}
               {brewery.beers && brewery.beers.length > 0 && (
@@ -692,167 +800,36 @@ export default function SimpleBreweryPageTemplateV2({
                 </div>
               </div>
 
-                {/* Visitor Information */}
-                  {(brewery.allowsVisitors !== undefined || brewery.offersTours !== undefined || brewery.beerToGo !== undefined || brewery.hasMerch !== undefined || brewery.food || brewery.otherDrinks || brewery.parking || brewery.dogFriendly || brewery.outdoorSeating) && (
+                {/* Combined Amenities Section - All Amenities */}
+                {(() => {
+                  const allAmenities = buildAllAmenitiesList();
+                  if (allAmenities.length === 0) return null;
+                  
+                  return (
                     <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Visitor Information</h3>
+                      <h3 className="text-xl font-bold text-black mb-3">Amenities</h3>
                       <div className="space-y-2">
-                        {brewery.allowsVisitors !== undefined && (
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              {brewery.allowsVisitors ? (
-                                <Link 
-                                  href="/amenities/visitors-welcome"
-                                  className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                                >
-                                  Visitors Welcome
-                                </Link>
-                              ) : 'No Visitors'}
-                            </span>
-                          </div>
-                        )}
-                        {brewery.offersTours !== undefined && (
-                          <div className="flex items-center gap-2">
-                            <Map className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              {brewery.offersTours ? (
-                                <Link 
-                                  href="/amenities/tours"
-                                  className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                                >
-                                  Tours Available
-                                </Link>
-                              ) : 'No Tours'}
-                            </span>
-                          </div>
-                        )}
-                        {brewery.beerToGo !== undefined && (
-                          <div className="flex items-center gap-2">
-                            <ShoppingBag className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              {brewery.beerToGo ? (
-                                <Link 
-                                  href="/amenities/beer-to-go"
-                                  className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                                >
-                                  Beer To Go Available
-                                </Link>
-                              ) : 'No Beer To Go'}
-                            </span>
-                          </div>
-                        )}
-                        {brewery.hasMerch !== undefined && (
-                          <div className="flex items-center gap-2">
-                            <Shirt className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              {brewery.hasMerch ? (
-                                <Link 
-                                  href="/amenities/merchandise"
-                                  className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                                >
-                                  Merchandise Available
-                                </Link>
-                              ) : 'No Merchandise'}
-                            </span>
-                          </div>
-                        )}
-                        {brewery.food && (
-                          <div className="flex items-center gap-2">
-                            <Utensils className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              {brewery.food.split(',').map((foodItem: string, index: number) => {
-                                const foodItems = brewery.food?.split(',') || [];
-                                return (
-                                  <span key={index}>
-                                    <Link 
-                                      href={`/amenities/${foodItem.trim().toLowerCase().replace(/\s+/g, '-')}`}
-                                      className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                                    >
-                                      {foodItem.trim()}
-                                    </Link>
-                                    {index < foodItems.length - 1 && ', '}
-                                  </span>
-                                );
-                              })}
-                            </span>
-                          </div>
-                        )}
-                        {brewery.otherDrinks && (
-                          <div className="flex items-center gap-2">
-                            <Coffee className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              <Link 
-                                href="/amenities/other-drinks"
-                                className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                              >
-                                Other Drinks
-                              </Link>
-                            </span>
-                          </div>
-                        )}
-                        {brewery.parking && (
-                          <div className="flex items-center gap-2">
-                            <Car className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              <Link 
-                                href="/amenities/parking"
-                                className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                              >
-                                Parking
-                              </Link>
-                            </span>
-                          </div>
-                        )}
-                        {brewery.dogFriendly && (
-                          <div className="flex items-center gap-2">
-                            <Dog className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              <Link 
-                                href="/amenities/dog-friendly"
-                                className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                              >
-                                Dog Friendly
-                              </Link>
-                            </span>
-                          </div>
-                        )}
-                        {brewery.outdoorSeating && (
-                          <div className="flex items-center gap-2">
-                            <Utensils className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              <Link 
-                                href="/amenities/outdoor-seating"
-                                className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                              >
-                                Outdoor Seating
-                              </Link>
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Features/Amenities */}
-                  {brewery.amenities && brewery.amenities.length > 0 && (
-                    <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Features & Amenities</h3>
-                      <div className="space-y-2">
-                        {brewery.amenities.map((amenity: string, index: number) => (
+                        {allAmenities.map((amenity, index) => (
                           <div key={index} className="flex items-center gap-2">
-                            {getAmenityIcon(amenity)}
-                            <Link 
-                              href={`/amenities/${amenity.toLowerCase().replace(/\s+/g, '-')}`}
-                              className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                            >
-                              {amenity}
-                            </Link>
+                            {getAmenityIcon(amenity.name)}
+                            {amenity.hasIt ? (
+                              <Link 
+                                href={amenity.url}
+                                className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                              >
+                                {amenity.name}
+                              </Link>
+                            ) : (
+                              <span className="text-gray-400 font-medium">
+                                {amenity.name}
+                              </span>
+                            )}
                           </div>
                         ))}
                       </div>
                     </div>
-                  )}
+                  );
+                })()}
 
                   {/* Memberships */}
                   {brewery.memberships && brewery.memberships.length > 0 && (

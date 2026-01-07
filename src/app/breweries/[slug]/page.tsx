@@ -16,9 +16,19 @@ interface BreweryPageProps {
 export async function generateStaticParams() {
   const processed = await getProcessedBreweryData();
   
-  return processed.breweries.map((brewery) => ({
-    slug: (brewery as any).slug || brewery.id,
-  }));
+  return processed.breweries
+    .map((brewery) => ({
+      slug: (brewery as any).slug || brewery.id,
+    }))
+    .filter(({ slug }) => {
+      // Filter out invalid slugs (URLs, empty strings, etc.)
+      if (!slug || typeof slug !== 'string') return false;
+      // Reject slugs that look like URLs
+      if (slug.includes('www.') || slug.includes('http://') || slug.includes('https://')) return false;
+      // Reject slugs with invalid characters
+      if (slug.includes('//') || slug.startsWith('/') || slug.endsWith('/')) return false;
+      return true;
+    });
 }
 
 export async function generateMetadata({ params }: BreweryPageProps) {

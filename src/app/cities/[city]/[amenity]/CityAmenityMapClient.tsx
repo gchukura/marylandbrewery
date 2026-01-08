@@ -239,40 +239,74 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-4">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              
-              {getPaginationRange().map((page, idx) => (
-                typeof page === 'number' ? (
+            <div className="p-3 sm:p-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
+                <div className="text-xs sm:text-sm text-gray-600 order-2 sm:order-1 whitespace-nowrap">
+                  Page {currentPage} of {totalPages}
+                </div>
+                <div className="flex items-center gap-1.5 sm:gap-2 order-1 sm:order-2">
                   <button
-                    key={idx}
-                    onClick={() => handlePageChange(page)}
-                    className={`min-w-[40px] h-10 rounded-lg font-medium transition-colors ${
-                      currentPage === page
-                        ? 'bg-[#9B2335] text-white'
-                        : 'border border-gray-300 hover:bg-gray-50'
-                    }`}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="p-2.5 sm:p-2 border border-gray-300 rounded-lg hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation"
+                    aria-label="Previous page"
                   >
-                    {page}
+                    <ChevronLeft className="h-5 w-5 sm:h-4 sm:w-4" />
                   </button>
-                ) : (
-                  <span key={idx} className="px-2 text-gray-400">...</span>
-                )
-              ))}
-              
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
+                  
+                  {/* Page numbers - show fewer on mobile */}
+                  <div className="flex items-center gap-1">
+                    {(() => {
+                      const range = getPaginationRange();
+                      const getVisiblePages = () => {
+                        if (totalPages <= 3) {
+                          return Array.from({ length: totalPages }, (_, i) => i + 1);
+                        } else if (currentPage <= 2) {
+                          return [1, 2, 3];
+                        } else if (currentPage >= totalPages - 1) {
+                          return [totalPages - 2, totalPages - 1, totalPages];
+                        } else {
+                          return [currentPage - 1, currentPage, currentPage + 1];
+                        }
+                      };
+                      
+                      const mobilePages = getVisiblePages();
+                      
+                      return range.map((page, idx) => {
+                        if (typeof page !== 'number') {
+                          return <span key={idx} className="px-2 text-gray-400 hidden sm:inline">...</span>;
+                        }
+                        
+                        const isVisibleOnMobile = mobilePages.includes(page);
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => handlePageChange(page)}
+                            className={`px-3 sm:px-3 py-2 sm:py-1 text-sm border rounded-lg transition-colors min-h-[44px] sm:min-h-[36px] min-w-[44px] sm:min-w-[36px] flex items-center justify-center touch-manipulation ${
+                              isVisibleOnMobile ? 'flex' : 'hidden sm:flex'
+                            } ${
+                              currentPage === page
+                                ? 'bg-[#9B2335] text-white border-[#9B2335]'
+                                : 'border-gray-300 hover:bg-gray-100 active:bg-gray-200'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        );
+                      });
+                    })()}
+                  </div>
+                  
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="p-2.5 sm:p-2 border border-gray-300 rounded-lg hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation"
+                    aria-label="Next page"
+                  >
+                    <ChevronRight className="h-5 w-5 sm:h-4 sm:w-4" />
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>

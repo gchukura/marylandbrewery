@@ -38,7 +38,7 @@ export default function HeaderV2() {
             {/* Logo */}
             <Link 
               href="/" 
-              className="flex items-center gap-0 hover:opacity-90 transition-opacity min-h-[44px] min-w-[44px]"
+              className="flex items-center gap-0 hover:opacity-90 transition-opacity min-h-[44px] min-w-[44px] flex-shrink-0 max-w-[calc(100%-60px)]"
               aria-label="Maryland Brewery Directory Home"
             >
               {/* Logo Emblem */}
@@ -47,15 +47,16 @@ export default function HeaderV2() {
                 alt="Maryland Brewery"
                 width={112}
                 height={112}
-                className="h-16 w-16 sm:h-20 sm:w-20 md:h-28 md:w-28 object-contain flex-shrink-0"
+                className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-28 lg:w-28 object-contain flex-shrink-0"
                 priority
               />
               {/* Text Logo - using Source Sans 3 from design system */}
               <span 
-                className="text-white whitespace-nowrap text-base sm:text-lg md:text-xl font-semibold -ml-4 sm:-ml-6 hidden sm:inline"
+                className="text-white whitespace-nowrap text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold -ml-3 sm:-ml-4 md:-ml-6 overflow-hidden"
                 style={{ fontFamily: "'Source Sans 3', sans-serif" }}
               >
-                MarylandBrewery.com
+                <span className="hidden xs:inline">MarylandBrewery.com</span>
+                <span className="xs:hidden">MD Brewery</span>
               </span>
             </Link>
 

@@ -24,4 +24,95 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  /* Prevent horizontal scroll on mobile */
+  overflow-x: hidden;
+  /* Better touch scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent horizontal scroll */
+html {
+  overflow-x: hidden;
+}
+
+/* Safe area support for notched devices */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* Safe area utility classes */
+  .safe-top {
+    padding-top: max(0px, env(safe-area-inset-top));
+  }
+  
+  .safe-bottom {
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+  
+  .safe-left {
+    padding-left: max(0px, env(safe-area-inset-left));
+  }
+  
+  .safe-right {
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+  
+  /* Safe area for fixed/sticky elements */
+  header.safe-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+}
+
+/* Better touch targets on mobile */
+@media (max-width: 768px) {
+  a, button, input, select, textarea {
+    /* Ensure minimum 44x44px touch target */
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Larger tap targets for links in navigation */
+  nav a {
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  /* Improve form input sizes on mobile */
+  input, select, textarea {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+  
+  /* Better touch scrolling */
+  * {
+    -webkit-tap-highlight-color: rgba(155, 35, 53, 0.1);
+  }
+  
+  /* Optimize touch interactions */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+  }
+  
+  /* Prevent text selection on buttons */
+  button {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Ensure readable font sizes */
+  body {
+    font-size: 16px; /* Base font size for readability */
+    line-height: 1.6; /* Better line spacing on mobile */
+  }
+  
+  /* Better table handling on mobile */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
 }

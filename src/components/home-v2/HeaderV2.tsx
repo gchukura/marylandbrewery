@@ -35,10 +35,20 @@ export default function HeaderV2() {
       <header className="bg-[#9B2335] sticky top-0 z-50 safe-top">
         <div className="container mx-auto px-4 safe-left safe-right">
           <div className="flex items-center justify-between h-16 sm:h-20">
-            {/* Logo */}
+            {/* Mobile Menu Button - Left side on mobile */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-3 text-white hover:text-[#D4A017] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation -ml-2"
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+
+            {/* Logo - Centered on mobile, left-aligned on desktop */}
             <Link 
               href="/" 
-              className="flex items-center gap-0 hover:opacity-90 transition-opacity min-h-[44px] min-w-[44px] flex-shrink-0 max-w-[calc(100%-60px)]"
+              className="flex items-center gap-0 hover:opacity-90 transition-opacity min-h-[44px] min-w-[44px] flex-shrink-0 lg:flex-shrink-0 mx-auto lg:mx-0"
               aria-label="Maryland Brewery Directory Home"
             >
               {/* Logo Emblem */}
@@ -47,60 +57,53 @@ export default function HeaderV2() {
                 alt="Maryland Brewery"
                 width={112}
                 height={112}
-                className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-28 lg:w-28 object-contain flex-shrink-0"
+                className="h-16 w-16 sm:h-20 sm:w-20 lg:h-28 lg:w-28 object-contain flex-shrink-0"
                 priority
               />
-              {/* Text Logo - using Source Sans 3 from design system */}
+              {/* Text Logo - Hidden on mobile, shown on desktop */}
               <span 
-                className="text-white whitespace-nowrap text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold -ml-3 sm:-ml-4 md:-ml-6 overflow-hidden"
+                className="text-white whitespace-nowrap text-xl font-semibold -ml-6 hidden lg:inline"
                 style={{ fontFamily: "'Source Sans 3', sans-serif" }}
               >
-                <span className="hidden xs:inline">MarylandBrewery.com</span>
-                <span className="xs:hidden">MD Brewery</span>
+                MarylandBrewery.com
               </span>
             </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-6">
-            {NAVIGATION_ITEMS.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="text-white hover:text-white transition-colors py-2 font-medium text-sm"
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center space-x-6">
+              {NAVIGATION_ITEMS.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="text-white hover:text-white transition-colors py-2 font-medium text-sm"
+                  style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-3 text-white hover:text-[#D4A017] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
-              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={mobileMenuOpen}
-            >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+            {/* Spacer for mobile to balance hamburger menu */}
+            <div className="lg:hidden w-[44px]"></div>
           </div>
 
-          {/* Mobile Navigation */}
+          {/* Mobile Navigation - Full overlay like BIMMERSHOPS */}
           {mobileMenuOpen && (
             <>
               {/* Backdrop - click to close */}
               <div 
-                className="lg:hidden fixed inset-0 bg-black/50 z-40 top-20"
+                className="lg:hidden fixed inset-0 bg-black/50 z-40 top-16 sm:top-20"
                 onClick={() => setMobileMenuOpen(false)}
                 aria-hidden="true"
               />
-              <div className="lg:hidden py-4 border-t border-[#7A1C2A] relative z-50 bg-[#9B2335]">
-                <nav className="space-y-1" aria-label="Mobile navigation">
+              {/* Mobile menu panel - slides from left */}
+              <div className="lg:hidden fixed inset-y-0 left-0 top-16 sm:top-20 w-64 max-w-[85vw] bg-[#9B2335] shadow-xl z-50 overflow-y-auto">
+                <nav className="py-4" aria-label="Mobile navigation">
                   {NAVIGATION_ITEMS.map((item) => (
                     <Link
                       key={item.label}
                       href={item.href}
-                      className="block px-4 py-4 text-white hover:text-[#D4A017] hover:bg-[#7A1C2A]/30 active:bg-[#7A1C2A]/50 transition-colors font-medium min-h-[48px] flex items-center touch-manipulation"
+                      className="block px-6 py-4 text-white hover:text-[#D4A017] hover:bg-[#7A1C2A]/30 active:bg-[#7A1C2A]/50 transition-colors font-medium min-h-[48px] flex items-center touch-manipulation border-b border-[#7A1C2A]/30 last:border-b-0"
                       style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                       onClick={() => setMobileMenuOpen(false)}
                     >

@@ -37,15 +37,17 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
     a.name.replace(/\s+County$/i, '').localeCompare(b.name.replace(/\s+County$/i, ''))
   );
 
-  // Organize cities into columns (5 columns)
+  // Organize cities into columns (5 columns for desktop, 2 for mobile)
   // Reading order: down column 1, then down column 2, etc. (alphabetical progression)
+  // The CSS grid will automatically handle the responsive column count
   const citiesPerColumn = Math.ceil(sortedCities.length / 5);
   const cityColumns: CityData[][] = [];
   for (let i = 0; i < 5; i++) {
     cityColumns.push(sortedCities.slice(i * citiesPerColumn, (i + 1) * citiesPerColumn));
   }
 
-  // Organize counties into columns (5 columns)
+  // Organize counties into columns (5 columns for desktop, 2 for mobile)
+  // The CSS grid will automatically handle the responsive column count
   const countiesPerColumn = Math.ceil(sortedCounties.length / 5);
   const countyColumns: CountyData[][] = [];
   for (let i = 0; i < 5; i++) {
@@ -141,10 +143,10 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
           </div>
         </div>
 
-        {/* Tab Content - 5 columns with staggered animation */}
+        {/* Tab Content - 2 columns on mobile, more on larger screens */}
         <div className={`max-w-7xl mx-auto transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
           {activeTab === 'city' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-0">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 sm:gap-x-8 gap-y-0">
               {cityColumns.map((column, colIndex) => (
                 <div 
                   key={colIndex} 
@@ -175,7 +177,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-0">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 sm:gap-x-8 gap-y-0">
               {countyColumns.map((column, colIndex) => (
                 <div 
                   key={colIndex} 

@@ -82,8 +82,8 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Tabs - Bold, distinctive design */}
-        <div className="flex items-center justify-center gap-0 mb-12 max-w-4xl mx-auto">
-          <div className="relative flex bg-white/80 backdrop-blur-sm rounded-t-xl border-2 border-[#E8E6E1] shadow-lg overflow-hidden">
+        <div className="flex items-center justify-center gap-0 mb-8 sm:mb-12 max-w-4xl mx-auto px-2">
+          <div className="relative flex bg-white/80 backdrop-blur-sm rounded-t-xl border-2 border-[#E8E6E1] shadow-lg overflow-hidden w-full sm:w-auto">
             {/* Active tab indicator background */}
             <div 
               className={`absolute top-0 h-full bg-gradient-to-br from-[#9B2335] to-[#7A1C2A] transition-all duration-500 ease-out rounded-t-xl ${
@@ -93,7 +93,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
             
             <button
               onClick={() => setActiveTab('city')}
-              className={`relative z-10 py-5 px-10 text-center font-semibold transition-all duration-300 ${
+              className={`relative z-10 py-4 sm:py-5 px-4 sm:px-10 text-center font-semibold transition-all duration-300 flex-1 sm:flex-none min-h-[48px] sm:min-h-0 ${
                 activeTab === 'city'
                   ? 'text-white'
                   : 'text-[#6B6B6B] hover:text-[#1C1C1C]'
@@ -102,22 +102,23 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
                 fontFamily: "'Source Sans 3', sans-serif",
                 letterSpacing: '0.025em',
                 textTransform: 'uppercase',
-                fontSize: '0.875rem',
+                fontSize: '0.75rem sm:0.875rem',
               }}
             >
-              <span className="relative">
-                Breweries by City
+              <span className="relative inline-block w-full sm:w-auto">
+                <span className="hidden sm:inline">Breweries by City</span>
+                <span className="sm:hidden">By City</span>
                 {activeTab === 'city' && (
-                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#D4A017] animate-pulse" />
+                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#D4A017] animate-pulse" style={{ width: '100%' }} />
                 )}
               </span>
             </button>
             
-            <div className="w-px h-8 bg-[#E8E6E1] my-auto" />
+            <div className="w-px h-8 bg-[#E8E6E1] my-auto hidden sm:block" />
             
             <button
               onClick={() => setActiveTab('county')}
-              className={`relative z-10 py-5 px-10 text-center font-semibold transition-all duration-300 ${
+              className={`relative z-10 py-4 sm:py-5 px-4 sm:px-10 text-center font-semibold transition-all duration-300 flex-1 sm:flex-none min-h-[48px] sm:min-h-0 ${
                 activeTab === 'county'
                   ? 'text-white'
                   : 'text-[#6B6B6B] hover:text-[#1C1C1C]'
@@ -126,13 +127,14 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
                 fontFamily: "'Source Sans 3', sans-serif",
                 letterSpacing: '0.025em',
                 textTransform: 'uppercase',
-                fontSize: '0.875rem',
+                fontSize: '0.75rem sm:0.875rem',
               }}
             >
-              <span className="relative">
-                Breweries by County
+              <span className="relative inline-block w-full sm:w-auto">
+                <span className="hidden sm:inline">Breweries by County</span>
+                <span className="sm:hidden">By County</span>
                 {activeTab === 'county' && (
-                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#D4A017] animate-pulse" />
+                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#D4A017] animate-pulse" style={{ width: '100%' }} />
                 )}
               </span>
             </button>

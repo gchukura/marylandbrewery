@@ -228,58 +228,79 @@ export default function TypeBreweriesMapClient({ breweries, typeName, typeDefini
 
         {/* Pagination */}
         {filtered.length > itemsPerPage && (
-          <div className="p-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              Page {currentPage} of {totalPages}
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                aria-label="Previous page"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              
-              {/* Page numbers */}
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum: number;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-                  
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => goToPage(pageNum)}
-                      className={`px-3 py-1 text-sm border rounded-lg transition-colors ${
-                        currentPage === pageNum
-                          ? 'bg-red-600 text-white border-red-600'
-                          : 'border-gray-300 hover:bg-gray-100'
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
+          <div className="p-3 sm:p-4 border-t border-gray-200 bg-gray-50">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
+              <div className="text-xs sm:text-sm text-gray-600 order-2 sm:order-1 whitespace-nowrap">
+                Page {currentPage} of {totalPages}
               </div>
+              <div className="flex items-center gap-1.5 sm:gap-2 order-1 sm:order-2">
+                <button
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="p-2.5 sm:p-2 border border-gray-300 rounded-lg hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft className="h-5 w-5 sm:h-4 sm:w-4" />
+                </button>
+                
+                {/* Page numbers - show fewer on mobile */}
+                <div className="flex items-center gap-1">
+                  {(() => {
+                    const getVisiblePages = () => {
+                      if (totalPages <= 3) {
+                        return Array.from({ length: totalPages }, (_, i) => i + 1);
+                      } else if (currentPage <= 2) {
+                        return [1, 2, 3];
+                      } else if (currentPage >= totalPages - 1) {
+                        return [totalPages - 2, totalPages - 1, totalPages];
+                      } else {
+                        return [currentPage - 1, currentPage, currentPage + 1];
+                      }
+                    };
+                    
+                    const mobilePages = getVisiblePages();
+                    const desktopPages = (() => {
+                      if (totalPages <= 5) {
+                        return Array.from({ length: totalPages }, (_, i) => i + 1);
+                      } else if (currentPage <= 3) {
+                        return [1, 2, 3, 4, 5];
+                      } else if (currentPage >= totalPages - 2) {
+                        return [totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+                      } else {
+                        return [currentPage - 2, currentPage - 1, currentPage, currentPage + 1, currentPage + 2];
+                      }
+                    })();
+                    
+                    return desktopPages.map((pageNum) => {
+                      const isVisibleOnMobile = mobilePages.includes(pageNum);
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => goToPage(pageNum)}
+                          className={`px-3 sm:px-3 py-2 sm:py-1 text-sm border rounded-lg transition-colors min-h-[44px] sm:min-h-[36px] min-w-[44px] sm:min-w-[36px] flex items-center justify-center touch-manipulation ${
+                            isVisibleOnMobile ? 'flex' : 'hidden sm:flex'
+                          } ${
+                            currentPage === pageNum
+                              ? 'bg-[#9B2335] text-white border-[#9B2335]'
+                              : 'border-gray-300 hover:bg-gray-100 active:bg-gray-200'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    });
+                  })()}
+                </div>
 
-              <button
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                aria-label="Next page"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
+                <button
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="p-2.5 sm:p-2 border border-gray-300 rounded-lg hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation"
+                  aria-label="Next page"
+                >
+                  <ChevronRight className="h-5 w-5 sm:h-4 sm:w-4" />
+                </button>
+              </div>
             </div>
           </div>
         )}

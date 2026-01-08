@@ -527,16 +527,16 @@ export default function SimpleBreweryPageTemplate({
 
           {/* Breadcrumb Navigation - Bottom of hero image, to the right of logo */}
           {breadcrumbs && breadcrumbs.length > 0 && (
-            <div className="absolute bottom-4 left-[200px] lg:left-[220px] xl:left-[240px] z-10 max-w-[calc(100%-240px)]">
-              <nav className="flex items-center space-x-1 text-xs sm:text-sm flex-wrap">
+            <div className="absolute bottom-2 sm:bottom-4 left-4 sm:left-[200px] lg:left-[220px] xl:left-[240px] z-10 max-w-[calc(100%-2rem)] sm:max-w-[calc(100%-240px)]">
+              <nav className="flex items-center space-x-1 text-xs sm:text-sm flex-wrap gap-y-1">
                 {breadcrumbs.map((crumb, index) => (
-                  <div key={index} className="flex items-center">
+                  <div key={index} className="flex items-center min-h-[32px]">
                     {index > 0 && (
                       <ChevronRight className="h-3 w-3 text-white/90 mx-1 flex-shrink-0" />
                     )}
                     <Link
                       href={crumb.url}
-                      className={`font-medium px-2 py-1 rounded backdrop-blur-sm transition-all shadow-md whitespace-nowrap ${
+                      className={`font-medium px-2 py-1.5 sm:py-1 rounded backdrop-blur-sm transition-all shadow-md whitespace-nowrap min-h-[32px] flex items-center touch-manipulation ${
                         crumb.isActive
                           ? 'text-white bg-black/60'
                           : 'text-white/95 hover:text-white bg-black/50 hover:bg-black/70 underline hover:no-underline hover:font-semibold'
@@ -566,15 +566,15 @@ export default function SimpleBreweryPageTemplate({
             <div className="lg:col-span-7">
               {/* Business Name */}
               <h1 
-                className="text-4xl font-bold text-gray-900 mb-2"
+                className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 break-words"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
                 {brewery.name}
               </h1>
               
               {/* City, State, Rating, and Website Link on same line */}
-              <div className="mb-6 flex items-center gap-8 flex-wrap" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
-                <div className="text-gray-600 text-lg">
+              <div className="mb-6 flex items-center gap-4 sm:gap-8 flex-wrap" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                <div className="text-gray-600 text-base sm:text-lg">
                   {brewery.city}, {brewery.state}
                 </div>
                 {(() => {

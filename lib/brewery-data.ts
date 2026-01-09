@@ -29,7 +29,7 @@ export const getAllBreweryData = unstable_cache(
   ['brewery-data'], // Cache key
   {
     tags: ['brewery-data'],
-    revalidate: 60, // Revalidate every 60 seconds in development
+    revalidate: 3600, // Revalidate every hour (3600 seconds)
   }
 );
 
@@ -310,7 +310,7 @@ export const getProcessedBreweryData = unstable_cache(
   ['processed-brewery-data'], // Cache key
   {
     tags: ['brewery-data'],
-    revalidate: 60, // Revalidate every 60 seconds in development
+    revalidate: 3600, // Revalidate every hour (3600 seconds)
   }
 );
 
@@ -326,7 +326,7 @@ export const getBreweriesByCity = unstable_cache(
   ['breweries-by-city'],
   {
     tags: ['brewery-data'],
-    revalidate: 60,
+    revalidate: 3600,
   }
 );
 
@@ -342,7 +342,7 @@ export const getBreweriesByCounty = unstable_cache(
   ['breweries-by-county'],
   {
     tags: ['brewery-data'],
-    revalidate: 60,
+    revalidate: 3600,
   }
 );
 
@@ -358,7 +358,7 @@ export const getBreweriesByType = unstable_cache(
   ['breweries-by-type'],
   {
     tags: ['brewery-data'],
-    revalidate: 60,
+    revalidate: 3600,
   }
 );
 
@@ -374,7 +374,7 @@ export const getBreweriesByAmenity = unstable_cache(
   ['breweries-by-amenity'],
   {
     tags: ['brewery-data'],
-    revalidate: 60,
+    revalidate: 3600,
   }
 );
 
@@ -389,7 +389,7 @@ export const getAllCities = unstable_cache(
   ['all-cities'],
   {
     tags: ['brewery-data'],
-    revalidate: 60,
+    revalidate: 3600,
   }
 );
 
@@ -404,7 +404,7 @@ export const getAllCounties = unstable_cache(
   ['all-counties'],
   {
     tags: ['brewery-data'],
-    revalidate: 60,
+    revalidate: 3600,
   }
 );
 
@@ -419,7 +419,7 @@ export const getAllAmenities = unstable_cache(
   ['all-amenities'],
   {
     tags: ['brewery-data'],
-    revalidate: 60,
+    revalidate: 3600,
   }
 );
 
@@ -434,7 +434,7 @@ export const getAllTypes = unstable_cache(
   ['all-types'],
   {
     tags: ['brewery-data'],
-    revalidate: 60,
+    revalidate: 3600,
   }
 );
 
@@ -449,7 +449,7 @@ export const getSiteStatistics = unstable_cache(
   ['site-statistics'],
   {
     tags: ['brewery-data'],
-    revalidate: 60,
+    revalidate: 3600,
   }
 );
 
@@ -474,7 +474,7 @@ export const searchBreweries = unstable_cache(
   ['search-breweries'],
   {
     tags: ['brewery-data'],
-    revalidate: 60,
+    revalidate: 3600,
   }
 );
 
@@ -500,7 +500,7 @@ export const getNearbyBreweries = unstable_cache(
   ['nearby-breweries'],
   {
     tags: ['brewery-data'],
-    revalidate: 60,
+    revalidate: 3600,
   }
 );
 

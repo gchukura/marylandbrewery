@@ -33,7 +33,7 @@ export default function HeaderV2() {
   return (
     <>
       <header className="bg-[#9B2335] sticky top-0 z-50 safe-top">
-        <div className="container mx-auto px-4 safe-left safe-right">
+        <div className="container mx-auto px-4 safe-left safe-right relative">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Mobile Menu Button - Left side on mobile */}
             <button
@@ -51,18 +51,18 @@ export default function HeaderV2() {
               className="flex items-center gap-0 hover:opacity-90 transition-opacity min-h-[44px] min-w-[44px] flex-shrink-0 lg:flex-shrink-0 mx-auto lg:mx-0"
               aria-label="Maryland Brewery Directory Home"
             >
-              {/* Logo Emblem */}
+              {/* Logo Emblem - Bigger on mobile */}
               <Image
                 src="/logo-emblem.svg"
                 alt="Maryland Brewery"
                 width={112}
                 height={112}
-                className="h-16 w-16 sm:h-20 sm:w-20 lg:h-28 lg:w-28 object-contain flex-shrink-0"
+                className="h-20 w-20 sm:h-24 sm:w-24 lg:h-28 lg:w-28 object-contain flex-shrink-0"
                 priority
               />
-              {/* Text Logo - Hidden on mobile, shown on desktop */}
+              {/* Text Logo - Visible on mobile and desktop with responsive sizing */}
               <span 
-                className="text-white whitespace-nowrap text-xl font-semibold -ml-6 hidden lg:inline"
+                className="text-white whitespace-nowrap text-sm sm:text-base lg:text-xl font-semibold -ml-4 sm:-ml-5 lg:-ml-6"
                 style={{ fontFamily: "'Source Sans 3', sans-serif" }}
               >
                 MarylandBrewery.com
@@ -87,7 +87,7 @@ export default function HeaderV2() {
             <div className="lg:hidden w-[44px]"></div>
           </div>
 
-          {/* Mobile Navigation - Full overlay like BIMMERSHOPS */}
+          {/* Mobile Navigation - Dropdown menu in one column */}
           {mobileMenuOpen && (
             <>
               {/* Backdrop - click to close */}
@@ -96,9 +96,9 @@ export default function HeaderV2() {
                 onClick={() => setMobileMenuOpen(false)}
                 aria-hidden="true"
               />
-              {/* Mobile menu panel - slides from left */}
-              <div className="lg:hidden fixed inset-y-0 left-0 top-16 sm:top-20 w-64 max-w-[85vw] bg-[#9B2335] shadow-xl z-50 overflow-y-auto">
-                <nav className="py-4" aria-label="Mobile navigation">
+              {/* Mobile menu panel - dropdown, doesn't span full vertical space */}
+              <div className="lg:hidden absolute left-0 top-full w-full bg-[#9B2335] shadow-xl z-50 border-t border-[#7A1C2A]">
+                <nav className="py-2" aria-label="Mobile navigation">
                   {NAVIGATION_ITEMS.map((item) => (
                     <Link
                       key={item.label}

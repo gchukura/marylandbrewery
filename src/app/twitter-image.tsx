@@ -7,6 +7,7 @@ export const size = {
   height: 630,
 };
 export const contentType = 'image/png';
+// Note: Edge runtime doesn't support revalidate export, caching handled via Cache-Control headers
 
 export default async function Image() {
   return new ImageResponse(
@@ -322,6 +323,9 @@ export default async function Image() {
     ),
     {
       ...size,
+      headers: {
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=1800, immutable',
+      },
     }
   );
 }

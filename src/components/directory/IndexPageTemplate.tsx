@@ -27,6 +27,7 @@ interface IndexPageTemplateProps {
   h1: string;
   introText: string;
   breadcrumbs: Array<{ name: string; url: string; isActive?: boolean }>;
+  heroImage?: string | null;
   
   // Data
   items: IndexItem[];
@@ -35,7 +36,7 @@ interface IndexPageTemplateProps {
   allBreweries?: any[]; // For map display
   
   // Configuration
-  pageType: 'city' | 'county' | 'amenity' | 'type';
+  pageType: 'city' | 'county' | 'amenity' | 'type' | 'region';
   showMap?: boolean;
   showStats?: boolean;
   mapZoom?: number;
@@ -45,6 +46,7 @@ export default function IndexPageTemplate({
   h1,
   introText,
   breadcrumbs,
+  heroImage,
   items,
   stats,
   groupedItems,
@@ -60,7 +62,7 @@ export default function IndexPageTemplate({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 1. Hero Section */}
-      <PageHero h1={h1} introText={introText} breadcrumbs={breadcrumbs} />
+      <PageHero h1={h1} introText={introText} breadcrumbs={breadcrumbs} heroImage={heroImage} />
 
       {/* 2. Stats Bar */}
       {showStats && stats.length > 0 && (

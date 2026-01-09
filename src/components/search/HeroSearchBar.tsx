@@ -81,7 +81,7 @@ export default function HeroSearchBar() {
           window.location.href = `/breweries/${(item as any).slug || item.id}`;
         } else if (item.type === 'city') {
           saveRecent(item.name);
-          window.location.href = `/city/${item.name.toLowerCase().replace(/\s+/g, '-')}/breweries`;
+                    window.location.href = `/cities/${item.name.toLowerCase().replace(/\s+/g, '-')}/breweries`;
         } else if (item.type === 'amenity') {
           saveRecent(item.name);
           window.location.href = `/breweries/${item.name.toLowerCase().replace(/\s+/g, '-')}`;
@@ -161,7 +161,7 @@ export default function HeroSearchBar() {
                     window.location.href = `/breweries/${(item as any).slug || item.id}`;
                   } else if (item.type === 'city') {
                     saveRecent(item.name);
-                    window.location.href = `/city/${item.name.toLowerCase().replace(/\s+/g, '-')}/breweries`;
+                    window.location.href = `/cities/${item.name.toLowerCase().replace(/\s+/g, '-')}/breweries`;
                   } else if (item.type === 'amenity') {
                     saveRecent(item.name);
                     window.location.href = `/breweries/${item.name.toLowerCase().replace(/\s+/g, '-')}`;

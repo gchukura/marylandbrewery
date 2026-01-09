@@ -616,3 +616,150 @@ export function generateTypeContentBlocks(
     { title: `What Makes ${type.charAt(0).toUpperCase() + type.slice(1)} Special`, content: block3Content }
   ];
 }
+
+/**
+ * Generate type-specific "What to Expect" content for brewery detail pages
+ */
+export function generateWhatToExpect(brewery: {
+  name: string;
+  type?: string | string[];
+  food?: string;
+  otherDrinks?: string;
+  offersTours?: boolean;
+  allowsVisitors?: boolean;
+  beerToGo?: boolean;
+  hours?: Record<string, string>;
+  amenities?: string[];
+}): string {
+  const typeStr = Array.isArray(brewery.type) 
+    ? brewery.type[0]?.toLowerCase() 
+    : brewery.type?.toLowerCase() || 'brewery';
+  
+  let content = '';
+  
+  if (typeStr.includes('brewpub')) {
+    content = `As a brewpub, ${brewery.name} combines craft beer with a full dining experience. `;
+    if (brewery.food) {
+      content += `The kitchen serves ${brewery.food.toLowerCase()}, `;
+    }
+    content += `making it perfect for a complete meal paired with house-brewed beers.`;
+    if (brewery.otherDrinks) {
+      content += ` Non-beer drinkers can enjoy ${brewery.otherDrinks.toLowerCase()}.`;
+    }
+    
+  } else if (typeStr.includes('taproom')) {
+    content = `The taproom at ${brewery.name} focuses on the beer experience. `;
+    if (brewery.food) {
+      content += `${brewery.food} is available on-site`;
+    } else {
+      content += `Food trucks often visit`;
+    }
+    content += `, but the star of the show is their craft beer selection.`;
+    if (brewery.offersTours) {
+      content += ` Tours are available for those interested in seeing the brewing process.`;
+    }
+    
+  } else if (typeStr.includes('micro')) {
+    content = `${brewery.name} produces small-batch craft beers with an emphasis on quality and creativity. `;
+    if (brewery.allowsVisitors) {
+      content += `Visitors can sample their latest creations in the taproom`;
+    }
+    if (brewery.beerToGo) {
+      content += `, and take favorites home via growlers or cans.`;
+    } else {
+      content += `.`;
+    }
+    
+  } else if (typeStr.includes('nano')) {
+    content = `As a nano brewery, ${brewery.name} produces ultra-small batches, making each visit unique. `;
+    content += `Availability is limited and beers rotate frequently—call ahead to confirm what's on tap.`;
+    
+  } else if (typeStr.includes('production') || typeStr.includes('regional')) {
+    content = `${brewery.name} is a production brewery crafting beer at scale while maintaining quality. `;
+    if (brewery.allowsVisitors) {
+      content += `Their taproom welcomes visitors to sample the full lineup.`;
+    }
+    if (brewery.offersTours) {
+      content += ` Brewery tours offer a behind-the-scenes look at the operation.`;
+    }
+    
+  } else {
+    // Default/generic
+    content = `${brewery.name} welcomes visitors to experience their craft beer offerings. `;
+    if (brewery.amenities && brewery.amenities.length > 0) {
+      const topAmenities = brewery.amenities.slice(0, 3).join(', ').toLowerCase();
+      content += `The space features ${topAmenities}.`;
+    }
+  }
+  
+  return content;
+}
+
+/**
+ * Generate atmosphere/vibe content for brewery detail pages
+ */
+export function generateAtmosphere(brewery: {
+  name: string;
+  amenities?: string[];
+  outdoorSeating?: boolean;
+}): string | null {
+  if (!brewery.amenities || brewery.amenities.length === 0) {
+    return null;
+  }
+  
+  const amenitiesLower = brewery.amenities.map(a => a.toLowerCase());
+  
+  const hasGames = amenitiesLower.some(a => 
+    a.includes('game') || a.includes('cornhole') || a.includes('dart') || a.includes('pool')
+  );
+  const hasMusic = amenitiesLower.some(a => a.includes('music'));
+  const isFamily = amenitiesLower.some(a => a.includes('family'));
+  const isDate = amenitiesLower.some(a => a.includes('date'));
+  const hasFirePit = amenitiesLower.some(a => a.includes('fire pit'));
+  const hasBeerGarden = amenitiesLower.some(a => a.includes('beer garden') || a.includes('patio'));
+  
+  // Only generate if we have relevant amenities
+  if (!hasGames && !hasMusic && !isFamily && !isDate && !brewery.outdoorSeating) {
+    return null;
+  }
+  
+  let content = '';
+  
+  // Audience type
+  if (isFamily && isDate) {
+    content += `${brewery.name} is versatile enough for family outings and date nights alike. `;
+  } else if (isFamily) {
+    content += `A family-friendly destination where all ages are welcome. `;
+  } else if (isDate) {
+    content += `The relaxed atmosphere makes ${brewery.name} a great spot for date night. `;
+  }
+  
+  // Games
+  if (hasGames) {
+    const games: string[] = [];
+    if (amenitiesLower.some(a => a.includes('cornhole'))) games.push('cornhole');
+    if (amenitiesLower.some(a => a.includes('dart'))) games.push('darts');
+    if (amenitiesLower.some(a => a.includes('pool'))) games.push('pool');
+    if (amenitiesLower.some(a => a === 'games')) games.push('board games');
+    
+    if (games.length > 0) {
+      content += `Games are available, including ${games.join(', ')}. `;
+    }
+  }
+  
+  // Music
+  if (hasMusic) {
+    content += `Live music is featured regularly—follow them on social media for upcoming shows. `;
+  }
+  
+  // Outdoor
+  if (brewery.outdoorSeating || hasBeerGarden) {
+    content += `The outdoor seating area is popular during warmer months`;
+    if (hasFirePit) {
+      content += `, and a fire pit keeps things cozy when it cools down`;
+    }
+    content += `. `;
+  }
+  
+  return content.trim() || null;
+}

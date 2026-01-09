@@ -1,0 +1,46 @@
+═══════════════════════════════════════════════════════
+📈 GOOGLE REVIEWS THEME ANALYSIS
+Generated: 1/1/2026, 2:59:49 AM
+═══════════════════════════════════════════════════════
+
+Total reviews analyzed: 949
+Average rating: 4.64 stars
+
+═══════════════════════════════════════════════════════
+TOP 5 COMMON THEMES
+═══════════════════════════════════════════════════════
+
+1. Beer Quality & Selection
+   Mentioned in 823 reviews (86.7%)
+   Average rating when mentioned: 4.7 stars
+   Example: "We had our wedding at Attaboy Barrel House and absolutely loved it. The vibe of the venue was exactly what we were looki..."
+
+2. Food & Menu
+   Mentioned in 759 reviews (80.0%)
+   Average rating when mentioned: 4.7 stars
+   Example: "We had our wedding at Attaboy Barrel House and absolutely loved it. The vibe of the venue was exactly what we were looki..."
+
+3. Service & Staff
+   Mentioned in 558 reviews (58.8%)
+   Average rating when mentioned: 4.7 stars
+   Example: "We had our wedding at Attaboy Barrel House and absolutely loved it. The vibe of the venue was exactly what we were looki..."
+
+4. Atmosphere & Ambiance
+   Mentioned in 551 reviews (58.1%)
+   Average rating when mentioned: 4.7 stars
+   Example: "We had our wedding at Attaboy Barrel House and absolutely loved it. The vibe of the venue was exactly what we were looki..."
+
+5. Outdoor Seating & Space
+   Mentioned in 239 reviews (25.2%)
+   Average rating when mentioned: 4.7 stars
+   Example: "We had our wedding here this past weekend and it could not have been a more perfect place! Not only is the space itself..."
+
+═══════════════════════════════════════════════════════
+RATING DISTRIBUTION
+═══════════════════════════════════════════════════════
+
+5 stars:  749 ( 78.9%) ███████████████████████████████████████
+4 stars:  121 ( 12.8%) ██████
+3 stars:   40 (  4.2%) ██
+2 stars:   20 (  2.1%) █
+1 stars:   19 (  2.0%) █

@@ -174,16 +174,16 @@ export default function ProgrammaticPageTemplate({
                 {breadcrumbs.map((crumb, index) => (
                   <li key={index} className="flex items-center">
                     {index > 0 && <ChevronRight className="h-4 w-4 mx-2" />}
-                    {crumb.isActive ? (
-                      <span className="text-yellow-300 font-medium">{crumb.name}</span>
-                    ) : (
-                      <a
-                        href={crumb.url}
-                        className="text-yellow-200 hover:text-white transition-colors"
-                      >
-                        {crumb.name}
-                      </a>
-                    )}
+                    <a
+                      href={crumb.url}
+                      className={`transition-colors ${
+                        crumb.isActive
+                          ? 'text-yellow-300 font-medium'
+                          : 'text-yellow-200 hover:text-white'
+                      }`}
+                    >
+                      {crumb.name}
+                    </a>
                   </li>
                 ))}
               </ol>

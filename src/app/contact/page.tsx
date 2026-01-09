@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export default function ContactPage() {
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Contact', url: '/contact', isActive: true },
   ];
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -54,33 +54,61 @@ export default function ContactPage() {
         h1="Contact Us"
         introText="Have a question or suggestion? Send us a note and we'll get back to you. Help us keep Maryland's craft brewery directory accurate and comprehensive."
         breadcrumbs={breadcrumbs}
+        heroImage="/cities-hero.jpg"
       />
       
       <div className="max-w-2xl mx-auto px-4 py-12">
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1 text-gray-800">Name</label>
-          <input name="name" type="text" required className="w-full border rounded px-3 py-2 text-gray-900" />
+          <label htmlFor="name" className="block text-sm font-medium mb-2 text-gray-800">Name</label>
+          <input 
+            id="name"
+            name="name" 
+            type="text" 
+            required 
+            autoComplete="name"
+            className="w-full border border-gray-300 rounded-md px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9B2335] focus:border-transparent min-h-[48px]" 
+          />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1 text-gray-800">Email</label>
-          <input name="email" type="email" required className="w-full border rounded px-3 py-2 text-gray-900" />
+          <label htmlFor="email" className="block text-sm font-medium mb-2 text-gray-800">Email</label>
+          <input 
+            id="email"
+            name="email" 
+            type="email" 
+            required 
+            autoComplete="email"
+            inputMode="email"
+            className="w-full border border-gray-300 rounded-md px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9B2335] focus:border-transparent min-h-[48px]" 
+          />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1 text-gray-800">Subject</label>
-          <input name="subject" type="text" className="w-full border rounded px-3 py-2 text-gray-900" />
+          <label htmlFor="subject" className="block text-sm font-medium mb-2 text-gray-800">Subject</label>
+          <input 
+            id="subject"
+            name="subject" 
+            type="text" 
+            autoComplete="off"
+            className="w-full border border-gray-300 rounded-md px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9B2335] focus:border-transparent min-h-[48px]" 
+          />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1 text-gray-800">Message</label>
-          <textarea name="message" rows={6} required className="w-full border rounded px-3 py-2 text-gray-900" />
+          <label htmlFor="message" className="block text-sm font-medium mb-2 text-gray-800">Message</label>
+          <textarea 
+            id="message"
+            name="message" 
+            rows={6} 
+            required 
+            className="w-full border border-gray-300 rounded-md px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9B2335] focus:border-transparent resize-y" 
+          />
         </div>
         <button
           type="submit"
-          className="bg-red-600 text-white font-semibold px-5 py-2 rounded hover:bg-red-700 transition"
+          className="bg-[#9B2335] text-white font-semibold px-6 py-3 rounded-md hover:bg-[#7A1C2A] active:bg-[#6A1623] transition-colors min-h-[48px] touch-manipulation w-full sm:w-auto"
           disabled={status === "loading"}
         >
-          {status === "loading" ? "Sending..." : "Send"}
+          {status === "loading" ? "Sending..." : "Send Message"}
         </button>
 
         {status === "success" && <p className="text-green-700 font-medium mt-2">{message}</p>}
@@ -95,7 +123,7 @@ export default function ContactPage() {
             <div className="font-semibold text-gray-900">Interactive Map</div>
             <div className="text-sm text-gray-600 mt-1">Find breweries near you</div>
           </Link>
-          <Link href="/city" className="bg-white rounded-lg p-4 border border-gray-200 hover:border-red-500 hover:shadow-md transition-all">
+          <Link href="/cities" className="bg-white rounded-lg p-4 border border-gray-200 hover:border-red-500 hover:shadow-md transition-all">
             <div className="font-semibold text-gray-900">Browse by City</div>
             <div className="text-sm text-gray-600 mt-1">Explore all cities</div>
           </Link>

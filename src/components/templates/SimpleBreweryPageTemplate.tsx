@@ -6,10 +6,12 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import BreweryLogo from '@/components/brewery/BreweryLogo';
+import BreweryPhotoGallery from '@/components/brewery/BreweryPhotoGallery';
 import { 
   MapPin, 
   Phone, 
@@ -33,10 +35,69 @@ import {
   Beer,
   Shirt
 } from 'lucide-react';
-import { Brewery, Beer as BeerType, Article, Membership } from '@/types/brewery';
+import { Brewery, Beer as BeerType, Article, Membership, BreweryArticle, COMMON_AMENITIES } from '@/types/brewery';
 import { BreadcrumbItem, RelatedPage } from '@/types/seo';
 import GoogleMap from '../maps/GoogleMap';
 import BreweryReviews from '../brewery/BreweryReviews';
+import BreweryArticles from '../brewery/BreweryArticles';
+
+/**
+ * Format hours string to ensure consistent AM/PM and HH:MM format
+ * Example: "2:00 – 9:00 PM" -> "02:00 PM – 09:00 PM"
+ */
+function formatHoursString(hoursString: string): string {
+  if (!hoursString || hoursString.toLowerCase() === 'closed') {
+    return 'Closed';
+  }
+
+  // Match time ranges with various separators (hyphen, en dash, em dash)
+  const match = hoursString.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?\s*[–—-]\s*(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  
+  if (!match) {
+    return hoursString; // Return as-is if we can't parse it
+  }
+
+  const [, openHour, openMin, openAmPm, closeHour, closeMin, closeAmPm] = match;
+
+  // Parse hours as numbers
+  const openHourNum = parseInt(openHour, 10);
+  const closeHourNum = parseInt(closeHour, 10);
+  
+  // Determine AM/PM for open time
+  let openAmPmFinal = openAmPm?.toUpperCase() || '';
+  if (!openAmPmFinal && closeAmPm) {
+    // If open doesn't have AM/PM but close does, infer it
+    const closeAmPmUpper = closeAmPm.toUpperCase();
+    if (openHourNum < closeHourNum || (closeAmPmUpper === 'PM' && openHourNum >= 12)) {
+      openAmPmFinal = closeAmPmUpper;
+    } else {
+      openAmPmFinal = 'AM';
+    }
+  } else if (!openAmPmFinal) {
+    // If neither has AM/PM, infer from hour value
+    openAmPmFinal = openHourNum < 12 ? 'AM' : 'PM';
+  }
+  
+  // Determine AM/PM for close time
+  let closeAmPmFinal = closeAmPm?.toUpperCase() || '';
+  if (!closeAmPmFinal && openAmPmFinal) {
+    // If close doesn't have AM/PM but open does, infer it
+    if (closeHourNum < openHourNum || (openAmPmFinal === 'AM' && closeHourNum >= 12)) {
+      closeAmPmFinal = 'PM';
+    } else {
+      closeAmPmFinal = openAmPmFinal;
+    }
+  } else if (!closeAmPmFinal) {
+    // If neither has AM/PM, infer from hour value
+    closeAmPmFinal = closeHourNum < 12 ? 'AM' : 'PM';
+  }
+
+  // Format to HH:MM with 2-digit hours
+  const formattedOpen = `${openHourNum.toString().padStart(2, '0')}:${openMin} ${openAmPmFinal}`;
+  const formattedClose = `${closeHourNum.toString().padStart(2, '0')}:${closeMin} ${closeAmPmFinal}`;
+
+  return `${formattedOpen} – ${formattedClose}`;
+}
 
 // Social Media Icons - SVG data URLs for platform logos
 const SOCIAL_MEDIA_ICONS = {
@@ -78,7 +139,32 @@ interface SimpleBreweryPageTemplateProps {
   
   // Navigation
   breadcrumbs: BreadcrumbItem[];
+  
+  // Generated content
+  aboutContent?: string;
   relatedPages: RelatedPage[];
+  
+  // Reviews (fetched server-side)
+  reviews?: any[];
+  totalReviews?: number;
+  
+  // News articles
+  articles?: BreweryArticle[];
+  
+  // Computed values for enhanced features
+  computed?: {
+    isOpenNow: boolean;
+    closingTime: string | null;
+    nextOpenDay: string | null;
+    nextOpenTime: string | null;
+    currentDay: string;
+    currentDayIndex: number;
+    cityAverageRating: number;
+    stateAverageRating: number;
+    sameCityCount: number;
+    sameCountyCount: number;
+    sameCityBreweries: Brewery[];
+  };
 }
 
 // Simple utility functions (no hooks)
@@ -133,11 +219,20 @@ export default function SimpleBreweryPageTemplate({
   metaDescription,
   breadcrumbs,
   relatedPages,
+  computed,
+  aboutContent,
+  articles,
+  reviews = [],
+  totalReviews = 0,
 }: SimpleBreweryPageTemplateProps) {
   
-  const breweryStatus = getBreweryStatus(brewery);
-  const isOpen = isOpenNow(brewery);
-  const currentDay = getCurrentDay();
+  // Use computed values if available, otherwise fall back to utility functions
+  const isOpen = computed?.isOpenNow ?? isOpenNow(brewery);
+  const currentDay = computed?.currentDay ?? getCurrentDay();
+  const breweryStatus = {
+    status: isOpen ? 'Open Now' : 'Closed',
+    color: isOpen ? 'text-green-600' : 'text-red-600'
+  };
 
   // Generate structured data for individual brewery
   const generateStructuredData = () => {
@@ -201,20 +296,170 @@ export default function SimpleBreweryPageTemplate({
       }
     }
 
+    // Add aggregate rating if available (for rich snippets with star ratings)
+    if (brewery.googleRating && brewery.googleRating > 0) {
+      structuredData.aggregateRating = {
+        '@type': 'AggregateRating',
+        ratingValue: brewery.googleRating,
+        reviewCount: brewery.googleRatingCount || 1,
+        bestRating: 5,
+        worstRating: 1,
+      };
+    }
+
+    // Add opening hours specification for "Open Now" rich snippets
+    if (brewery.hours) {
+      const dayMapping: Record<string, string> = {
+        sunday: 'Sunday',
+        monday: 'Monday',
+        tuesday: 'Tuesday',
+        wednesday: 'Wednesday',
+        thursday: 'Thursday',
+        friday: 'Friday',
+        saturday: 'Saturday',
+      };
+
+      const openingHoursSpec = Object.entries(brewery.hours)
+        .filter(([_, hours]) => hours && hours.toLowerCase() !== 'closed' && hours.trim())
+        .map(([day, hours]) => {
+          // Parse hours like "11:00 AM – 9:00 PM" or "2:00 – 9:00 PM"
+          const match = hours.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?\s*[–—-]\s*(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+          if (!match) return null;
+
+          const [, openHour, openMin, openAmPm, closeHour, closeMin, closeAmPm] = match;
+          
+          // Convert to 24-hour format for schema
+          let openHour24 = parseInt(openHour, 10);
+          let closeHour24 = parseInt(closeHour, 10);
+          
+          const openPeriod = (openAmPm || closeAmPm || 'PM').toUpperCase();
+          const closePeriod = (closeAmPm || 'PM').toUpperCase();
+          
+          if (openPeriod === 'PM' && openHour24 !== 12) openHour24 += 12;
+          if (openPeriod === 'AM' && openHour24 === 12) openHour24 = 0;
+          if (closePeriod === 'PM' && closeHour24 !== 12) closeHour24 += 12;
+          if (closePeriod === 'AM' && closeHour24 === 12) closeHour24 = 0;
+
+          return {
+            '@type': 'OpeningHoursSpecification',
+            dayOfWeek: dayMapping[day] || day,
+            opens: `${openHour24.toString().padStart(2, '0')}:${openMin}`,
+            closes: `${closeHour24.toString().padStart(2, '0')}:${closeMin}`,
+          };
+        })
+        .filter(Boolean);
+
+      if (openingHoursSpec.length > 0) {
+        structuredData.openingHoursSpecification = openingHoursSpec;
+      }
+    }
+
     return structuredData;
   };
 
   // Helper function to get amenity icon
   const getAmenityIcon = (amenity: string) => {
     const lowerAmenity = amenity.toLowerCase();
-    if (lowerAmenity.includes('dog') || lowerAmenity.includes('pet')) return <Dog className="h-4 w-4" />;
-    if (lowerAmenity.includes('wifi') || lowerAmenity.includes('internet')) return <Wifi className="h-4 w-4" />;
-    if (lowerAmenity.includes('food') || lowerAmenity.includes('kitchen')) return <Utensils className="h-4 w-4" />;
-    if (lowerAmenity.includes('music') || lowerAmenity.includes('live')) return <Music className="h-4 w-4" />;
-    if (lowerAmenity.includes('parking')) return <Car className="h-4 w-4" />;
-    if (lowerAmenity.includes('merchandise') || lowerAmenity.includes('shop')) return <ShoppingBag className="h-4 w-4" />;
-    if (lowerAmenity.includes('truck') || lowerAmenity.includes('food truck')) return <Truck className="h-4 w-4" />;
-    return <CheckCircle className="h-4 w-4" />;
+    if (lowerAmenity.includes('dog') || lowerAmenity.includes('pet')) return <Dog className="h-4 w-4 text-[#9B2335]" />;
+    if (lowerAmenity.includes('wifi') || lowerAmenity.includes('internet')) return <Wifi className="h-4 w-4 text-[#9B2335]" />;
+    if (lowerAmenity.includes('food') || lowerAmenity.includes('kitchen')) return <Utensils className="h-4 w-4 text-[#9B2335]" />;
+    if (lowerAmenity.includes('music') || lowerAmenity.includes('live')) return <Music className="h-4 w-4 text-[#9B2335]" />;
+    if (lowerAmenity.includes('parking')) return <Car className="h-4 w-4 text-[#9B2335]" />;
+    if (lowerAmenity.includes('merchandise') || lowerAmenity.includes('shop')) return <ShoppingBag className="h-4 w-4 text-[#9B2335]" />;
+    if (lowerAmenity.includes('truck') || lowerAmenity.includes('food truck')) return <Truck className="h-4 w-4 text-[#9B2335]" />;
+    if (lowerAmenity.includes('visitor') || lowerAmenity.includes('allows')) return <Users className="h-4 w-4 text-[#9B2335]" />;
+    if (lowerAmenity.includes('tour')) return <Map className="h-4 w-4 text-[#9B2335]" />;
+    if (lowerAmenity.includes('beer to go') || lowerAmenity.includes('beer-to-go')) return <ShoppingBag className="h-4 w-4 text-[#9B2335]" />;
+    if (lowerAmenity.includes('outdoor') || lowerAmenity.includes('patio')) return <Utensils className="h-4 w-4 text-[#9B2335]" />;
+    if (lowerAmenity.includes('drink') && !lowerAmenity.includes('beer')) return <Coffee className="h-4 w-4 text-[#9B2335]" />;
+    return <CheckCircle className="h-4 w-4 text-[#9B2335]" />;
+  };
+
+  // Helper function to check if brewery has a specific amenity
+  const hasAmenity = (amenityName: string): boolean => {
+    const lowerName = amenityName.toLowerCase();
+    
+    // Check amenities array
+    if (brewery.amenities && brewery.amenities.some(a => a.toLowerCase() === lowerName)) {
+      return true;
+    }
+    
+    // Check boolean fields and special cases
+    if (lowerName === 'allows visitors' || lowerName === 'visitors welcome') {
+      return brewery.allowsVisitors === true;
+    }
+    if (lowerName === 'tours') {
+      return brewery.offersTours === true;
+    }
+    if (lowerName === 'beer to go') {
+      return brewery.beerToGo === true;
+    }
+    if (lowerName === 'merchandise') {
+      return brewery.hasMerch === true;
+    }
+    if (lowerName === 'parking') {
+      return !!brewery.parking && brewery.parking.toLowerCase() === 'yes';
+    }
+    if (lowerName === 'pet friendly' || lowerName === 'dog friendly') {
+      return brewery.dogFriendly === true;
+    }
+    if (lowerName === 'outdoor seating') {
+      return brewery.outdoorSeating === true;
+    }
+    if (lowerName === 'other drinks') {
+      return !!brewery.otherDrinks && brewery.otherDrinks.toLowerCase() === 'yes';
+    }
+    if (lowerName.includes('food')) {
+      return !!brewery.food;
+    }
+    
+    return false;
+  };
+
+  // Helper function to build all amenities list (limited to database columns)
+  const buildAllAmenitiesList = () => {
+    // Only show amenities that correspond to actual database columns
+    // Based on: allows_visitors, offers_tours, beer_to_go, has_merch, dog_friendly,
+    // outdoor_seating, food, other_drinks, parking, and the amenities array
+    const databaseAmenities = [
+      'Allows Visitors',
+      'Tours',
+      'Beer To Go',
+      'Merchandise',
+      'Pet Friendly',
+      'Outdoor Seating',
+      'Parking',
+      'Other Drinks',
+      // Food-related - will be handled separately based on food column value
+      'Food',
+      'Food Trucks',
+      'Full Kitchen'
+    ];
+    
+    // Start with database column amenities
+    const combined = [...databaseAmenities];
+    
+    // Add any amenities from the brewery's amenities array that aren't already in the list
+    if (brewery.amenities) {
+      brewery.amenities.forEach(amenity => {
+        if (!combined.some(a => a.toLowerCase() === amenity.toLowerCase())) {
+          combined.push(amenity);
+        }
+      });
+    }
+    
+    // Sort alphabetically
+    combined.sort((a, b) => a.localeCompare(b));
+    
+    return combined.map(amenity => {
+      const hasIt = hasAmenity(amenity);
+      const slug = amenity.toLowerCase().replace(/\s+/g, '-');
+      return {
+        name: amenity,
+        url: `/amenities/${slug}`,
+        hasIt
+      };
+    });
   };
 
   return (
@@ -230,152 +475,297 @@ export default function SimpleBreweryPageTemplate({
       />
 
       <div className="min-h-screen bg-white">
-        {/* Colorado Brewery List Style Header */}
-        <div className="bg-white">
-          <div className="max-w-6xl mx-auto px-4 py-8">
-
-                {/* Brewery Name and Logo */}
-                <div className="mb-8">
-                  <div className="flex items-center gap-6 mb-6">
-                    {brewery.logo && (
-                      <BreweryLogo 
-                        logo={brewery.logo} 
-                        breweryName={brewery.name}
-                        size="lg"
+        {/* Hero Photo Section with Overlapping Logo */}
+        <div className="relative w-full mb-16">
+          {(() => {
+            // Use first photo from photos array (local) if available, otherwise fall back to photoUrl
+            // This avoids external API calls for the hero image
+            const heroImage = brewery.photos && brewery.photos.length > 0 
+              ? brewery.photos[0] 
+              : brewery.photoUrl;
+            
+            return (
+              <div className="relative w-full py-12 md:py-16">
+                {heroImage ? (
+                  <div className="absolute inset-0">
+                    {heroImage.startsWith('http') ? (
+                      <img 
+                        src={heroImage} 
+                        alt={`${brewery.name} exterior`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Image
+                        src={heroImage}
+                        alt={`${brewery.name} exterior`}
+                        fill
+                        className="object-cover"
+                        sizes="100vw"
+                        priority
                       />
                     )}
-                    <h1 className="text-4xl font-bold text-gray-900">{brewery.name}</h1>
+                    {/* Optional overlay gradient for better text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                   </div>
-                </div>
-          </div>
-        </div>
-
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          {/* Interactive Map */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-black mb-4">Map</h2>
-            <div className="bg-gray-100 rounded-lg p-4">
-              <div className="h-96 rounded-lg mb-4 overflow-hidden">
-                <GoogleMap 
-                  breweries={[brewery]} 
-                  height="100%" 
-                  center={{ lat: brewery.latitude, lng: brewery.longitude }}
-                  zoom={15}
-                  showClusters={false}
-                  autoOpenPopup={true}
+                ) : null}
+              </div>
+            );
+          })()}
+          
+          {/* Logo overlapping into header (Bimmershops style) */}
+          {brewery.logo && (
+            <div className={`absolute ${brewery.photoUrl ? 'bottom-0' : 'top-0'} left-4 lg:left-8 transform ${brewery.photoUrl ? 'translate-y-1/2' : 'translate-y-0'} z-10`}>
+              <div className="bg-white p-2 rounded-lg shadow-lg flex items-center justify-center h-[176px] w-[176px]">
+                <BreweryLogo 
+                  logo={brewery.logo} 
+                  breweryName={brewery.name}
+                  size="xl"
                 />
               </div>
-              <div className="text-center">
-                <a
-                  href={`https://maps.google.com/?q=${brewery.latitude},${brewery.longitude}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-                >
-                  Get Directions
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Description */}
-          {brewery.description && (
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-black mb-4">Description</h2>
-              <p className="text-gray-700 leading-relaxed text-lg">{brewery.description}</p>
             </div>
           )}
 
-          {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Beers Table */}
-            <div>
-              <h2 className="text-2xl font-bold text-black mb-4">Beers Brewed</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="bg-red-600 text-white">
-                      <th className="text-left py-3 px-4 font-bold">Name</th>
-                      <th className="text-left py-3 px-4 font-bold">Style</th>
-                      <th className="text-left py-3 px-4 font-bold">ABV</th>
-                      <th className="text-left py-3 px-4 font-bold">Availability</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {/* Beer data from Google Sheets - brewery.beers array */}
-                    {brewery.beers && brewery.beers.length > 0 ? (
-                      brewery.beers.map((beer: BeerType, index: number) => (
-                        <tr key={index} className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-yellow-50' : 'bg-white'}`}>
-                          <td className="py-3 px-4 font-semibold text-gray-900">{beer.name}</td>
-                          <td className="py-3 px-4 text-gray-700">{beer.style}</td>
-                          <td className="py-3 px-4 text-gray-700">{formatABV(beer.abv)}</td>
-                          <td className="py-3 px-4 text-gray-700">{beer.availability}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={4} className="py-8 px-4 text-center text-gray-500">
-                          No beer information available
-                        </td>
-                      </tr>
+          {/* Breadcrumb Navigation - Bottom of hero image, to the right of logo */}
+          {breadcrumbs && breadcrumbs.length > 0 && (
+            <div className="absolute bottom-2 sm:bottom-4 left-4 sm:left-[200px] lg:left-[220px] xl:left-[240px] z-10 max-w-[calc(100%-2rem)] sm:max-w-[calc(100%-240px)]">
+              <nav className="flex items-center space-x-1 text-xs sm:text-sm flex-wrap gap-y-1">
+                {breadcrumbs.map((crumb, index) => (
+                  <div key={index} className="flex items-center min-h-[32px]">
+                    {index > 0 && (
+                      <ChevronRight className="h-3 w-3 text-white/90 mx-1 flex-shrink-0" />
                     )}
-                  </tbody>
-                </table>
+                    <Link
+                      href={crumb.url}
+                      className={`font-medium px-2 py-1.5 sm:py-1 rounded backdrop-blur-sm transition-all shadow-md whitespace-nowrap min-h-[32px] flex items-center touch-manipulation ${
+                        crumb.isActive
+                          ? 'text-white bg-black/60'
+                          : 'text-white/95 hover:text-white bg-black/50 hover:bg-black/70 underline hover:no-underline hover:font-semibold'
+                      }`}
+                    >
+                      {crumb.name}
+                    </Link>
+                  </div>
+                ))}
+              </nav>
+            </div>
+          )}
+        </div>
+
+        {/* Main Content Area - Bimmershops Style Layout */}
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          {/* Three Column Layout: Left Sidebar | Main Content | Right Sidebar */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left Sidebar - Empty (logo overlaps into header) */}
+            <div className="lg:col-span-2">
+              <div className="sticky top-8">
+                {/* Left sidebar is intentionally empty - logo overlaps from hero section */}
               </div>
             </div>
 
-            {/* Right Column - Structured Information */}
-            <div className="space-y-6">
-              {/* Address */}
-              <div>
-                <h3 className="text-xl font-bold text-black mb-3">Address</h3>
-                <div className="text-gray-700">
-                  {brewery.street}<br />
-                  <Link 
-                    href={`/city/${brewery.city.toLowerCase().replace(/\s+/g, '-')}/breweries`}
-                    className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                  >
-                    {brewery.city}
-                  </Link>, {brewery.state} {brewery.zip}
+            {/* Main Content - Center Column */}
+            <div className="lg:col-span-7">
+              {/* Business Name */}
+              <h1 
+                className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 break-words"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              >
+                {brewery.name}
+              </h1>
+              
+              {/* City, State, Rating, and Website Link on same line */}
+              <div className="mb-6 flex items-center gap-4 sm:gap-8 flex-wrap" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                <div className="text-gray-600 text-base sm:text-lg">
+                  {brewery.city}, {brewery.state}
                 </div>
+                {(() => {
+                  // Calculate the rating to display - use combined average if both Google and Yelp exist
+                  const hasGoogle = brewery.googleRating && brewery.googleRating > 0 && brewery.googleRatingCount && brewery.googleRatingCount > 0;
+                  const hasYelp = (brewery as any).yelpRating && (brewery as any).yelpRating > 0 && (brewery as any).yelpRatingCount && (brewery as any).yelpRatingCount > 0;
+                  
+                  let displayRating: number | null = null;
+                  let totalReviewCount = 0;
+                  
+                  if (hasGoogle && hasYelp) {
+                    // Calculate combined weighted average to match about content
+                    const totalReviews = brewery.googleRatingCount! + (brewery as any).yelpRatingCount!;
+                    displayRating = (brewery.googleRating! * brewery.googleRatingCount! + (brewery as any).yelpRating! * (brewery as any).yelpRatingCount!) / totalReviews;
+                    totalReviewCount = totalReviews;
+                  } else if (hasGoogle) {
+                    displayRating = brewery.googleRating!;
+                    totalReviewCount = (brewery as any).actualReviewCount || brewery.googleRatingCount || 0;
+                  } else if (hasYelp) {
+                    displayRating = (brewery as any).yelpRating!;
+                    totalReviewCount = (brewery as any).yelpRatingCount || 0;
+                  }
+                  
+                  if (!displayRating) return null;
+                  
+                  return (
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => {
+                          const fullStars = Math.floor(displayRating!);
+                          const hasHalfStar = displayRating! % 1 >= 0.25 && displayRating! % 1 < 0.75;
+                          const isFull = i < fullStars;
+                          const isHalf = i === fullStars && hasHalfStar;
+                          
+                          return (
+                            <div key={i} className="relative h-5 w-5 flex-shrink-0">
+                              {/* Base empty star */}
+                              <Star className="h-5 w-5 absolute text-gray-300" />
+                              {/* Full star overlay */}
+                              {isFull && (
+                                <Star className="h-5 w-5 absolute fill-[#D4A017] text-[#D4A017]" />
+                              )}
+                              {/* Half star overlay */}
+                              {isHalf && (
+                                <div className="absolute overflow-hidden" style={{ width: '50%' }}>
+                                  <Star className="h-5 w-5 fill-[#D4A017] text-[#D4A017]" />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <span className="text-lg font-semibold" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{displayRating.toFixed(1)}</span>
+                      <span className="text-gray-500 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                        ({totalReviewCount})
+                      </span>
+                    </div>
+                  );
+                })()}
+                {brewery.website && (
+                  <div className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
+                    <Globe className="h-5 w-5" />
+                    <a
+                      href={brewery.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-lg font-medium hover:underline"
+                      style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                    >
+                      Visit our Website
+                    </a>
+                  </div>
+                )}
               </div>
+              
+              {/* Dividing line between brewery name section and about section */}
+              <div className="border-t border-gray-300 mb-8"></div>
+              
+              {/* About Section - Enhanced */}
+              <section className="mb-8">
+                <h2 
+                  className="text-2xl font-bold text-black mb-4"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  About Brewery
+                </h2>
+                
+                {/* Primary Description - Generated from review themes */}
+                {aboutContent ? (
+                  <p className="text-gray-700 mb-4 leading-relaxed text-lg" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{aboutContent}</p>
+                ) : brewery.description ? (
+                  <p className="text-gray-700 mb-4 leading-relaxed text-lg" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{brewery.description}</p>
+                ) : (
+                  <p className="text-gray-700 mb-4 leading-relaxed text-lg" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                    {brewery.name} is a {Array.isArray(brewery.type) ? brewery.type.join(' and ').toLowerCase() : (brewery.type || 'brewery').toLowerCase()} located in {brewery.city}, {brewery.county} County, Maryland.
+                    {brewery.amenities && brewery.amenities.length > 0 && (
+                      <> Featuring {brewery.amenities.slice(0, 3).join(', ').toLowerCase()}, this local brewery welcomes craft beer enthusiasts.</>
+                    )}
+                  </p>
+                )}
+                
+                {/* Awards - If available */}
+                {brewery.awards && brewery.awards.length > 0 && (
+                  <>
+                    <h3 
+                      className="text-xl font-semibold text-gray-900 mt-6 mb-3"
+                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    >
+                      Awards & Recognition
+                    </h3>
+                    <ul className="list-disc list-inside text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                      {brewery.awards.map((award, index) => (
+                        <li key={index}>{award}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                
+                {/* Photo Gallery - Bimmershops Style */}
+                {brewery.photos && brewery.photos.length > 0 && (() => {
+                  // The hero image (photoUrl) is the first photo from Google Places API,
+                  // which corresponds to the first photo in the photos array (/photos/{breweryId}-1.jpg).
+                  // Exclude the first photo from the gallery to avoid duplication.
+                  const galleryPhotos = brewery.photos
+                    .filter(photo => !!photo)
+                    .slice(1) // Skip the first photo (index 0) which is the hero image
+                    .slice(0, 9); // Limit to 9 photos (all same size in 3x3 grid)
+                  
+                  return galleryPhotos.length > 0 ? (
+                    <div className="mt-8">
+                      <BreweryPhotoGallery 
+                        photos={galleryPhotos} 
+                        breweryName={brewery.name}
+                      />
+                    </div>
+                  ) : null;
+                })()}
+              </section>
 
-              {/* Contact Information */}
-              {(brewery.phone || brewery.website) && (
-                <div>
-                  <h3 className="text-xl font-bold text-black mb-3">Contact</h3>
-                  <div className="space-y-2">
-                    {brewery.phone && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-red-600" />
-                        <a href={`tel:${brewery.phone}`} className="text-gray-700 hover:text-red-600">
-                          {brewery.phone}
-                        </a>
-                      </div>
-                    )}
-                    {brewery.website && (
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-red-600" />
-                        <a href={brewery.website} target="_blank" rel="noopener noreferrer" className="text-gray-700 hover:text-red-600">
-                          Website
-                        </a>
-                      </div>
-                    )}
+              {/* Beers Table */}
+              {brewery.beers && brewery.beers.length > 0 && (
+                <div className="mb-8">
+                  <h2 
+                    className="text-2xl font-bold text-black mb-4"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Beers Brewed
+                  </h2>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-[#9B2335] text-white" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                          <th className="text-left py-3 px-4 font-bold">Name</th>
+                          <th className="text-left py-3 px-4 font-bold">Style</th>
+                          <th className="text-left py-3 px-4 font-bold">ABV</th>
+                          <th className="text-left py-3 px-4 font-bold">Availability</th>
+                        </tr>
+                      </thead>
+                      <tbody style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                        {brewery.beers.map((beer: BeerType, index: number) => (
+                          <tr key={index} className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-[#FAF9F6]' : 'bg-white'}`}>
+                            <td className="py-3 px-4 font-semibold text-gray-900">{beer.name}</td>
+                            <td className="py-3 px-4 text-gray-700">{beer.style}</td>
+                            <td className="py-3 px-4 text-gray-700">{formatABV(beer.abv)}</td>
+                            <td className="py-3 px-4 text-gray-700">{beer.availability}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
 
+              {/* Additional Information Sections */}
+              <div className="space-y-6">
               {/* Brewery Type */}
               {brewery.type && (
                 <div>
-                  <h3 className="text-xl font-bold text-black mb-3">Brewery Type</h3>
-                  <div className="text-gray-700">
+                  <h3 
+                    className="text-xl font-bold text-black mb-3"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Brewery Type
+                  </h3>
+                  <div className="text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                     {Array.isArray(brewery.type) 
                       ? brewery.type.map((type: string, index: number) => (
                           <span key={index}>
                             <Link 
                               href={`/type/${type.toLowerCase().replace(/\s+/g, '-')}`}
-                              className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                              className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
                             >
                               {type}
                             </Link>
@@ -385,7 +775,7 @@ export default function SimpleBreweryPageTemplate({
                       : (
                           <Link 
                             href={`/type/${brewery.type.toLowerCase().replace(/\s+/g, '-')}`}
-                            className="text-red-600 hover:text-red-800 hover:underline font-medium"
+                            className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
                           >
                             {brewery.type}
                           </Link>
@@ -397,10 +787,15 @@ export default function SimpleBreweryPageTemplate({
               {/* Links to Articles */}
               {brewery.articles && brewery.articles.length > 0 && (
                 <div>
-                  <h3 className="text-xl font-bold text-black mb-3">Articles</h3>
-                  <div className="space-y-2">
+                  <h3 
+                    className="text-xl font-bold text-black mb-3"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Articles
+                  </h3>
+                  <div className="space-y-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                     {brewery.articles.map((article: Article, index: number) => (
-                      <a key={index} href={article.url} target="_blank" rel="noopener noreferrer" className="block text-red-600 hover:text-red-700">
+                      <a key={index} href={article.url} target="_blank" rel="noopener noreferrer" className="block text-[#9B2335] hover:text-[#7A1C2A]">
                         {article.title}
                       </a>
                     ))}
@@ -410,28 +805,33 @@ export default function SimpleBreweryPageTemplate({
 
               {/* Social Media */}
               <div>
-                <h3 className="text-xl font-bold text-black mb-3">Social Media</h3>
-                <div className="space-y-2">
+                <h3 
+                  className="text-xl font-bold text-black mb-3"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  Social Media
+                </h3>
+                <div className="space-y-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                   {brewery.socialMedia?.facebook && (
-                    <a href={brewery.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-red-600 hover:text-red-700">
+                    <a href={brewery.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
                       <img src={getSocialMediaIcon('facebook')} alt={`${brewery.name} on Facebook`} className="h-4 w-4" />
                       Facebook
                     </a>
                   )}
                   {brewery.socialMedia?.twitter && (
-                    <a href={brewery.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-red-600 hover:text-red-700">
+                    <a href={brewery.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
                       <img src={getSocialMediaIcon('twitter')} alt={`${brewery.name} on Twitter`} className="h-4 w-4" />
                       Twitter
                     </a>
                   )}
                   {brewery.socialMedia?.instagram && (
-                    <a href={brewery.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-red-600 hover:text-red-700">
+                    <a href={brewery.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
                       <img src={getSocialMediaIcon('instagram')} alt={`${brewery.name} on Instagram`} className="h-4 w-4" />
                       Instagram
                     </a>
                   )}
                   {brewery.socialMedia?.untappd && (
-                    <a href={brewery.socialMedia.untappd} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-red-600 hover:text-red-700">
+                    <a href={brewery.socialMedia.untappd} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
                       <img src={getSocialMediaIcon('untappd')} alt={`${brewery.name} on Untappd`} className="h-4 w-4" />
                       Untappd
                     </a>
@@ -439,188 +839,51 @@ export default function SimpleBreweryPageTemplate({
                 </div>
               </div>
 
-              {/* Hours */}
-              {brewery.hours && (
-                <div>
-                  <h3 className="text-xl font-bold text-black mb-3">Hours</h3>
-                  <div className="space-y-1">
-                    {Object.entries(brewery.hours).map(([day, hours]) => (
-                      <div key={day} className="flex">
-                        <span className="font-medium text-gray-900 w-20">{day.charAt(0).toUpperCase() + day.slice(1)}</span>
-                        <span className="text-gray-700 ml-4">{hours ? hours : 'Closed'}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-
-                  {/* Visitor Information */}
-                  {(brewery.allowsVisitors !== undefined || brewery.offersTours !== undefined || brewery.beerToGo !== undefined || brewery.hasMerch !== undefined || brewery.food || brewery.otherDrinks || brewery.parking || brewery.dogFriendly || brewery.outdoorSeating) && (
+                {/* Combined Amenities Section - All Amenities */}
+                {(() => {
+                  const allAmenities = buildAllAmenitiesList();
+                  if (allAmenities.length === 0) return null;
+                  
+                  return (
                     <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Visitor Information</h3>
-                      <div className="space-y-2">
-                        {brewery.allowsVisitors !== undefined && (
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              {brewery.allowsVisitors ? (
-                                <Link 
-                                  href="/amenities/visitors-welcome"
-                                  className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                                >
-                                  Visitors Welcome
-                                </Link>
-                              ) : 'No Visitors'}
-                            </span>
-                          </div>
-                        )}
-                        {brewery.offersTours !== undefined && (
-                          <div className="flex items-center gap-2">
-                            <Map className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              {brewery.offersTours ? (
-                                <Link 
-                                  href="/amenities/tours"
-                                  className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                                >
-                                  Tours Available
-                                </Link>
-                              ) : 'No Tours'}
-                            </span>
-                          </div>
-                        )}
-                        {brewery.beerToGo !== undefined && (
-                          <div className="flex items-center gap-2">
-                            <ShoppingBag className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              {brewery.beerToGo ? (
-                                <Link 
-                                  href="/amenities/beer-to-go"
-                                  className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                                >
-                                  Beer To Go Available
-                                </Link>
-                              ) : 'No Beer To Go'}
-                            </span>
-                          </div>
-                        )}
-                        {brewery.hasMerch !== undefined && (
-                          <div className="flex items-center gap-2">
-                            <Shirt className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              {brewery.hasMerch ? (
-                                <Link 
-                                  href="/amenities/merchandise"
-                                  className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                                >
-                                  Merchandise Available
-                                </Link>
-                              ) : 'No Merchandise'}
-                            </span>
-                          </div>
-                        )}
-                        {brewery.food && (
-                          <div className="flex items-center gap-2">
-                            <Utensils className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              {brewery.food.split(',').map((foodItem: string, index: number) => {
-                                const foodItems = brewery.food?.split(',') || [];
-                                return (
-                                  <span key={index}>
-                                    <Link 
-                                      href={`/amenities/${foodItem.trim().toLowerCase().replace(/\s+/g, '-')}`}
-                                      className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                                    >
-                                      {foodItem.trim()}
-                                    </Link>
-                                    {index < foodItems.length - 1 && ', '}
-                                  </span>
-                                );
-                              })}
-                            </span>
-                          </div>
-                        )}
-                        {brewery.otherDrinks && (
-                          <div className="flex items-center gap-2">
-                            <Coffee className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              <Link 
-                                href="/amenities/other-drinks"
-                                className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                              >
-                                Other Drinks
-                              </Link>
-                            </span>
-                          </div>
-                        )}
-                        {brewery.parking && (
-                          <div className="flex items-center gap-2">
-                            <Car className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              <Link 
-                                href="/amenities/parking"
-                                className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                              >
-                                Parking
-                              </Link>
-                            </span>
-                          </div>
-                        )}
-                        {brewery.dogFriendly && (
-                          <div className="flex items-center gap-2">
-                            <Dog className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              <Link 
-                                href="/amenities/dog-friendly"
-                                className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                              >
-                                Dog Friendly
-                              </Link>
-                            </span>
-                          </div>
-                        )}
-                        {brewery.outdoorSeating && (
-                          <div className="flex items-center gap-2">
-                            <Utensils className="h-4 w-4 text-red-600" />
-                            <span className="text-gray-700">
-                              <Link 
-                                href="/amenities/outdoor-seating"
-                                className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                              >
-                                Outdoor Seating
-                              </Link>
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Features/Amenities */}
-                  {brewery.amenities && brewery.amenities.length > 0 && (
-                    <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Features & Amenities</h3>
-                      <div className="space-y-2">
-                        {brewery.amenities.map((amenity: string, index: number) => (
+                      <h3 
+                        className="text-xl font-bold text-black mb-3"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Amenities
+                      </h3>
+                      <div className="space-y-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                        {allAmenities.map((amenity, index) => (
                           <div key={index} className="flex items-center gap-2">
-                            {getAmenityIcon(amenity)}
-                            <Link 
-                              href={`/amenities/${amenity.toLowerCase().replace(/\s+/g, '-')}`}
-                              className="text-red-600 hover:text-red-800 hover:underline font-medium"
-                            >
-                              {amenity}
-                            </Link>
+                            {getAmenityIcon(amenity.name)}
+                            {amenity.hasIt ? (
+                              <Link 
+                                href={amenity.url}
+                                className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
+                              >
+                                {amenity.name}
+                              </Link>
+                            ) : (
+                              <span className="text-gray-400 font-medium">
+                                {amenity.name}
+                              </span>
+                            )}
                           </div>
                         ))}
                       </div>
                     </div>
-                  )}
+                  );
+                })()}
 
                   {/* Memberships */}
                   {brewery.memberships && brewery.memberships.length > 0 && (
                     <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Memberships</h3>
+                      <h3 
+                        className="text-xl font-bold text-black mb-3"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Memberships
+                      </h3>
                       <div className="flex flex-wrap gap-4">
                         {brewery.memberships.map((membership: Membership, index: number) => {
                           const membershipIcon = getMembershipIcon(membership.name);
@@ -648,16 +911,26 @@ export default function SimpleBreweryPageTemplate({
               {/* Opening Date */}
               {(brewery.openingDate || brewery.openedDate) && (
                 <div>
-                  <h3 className="text-xl font-bold text-black mb-3">Opening Date</h3>
-                  <div className="text-gray-700">{brewery.openingDate || brewery.openedDate}</div>
+                  <h3 
+                    className="text-xl font-bold text-black mb-3"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Opening Date
+                  </h3>
+                  <div className="text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{brewery.openingDate || brewery.openedDate}</div>
                 </div>
               )}
 
                   {/* Awards */}
                   {brewery.awards && brewery.awards.length > 0 && (
                     <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Awards</h3>
-                      <div className="space-y-1">
+                      <h3 
+                        className="text-xl font-bold text-black mb-3"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Awards
+                      </h3>
+                      <div className="space-y-1" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                         {brewery.awards.map((award: string, index: number) => (
                           <div key={index} className="text-gray-700">🏆 {award}</div>
                         ))}
@@ -668,8 +941,13 @@ export default function SimpleBreweryPageTemplate({
                   {/* Certifications */}
                   {brewery.certifications && brewery.certifications.length > 0 && (
                     <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Certifications</h3>
-                      <div className="space-y-1">
+                      <h3 
+                        className="text-xl font-bold text-black mb-3"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Certifications
+                      </h3>
+                      <div className="space-y-1" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                         {brewery.certifications.map((cert: string, index: number) => (
                           <div key={index} className="text-gray-700">📜 {cert}</div>
                         ))}
@@ -680,8 +958,13 @@ export default function SimpleBreweryPageTemplate({
                   {/* Special Events */}
                   {brewery.specialEvents && brewery.specialEvents.length > 0 && (
                     <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Special Events</h3>
-                      <div className="space-y-1">
+                      <h3 
+                        className="text-xl font-bold text-black mb-3"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Special Events
+                      </h3>
+                      <div className="space-y-1" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                         {brewery.specialEvents.map((event: string, index: number) => (
                           <div key={index} className="text-gray-700">🎉 {event}</div>
                         ))}
@@ -692,25 +975,207 @@ export default function SimpleBreweryPageTemplate({
                   {/* Last Updated */}
                   {brewery.lastUpdated && (
                     <div>
-                      <h3 className="text-xl font-bold text-black mb-3">Last Updated</h3>
-                      <div className="text-gray-700">{
-                        new Date(brewery.lastUpdated).toLocaleDateString('en-US', {
-                          month: '2-digit',
-                          day: '2-digit',
-                          year: 'numeric'
-                        })
+                      <h3 
+                        className="text-xl font-bold text-black mb-3"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Last Updated
+                      </h3>
+                      <div className="text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{
+                        (() => {
+                          const date = new Date(brewery.lastUpdated);
+                          const month = date.toLocaleDateString('en-US', { month: 'long' });
+                          const day = date.getDate();
+                          const year = date.getFullYear();
+                          return `${month} ${day}, ${year}`;
+                        })()
                       }</div>
                     </div>
                   )}
+              </div>
+            </div>
+
+            {/* Right Sidebar - Map and Contact Info (Bimmershops style) */}
+            <div className="lg:col-span-3">
+              <div className="sticky top-8">
+                {/* Phone Number Button - CTA */}
+                {brewery.phone && (
+                  <div className="mb-4">
+                    <a
+                      href={`tel:${brewery.phone}`}
+                      className="inline-flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded text-lg transition-colors"
+                    >
+                      <Phone className="h-5 w-5" />
+                      <span style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{brewery.phone}</span>
+                    </a>
+                  </div>
+                )}
+                
+                {/* Open/Closed Status - Moved from main content, centered */}
+                {computed && (computed.isOpenNow !== undefined) && (
+                  <div className="mb-4 text-center" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                    {computed.isOpenNow ? (
+                      <span className="text-sm text-gray-600">
+                        <span className="font-bold">Open</span>
+                        {computed.closingTime 
+                          ? ` now until ${computed.closingTime}`
+                          : ' now'}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-600">
+                        <span className="font-bold">Closed</span>
+                        {computed.nextOpenDay && computed.nextOpenTime ? (
+                          <>
+                            , open again{' '}
+                            <span className="font-bold">
+                              {computed.nextOpenDay.charAt(0).toUpperCase() + computed.nextOpenDay.slice(1)} at {computed.nextOpenTime}
+                            </span>
+                          </>
+                        ) : null}
+                      </span>
+                    )}
+                  </div>
+                )}
+                
+                {/* Map */}
+                <div className="mb-4">
+                  <div className="h-64 rounded-lg overflow-hidden border border-gray-200">
+                    <GoogleMap 
+                      breweries={[brewery]} 
+                      height="100%" 
+                      center={{ lat: brewery.latitude, lng: brewery.longitude }}
+                      zoom={14}
+                      showClusters={false}
+                      autoOpenPopup={false}
+                      useFitBounds={false}
+                    />
+                  </div>
+                </div>
+                
+                {/* Address */}
+                <div className="mb-4">
+                  <h3 
+                    className="text-lg font-bold text-black mb-3"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Address
+                  </h3>
+                  <div className="flex items-start gap-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                    <MapPin className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                    <div className="text-gray-700">
+                      <div className="text-sm">{brewery.street}</div>
+                      <div className="text-sm">{brewery.city}, {brewery.state} {brewery.zip} US</div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Hours of Operation Section */}
+                {brewery.hours && (
+                  <div className="mb-4">
+                    <h3 
+                      className="text-lg font-bold text-black mb-3"
+                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    >
+                      Hours of Operation
+                    </h3>
+                    <ul className="space-y-1 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                      {(() => {
+                        // Group Monday-Friday if they have the same hours
+                        const mondayHours = brewery.hours?.monday;
+                        const tuesdayHours = brewery.hours?.tuesday;
+                        const wednesdayHours = brewery.hours?.wednesday;
+                        const thursdayHours = brewery.hours?.thursday;
+                        const fridayHours = brewery.hours?.friday;
+                        
+                        const allWeekdaysSame = mondayHours && 
+                          mondayHours === tuesdayHours &&
+                          mondayHours === wednesdayHours &&
+                          mondayHours === thursdayHours &&
+                          mondayHours === fridayHours;
+                        
+                        const hoursList = [];
+                        
+                        // Add Monday-Friday grouped if same
+                        if (allWeekdaysSame) {
+                          hoursList.push(
+                            <li key="weekdays" className="flex items-center">
+                              <span className="font-medium text-gray-900 w-32 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Monday - Friday</span>
+                              <span className="text-gray-700 ml-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                                {mondayHours && mondayHours !== 'Closed' ? formatHoursString(mondayHours) : 'Closed'}
+                              </span>
+                            </li>
+                          );
+                        } else {
+                          // Add individual weekdays
+                          ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'].forEach(day => {
+                            const dayName = day.charAt(0).toUpperCase() + day.slice(1);
+                            const hours = brewery.hours?.[day as keyof typeof brewery.hours];
+                            hoursList.push(
+                              <li key={day} className="flex items-center">
+                                <span className="font-medium text-gray-900 w-32 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{dayName}</span>
+                                <span className="text-gray-700 ml-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                                  {hours && hours !== 'Closed' ? formatHoursString(hours) : 'Closed'}
+                                </span>
+                              </li>
+                            );
+                          });
+                        }
+                        
+                        // Add Saturday
+                        const satHours = brewery.hours?.saturday;
+                        if (satHours !== undefined) {
+                          hoursList.push(
+                            <li key="saturday" className="flex items-center">
+                              <span className="font-medium text-gray-900 w-32 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Saturday</span>
+                              <span className="text-gray-700 ml-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                                {satHours && satHours !== 'Closed' ? formatHoursString(satHours) : 'Closed'}
+                              </span>
+                            </li>
+                          );
+                        }
+                        
+                        // Add Sunday
+                        const sunHours = brewery.hours?.sunday;
+                        if (sunHours !== undefined) {
+                          hoursList.push(
+                            <li key="sunday" className="flex items-center">
+                              <span className="font-medium text-gray-900 w-32 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Sunday</span>
+                              <span className="text-gray-700 ml-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                                {sunHours && sunHours !== 'Closed' ? formatHoursString(sunHours) : 'Closed'}
+                              </span>
+                            </li>
+                          );
+                        }
+                        
+                        return hoursList;
+                      })()}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
         </div>
       </div>
 
+      {/* News & Articles Section */}
+      {articles && articles.length > 0 && (
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <BreweryArticles articles={articles} breweryName={brewery.name} />
+        </div>
+      )}
+
       {/* Reviews Section */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <BreweryReviews breweryId={brewery.id} reviewsPerPage={5} />
+        <BreweryReviews 
+          breweryId={brewery.id} 
+          reviewsPerPage={5}
+          placeId={brewery.placeId}
+          totalGoogleReviews={brewery.googleRatingCount}
+          reviews={reviews}
+          totalReviews={totalReviews}
+        />
       </div>
     </>
   );

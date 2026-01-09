@@ -97,16 +97,24 @@ async function findPlaceId(query: string): Promise<string | null> {
 }
 
 /**
+ * Get photo URL from Google Places API photo reference
+ */
+function getPhotoUrl(photoReference: string, maxWidth: number = 1200): string {
+  return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photoreference=${photoReference}&key=${apiKey}`;
+}
+
+/**
  * Get Place Details from Google Places API
  */
 async function getPlaceDetails(placeId: string): Promise<{
   hours?: Record<string, string>;
   phone?: string;
   website?: string;
+  photoUrl?: string;
 } | null> {
   try {
-    // Request specific fields to reduce API costs
-    const fields = 'opening_hours,formatted_phone_number,international_phone_number,website';
+    // Request specific fields including photos
+    const fields = 'opening_hours,formatted_phone_number,international_phone_number,website,photos';
     const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=${fields}&key=${apiKey}`;
     
     const response = await fetch(url);
@@ -124,6 +132,7 @@ async function getPlaceDetails(placeId: string): Promise<{
         hours?: Record<string, string>;
         phone?: string;
         website?: string;
+        photoUrl?: string;
       } = {};
       
       // Parse opening hours
@@ -170,6 +179,15 @@ async function getPlaceDetails(placeId: string): Promise<{
       // Get website
       if (result.website) {
         enriched.website = result.website;
+      }
+      
+      // Get first photo (usually the best/main photo)
+      if (result.photos && result.photos.length > 0) {
+        const firstPhoto = result.photos[0];
+        if (firstPhoto.photo_reference) {
+          // Get a high-quality photo (1200px width is a good balance)
+          enriched.photoUrl = getPhotoUrl(firstPhoto.photo_reference, 1200);
+        }
       }
       
       return enriched;
@@ -278,7 +296,7 @@ async function enrichBreweries() {
     console.log('📥 Step 1: Fetching breweries from Supabase...');
     const { data: breweries, error: fetchError } = await client
       .from('breweries')
-      .select('id, name, street, city, state, zip, phone, website, hours, social_media')
+      .select('id, name, street, city, state, zip, phone, website, hours, social_media, photo_url')
       .order('name');
     
     if (fetchError) {
@@ -300,6 +318,7 @@ async function enrichBreweries() {
     let phoneUpdated = 0;
     let websiteUpdated = 0;
     let socialMediaUpdated = 0;
+    let photoUpdated = 0;
     let skipped = 0;
     let errorCount = 0;
     let requestDeniedError: Error | null = null;
@@ -365,6 +384,14 @@ async function enrichBreweries() {
           hasUpdates = true;
           websiteUpdated++;
           console.log(`   ✓ Website updated: ${details.website}`);
+        }
+        
+        // Update photo if available and different
+        if (details.photoUrl && details.photoUrl !== brewery.photo_url) {
+          updates.photo_url = details.photoUrl;
+          hasUpdates = true;
+          photoUpdated++;
+          console.log(`   ✓ Photo updated`);
         }
         
         // Try to extract social media from website
@@ -442,6 +469,7 @@ async function enrichBreweries() {
     console.log(`   ✓ Phone updated: ${phoneUpdated}`);
     console.log(`   ✓ Website updated: ${websiteUpdated}`);
     console.log(`   ✓ Social media updated: ${socialMediaUpdated}`);
+    console.log(`   ✓ Photo updated: ${photoUpdated}`);
     console.log(`   ⊘ Skipped: ${skipped}`);
     console.log(`   ✗ Errors: ${errorCount}\n`);
 
@@ -452,6 +480,7 @@ async function enrichBreweries() {
     console.log(`  - Phone updated: ${phoneUpdated}`);
     console.log(`  - Website updated: ${websiteUpdated}`);
     console.log(`  - Social media updated: ${socialMediaUpdated}`);
+    console.log(`  - Photo updated: ${photoUpdated}`);
     console.log(`  - Skipped: ${skipped}`);
     console.log(`  - Errors: ${errorCount}`);
 

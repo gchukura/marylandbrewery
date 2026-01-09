@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/opengraph-image',
         width: 1200,
         height: 630,
         alt: 'Maryland Brewery Directory - Open Now',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Breweries Open Now - Maryland Brewery Directory',
     description: 'Find Maryland breweries currently open. Real-time list of breweries open now across the state.',
-    images: ['/og-image.jpg'],
+    images: ['/opengraph-image'],
   },
 };
 
@@ -72,14 +72,14 @@ export default async function OpenNowPage() {
   const groups = Array.from(byCity.entries()).sort((a,b) => a[0].localeCompare(b[0]));
 
   const breadcrumbs = [
-    { name: 'Home', url: '/', isActive: false },
+    { name: 'Maryland Breweries', url: '/', isActive: false },
     { name: 'Open Now', url: '/open-now', isActive: true },
   ];
 
   // Related pages for internal linking
   const relatedPages = [
     { title: 'Interactive Map', url: '/map', count: processed.breweries.length },
-    { title: 'All Cities', url: '/city', count: processed.cities.length },
+    { title: 'All Cities', url: '/cities', count: processed.cities.length },
     { title: 'Browse by Amenity', url: '/amenities', count: 0 },
   ];
 
@@ -89,6 +89,7 @@ export default async function OpenNowPage() {
         h1="Breweries Open Now"
         introText="Find Maryland breweries currently open right now. Real-time list of breweries open across the state with current hours and closing times. Updated hourly."
         breadcrumbs={breadcrumbs}
+        heroImage="/cities-hero.jpg"
       />
       
       <div className="container mx-auto px-4 py-10">

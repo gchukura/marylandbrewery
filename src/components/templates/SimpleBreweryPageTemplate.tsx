@@ -475,8 +475,8 @@ export default function SimpleBreweryPageTemplate({
       />
 
       <div className="min-h-screen bg-white">
-        {/* Hero Photo Section with Overlapping Logo */}
-        <div className="relative w-full mb-16">
+        {/* Hero Photo Section with Overlapping Logo - Matching PageHero structure */}
+        <section className="bg-white border-b-4 border-[#9B2335] relative" style={{ marginBottom: 'calc(4rem + 88px)' }}>
           {(() => {
             // Use first photo from photos array (local) if available, otherwise fall back to photoUrl
             // This avoids external API calls for the hero image
@@ -485,8 +485,9 @@ export default function SimpleBreweryPageTemplate({
               : brewery.photoUrl;
             
             return (
-              <div className="relative w-full py-12 md:py-16">
-                {heroImage ? (
+              <>
+                {/* Hero Image Background */}
+                {heroImage && (
                   <div className="absolute inset-0">
                     {heroImage.startsWith('http') ? (
                       <img 
@@ -502,19 +503,48 @@ export default function SimpleBreweryPageTemplate({
                         className="object-cover"
                         sizes="100vw"
                         priority
+                        unoptimized={false}
                       />
                     )}
-                    {/* Optional overlay gradient for better text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    {/* Dark overlay for better text readability - matching PageHero */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
                   </div>
-                ) : null}
-              </div>
+                )}
+              </>
             );
           })()}
           
-          {/* Logo overlapping into header (Bimmershops style) */}
+          {/* Content Container - Increased height for better visual impact */}
+          <div className="container mx-auto px-4 py-16 md:py-20 lg:py-24 relative z-10">
+            {/* Breadcrumb Navigation - Consistent with PageHero style */}
+            {breadcrumbs && breadcrumbs.length > 0 && (
+              <nav className="mb-6" aria-label="Breadcrumb">
+                <ol className="flex items-center flex-wrap gap-2 text-sm font-body text-white/90">
+                  {breadcrumbs.map((crumb, index) => (
+                    <li key={index} className="flex items-center">
+                      {index > 0 && (
+                        <ChevronRight className="h-4 w-4 mx-2 text-white/70" />
+                      )}
+                      <Link 
+                        href={crumb.url} 
+                        className={`transition-colors font-medium font-body drop-shadow-md ${
+                          crumb.isActive 
+                            ? 'text-white' 
+                            : 'hover:text-white'
+                        }`}
+                      >
+                        {crumb.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            )}
+          </div>
+          
+          {/* Logo overlapping into header - Positioned to sit on top of hero and be fully visible */}
           {brewery.logo && (
-            <div className={`absolute ${brewery.photoUrl ? 'bottom-0' : 'top-0'} left-4 lg:left-8 transform ${brewery.photoUrl ? 'translate-y-1/2' : 'translate-y-0'} z-10`}>
+            <div className="absolute bottom-0 left-4 lg:left-8" style={{ transform: 'translateY(50%)', zIndex: 20 }}>
               <div className="bg-white p-2 rounded-lg shadow-lg flex items-center justify-center h-[176px] w-[176px]">
                 <BreweryLogo 
                   logo={brewery.logo} 
@@ -524,41 +554,18 @@ export default function SimpleBreweryPageTemplate({
               </div>
             </div>
           )}
-
-          {/* Breadcrumb Navigation - Bottom of hero image, to the right of logo */}
-          {breadcrumbs && breadcrumbs.length > 0 && (
-            <div className="absolute bottom-2 sm:bottom-4 left-4 sm:left-[200px] lg:left-[220px] xl:left-[240px] z-10 max-w-[calc(100%-2rem)] sm:max-w-[calc(100%-240px)]">
-              <nav className="flex items-center space-x-1 text-xs sm:text-sm flex-wrap gap-y-1">
-                {breadcrumbs.map((crumb, index) => (
-                  <div key={index} className="flex items-center min-h-[32px]">
-                    {index > 0 && (
-                      <ChevronRight className="h-3 w-3 text-white/90 mx-1 flex-shrink-0" />
-                    )}
-                    <Link
-                      href={crumb.url}
-                      className={`font-medium px-2 py-1.5 sm:py-1 rounded backdrop-blur-sm transition-all shadow-md whitespace-nowrap min-h-[32px] flex items-center touch-manipulation ${
-                        crumb.isActive
-                          ? 'text-white bg-black/60'
-                          : 'text-white/95 hover:text-white bg-black/50 hover:bg-black/70 underline hover:no-underline hover:font-semibold'
-                      }`}
-                    >
-                      {crumb.name}
-                    </Link>
-                  </div>
-                ))}
-              </nav>
-            </div>
-          )}
-        </div>
+        </section>
 
         {/* Main Content Area - Bimmershops Style Layout */}
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 pt-0 pb-6 md:pt-2 md:pb-8">
           {/* Three Column Layout: Left Sidebar | Main Content | Right Sidebar */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Left Sidebar - Empty (logo overlaps into header) */}
             <div className="lg:col-span-2">
               <div className="sticky top-8">
                 {/* Left sidebar is intentionally empty - logo overlaps from hero section */}
+                {/* Add spacing to account for logo height */}
+                <div className="h-[88px] lg:h-[88px]"></div>
               </div>
             </div>
 
@@ -566,15 +573,14 @@ export default function SimpleBreweryPageTemplate({
             <div className="lg:col-span-7">
               {/* Business Name */}
               <h1 
-                className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 break-words"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1C1C1C] mb-4 break-words font-display leading-tight"
               >
                 {brewery.name}
               </h1>
               
               {/* City, State, Rating, and Website Link on same line */}
-              <div className="mb-6 flex items-center gap-4 sm:gap-8 flex-wrap" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
-                <div className="text-gray-600 text-base sm:text-lg">
+              <div className="mb-6 flex items-center gap-4 sm:gap-8 flex-wrap font-body">
+                <div className="text-[#6B6B6B] text-body-large font-medium">
                   {brewery.city}, {brewery.state}
                 </div>
                 {(() => {
@@ -604,22 +610,22 @@ export default function SimpleBreweryPageTemplate({
                     <div className="flex items-center gap-2">
                       <div className="flex items-center">
                         {[...Array(5)].map((_, i) => {
-                          const fullStars = Math.floor(displayRating!);
-                          const hasHalfStar = displayRating! % 1 >= 0.25 && displayRating! % 1 < 0.75;
-                          const isFull = i < fullStars;
-                          const isHalf = i === fullStars && hasHalfStar;
+                          const starValue = displayRating! - i;
+                          const isFull = starValue >= 1;
+                          const isPartial = starValue > 0 && starValue < 1;
+                          const partialWidth = isPartial ? starValue : 0;
                           
                           return (
                             <div key={i} className="relative h-5 w-5 flex-shrink-0">
                               {/* Base empty star */}
-                              <Star className="h-5 w-5 absolute text-gray-300" />
+                              <Star className="h-5 w-5 absolute text-[#E8E6E1] fill-[#E8E6E1]" />
                               {/* Full star overlay */}
                               {isFull && (
                                 <Star className="h-5 w-5 absolute fill-[#D4A017] text-[#D4A017]" />
                               )}
-                              {/* Half star overlay */}
-                              {isHalf && (
-                                <div className="absolute overflow-hidden" style={{ width: '50%' }}>
+                              {/* Partial star overlay */}
+                              {isPartial && (
+                                <div className="absolute overflow-hidden" style={{ width: `${partialWidth * 100}%` }}>
                                   <Star className="h-5 w-5 fill-[#D4A017] text-[#D4A017]" />
                                 </div>
                               )}
@@ -627,8 +633,8 @@ export default function SimpleBreweryPageTemplate({
                           );
                         })}
                       </div>
-                      <span className="text-lg font-semibold" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{displayRating.toFixed(1)}</span>
-                      <span className="text-gray-500 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                      <span className="text-body-large font-semibold font-body">{displayRating.toFixed(1)}</span>
+                      <span className="text-[#1C1C1C] text-body font-body">
                         ({totalReviewCount})
                       </span>
                     </div>
@@ -641,8 +647,7 @@ export default function SimpleBreweryPageTemplate({
                       href={brewery.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-lg font-medium hover:underline"
-                      style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                      className="text-body-large font-medium hover:underline font-body"
                     >
                       Visit our Website
                     </a>
@@ -651,24 +656,23 @@ export default function SimpleBreweryPageTemplate({
               </div>
               
               {/* Dividing line between brewery name section and about section */}
-              <div className="border-t border-gray-300 mb-8"></div>
+              <div className="border-t-2 border-[#E8E6E1] my-6"></div>
               
               {/* About Section - Enhanced */}
               <section className="mb-8">
                 <h2 
-                  className="text-2xl font-bold text-black mb-4"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-4 font-display"
                 >
                   About Brewery
                 </h2>
                 
                 {/* Primary Description - Generated from review themes */}
                 {aboutContent ? (
-                  <p className="text-gray-700 mb-4 leading-relaxed text-lg" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{aboutContent}</p>
+                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-xl font-body">{aboutContent}</p>
                 ) : brewery.description ? (
-                  <p className="text-gray-700 mb-4 leading-relaxed text-lg" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{brewery.description}</p>
+                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-xl font-body">{brewery.description}</p>
                 ) : (
-                  <p className="text-gray-700 mb-4 leading-relaxed text-lg" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-xl font-body">
                     {brewery.name} is a {Array.isArray(brewery.type) ? brewery.type.join(' and ').toLowerCase() : (brewery.type || 'brewery').toLowerCase()} located in {brewery.city}, {brewery.county} County, Maryland.
                     {brewery.amenities && brewery.amenities.length > 0 && (
                       <> Featuring {brewery.amenities.slice(0, 3).join(', ').toLowerCase()}, this local brewery welcomes craft beer enthusiasts.</>
@@ -680,12 +684,11 @@ export default function SimpleBreweryPageTemplate({
                 {brewery.awards && brewery.awards.length > 0 && (
                   <>
                     <h3 
-                      className="text-xl font-semibold text-gray-900 mt-6 mb-3"
-                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mt-8 mb-4 font-display"
                     >
                       Awards & Recognition
                     </h3>
-                    <ul className="list-disc list-inside text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                    <ul className="list-disc list-inside text-[#1C1C1C] text-body-large font-body space-y-2">
                       {brewery.awards.map((award, index) => (
                         <li key={index}>{award}</li>
                       ))}
@@ -717,29 +720,29 @@ export default function SimpleBreweryPageTemplate({
               {/* Beers Table */}
               {brewery.beers && brewery.beers.length > 0 && (
                 <div className="mb-8">
+                  <div className="border-t-2 border-[#E8E6E1] my-6"></div>
                   <h2 
-                    className="text-2xl font-bold text-black mb-4"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-8 font-display"
                   >
                     Beers Brewed
                   </h2>
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                       <thead>
-                        <tr className="bg-[#9B2335] text-white" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
-                          <th className="text-left py-3 px-4 font-bold">Name</th>
-                          <th className="text-left py-3 px-4 font-bold">Style</th>
-                          <th className="text-left py-3 px-4 font-bold">ABV</th>
-                          <th className="text-left py-3 px-4 font-bold">Availability</th>
+                        <tr className="bg-[#9B2335] text-white font-body">
+                          <th className="text-left py-4 px-4 font-bold text-body-large">Name</th>
+                          <th className="text-left py-4 px-4 font-bold text-body-large">Style</th>
+                          <th className="text-left py-4 px-4 font-bold text-body-large">ABV</th>
+                          <th className="text-left py-4 px-4 font-bold text-body-large">Availability</th>
                         </tr>
                       </thead>
-                      <tbody style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                      <tbody className="font-body">
                         {brewery.beers.map((beer: BeerType, index: number) => (
-                          <tr key={index} className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-[#FAF9F6]' : 'bg-white'}`}>
-                            <td className="py-3 px-4 font-semibold text-gray-900">{beer.name}</td>
-                            <td className="py-3 px-4 text-gray-700">{beer.style}</td>
-                            <td className="py-3 px-4 text-gray-700">{formatABV(beer.abv)}</td>
-                            <td className="py-3 px-4 text-gray-700">{beer.availability}</td>
+                          <tr key={index} className={`border-b border-[#E8E6E1] ${index % 2 === 0 ? 'bg-[#FAF9F6]' : 'bg-white'}`}>
+                            <td className="py-4 px-4 font-semibold text-[#1C1C1C] text-body">{beer.name}</td>
+                            <td className="py-4 px-4 text-[#1C1C1C] text-body">{beer.style}</td>
+                            <td className="py-4 px-4 text-[#1C1C1C] text-body">{formatABV(beer.abv)}</td>
+                            <td className="py-4 px-4 text-[#1C1C1C] text-body">{beer.availability}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -749,17 +752,16 @@ export default function SimpleBreweryPageTemplate({
               )}
 
               {/* Additional Information Sections */}
-              <div className="space-y-6">
+              <div className="space-y-10">
               {/* Brewery Type */}
               {brewery.type && (
                 <div>
                   <h3 
-                    className="text-xl font-bold text-black mb-3"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
                   >
                     Brewery Type
                   </h3>
-                  <div className="text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                  <div className="text-[#1C1C1C] font-body">
                     {Array.isArray(brewery.type) 
                       ? brewery.type.map((type: string, index: number) => (
                           <span key={index}>
@@ -788,14 +790,13 @@ export default function SimpleBreweryPageTemplate({
               {brewery.articles && brewery.articles.length > 0 && (
                 <div>
                   <h3 
-                    className="text-xl font-bold text-black mb-3"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
                   >
                     Articles
                   </h3>
-                  <div className="space-y-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                  <div className="space-y-3 font-body">
                     {brewery.articles.map((article: Article, index: number) => (
-                      <a key={index} href={article.url} target="_blank" rel="noopener noreferrer" className="block text-[#9B2335] hover:text-[#7A1C2A]">
+                      <a key={index} href={article.url} target="_blank" rel="noopener noreferrer" className="block text-[#9B2335] hover:text-[#7A1C2A] text-body-large font-medium">
                         {article.title}
                       </a>
                     ))}
@@ -806,34 +807,33 @@ export default function SimpleBreweryPageTemplate({
               {/* Social Media */}
               <div>
                 <h3 
-                  className="text-xl font-bold text-black mb-3"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
                 >
                   Social Media
                 </h3>
-                <div className="space-y-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                <div className="flex flex-wrap items-center gap-4 font-body">
                   {brewery.socialMedia?.facebook && (
                     <a href={brewery.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
-                      <img src={getSocialMediaIcon('facebook')} alt={`${brewery.name} on Facebook`} className="h-4 w-4" />
-                      Facebook
+                      <img src={getSocialMediaIcon('facebook')} alt={`${brewery.name} on Facebook`} className="h-5 w-5" />
+                      <span className="text-body">Facebook</span>
                     </a>
                   )}
                   {brewery.socialMedia?.twitter && (
                     <a href={brewery.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
-                      <img src={getSocialMediaIcon('twitter')} alt={`${brewery.name} on Twitter`} className="h-4 w-4" />
-                      Twitter
+                      <img src={getSocialMediaIcon('twitter')} alt={`${brewery.name} on Twitter`} className="h-5 w-5" />
+                      <span className="text-body">Twitter</span>
                     </a>
                   )}
                   {brewery.socialMedia?.instagram && (
                     <a href={brewery.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
-                      <img src={getSocialMediaIcon('instagram')} alt={`${brewery.name} on Instagram`} className="h-4 w-4" />
-                      Instagram
+                      <img src={getSocialMediaIcon('instagram')} alt={`${brewery.name} on Instagram`} className="h-5 w-5" />
+                      <span className="text-body">Instagram</span>
                     </a>
                   )}
                   {brewery.socialMedia?.untappd && (
                     <a href={brewery.socialMedia.untappd} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
-                      <img src={getSocialMediaIcon('untappd')} alt={`${brewery.name} on Untappd`} className="h-4 w-4" />
-                      Untappd
+                      <img src={getSocialMediaIcon('untappd')} alt={`${brewery.name} on Untappd`} className="h-5 w-5" />
+                      <span className="text-body">Untappd</span>
                     </a>
                   )}
                 </div>
@@ -844,30 +844,40 @@ export default function SimpleBreweryPageTemplate({
                   const allAmenities = buildAllAmenitiesList();
                   if (allAmenities.length === 0) return null;
                   
+                  // Split amenities into columns with max 5 per column
+                  const itemsPerColumn = 5;
+                  const columns: typeof allAmenities[] = [];
+                  for (let i = 0; i < allAmenities.length; i += itemsPerColumn) {
+                    columns.push(allAmenities.slice(i, i + itemsPerColumn));
+                  }
+                  
                   return (
                     <div>
                       <h3 
-                        className="text-xl font-bold text-black mb-3"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
                       >
                         Amenities
                       </h3>
-                      <div className="space-y-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
-                        {allAmenities.map((amenity, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            {getAmenityIcon(amenity.name)}
-                            {amenity.hasIt ? (
-                              <Link 
-                                href={amenity.url}
-                                className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
-                              >
-                                {amenity.name}
-                              </Link>
-                            ) : (
-                              <span className="text-gray-400 font-medium">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3 font-body">
+                        {columns.map((column, columnIndex) => (
+                          <div key={columnIndex} className="space-y-3">
+                            {column.map((amenity, index) => (
+                              <div key={index} className="flex items-center gap-2">
+                                {getAmenityIcon(amenity.name)}
+                                {amenity.hasIt ? (
+                                  <Link 
+                                    href={amenity.url}
+                                    className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium text-body"
+                                  >
+                                    {amenity.name}
+                                  </Link>
+                                ) : (
+                              <span className="text-[#6B6B6B] font-medium text-body">
                                 {amenity.name}
                               </span>
-                            )}
+                                )}
+                              </div>
+                            ))}
                           </div>
                         ))}
                       </div>
@@ -879,8 +889,7 @@ export default function SimpleBreweryPageTemplate({
                   {brewery.memberships && brewery.memberships.length > 0 && (
                     <div>
                       <h3 
-                        className="text-xl font-bold text-black mb-3"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
                       >
                         Memberships
                       </h3>
@@ -896,8 +905,8 @@ export default function SimpleBreweryPageTemplate({
                                   className="h-36 w-36 object-contain"
                                 />
                               ) : (
-                                <div className="h-36 w-36 bg-gray-300 rounded flex items-center justify-center">
-                                  <span className="text-lg text-gray-600">🏆</span>
+                                <div className="h-36 w-36 bg-[#E8E6E1] rounded flex items-center justify-center">
+                                  <span className="text-body-large text-[#6B6B6B]">🏆</span>
                                 </div>
                               )}
                             </div>
@@ -912,12 +921,11 @@ export default function SimpleBreweryPageTemplate({
               {(brewery.openingDate || brewery.openedDate) && (
                 <div>
                   <h3 
-                    className="text-xl font-bold text-black mb-3"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
                   >
                     Opening Date
                   </h3>
-                  <div className="text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{brewery.openingDate || brewery.openedDate}</div>
+                  <div className="text-[#1C1C1C] text-body font-body">{brewery.openingDate || brewery.openedDate}</div>
                 </div>
               )}
 
@@ -925,14 +933,13 @@ export default function SimpleBreweryPageTemplate({
                   {brewery.awards && brewery.awards.length > 0 && (
                     <div>
                       <h3 
-                        className="text-xl font-bold text-black mb-3"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
                       >
                         Awards
                       </h3>
-                      <div className="space-y-1" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                      <div className="space-y-2 font-body">
                         {brewery.awards.map((award: string, index: number) => (
-                          <div key={index} className="text-gray-700">🏆 {award}</div>
+                          <div key={index} className="text-[#1C1C1C] text-body">🏆 {award}</div>
                         ))}
                       </div>
                     </div>
@@ -942,14 +949,13 @@ export default function SimpleBreweryPageTemplate({
                   {brewery.certifications && brewery.certifications.length > 0 && (
                     <div>
                       <h3 
-                        className="text-xl font-bold text-black mb-3"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
                       >
                         Certifications
                       </h3>
-                      <div className="space-y-1" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                      <div className="space-y-2 font-body">
                         {brewery.certifications.map((cert: string, index: number) => (
-                          <div key={index} className="text-gray-700">📜 {cert}</div>
+                          <div key={index} className="text-[#1C1C1C] text-body">📜 {cert}</div>
                         ))}
                       </div>
                     </div>
@@ -959,14 +965,13 @@ export default function SimpleBreweryPageTemplate({
                   {brewery.specialEvents && brewery.specialEvents.length > 0 && (
                     <div>
                       <h3 
-                        className="text-xl font-bold text-black mb-3"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
                       >
                         Special Events
                       </h3>
-                      <div className="space-y-1" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                      <div className="space-y-2 font-body">
                         {brewery.specialEvents.map((event: string, index: number) => (
-                          <div key={index} className="text-gray-700">🎉 {event}</div>
+                          <div key={index} className="text-[#1C1C1C] text-body">🎉 {event}</div>
                         ))}
                       </div>
                     </div>
@@ -976,12 +981,11 @@ export default function SimpleBreweryPageTemplate({
                   {brewery.lastUpdated && (
                     <div>
                       <h3 
-                        className="text-xl font-bold text-black mb-3"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
                       >
                         Last Updated
                       </h3>
-                      <div className="text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{
+                      <div className="text-[#1C1C1C] font-body">{
                         (() => {
                           const date = new Date(brewery.lastUpdated);
                           const month = date.toLocaleDateString('en-US', { month: 'long' });
@@ -1003,26 +1007,28 @@ export default function SimpleBreweryPageTemplate({
                   <div className="mb-4">
                     <a
                       href={`tel:${brewery.phone}`}
-                      className="inline-flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded text-lg transition-colors"
+                      className="inline-flex items-center justify-center gap-2 w-full bg-[#14532d] hover:bg-[#166534] text-white font-bold py-3 px-6 rounded text-body-large transition-colors font-body"
+                      style={{ color: '#ffffff' }}
+                      aria-label={`Call ${brewery.name} at ${brewery.phone}`}
                     >
-                      <Phone className="h-5 w-5" />
-                      <span style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{brewery.phone}</span>
+                      <Phone className="h-5 w-5" style={{ color: '#ffffff' }} aria-hidden="true" />
+                      <span style={{ color: '#ffffff' }}>{brewery.phone}</span>
                     </a>
                   </div>
                 )}
                 
                 {/* Open/Closed Status - Moved from main content, centered */}
                 {computed && (computed.isOpenNow !== undefined) && (
-                  <div className="mb-4 text-center" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                  <div className="mb-4 text-center font-body">
                     {computed.isOpenNow ? (
-                      <span className="text-sm text-gray-600">
+                      <span className="text-body text-[#6B6B6B]">
                         <span className="font-bold">Open</span>
                         {computed.closingTime 
                           ? ` now until ${computed.closingTime}`
                           : ' now'}
                       </span>
                     ) : (
-                      <span className="text-sm text-gray-600">
+                      <span className="text-body text-[#6B6B6B]">
                         <span className="font-bold">Closed</span>
                         {computed.nextOpenDay && computed.nextOpenTime ? (
                           <>
@@ -1039,7 +1045,7 @@ export default function SimpleBreweryPageTemplate({
                 
                 {/* Map */}
                 <div className="mb-4">
-                  <div className="h-64 rounded-lg overflow-hidden border border-gray-200">
+                  <div className="h-64 rounded-lg overflow-hidden border border-[#E8E6E1]">
                     <GoogleMap 
                       breweries={[brewery]} 
                       height="100%" 
@@ -1053,32 +1059,30 @@ export default function SimpleBreweryPageTemplate({
                 </div>
                 
                 {/* Address */}
-                <div className="mb-4">
+                <div className="mb-8">
                   <h3 
-                    className="text-lg font-bold text-black mb-3"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
                   >
                     Address
                   </h3>
-                  <div className="flex items-start gap-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
-                    <MapPin className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
-                    <div className="text-gray-700">
-                      <div className="text-sm">{brewery.street}</div>
-                      <div className="text-sm">{brewery.city}, {brewery.state} {brewery.zip} US</div>
+                  <div className="flex items-start gap-2 font-body">
+                    <MapPin className="h-5 w-5 text-[#6B6B6B] mt-0.5 flex-shrink-0" />
+                    <div className="text-[#1C1C1C]">
+                      <div className="text-body font-medium">{brewery.street}</div>
+                      <div className="text-body">{brewery.city}, {brewery.state} {brewery.zip} US</div>
                     </div>
                   </div>
                 </div>
                 
                 {/* Hours of Operation Section */}
                 {brewery.hours && (
-                  <div className="mb-4">
+                  <div className="mb-8">
                     <h3 
-                      className="text-lg font-bold text-black mb-3"
-                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
                     >
                       Hours of Operation
                     </h3>
-                    <ul className="space-y-1 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                    <ul className="space-y-1 text-body font-body">
                       {(() => {
                         // Group Monday-Friday if they have the same hours
                         const mondayHours = brewery.hours?.monday;
@@ -1099,8 +1103,8 @@ export default function SimpleBreweryPageTemplate({
                         if (allWeekdaysSame) {
                           hoursList.push(
                             <li key="weekdays" className="flex items-center">
-                              <span className="font-medium text-gray-900 w-32 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Monday - Friday</span>
-                              <span className="text-gray-700 ml-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                              <span className="font-medium text-[#1C1C1C] w-32 font-body">Monday - Friday</span>
+                              <span className="text-[#1C1C1C] ml-2 font-body">
                                 {mondayHours && mondayHours !== 'Closed' ? formatHoursString(mondayHours) : 'Closed'}
                               </span>
                             </li>
@@ -1112,8 +1116,8 @@ export default function SimpleBreweryPageTemplate({
                             const hours = brewery.hours?.[day as keyof typeof brewery.hours];
                             hoursList.push(
                               <li key={day} className="flex items-center">
-                                <span className="font-medium text-gray-900 w-32 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{dayName}</span>
-                                <span className="text-gray-700 ml-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                                <span className="font-medium text-[#1C1C1C] w-32 font-body">{dayName}</span>
+                                <span className="text-[#1C1C1C] ml-2 font-body">
                                   {hours && hours !== 'Closed' ? formatHoursString(hours) : 'Closed'}
                                 </span>
                               </li>
@@ -1126,8 +1130,8 @@ export default function SimpleBreweryPageTemplate({
                         if (satHours !== undefined) {
                           hoursList.push(
                             <li key="saturday" className="flex items-center">
-                              <span className="font-medium text-gray-900 w-32 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Saturday</span>
-                              <span className="text-gray-700 ml-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                              <span className="font-medium text-[#1C1C1C] w-32 font-body">Saturday</span>
+                              <span className="text-[#1C1C1C] ml-2 font-body">
                                 {satHours && satHours !== 'Closed' ? formatHoursString(satHours) : 'Closed'}
                               </span>
                             </li>
@@ -1139,8 +1143,8 @@ export default function SimpleBreweryPageTemplate({
                         if (sunHours !== undefined) {
                           hoursList.push(
                             <li key="sunday" className="flex items-center">
-                              <span className="font-medium text-gray-900 w-32 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Sunday</span>
-                              <span className="text-gray-700 ml-2 text-sm" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                              <span className="font-medium text-[#1C1C1C] w-32 font-body">Sunday</span>
+                              <span className="text-[#1C1C1C] ml-2 font-body">
                                 {sunHours && sunHours !== 'Closed' ? formatHoursString(sunHours) : 'Closed'}
                               </span>
                             </li>
@@ -1156,26 +1160,49 @@ export default function SimpleBreweryPageTemplate({
             </div>
           </div>
 
-        </div>
-      </div>
+          {/* News & Articles Section */}
+          {articles && articles.length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* Left Sidebar - Empty (logo overlaps into header) */}
+              <div className="lg:col-span-2">
+                <div className="sticky top-8">
+                  {/* Left sidebar is intentionally empty - logo overlaps from hero section */}
+                </div>
+              </div>
 
-      {/* News & Articles Section */}
-      {articles && articles.length > 0 && (
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <BreweryArticles articles={articles} breweryName={brewery.name} />
-        </div>
-      )}
+              {/* Main Content - Center Column */}
+              <div className="lg:col-span-7">
+                <div className="border-t-2 border-[#E8E6E1] my-6"></div>
+                <BreweryArticles articles={articles} breweryName={brewery.name} />
+              </div>
 
-      {/* Reviews Section */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <BreweryReviews 
-          breweryId={brewery.id} 
-          reviewsPerPage={5}
-          placeId={brewery.placeId}
-          totalGoogleReviews={brewery.googleRatingCount}
-          reviews={reviews}
-          totalReviews={totalReviews}
-        />
+              {/* Right Sidebar - Empty */}
+              <div className="lg:col-span-3"></div>
+            </div>
+          )}
+
+          {/* Reviews Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left Sidebar - Empty */}
+            <div className="lg:col-span-2"></div>
+
+            {/* Main Content - Center Column */}
+            <div className="lg:col-span-7">
+              <div className="border-t-2 border-[#E8E6E1] my-6"></div>
+              <BreweryReviews 
+                breweryId={brewery.id} 
+                reviewsPerPage={5}
+                placeId={brewery.placeId}
+                totalGoogleReviews={brewery.googleRatingCount}
+                reviews={reviews}
+                totalReviews={totalReviews}
+              />
+            </div>
+
+            {/* Right Sidebar - Empty */}
+            <div className="lg:col-span-3"></div>
+          </div>
+        </div>
       </div>
     </>
   );

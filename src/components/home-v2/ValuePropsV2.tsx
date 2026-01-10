@@ -20,9 +20,9 @@ const propositions = [
 
 export default function ValuePropsV2() {
   return (
-    <section className="pt-8 md:pt-12 pb-16 md:pb-24 bg-white">
+    <section className="py-8 md:py-10 bg-white">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 max-w-5xl mx-auto">
           {propositions.map((prop, index) => (
             <div 
               key={index} 
@@ -37,16 +37,14 @@ export default function ValuePropsV2() {
               
               {/* Title */}
               <h3 
-                className="text-xl font-semibold text-[#1C1C1C] mb-3"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                className="text-h3 font-semibold text-[#1C1C1C] mb-3 font-display"
               >
                 {prop.title}
               </h3>
               
               {/* Description */}
               <p 
-                className="text-[#6B6B6B] leading-relaxed"
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                className="text-body text-[#6B6B6B] leading-loose font-body"
               >
                 {prop.description}
               </p>

@@ -53,25 +53,25 @@ export default function PageHero({ h1, introText, breadcrumbs, heroImage, heroIm
         <div className="absolute inset-0 md-pattern-bg pointer-events-none" />
       )}
       
-      <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
+      <div className="container mx-auto px-4 py-10 md:py-14 relative z-10">
         {/* Breadcrumbs */}
         <nav className="mb-6" aria-label="Breadcrumb">
-          <ol className={`flex items-center flex-wrap gap-2 text-sm ${heroImage ? 'text-white/90' : 'text-gray-600'}`}>
+          <ol className={`flex items-center flex-wrap gap-2 text-sm font-body ${heroImage ? 'text-white/90' : 'text-[#6B6B6B]'}`}>
             {breadcrumbs.map((crumb, index) => (
               <li key={index} className="flex items-center">
                 {index > 0 && (
-                  <ChevronRight className={`h-4 w-4 mx-2 ${heroImage ? 'text-white/70' : 'text-gray-400'}`} />
+                  <ChevronRight className={`h-4 w-4 mx-2 ${heroImage ? 'text-white/70' : 'text-[#6B6B6B]'}`} />
                 )}
                 <Link 
                   href={crumb.url} 
-                  className={`transition-colors font-medium ${
+                  className={`transition-colors font-medium font-body ${
                     crumb.isActive 
                       ? heroImage 
                         ? 'text-white drop-shadow-md' 
-                        : 'text-gray-900'
+                        : 'text-[#1C1C1C]'
                       : heroImage 
                         ? 'hover:text-white drop-shadow-md' 
-                        : 'hover:text-red-600'
+                        : 'hover:text-[#9B2335]'
                   }`}
                 >
                   {crumb.name}
@@ -83,22 +83,22 @@ export default function PageHero({ h1, introText, breadcrumbs, heroImage, heroIm
 
         {/* H1 Title */}
         <h1 
-          className={`text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight ${
+          className={`text-h1 md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6 leading-snug font-display ${
             heroImage 
               ? 'text-white drop-shadow-lg' 
-              : 'text-gray-900'
+              : 'text-[#1C1C1C]'
           }`}
-          style={heroImage ? { textShadow: '2px 2px 4px rgba(0,0,0,0.5)' } : {}}
+          style={heroImage ? { textShadow: '2px 2px 4px rgba(0,0,0,0.5)' } : undefined}
         >
           {h1}
         </h1>
 
         {/* Intro Paragraph */}
         <p 
-          className={`text-lg md:text-xl max-w-4xl leading-relaxed ${
+          className={`text-body-large md:text-xl max-w-3xl leading-snug font-body ${
             heroImage 
               ? 'text-white/95 drop-shadow-md' 
-              : 'text-gray-700'
+              : 'text-[#6B6B6B]'
           }`}
         >
           {introText}

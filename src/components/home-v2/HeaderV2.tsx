@@ -62,8 +62,7 @@ export default function HeaderV2() {
               />
               {/* Text Logo - Visible on mobile and desktop with responsive sizing */}
               <span 
-                className="text-white whitespace-nowrap text-sm sm:text-base lg:text-xl font-semibold -ml-4 sm:-ml-5 lg:-ml-6"
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                className="text-white whitespace-nowrap text-sm sm:text-base lg:text-xl font-semibold -ml-4 sm:-ml-5 lg:-ml-6 font-body"
               >
                 MarylandBrewery.com
               </span>
@@ -75,8 +74,7 @@ export default function HeaderV2() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="text-white hover:text-white transition-colors py-2 font-medium text-sm"
-                  style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                  className="text-white hover:text-white transition-colors py-2 font-medium text-base font-body"
                 >
                   {item.label}
                 </Link>
@@ -103,8 +101,7 @@ export default function HeaderV2() {
                     <Link
                       key={item.label}
                       href={item.href}
-                      className="block px-6 py-4 text-white hover:text-[#D4A017] hover:bg-[#7A1C2A]/30 active:bg-[#7A1C2A]/50 transition-colors font-medium min-h-[48px] flex items-center touch-manipulation border-b border-[#7A1C2A]/30 last:border-b-0"
-                      style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                      className="block px-6 py-4 text-white hover:text-[#D4A017] hover:bg-[#7A1C2A]/30 active:bg-[#7A1C2A]/50 transition-colors font-medium text-base min-h-[48px] flex items-center touch-manipulation border-b border-[#7A1C2A]/30 last:border-b-0 font-body"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {item.label}
@@ -116,7 +113,7 @@ export default function HeaderV2() {
           )}
         </div>
       </header>
-      {/* Orange border at bottom */}
+      {/* Gold border at bottom */}
       <div className="h-1 bg-[#D4A017]" />
     </>
   );

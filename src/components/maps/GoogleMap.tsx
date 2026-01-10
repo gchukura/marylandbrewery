@@ -199,21 +199,21 @@ function MapContent({
             <h3 className="font-bold text-lg text-gray-900 mb-1">
               {selectedBrewery.name}
             </h3>
-            <p className="text-sm text-gray-600 mb-1">
+            <p className="text-base text-gray-600 mb-1">
               {selectedBrewery.city}, {selectedBrewery.state}
             </p>
             {selectedBrewery.street && (
-              <p className="text-xs text-gray-500 mb-1">
+              <p className="text-sm text-gray-500 mb-1">
                 {selectedBrewery.street}
               </p>
             )}
             {selectedBrewery.phone && (
-              <p className="text-xs text-blue-600 mb-2">{selectedBrewery.phone}</p>
+              <p className="text-sm text-blue-600 mb-2">{selectedBrewery.phone}</p>
             )}
             <div className="mt-2">
               <a
                 href={`/breweries/${(selectedBrewery as any).slug || selectedBrewery.id}`}
-                className="inline-block bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700 transition-colors"
+                className="inline-block bg-red-600 text-white text-sm px-3 py-1.5 rounded hover:bg-red-700 transition-colors font-medium"
               >
                 View Details
               </a>

@@ -1,7 +1,6 @@
 /* Heritage Craft Modern Design System */
 
-/* Google Fonts Import - Add to layout or use next/font */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
+/* Note: Google Fonts are imported in globals.css - do not duplicate here */
 
 :root {
   /* Heritage Color Palette */
@@ -16,8 +15,8 @@
   --md-light-gray: #E8E6E1;
   
   /* Typography */
-  --font-display: 'Playfair Display', Georgia, serif;
-  --font-body: 'Source Sans 3', -apple-system, sans-serif;
+  --font-display: var(--font-playfair-display), Georgia, serif;
+  --font-body: var(--font-source-sans-3), -apple-system, sans-serif;
 }
 
 /* Crossbottonée Pattern Background */

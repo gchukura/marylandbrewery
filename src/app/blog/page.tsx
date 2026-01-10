@@ -1,9 +1,10 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
 import { ChevronRight, Newspaper } from 'lucide-react';
+import PageHero from '@/components/directory/PageHero';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import '@/components/home-v2/styles.css';
 
 export const metadata: Metadata = {
   title: 'Blog - Coming Soon | Maryland Brewery Directory',
@@ -31,70 +32,20 @@ export default function BlogPage() {
   const blogHeroImageFile = join(process.cwd(), 'public', 'blog-hero.jpg');
   const hasBlogHeroImage = existsSync(blogHeroImageFile);
 
+  const breadcrumbs = [
+    { name: 'Maryland Breweries', url: '/', isActive: false },
+    { name: 'Blog', url: '/blog', isActive: true },
+  ];
+
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
-      {/* Hero Section */}
-      <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
-        {/* Blog Hero Image Background */}
-        {hasBlogHeroImage && (
-          <div className="absolute inset-0">
-            <Image
-              src={blogHeroImagePath}
-              alt="Maryland Brewery Blog"
-              fill
-              className="object-cover"
-              sizes="100vw"
-              priority
-              unoptimized={false}
-            />
-            {/* Dark overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-          </div>
-        )}
-        
-        {/* Pattern overlay (only if no hero image) */}
-        {!hasBlogHeroImage && (
-          <div className="absolute inset-0 md-pattern-bg pointer-events-none opacity-5" />
-        )}
-        
-        <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
-          {/* Breadcrumbs */}
-          <nav className="mb-6" aria-label="Breadcrumb">
-            <ol 
-              className={`flex items-center flex-wrap gap-2 text-sm ${hasBlogHeroImage ? 'text-white/90' : 'text-[#6B6B6B]'}`}
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-            >
-              <li>
-                <Link 
-                  href="/" 
-                  className={`transition-colors ${hasBlogHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-[#9B2335]'}`}
-                >
-                  Maryland Breweries
-                </Link>
-              </li>
-              <li><ChevronRight className={`h-4 w-4 mx-2 ${hasBlogHeroImage ? 'text-white/70' : ''}`} /></li>
-              <li>
-                <span className={`font-medium ${hasBlogHeroImage ? 'text-white drop-shadow-md' : 'text-[#1C1C1C]'}`}>Blog</span>
-              </li>
-            </ol>
-          </nav>
-
-          {/* H1 Title */}
-          <h1 
-            className={`text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${
-              hasBlogHeroImage 
-                ? 'text-white drop-shadow-lg' 
-                : 'text-[#1C1C1C]'
-            }`}
-            style={{ 
-              fontFamily: "'Playfair Display', Georgia, serif",
-              textShadow: hasBlogHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined
-            }}
-          >
-            Blog
-          </h1>
-        </div>
-      </section>
+      <PageHero
+        h1="Blog"
+        introText="Stay tuned for brewery news, craft beer guides, and stories from Maryland's thriving beer scene."
+        breadcrumbs={breadcrumbs}
+        heroImage={hasBlogHeroImage ? blogHeroImagePath : null}
+        heroImageAlt="Maryland Brewery Blog"
+      />
 
       {/* Coming Soon Content */}
       <section className="py-16 md:py-24">

@@ -201,31 +201,31 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                       <div className="flex-1 min-w-0 grid grid-cols-2 gap-4">
                         {/* Name Column */}
                         <div className="min-w-0">
-                          <h3 className="font-semibold text-[#9B2335] text-sm mb-1">
+                          <h3 className="font-semibold text-[#9B2335] text-base mb-1">
                             {brewery.name}
                           </h3>
                           {/* Maryland Brewery in City, MD */}
-                          <div className="text-xs font-bold text-gray-700 mt-0.5 mb-1">
+                          <div className="text-sm font-bold text-gray-700 mt-0.5 mb-1">
                             Maryland Brewery in {brewery.city}, MD
                           </div>
                           {/* Reviews below name */}
                           {brewery.googleRating && (
                             <div className="flex items-center gap-1 mt-1">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              <span className="text-xs text-gray-700">
+                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                              <span className="text-sm text-gray-700">
                                 {brewery.googleRating.toFixed(1)}{brewery.googleRatingCount ? ` - ${brewery.googleRatingCount} ${brewery.googleRatingCount === 1 ? 'review' : 'reviews'}` : ''}
                               </span>
                             </div>
                           )}
                           {/* Distance from neighborhood or city */}
                           {neighborhood && neighborhood.latitude && neighborhood.longitude && brewery.latitude && brewery.longitude && (
-                            <div className="text-xs text-gray-600 mt-1">
+                            <div className="text-sm text-gray-600 mt-1">
                               {calculateDistance(neighborhood.latitude, neighborhood.longitude, brewery.latitude, brewery.longitude).toFixed(1)} miles away from {neighborhood.name}, {cityName}, MD
                             </div>
                           )}
                           {/* Distance from city (for city "near" pages) */}
                           {isNearPage && !neighborhood && brewery.distance !== undefined && (
-                            <div className="text-xs text-gray-600 mt-1">
+                            <div className="text-sm text-gray-600 mt-1">
                               {brewery.distance.toFixed(1)} miles away from {cityName}, MD
                             </div>
                           )}
@@ -234,13 +234,13 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                               {((brewery.amenities || brewery.features) as string[]).slice(0, 3).map((a: string) => (
                                 <span
                                   key={a}
-                                  className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
+                                  className="text-sm bg-gray-100 text-gray-700 px-2 py-1 rounded"
                                 >
                                   {a}
                                 </span>
                               ))}
                               {((brewery.amenities || brewery.features) as string[]).length > 3 && (
-                                <span className="text-xs text-gray-500">
+                                <span className="text-sm text-gray-500">
                                   +{((brewery.amenities || brewery.features) as string[]).length - 3} more
                                 </span>
                               )}
@@ -249,9 +249,9 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                         </div>
                         
                         {/* Address Column */}
-                        <div className="min-w-0 text-xs text-gray-600">
+                        <div className="min-w-0 text-sm text-gray-600">
                           <div className="flex items-start mb-1">
-                            <MapPin className="h-3 w-3 mr-1 mt-0.5 flex-shrink-0" />
+                            <MapPin className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
                               {brewery.street && (
                                 <div>{brewery.street}</div>
@@ -266,7 +266,7 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                           {/* Phone below address */}
                           {brewery.phone && (
                             <div className="flex items-center gap-1 mt-1">
-                              <Phone className="h-3 w-3 flex-shrink-0" />
+                              <Phone className="h-4 w-4 flex-shrink-0" />
                               <span>{brewery.phone}</span>
                             </div>
                           )}

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import PageHero from '@/components/directory/PageHero';
 import Link from 'next/link';
+import { Map, Building2, CheckSquare } from 'lucide-react';
+import '@/components/home-v2/styles.css';
 
 export default function ContactPage() {
   const breadcrumbs = [
@@ -49,7 +51,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="min-h-screen bg-[#FAF9F6]">
       <PageHero
         h1="Contact Us"
         introText="Have a question or suggestion? Send us a note and we'll get back to you. Help us keep Maryland's craft brewery directory accurate and comprehensive."
@@ -57,83 +59,103 @@ export default function ContactPage() {
         heroImage="/cities-hero.jpg"
       />
       
-      <div className="max-w-2xl mx-auto px-4 py-12">
+      <section className="py-10 md:py-14">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white rounded-lg shadow-sm border border-[#E8E6E1] p-6 md:p-8">
+              <form onSubmit={handleSubmit} className="space-y-6 font-body">
+                <div>
+                  <label htmlFor="name" className="block text-body-large font-medium mb-2 text-[#1C1C1C] font-body">Name</label>
+                  <input 
+                    id="name"
+                    name="name" 
+                    type="text" 
+                    required 
+                    autoComplete="name"
+                    className="w-full border border-[#E8E6E1] rounded-md px-4 py-3 text-body-large text-[#1C1C1C] focus:outline-none focus:ring-2 focus:ring-[#9B2335] focus:border-transparent min-h-[48px] font-body" 
+                  />
+                </div>
+                <div>
+                  <label htmlFor="email" className="block text-body-large font-medium mb-2 text-[#1C1C1C] font-body">Email</label>
+                  <input 
+                    id="email"
+                    name="email" 
+                    type="email" 
+                    required 
+                    autoComplete="email"
+                    inputMode="email"
+                    className="w-full border border-[#E8E6E1] rounded-md px-4 py-3 text-body-large text-[#1C1C1C] focus:outline-none focus:ring-2 focus:ring-[#9B2335] focus:border-transparent min-h-[48px] font-body" 
+                  />
+                </div>
+                <div>
+                  <label htmlFor="subject" className="block text-body-large font-medium mb-2 text-[#1C1C1C] font-body">Subject</label>
+                  <input 
+                    id="subject"
+                    name="subject" 
+                    type="text" 
+                    autoComplete="off"
+                    className="w-full border border-[#E8E6E1] rounded-md px-4 py-3 text-body-large text-[#1C1C1C] focus:outline-none focus:ring-2 focus:ring-[#9B2335] focus:border-transparent min-h-[48px] font-body" 
+                  />
+                </div>
+                <div>
+                  <label htmlFor="message" className="block text-body-large font-medium mb-2 text-[#1C1C1C] font-body">Message</label>
+                  <textarea 
+                    id="message"
+                    name="message" 
+                    rows={6} 
+                    required 
+                    className="w-full border border-[#E8E6E1] rounded-md px-4 py-3 text-body-large text-[#1C1C1C] focus:outline-none focus:ring-2 focus:ring-[#9B2335] focus:border-transparent resize-y font-body" 
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="bg-[#9B2335] text-white font-semibold px-6 py-3 rounded-md hover:bg-[#7A1C2A] active:bg-[#7A1C2A] transition-colors min-h-[48px] touch-manipulation w-full sm:w-auto text-body-large font-body"
+                  disabled={status === "loading"}
+                >
+                  {status === "loading" ? "Sending..." : "Send Message"}
+                </button>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium mb-2 text-gray-800">Name</label>
-          <input 
-            id="name"
-            name="name" 
-            type="text" 
-            required 
-            autoComplete="name"
-            className="w-full border border-gray-300 rounded-md px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9B2335] focus:border-transparent min-h-[48px]" 
-          />
-        </div>
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-2 text-gray-800">Email</label>
-          <input 
-            id="email"
-            name="email" 
-            type="email" 
-            required 
-            autoComplete="email"
-            inputMode="email"
-            className="w-full border border-gray-300 rounded-md px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9B2335] focus:border-transparent min-h-[48px]" 
-          />
-        </div>
-        <div>
-          <label htmlFor="subject" className="block text-sm font-medium mb-2 text-gray-800">Subject</label>
-          <input 
-            id="subject"
-            name="subject" 
-            type="text" 
-            autoComplete="off"
-            className="w-full border border-gray-300 rounded-md px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9B2335] focus:border-transparent min-h-[48px]" 
-          />
-        </div>
-        <div>
-          <label htmlFor="message" className="block text-sm font-medium mb-2 text-gray-800">Message</label>
-          <textarea 
-            id="message"
-            name="message" 
-            rows={6} 
-            required 
-            className="w-full border border-gray-300 rounded-md px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#9B2335] focus:border-transparent resize-y" 
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-[#9B2335] text-white font-semibold px-6 py-3 rounded-md hover:bg-[#7A1C2A] active:bg-[#6A1623] transition-colors min-h-[48px] touch-manipulation w-full sm:w-auto"
-          disabled={status === "loading"}
-        >
-          {status === "loading" ? "Sending..." : "Send Message"}
-        </button>
+                {status === "success" && <p className="text-green-700 font-medium mt-2 text-body-large font-body">{message}</p>}
+                {status === "error" && <p className="text-red-700 font-medium mt-2 text-body-large font-body">{message}</p>}
+              </form>
+            </div>
 
-        {status === "success" && <p className="text-green-700 font-medium mt-2">{message}</p>}
-        {status === "error" && <p className="text-red-700 font-medium mt-2">{message}</p>}
-      </form>
-
-      {/* Related Links Section */}
-      <section className="mt-12 pt-8 border-t border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Explore More</h2>
-        <div className="grid md:grid-cols-3 gap-4">
-          <Link href="/map" className="bg-white rounded-lg p-4 border border-gray-200 hover:border-red-500 hover:shadow-md transition-all">
-            <div className="font-semibold text-gray-900">Interactive Map</div>
-            <div className="text-sm text-gray-600 mt-1">Find breweries near you</div>
-          </Link>
-          <Link href="/cities" className="bg-white rounded-lg p-4 border border-gray-200 hover:border-red-500 hover:shadow-md transition-all">
-            <div className="font-semibold text-gray-900">Browse by City</div>
-            <div className="text-sm text-gray-600 mt-1">Explore all cities</div>
-          </Link>
-          <Link href="/amenities" className="bg-white rounded-lg p-4 border border-gray-200 hover:border-red-500 hover:shadow-md transition-all">
-            <div className="font-semibold text-gray-900">Browse by Amenity</div>
-            <div className="text-sm text-gray-600 mt-1">Find features you want</div>
-          </Link>
+            {/* Related Links Section */}
+            <section className="mt-12 pt-8 border-t border-[#E8E6E1]">
+              <h2 className="text-h2 font-bold text-[#1C1C1C] mb-8 font-display">Explore More</h2>
+              <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+                <Link href="/map" className="bg-white rounded-lg p-8 lg:p-10 border border-[#E8E6E1] hover:border-[#9B2335] hover:shadow-md transition-all group min-h-[160px] flex flex-col">
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="w-14 h-14 rounded-lg bg-[#9B2335]/10 flex items-center justify-center group-hover:bg-[#9B2335]/20 transition-colors flex-shrink-0">
+                      <Map className="h-7 w-7 text-[#9B2335]" />
+                    </div>
+                    <div className="font-semibold text-[#1C1C1C] text-body font-body whitespace-nowrap">Interactive Map</div>
+                  </div>
+                  <div className="text-body text-[#6B6B6B] font-body">Find breweries near you</div>
+                </Link>
+                <Link href="/cities" className="bg-white rounded-lg p-8 lg:p-10 border border-[#E8E6E1] hover:border-[#9B2335] hover:shadow-md transition-all group min-h-[160px] flex flex-col">
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="w-14 h-14 rounded-lg bg-[#9B2335]/10 flex items-center justify-center group-hover:bg-[#9B2335]/20 transition-colors flex-shrink-0">
+                      <Building2 className="h-7 w-7 text-[#9B2335]" />
+                    </div>
+                    <div className="font-semibold text-[#1C1C1C] text-body font-body whitespace-nowrap">Browse by City</div>
+                  </div>
+                  <div className="text-body text-[#6B6B6B] font-body">Explore all cities</div>
+                </Link>
+                <Link href="/amenities" className="bg-white rounded-lg p-8 lg:p-10 border border-[#E8E6E1] hover:border-[#9B2335] hover:shadow-md transition-all group min-h-[160px] flex flex-col">
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="w-14 h-14 rounded-lg bg-[#9B2335]/10 flex items-center justify-center group-hover:bg-[#9B2335]/20 transition-colors flex-shrink-0">
+                      <CheckSquare className="h-7 w-7 text-[#9B2335]" />
+                    </div>
+                    <div className="font-semibold text-[#1C1C1C] text-body font-body whitespace-nowrap">Browse by Amenity</div>
+                  </div>
+                  <div className="text-body text-[#6B6B6B] font-body">Find features you want</div>
+                </Link>
+              </div>
+            </section>
+          </div>
         </div>
       </section>
-      </div>
     </div>
   );
 }

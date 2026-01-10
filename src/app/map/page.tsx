@@ -61,15 +61,15 @@ export default async function MapPage() {
   const hasMapHeroImage = existsSync(mapHeroImageFile);
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-[#FAF9F6] min-h-screen">
       <PageHero
         h1="Brewery Map"
         introText="Explore all Maryland breweries on an interactive map with a filterable directory. Search by name, city, type, or amenities to find the perfect brewery for your visit."
         breadcrumbs={breadcrumbs}
         heroImage={hasMapHeroImage ? mapHeroImagePath : null}
       />
-      <div className="container mx-auto px-4 py-6">
-        <Suspense fallback={<div className="text-center py-8">Loading map...</div>}>
+      <div className="container mx-auto px-4 py-8 md:py-10">
+        <Suspense fallback={<div className="text-center py-8 text-base font-body text-[#6B6B6B]">Loading map...</div>}>
           <MapWithListClient breweries={breweries} />
         </Suspense>
       </div>

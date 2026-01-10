@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Star } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface Review {
   id: string;
@@ -52,7 +51,7 @@ export default function BreweryReviews({
           <Star
             key={i}
             className={`w-4 h-4 ${
-              i < rating ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-300 text-gray-300'
+              i < rating ? 'fill-[#D4A017] text-[#D4A017]' : 'fill-[#E8E6E1] text-[#E8E6E1]'
             }`}
           />
         ))}
@@ -119,27 +118,27 @@ export default function BreweryReviews({
   }
 
   return (
-    <div className="mt-12">
-      <h2 className="text-2xl font-bold text-black mb-6">
-        {totalReviews} {totalReviews === 1 ? 'Review' : 'Reviews'}
+    <div>
+      <h2 className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display">
+        Reviews ({totalReviews})
       </h2>
 
       <div className="space-y-6">
         {paginatedReviews.map((review) => (
-          <div key={review.id} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
+          <div key={review.id} className="border-b border-[#E8E6E1] pb-6 last:border-b-0 last:pb-0">
             <div className="flex items-center gap-3 mb-2">
-              <h3 className="font-semibold text-black">
+              <h3 className="font-semibold text-[#1C1C1C] font-body">
                 {formatReviewerName(review.reviewer_name)}
                 <span className="font-normal">{formatSource(review.source)}</span>
               </h3>
               {review.rating && renderStars(review.rating)}
             </div>
-            <div className="text-sm text-gray-500 mb-3">
+            <div className="text-body text-[#6B6B6B] mb-3 font-body">
               {formatDate(review.review_date, review.review_timestamp)}
             </div>
             {review.review_text && (
               <div>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-[#1C1C1C] leading-relaxed text-body font-body">
                   {expandedReviews.has(review.id) || !shouldTruncate(review.review_text)
                     ? review.review_text
                     : getPreviewText(review.review_text)}
@@ -147,7 +146,7 @@ export default function BreweryReviews({
                 {shouldTruncate(review.review_text) && (
                   <button
                     onClick={() => toggleReview(review.id)}
-                    className="mt-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    className="mt-2 text-body text-[#9B2335] hover:text-[#7A1C2A] font-medium font-body"
                   >
                     {expandedReviews.has(review.id) ? 'Show less' : 'Read more'}
                   </button>
@@ -160,23 +159,23 @@ export default function BreweryReviews({
 
       {totalPages > 1 && (
         <div className="mt-8 flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
+          <button
             onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
+            className="border border-[#E8E6E1] text-[#1C1C1C] hover:bg-[#FAF9F6] hover:border-[#9B2335] px-4 py-2 rounded-md transition-colors font-medium text-body font-body disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
-          </Button>
-          <span className="text-sm text-gray-600">
+          </button>
+          <span className="text-body text-[#6B6B6B] font-body">
             Page {currentPage} of {totalPages}
           </span>
-          <Button
-            variant="outline"
+          <button
             onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
+            className="border border-[#E8E6E1] text-[#1C1C1C] hover:bg-[#FAF9F6] hover:border-[#9B2335] px-4 py-2 rounded-md transition-colors font-medium text-body font-body disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
-          </Button>
+          </button>
         </div>
       )}
     </div>

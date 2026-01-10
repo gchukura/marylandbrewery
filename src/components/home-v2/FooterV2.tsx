@@ -42,8 +42,7 @@ export default function FooterV2() {
           {/* Brewery Enthusiasts Column */}
           <div>
             <h3 
-              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider"
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider font-body"
             >
               Brewery Enthusiasts
             </h3>
@@ -52,8 +51,7 @@ export default function FooterV2() {
                 <li key={link.href}>
                   <Link 
                     href={link.href} 
-                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm"
-                    style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm font-body"
                   >
                     {link.name}
                   </Link>
@@ -65,8 +63,7 @@ export default function FooterV2() {
           {/* Brewery Owners Column */}
           <div>
             <h3 
-              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider"
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider font-body"
             >
               Brewery Owners
             </h3>
@@ -75,8 +72,7 @@ export default function FooterV2() {
                 <li key={link.href}>
                   <Link 
                     href={link.href} 
-                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm"
-                    style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm font-body"
                   >
                     {link.name}
                   </Link>
@@ -88,8 +84,7 @@ export default function FooterV2() {
           {/* About Column */}
           <div>
             <h3 
-              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider"
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider font-body"
             >
               About
             </h3>
@@ -98,8 +93,7 @@ export default function FooterV2() {
                 <li key={link.href}>
                   <Link 
                     href={link.href} 
-                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm"
-                    style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm font-body"
                   >
                     {link.name}
                   </Link>
@@ -112,8 +106,7 @@ export default function FooterV2() {
         {/* Bottom Bar */}
         <div className="border-t border-[#2A2A2A] pt-4">
           <div 
-            className="text-xs text-[#9CA3AF] text-center"
-            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+            className="text-xs text-[#9CA3AF] text-center font-body"
           >
             © {currentYear} MarylandBrewery.com. This site is for information purposes only and not affiliated with any of the companies mentioned. Enjoy responsibly!
           </div>

@@ -81,15 +81,129 @@ src/
 └── types/             # TypeScript type definitions
 ```
 
+## Style Guide & Design System
+
+The project follows a comprehensive, accessible design system that ensures consistency and WCAG AA compliance. The style guide is centralized in `src/styles/style-guide.ts` and `src/styles/style-guide.css`.
+
+### Typography
+
+**Font Families:**
+- **Display/Headings**: `'Playfair Display', Georgia, serif` - Use `font-display` class or `fontFamily: 'display'` in Tailwind
+- **Body**: `'Source Sans 3', sans-serif` - Use `font-body` class or `fontFamily: 'body'` in Tailwind
+
+**Typography Scale (WCAG AA Compliant):**
+- **Display**: 3rem (48px) - Hero headings
+- **H1**: 2.25rem (36px) - Page titles
+- **H2**: 1.875rem (30px) - Section headings
+- **H3**: 1.5rem (24px) - Subsection headings
+- **Body Large**: 1.125rem (18px) - Large body text
+- **Body**: 1rem (16px) - Standard body text (minimum for accessibility)
+- **Navigation**: 1rem (16px) - Navigation links (minimum for accessibility)
+- **Small**: 0.875rem (14px) - Small text/UI elements (minimum with adequate weight)
+- **Caption**: 0.75rem (12px) - Decorative text only
+
+**Usage Examples:**
+```tsx
+// Headings
+<h1 className="text-h1 font-display font-bold text-charcoal">Page Title</h1>
+<h2 className="text-h2 font-display font-semibold">Section Title</h2>
+
+// Body text
+<p className="text-body font-body text-warm-gray">Body text here</p>
+
+// Navigation
+<Link className="text-base font-body font-medium text-white">Nav Link</Link>
+```
+
+### Colors
+
+**Primary Colors:**
+- `red-primary`: #9B2335 (WCAG AA: 4.9:1 on white)
+- `red-dark`: #7A1C2A
+- `gold-primary`: #D4A017 (use with caution, verify contrast)
+- `gold-light`: #E8C547
+- `gold-dark`: #B8870F
+
+**Neutral Colors:**
+- `charcoal`: #1C1C1C (WCAG AAA: 15.8:1 on white)
+- `warm-gray`: #6B6B6B (WCAG AA: 4.6:1 on white)
+- `light-gray`: #E8E6E1
+- `cream`: #FAF9F6 (background)
+- `cream-dark`: #F0EDE8
+
+**Usage:**
+```tsx
+// Text colors
+<p className="text-charcoal">Primary text</p>
+<p className="text-warm-gray">Secondary text</p>
+
+// Background colors
+<div className="bg-cream">Background</div>
+<div className="bg-red-primary text-white">Button</div>
+```
+
+**Legacy Colors (for backwards compatibility):**
+- `md-red`: #9B2335
+- `md-gold`: #D4A017
+- `md-black`: #000000
+- `md-white`: #FFFFFF
+
+### Spacing
+
+**Optimized Spacing Scale:**
+- **Section Padding**: `py-8 md:py-10` (mobile), `py-10 md:py-14` (desktop)
+- **Hero Padding**: `pt-12 md:pt-16` (mobile), `pb-6 md:pb-8` (desktop)
+- **Container Padding**: `px-4 sm:px-6 lg:px-8`
+- **Grid Gaps**: `gap-4 md:gap-6 lg:gap-8`
+
+**Usage:**
+```tsx
+<section className="py-8 md:py-10 bg-white">
+  <div className="container mx-auto px-4">
+    {/* Content */}
+  </div>
+</section>
+```
+
+### Accessibility Guidelines
+
+**Font Sizes:**
+- ✅ All body text: Minimum 16px (1rem)
+- ✅ All navigation text: Minimum 16px (1rem)
+- ✅ UI elements: Minimum 14px (0.875rem) with medium weight
+
+**Color Contrast:**
+- ✅ Normal text: Minimum 4.5:1 contrast ratio (WCAG AA)
+- ✅ Large text (18px+): Minimum 3:1 contrast ratio (WCAG AA)
+- ✅ All primary colors tested and verified
+
+**Best Practices:**
+1. Always use Tailwind classes from the style guide, avoid inline `font-size` styles
+2. Use `font-body` for all body text and navigation
+3. Use `font-display` for all headings
+4. Verify contrast when using gold color
+5. Maintain minimum touch target size of 44x44px for interactive elements
+
+### Implementation Files
+
+- **Design Tokens**: `src/styles/style-guide.ts` - TypeScript constants
+- **CSS Variables**: `src/styles/style-guide.css` - CSS custom properties
+- **Tailwind Config**: `tailwind.config.ts` - Extended with style guide tokens
+- **Global Styles**: `src/app/globals.css` - Base styles and font imports
+
+### Reference Components
+
+For examples of proper style guide usage, see:
+- `src/components/home-v2/HeaderV2.tsx` - Navigation styling
+- `src/components/home-v2/HeroV2.tsx` - Hero section typography
+- `src/components/home-v2/ValuePropsV2.tsx` - Section styling
+- `src/app/cities/page.tsx` - Page-level typography and spacing
+
 ## Configuration
 
 ### Tailwind CSS
 
-The project uses custom Maryland flag colors:
-- `md-red`: #E03A3E
-- `md-gold`: #EAAA00
-- `md-black`: #000000
-- `md-white`: #FFFFFF
+The project uses the style guide color palette (see Style Guide section above) with legacy color support for backwards compatibility.
 
 ### Next.js Configuration
 

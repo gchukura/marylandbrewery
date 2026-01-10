@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { BreweryArticle } from '@/types/brewery';
 
 interface BreweryArticlesProps {
@@ -49,30 +48,30 @@ export default function BreweryArticles({ articles, breweryName }: BreweryArticl
   };
 
   return (
-    <div className="mt-12">
+    <div>
       <div className="mb-4">
-        <h2 className="text-2xl font-bold text-black">
+        <h2 className="text-xl md:text-2xl font-semibold text-[#1C1C1C] font-display">
           News & Articles
         </h2>
       </div>
 
       <div className="space-y-6">
         {displayArticles.map((article) => (
-          <div key={article.id}>
+          <div key={article.id} className="pb-6 border-b border-[#E8E6E1] last:border-b-0 last:pb-0">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <h3 className="text-lg font-semibold mb-2">
+                <h3 className="text-xl font-semibold mb-2 font-body">
                   <a
                     href={article.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
+                    className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline"
                   >
                     {article.title}
                   </a>
                 </h3>
                 {(article.publishedAt || article.source) && (
-                  <div className="text-sm text-gray-500 mb-2">
+                  <div className="text-body text-[#6B6B6B] mb-3 font-body">
                     {article.publishedAt && formatDate(article.publishedAt)}
                     {article.source && (
                       <span>
@@ -83,7 +82,7 @@ export default function BreweryArticles({ articles, breweryName }: BreweryArticl
                   </div>
                 )}
                 {article.description && (
-                  <p className="text-gray-700 line-clamp-2">{article.description}</p>
+                  <p className="text-[#1C1C1C] line-clamp-2 text-body font-body">{article.description}</p>
                 )}
               </div>
               {article.imageUrl && (
@@ -102,13 +101,13 @@ export default function BreweryArticles({ articles, breweryName }: BreweryArticl
       </div>
 
       {hasMore && (
-        <div className="mt-6 text-center">
-          <Button
-            variant="outline"
+        <div className="mt-8 text-center">
+          <button
             onClick={() => setShowAll(!showAll)}
+            className="border border-[#E8E6E1] text-[#1C1C1C] hover:bg-[#FAF9F6] hover:border-[#9B2335] px-6 py-3 rounded-md transition-colors font-medium text-body font-body"
           >
             {showAll ? 'Show Less' : `Show More (${articles.length - INITIAL_DISPLAY_COUNT} more)`}
-          </Button>
+          </button>
         </div>
       )}
     </div>

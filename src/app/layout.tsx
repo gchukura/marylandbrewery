@@ -1,9 +1,26 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
-import Script from "next/script";
+import { Playfair_Display, Source_Sans_3 } from "next/font/google";
 import ConditionalLayoutClient from "@/components/layout/ConditionalLayoutClient";
+import AdSenseScript from "@/components/ads/AdSenseScript";
 import "./globals.css";
 import "@/styles/design-system.css";
+import "@/styles/style-guide.css";
+
+// Optimize font loading with next/font/google
+const playfairDisplay = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-playfair-display",
+});
+
+const sourceSans3 = Source_Sans_3({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  display: "swap",
+  variable: "--font-source-sans-3",
+});
 
 // Revalidate every hour for ISR
 export const revalidate = 3600;
@@ -116,7 +133,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className={`scroll-smooth ${playfairDisplay.variable} ${sourceSans3.variable}`}>
       <head>
         {/* WebSite Schema for Sitelinks Search Box */}
         <script
@@ -151,14 +168,8 @@ export default function RootLayout({
         <meta name="theme-color" content="#9B2335" />
         <meta name="msapplication-TileColor" content="#9B2335" />
       </head>
-      <body className="min-h-screen bg-gray-50 antialiased" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
-        <Script
-          id="adsbygoogle-init"
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4357894821158922"
-          crossOrigin="anonymous"
-          strategy="lazyOnload"
-        />
+      <body className="min-h-screen bg-gray-50 antialiased">
+        <AdSenseScript />
         <ConditionalLayoutClient>
           {children}
         </ConditionalLayoutClient>

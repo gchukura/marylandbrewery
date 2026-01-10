@@ -98,10 +98,10 @@ export default async function CountiesIndexPage() {
           <div className="absolute inset-0 md-pattern-bg pointer-events-none" />
         )}
         
-        <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
+        <div className="container mx-auto px-4 py-10 md:py-14 relative z-10">
           {/* Breadcrumbs */}
           <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className={`flex items-center flex-wrap gap-2 text-sm ${hasCountiesHeroImage ? 'text-white/90' : ''}`} style={{ fontFamily: "'Source Sans 3', sans-serif", color: hasCountiesHeroImage ? undefined : '#6B6B6B' }}>
+            <ol className={`flex items-center flex-wrap gap-2 text-sm font-body ${hasCountiesHeroImage ? 'text-white/90' : 'text-[#6B6B6B]'}`}>
               <li>
                 <Link 
                   href="/" 
@@ -110,7 +110,7 @@ export default async function CountiesIndexPage() {
                   Maryland Breweries
                 </Link>
               </li>
-              <li><ChevronRight className={`h-4 w-4 mx-2 ${hasCountiesHeroImage ? 'text-white/70' : ''}`} /></li>
+              <li><ChevronRight className={`h-4 w-4 mx-2 ${hasCountiesHeroImage ? 'text-white/70' : 'text-[#6B6B6B]'}`} /></li>
               <li>
                 <Link 
                   href="/counties" 
@@ -124,24 +124,23 @@ export default async function CountiesIndexPage() {
 
           {/* H1 Title */}
           <h1 
-            className={`text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${
+            className={`text-h1 md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6 leading-snug font-display ${
               hasCountiesHeroImage 
                 ? 'text-white drop-shadow-lg' 
                 : 'text-[#1C1C1C]'
             }`}
-            style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: hasCountiesHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
+            style={hasCountiesHeroImage ? { textShadow: '2px 2px 4px rgba(0,0,0,0.5)' } : undefined}
           >
             Maryland Counties with Breweries
           </h1>
 
           {/* Intro Paragraph */}
           <p 
-            className={`text-lg md:text-xl text-[#6B6B6B] max-w-3xl leading-relaxed ${
+            className={`text-body-large md:text-xl max-w-3xl leading-snug font-body ${
               hasCountiesHeroImage 
                 ? 'text-white/95 drop-shadow-md' 
                 : 'text-[#6B6B6B]'
             }`}
-            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
             Browse all counties in Maryland with craft breweries. From urban centers like Baltimore City and Montgomery County to rural areas across the state, discover breweries organized by county.
           </p>
@@ -149,29 +148,24 @@ export default async function CountiesIndexPage() {
       </section>
 
       {/* All Counties Listing - 5 columns like BimmerShops */}
-      <section className="bg-white py-12 md:py-16 border-b border-[#E8E6E1]">
+      <section className="bg-white py-10 md:py-14 border-b border-[#E8E6E1]">
         <div className="container mx-auto px-4">
           <div className="mb-8">
             <div className="section-divider mb-4" />
             <h2 
-              className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-3"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="text-h2 md:text-3xl lg:text-4xl font-bold text-[#1C1C1C] mb-3 font-display"
             >
               Find Maryland Breweries in Your County
             </h2>
           </div>
 
           {/* All Counties Grid - 5 columns like BimmerShops */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-1">
             {items.map((county) => (
               <Link
                 key={county.slug}
                 href={county.url}
-                className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-sm border-b border-[#E5E7EB] last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm"
-                style={{ 
-                  fontFamily: "'Source Sans 3', sans-serif",
-                  fontWeight: 500,
-                }}
+                className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-base border-b border-gray-200 last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm font-body font-medium"
               >
                 <span className="relative inline-block">
                   {county.name.replace(/\s+County$/i, '')}
@@ -185,24 +179,22 @@ export default async function CountiesIndexPage() {
       </section>
 
       {/* About Section */}
-      <section className="bg-white py-12 md:py-16 border-t border-[#E8E6E1]">
+      <section className="bg-white py-10 md:py-14 border-t border-[#E8E6E1]">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 
-            className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-6"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="text-h2 md:text-3xl lg:text-4xl font-bold text-[#1C1C1C] mb-6 font-display"
           >
             About Maryland Brewery Directory
           </h2>
           <div 
-            className="prose prose-lg text-[#6B6B6B] space-y-4"
-            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+            className="prose prose-lg text-[#6B6B6B] space-y-4 font-body"
           >
-            <p>
+            <p className="text-body leading-loose">
               Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 
               We connect beer enthusiasts with local breweries, providing detailed information about locations, 
               hours, amenities, and beer selections.
             </p>
-            <p>
+            <p className="text-body leading-loose">
               <strong className="text-[#1C1C1C]">Brewery Owners:</strong> Want to list your brewery or update 
               your information? <Link href="/contact" className="text-[#9B2335] hover:text-[#D4A017] transition-colors underline">
                 Contact us

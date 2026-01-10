@@ -55,37 +55,13 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
   }
 
   return (
-    <section className="relative pt-8 md:pt-12 pb-20 md:pb-28 bg-gradient-to-b from-[#FAF9F6] via-white to-[#FAF9F6] overflow-hidden">
-      {/* Subtle background texture */}
-      <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
-        <div 
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-              repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                #9B2335 2px,
-                #9B2335 4px
-              ),
-              repeating-linear-gradient(
-                90deg,
-                transparent,
-                transparent 2px,
-                #D4A017 2px,
-                #D4A017 4px
-              )
-            `,
-            backgroundSize: '40px 40px',
-          }}
-        />
-      </div>
-
-      <div className="container mx-auto px-4 relative z-10">
-        {/* Tabs - Bold, distinctive design */}
-        <div className="flex items-center justify-center gap-0 mb-8 sm:mb-12 max-w-4xl mx-auto px-2">
-          <div className="relative flex bg-white/80 backdrop-blur-sm rounded-t-xl border-2 border-[#E8E6E1] shadow-lg overflow-hidden w-full sm:w-auto">
+    <section className="relative pt-8 md:pt-10 pb-8 md:pb-10 bg-white">
+      <div className="container mx-auto px-4">
+        {/* Card wrapper with shadow */}
+        <div className="bg-white rounded-lg shadow-md border border-[#E8E6E1] p-6 md:p-8 max-w-7xl mx-auto">
+          {/* Tabs - Bold, distinctive design */}
+          <div className="flex items-center justify-center gap-0 mb-8 sm:mb-10 max-w-5xl mx-auto px-2">
+            <div className="relative flex bg-white/80 backdrop-blur-sm rounded-t-xl border-2 border-[#E8E6E1] shadow-lg overflow-hidden w-full sm:w-auto">
             {/* Active tab indicator background */}
             <div 
               className={`absolute top-0 h-full bg-gradient-to-br from-[#9B2335] to-[#7A1C2A] transition-all duration-500 ease-out rounded-t-xl ${
@@ -95,17 +71,11 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
             
             <button
               onClick={() => setActiveTab('city')}
-              className={`relative z-10 py-4 sm:py-5 px-4 sm:px-10 text-center font-semibold transition-all duration-300 flex-1 sm:flex-none min-h-[48px] sm:min-h-0 ${
+              className={`relative z-10 py-4 sm:py-5 px-6 sm:px-12 text-center font-semibold transition-all duration-300 flex-1 sm:flex-none min-h-[48px] sm:min-h-0 text-xs sm:text-sm uppercase tracking-wide font-body whitespace-nowrap ${
                 activeTab === 'city'
                   ? 'text-white'
                   : 'text-[#6B6B6B] hover:text-[#1C1C1C]'
               }`}
-              style={{ 
-                fontFamily: "'Source Sans 3', sans-serif",
-                letterSpacing: '0.025em',
-                textTransform: 'uppercase',
-                fontSize: '0.75rem sm:0.875rem',
-              }}
             >
               <span className="relative inline-block w-full sm:w-auto">
                 <span className="hidden sm:inline">Breweries by City</span>
@@ -120,17 +90,11 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
             
             <button
               onClick={() => setActiveTab('county')}
-              className={`relative z-10 py-4 sm:py-5 px-4 sm:px-10 text-center font-semibold transition-all duration-300 flex-1 sm:flex-none min-h-[48px] sm:min-h-0 ${
+              className={`relative z-10 py-4 sm:py-5 px-6 sm:px-12 text-center font-semibold transition-all duration-300 flex-1 sm:flex-none min-h-[48px] sm:min-h-0 text-xs sm:text-sm uppercase tracking-wide font-body whitespace-nowrap ${
                 activeTab === 'county'
                   ? 'text-white'
                   : 'text-[#6B6B6B] hover:text-[#1C1C1C]'
               }`}
-              style={{ 
-                fontFamily: "'Source Sans 3', sans-serif",
-                letterSpacing: '0.025em',
-                textTransform: 'uppercase',
-                fontSize: '0.75rem sm:0.875rem',
-              }}
             >
               <span className="relative inline-block w-full sm:w-auto">
                 <span className="hidden sm:inline">Breweries by County</span>
@@ -141,12 +105,12 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
               </span>
             </button>
           </div>
-        </div>
+          </div>
 
-        {/* Tab Content - 2 columns on mobile, more on larger screens */}
-        <div className={`max-w-7xl mx-auto transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+          {/* Tab Content - 2 columns on mobile, more on larger screens */}
+          <div className={`transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
           {activeTab === 'city' ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 sm:gap-x-8 gap-y-0">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-0">
               {cityColumns.map((column, colIndex) => (
                 <div 
                   key={colIndex} 
@@ -159,11 +123,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
                     <Link
                       key={city.slug}
                       href={`/cities/${city.slug}/breweries`}
-                      className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-sm border-b border-[#E5E7EB] last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm"
-                      style={{ 
-                        fontFamily: "'Source Sans 3', sans-serif",
-                        fontWeight: 500,
-                      }}
+                      className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-base border-b border-gray-200 last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm font-body font-medium"
                     >
                       <span className="relative inline-block">
                         {city.name}
@@ -177,7 +137,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 sm:gap-x-8 gap-y-0">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-0">
               {countyColumns.map((column, colIndex) => (
                 <div 
                   key={colIndex} 
@@ -190,11 +150,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
                     <Link
                       key={county.slug}
                       href={`/counties/${county.slug}/breweries`}
-                      className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-sm border-b border-[#E5E7EB] last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm"
-                      style={{ 
-                        fontFamily: "'Source Sans 3', sans-serif",
-                        fontWeight: 500,
-                      }}
+                      className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-base border-b border-gray-200 last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm font-body font-medium"
                     >
                       <span className="relative inline-block">
                         {county.name.replace(/\s+County$/i, '')}
@@ -208,6 +164,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
               ))}
             </div>
           )}
+          </div>
         </div>
       </div>
 

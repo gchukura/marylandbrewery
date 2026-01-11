@@ -211,7 +211,6 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                           <div className="text-sm font-bold text-gray-700 mt-0.5 mb-1">
                             Maryland Brewery in {brewery.city}, MD
                           </div>
-<<<<<<< HEAD
                           {/* Reviews below name */}
                           {brewery.googleRating && (
                             <div className="flex items-center gap-1 mt-1">
@@ -221,73 +220,6 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                               </span>
                             </div>
                           )}
-=======
-                          {/* Reviews below name - same star handling as brewery detail page */}
-                          {(() => {
-                            // Calculate the rating to display - use combined average if both Google and Yelp exist
-                            const hasGoogle = brewery.googleRating && brewery.googleRating > 0 && brewery.googleRatingCount && brewery.googleRatingCount > 0;
-                            const hasYelp = (brewery as any).yelpRating && (brewery as any).yelpRating > 0 && (brewery as any).yelpRatingCount && (brewery as any).yelpRatingCount > 0;
-                            
-                            let displayRating: number | null = null;
-                            let totalReviewCount = 0;
-                            
-                            if (hasGoogle && hasYelp) {
-                              // Calculate combined weighted average
-                              const totalReviews = brewery.googleRatingCount! + (brewery as any).yelpRatingCount!;
-                              displayRating = (brewery.googleRating! * brewery.googleRatingCount! + (brewery as any).yelpRating! * (brewery as any).yelpRatingCount!) / totalReviews;
-                              totalReviewCount = totalReviews;
-                            } else if (hasGoogle) {
-                              displayRating = brewery.googleRating!;
-                              totalReviewCount = (brewery as any).actualReviewCount || brewery.googleRatingCount || 0;
-                            } else if (hasYelp) {
-                              displayRating = (brewery as any).yelpRating!;
-                              totalReviewCount = (brewery as any).yelpRatingCount || 0;
-                            }
-                            
-                            if (!displayRating) return null;
-                            
-                            return (
-                              <div className="flex items-center gap-1 mt-1">
-                                <div className="flex items-center">
-                                  {[...Array(5)].map((_, i) => {
-                                    const decimal = displayRating! % 1;
-                                    const fullStars = Math.floor(displayRating!);
-                                    // Round up to full star if decimal >= 0.75
-                                    const effectiveFullStars = decimal >= 0.75 ? fullStars + 1 : fullStars;
-                                    const hasHalfStar = decimal >= 0.25 && decimal < 0.75;
-                                    const isFull = i < effectiveFullStars;
-                                    const isHalf = i === fullStars && hasHalfStar;
-                                    
-                                    return (
-                                      <div key={i} className="relative h-3 w-3 flex-shrink-0">
-                                        {/* Base empty star */}
-                                        <Star className="h-3 w-3 absolute text-gray-300" />
-                                        {/* Full star overlay */}
-                                        {isFull && (
-                                          <Star className="h-3 w-3 absolute fill-[#D4A017] text-[#D4A017]" />
-                                        )}
-                                        {/* Half star overlay */}
-                                        {isHalf && (
-                                          <div className="absolute overflow-hidden" style={{ width: '50%' }}>
-                                            <Star className="h-3 w-3 fill-[#D4A017] text-[#D4A017]" />
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                                <span className="text-xs font-semibold text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
-                                  {displayRating.toFixed(1)}
-                                </span>
-                                {totalReviewCount > 0 && (
-                                  <span className="text-xs text-gray-500" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
-                                    ({totalReviewCount})
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          })()}
->>>>>>> 258d37a6754b4a766d41d3d3f95f7bc9970ff784
                           {/* Distance from neighborhood or city */}
                           {neighborhood && neighborhood.latitude && neighborhood.longitude && brewery.latitude && brewery.longitude && (
                             <div className="text-sm text-gray-600 mt-1">
@@ -300,7 +232,6 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                               {brewery.distance.toFixed(1)} miles away from {cityName}, MD
                             </div>
                           )}
-<<<<<<< HEAD
                           {(brewery.amenities || brewery.features) && (
                             <div className="flex flex-wrap gap-1 mt-2">
                               {((brewery.amenities || brewery.features) as string[]).slice(0, 3).map((a: string) => (
@@ -318,8 +249,6 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                               )}
                             </div>
                           )}
-=======
->>>>>>> 258d37a6754b4a766d41d3d3f95f7bc9970ff784
                         </div>
                         
                         {/* Address Column */}

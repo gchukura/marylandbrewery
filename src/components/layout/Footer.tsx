@@ -139,7 +139,12 @@ export default function Footer() {
               fontSize: '0.75rem'
             }}
           >
-            © {currentYear} MarylandBrewery.com. This site is for information purposes only and not affiliated with any of the companies mentioned. Enjoy responsibly!
+            <div className="mb-1">
+              MarylandBrewery.com is a copyright © {currentYear} of <Link href="https://bluestonebrands.com" className="text-white underline hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">BluestoneBrands.com</Link>
+            </div>
+            <div>
+              This site is for information purposes only and not affiliated with any of the companies mentioned. Enjoy responsibly!
+            </div>
           </div>
         </div>
       </div>

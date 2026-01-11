@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronRight, Newspaper } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { existsSync } from 'fs';
 import { join } from 'path';
 
@@ -100,19 +100,6 @@ export default function BlogPage() {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
-            {/* Icon */}
-            <div className="w-24 h-24 mx-auto mb-8 rounded-full bg-[#9B2335]/10 flex items-center justify-center">
-              <Newspaper className="w-12 h-12 text-[#9B2335]" />
-            </div>
-
-            {/* Coming Soon Badge */}
-            <span 
-              className="inline-block px-4 py-2 bg-[#D4A017]/20 text-[#8B6914] text-sm font-semibold rounded-full mb-6"
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-            >
-              Coming Soon
-            </span>
-
             <h2 
               className="text-2xl md:text-3xl font-bold text-[#1C1C1C] mb-4"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}

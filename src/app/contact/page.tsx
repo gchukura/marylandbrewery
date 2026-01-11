@@ -62,6 +62,7 @@ export default function ContactPage() {
       <section className="py-10 md:py-14">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
+            {/* Form Section */}
             <div className="bg-white rounded-lg shadow-sm border border-[#E8E6E1] p-6 md:p-8">
               <form onSubmit={handleSubmit} className="space-y-6 font-body">
                 <div>
@@ -119,40 +120,40 @@ export default function ContactPage() {
                 {status === "error" && <p className="text-red-700 font-medium mt-2 text-body-large font-body">{message}</p>}
               </form>
             </div>
+          </div>
 
-            {/* Related Links Section */}
-            <section className="mt-12 pt-8 border-t border-[#E8E6E1]">
-              <h2 className="text-h2 font-bold text-[#1C1C1C] mb-8 font-display">Explore More</h2>
-              <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-                <Link href="/map" className="bg-white rounded-lg p-8 lg:p-10 border border-[#E8E6E1] hover:border-[#9B2335] hover:shadow-md transition-all group min-h-[160px] flex flex-col">
+          {/* Related Links Section - Wider Container */}
+          <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-[#E8E6E1]">
+            <h2 className="text-h2 font-bold text-[#1C1C1C] mb-8 font-display">Explore More</h2>
+            <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+                <Link href="/map" className="bg-white rounded-lg p-8 lg:p-10 border border-[#E8E6E1] hover:border-[#9B2335] hover:shadow-md transition-all group min-h-[160px] flex flex-col min-w-0">
                   <div className="flex items-center gap-4 mb-5 flex-shrink-0">
                     <div className="w-14 h-14 rounded-lg bg-[#9B2335]/10 flex items-center justify-center group-hover:bg-[#9B2335]/20 transition-colors flex-shrink-0">
                       <Map className="h-7 w-7 text-[#9B2335]" />
                     </div>
-                    <h3 className="font-semibold text-[#1C1C1C] text-body font-body">Interactive Map</h3>
+                    <h3 className="font-semibold text-[#1C1C1C] text-body font-body whitespace-nowrap">Interactive Map</h3>
                   </div>
-                  <p className="text-body text-[#6B6B6B] font-body mt-auto">Find breweries near you</p>
+                  <p className="text-body text-[#6B6B6B] font-body mt-auto whitespace-nowrap">Find breweries near you</p>
                 </Link>
-                <Link href="/cities" className="bg-white rounded-lg p-8 lg:p-10 border border-[#E8E6E1] hover:border-[#9B2335] hover:shadow-md transition-all group min-h-[160px] flex flex-col">
+                <Link href="/cities" className="bg-white rounded-lg p-8 lg:p-10 border border-[#E8E6E1] hover:border-[#9B2335] hover:shadow-md transition-all group min-h-[160px] flex flex-col min-w-0">
                   <div className="flex items-center gap-4 mb-5 flex-shrink-0">
                     <div className="w-14 h-14 rounded-lg bg-[#9B2335]/10 flex items-center justify-center group-hover:bg-[#9B2335]/20 transition-colors flex-shrink-0">
                       <Building2 className="h-7 w-7 text-[#9B2335]" />
                     </div>
-                    <h3 className="font-semibold text-[#1C1C1C] text-body font-body">Browse by City</h3>
+                    <h3 className="font-semibold text-[#1C1C1C] text-body font-body whitespace-nowrap">Browse by City</h3>
                   </div>
-                  <p className="text-body text-[#6B6B6B] font-body mt-auto">Explore all cities</p>
+                  <p className="text-body text-[#6B6B6B] font-body mt-auto whitespace-nowrap">Explore all cities</p>
                 </Link>
-                <Link href="/amenities" className="bg-white rounded-lg p-8 lg:p-10 border border-[#E8E6E1] hover:border-[#9B2335] hover:shadow-md transition-all group min-h-[160px] flex flex-col">
+                <Link href="/amenities" className="bg-white rounded-lg p-8 lg:p-10 border border-[#E8E6E1] hover:border-[#9B2335] hover:shadow-md transition-all group min-h-[160px] flex flex-col min-w-0">
                   <div className="flex items-center gap-4 mb-5 flex-shrink-0">
                     <div className="w-14 h-14 rounded-lg bg-[#9B2335]/10 flex items-center justify-center group-hover:bg-[#9B2335]/20 transition-colors flex-shrink-0">
                       <CheckSquare className="h-7 w-7 text-[#9B2335]" />
                     </div>
-                    <h3 className="font-semibold text-[#1C1C1C] text-body font-body">Browse by Amenity</h3>
+                    <h3 className="font-semibold text-[#1C1C1C] text-body font-body whitespace-nowrap">Browse by Amenity</h3>
                   </div>
-                  <p className="text-body text-[#6B6B6B] font-body mt-auto">Find features you want</p>
+                  <p className="text-body text-[#6B6B6B] font-body mt-auto whitespace-nowrap">Find features you want</p>
                 </Link>
-              </div>
-            </section>
+            </div>
           </div>
         </div>
       </section>

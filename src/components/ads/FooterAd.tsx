@@ -9,10 +9,22 @@ import { useEffect, useState, useRef } from 'react';
  * Ad unit: MarylandBrewery: Leaderboard-Bottom
  * 
  * Automatically hides the ad container if no ad is displayed (e.g., ad blocker active)
+ * 
+ * @param onVisibilityChange - Optional callback when visibility changes (e.g., when ad is blocked)
  */
-export default function FooterAd() {
+interface FooterAdProps {
+  onVisibilityChange?: (isVisible: boolean) => void;
+}
+
+export default function FooterAd({ onVisibilityChange }: FooterAdProps) {
   const [isVisible, setIsVisible] = useState(true); // Start visible to allow ads to load
   const adRef = useRef<HTMLDivElement>(null);
+  const onVisibilityChangeRef = useRef(onVisibilityChange);
+  
+  // Keep callback ref updated
+  useEffect(() => {
+    onVisibilityChangeRef.current = onVisibilityChange;
+  }, [onVisibilityChange]);
 
   useEffect(() => {
     try {
@@ -22,6 +34,7 @@ export default function FooterAd() {
     } catch (error) {
       console.error('AdSense error:', error);
       setIsVisible(false);
+      onVisibilityChangeRef.current?.(false);
     }
   }, []);
 
@@ -52,6 +65,13 @@ export default function FooterAd() {
       // This ensures we only hide when ad blocker is actually preventing ads
       if (!scriptLoaded && !adScriptElement && !hasContent && height <= 50) {
         setIsVisible(false);
+        onVisibilityChangeRef.current?.(false);
+      } else if (hasContent || height > 60) {
+        // Ad has loaded, ensure visible
+        if (!isVisible) {
+          setIsVisible(true);
+          onVisibilityChangeRef.current?.(true);
+        }
       }
       // Otherwise, keep it visible - even if ad hasn't loaded yet, it might still load
     };

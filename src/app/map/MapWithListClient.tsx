@@ -142,102 +142,115 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
               {paginatedBreweries.map((brewery) => {
                 const slug = (brewery as any).slug || brewery.id;
                 return (
-                  <Link
-                    key={brewery.id}
-                    href={`/breweries/${slug}`}
-                    className="block p-4 font-body"
-                  >
-                    <div className="flex items-start gap-3">
-                      {/* Logo on the left - square with border like inspiration */}
-                      {brewery.logo ? (
-                        <div className="flex-shrink-0">
-                          <div className="w-16 h-16 border-2 border-[#E8E6E1] rounded bg-white flex items-center justify-center p-1.5 shadow-sm">
-                            <BreweryLogo 
-                              logo={brewery.logo} 
-                              breweryName={brewery.name}
-                              size="sm"
-                              className="w-full h-full"
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        // Placeholder for breweries without logos
-                        <div className="flex-shrink-0">
-                          <div className="w-16 h-16 border-2 border-[#E8E6E1] rounded bg-[#FAF9F6] flex items-center justify-center">
-                            <div className="text-[#6B6B6B] text-xs font-semibold text-center px-1 font-body">
-                              {brewery.name?.substring(0, 2).toUpperCase() || 'BW'}
+                  <div key={brewery.id} className="p-4 font-body">
+                    <Link
+                      href={`/breweries/${slug}`}
+                      className="block"
+                    >
+                      <div className="flex items-start gap-3">
+                        {/* Logo on the left - square with border like inspiration */}
+                        {brewery.logo ? (
+                          <div className="flex-shrink-0">
+                            <div className="w-16 h-16 border-2 border-[#E8E6E1] rounded bg-white flex items-center justify-center p-1.5 shadow-sm">
+                              <BreweryLogo 
+                                logo={brewery.logo} 
+                                breweryName={brewery.name}
+                                size="sm"
+                                className="w-full h-full"
+                              />
                             </div>
                           </div>
-                        </div>
-                      )}
-                      
-                      {/* Content on the right - Two columns */}
-                      <div className="flex-1 min-w-0 grid grid-cols-2 gap-4">
-                        {/* Name Column */}
-                        <div className="min-w-0">
-                          <h3 className="font-semibold text-[#9B2335] text-base mb-1">
-                            {brewery.name}
-                          </h3>
-                          {/* Maryland Brewery in City, MD */}
-                          {brewery.city && (
-                            <div className="text-sm font-bold text-[#1C1C1C] mb-1 font-body">
-                              Maryland Brewery in {brewery.city}, MD
-                            </div>
-                          )}
-                          {/* Reviews below name */}
-                          {brewery.googleRating && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="text-sm text-[#1C1C1C] font-body">
-                                {brewery.googleRating.toFixed(1)}{brewery.googleRatingCount ? ` - ${brewery.googleRatingCount} ${brewery.googleRatingCount === 1 ? 'review' : 'reviews'}` : ''}
-                              </span>
-                            </div>
-                          )}
-                          {(brewery.amenities || brewery.features) && (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {((brewery.amenities || brewery.features) as string[]).slice(0, 3).map((a: string) => (
-                                <span
-                                  key={a}
-                                  className="text-sm bg-[#FAF9F6] text-[#1C1C1C] px-2 py-1 rounded font-body"
-                                >
-                                  {a}
-                                </span>
-                              ))}
-                              {((brewery.amenities || brewery.features) as string[]).length > 3 && (
-                                <span className="text-sm text-[#6B6B6B] font-body">
-                                  +{((brewery.amenities || brewery.features) as string[]).length - 3} more
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Address Column */}
-                        <div className="min-w-0 text-sm text-[#6B6B6B] font-body">
-                          <div className="flex items-start mb-1">
-                            <MapPin className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
-                            <div className="flex-1">
-                              {brewery.street && (
-                                <div>{brewery.street}</div>
-                              )}
-                              <div>
-                                {[brewery.city, brewery.state, brewery.zip]
-                                  .filter(Boolean)
-                                  .join(', ')}
+                        ) : (
+                          // Placeholder for breweries without logos
+                          <div className="flex-shrink-0">
+                            <div className="w-16 h-16 border-2 border-[#E8E6E1] rounded bg-[#FAF9F6] flex items-center justify-center">
+                              <div className="text-[#6B6B6B] text-xs font-semibold text-center px-1 font-body">
+                                {brewery.name?.substring(0, 2).toUpperCase() || 'BW'}
                               </div>
                             </div>
                           </div>
-                          {/* Phone below address */}
-                          {brewery.phone && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <Phone className="h-4 w-4 flex-shrink-0" />
-                              <span>{brewery.phone}</span>
+                        )}
+                        
+                        {/* Content on the right - Two columns */}
+                        <div className="flex-1 min-w-0 grid grid-cols-2 gap-4">
+                          {/* Name Column */}
+                          <div className="min-w-0">
+                            <h3 className="font-semibold text-[#9B2335] text-base mb-1">
+                              {brewery.name}
+                            </h3>
+                            {/* Maryland Brewery in City, MD */}
+                            {brewery.city && (
+                              <div className="text-sm font-bold text-[#1C1C1C] mb-1 font-body">
+                                Maryland Brewery in {brewery.city}, MD
+                              </div>
+                            )}
+                            {/* Reviews below name */}
+                            {brewery.googleRating && (
+                              <div className="flex items-center gap-1 mt-1">
+                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                <span className="text-sm text-[#1C1C1C] font-body">
+                                  {brewery.googleRating.toFixed(1)}{brewery.googleRatingCount ? ` - ${brewery.googleRatingCount} ${brewery.googleRatingCount === 1 ? 'review' : 'reviews'}` : ''}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Address Column */}
+                          <div className="min-w-0 text-sm text-[#6B6B6B] font-body">
+                            <div className="flex items-start mb-1">
+                              <MapPin className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                              <div className="flex-1">
+                                {brewery.street && (
+                                  <div>{brewery.street}</div>
+                                )}
+                                <div>
+                                  {[brewery.city, brewery.state, brewery.zip]
+                                    .filter(Boolean)
+                                    .join(', ')}
+                                </div>
+                              </div>
                             </div>
-                          )}
+                            {/* Phone below address */}
+                            {brewery.phone && (
+                              <div className="flex items-center gap-1 mt-1">
+                                <Phone className="h-4 w-4 flex-shrink-0" />
+                                <span>{brewery.phone}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                    
+                    {/* Amenities spanning full width below both columns - outside the Link to avoid nested anchors */}
+                    {(() => {
+                      const amenityList = (brewery.amenities || brewery.features || []) as string[];
+                      if (!amenityList || amenityList.length === 0) return null;
+                      
+                      // Sort amenities alphabetically
+                      const sortedAmenities = [...amenityList].sort((a, b) => 
+                        (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' })
+                      );
+                      
+                      return (
+                        <div className="flex flex-wrap gap-x-1.5 gap-y-1 mt-6">
+                          {sortedAmenities.map((a: string) => {
+                            if (!a) return null;
+                            const amenitySlug = slugify(a);
+                            return (
+                              <Link
+                                key={a}
+                                href={`/amenities/${amenitySlug}`}
+                                className="inline-flex items-center justify-center text-xs text-[#9B2335] bg-white border border-[#9B2335] hover:bg-[#9B2335] hover:text-white px-2 py-1 rounded transition-colors font-medium whitespace-nowrap font-body"
+                              >
+                                {a}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
+                  </div>
                 );
               })}
             </div>

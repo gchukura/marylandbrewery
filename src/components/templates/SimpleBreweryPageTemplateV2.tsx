@@ -848,11 +848,11 @@ export default function SimpleBreweryPageTemplateV2({
                                 <img 
                                   src={membershipIcon} 
                                   alt={`${membership.name} membership`}
-                                  className="h-36 w-36 object-contain"
+                                  className="h-20 w-20 object-contain"
                                 />
                               ) : (
-                                <div className="h-36 w-36 bg-gray-300 rounded flex items-center justify-center">
-                                  <span className="text-lg text-gray-600">🏆</span>
+                                <div className="h-20 w-20 bg-gray-300 rounded flex items-center justify-center">
+                                  <span className="text-sm text-gray-600">🏆</span>
                                 </div>
                               )}
                             </div>

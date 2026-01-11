@@ -29,14 +29,13 @@ export default function FooterAd() {
     if (!adRef.current) return;
 
     const checkAdDisplay = () => {
-      const adElement = adRef.current?.querySelector('.adsbygoogle');
+      const adElement = adRef.current?.querySelector('.adsbygoogle') as HTMLElement | null;
       if (!adElement) {
         setIsVisible(false);
         return;
       }
 
       // Check if ad element has actual content/height
-      const computedStyle = window.getComputedStyle(adElement);
       const height = adElement.offsetHeight;
       const hasContent = adElement.children.length > 0 || height > 60; // More than minHeight
 

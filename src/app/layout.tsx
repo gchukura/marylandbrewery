@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
+import Script from "next/script";
 import ConditionalLayoutClient from "@/components/layout/ConditionalLayoutClient";
 import "./globals.css";
 import "@/styles/design-system.css";
@@ -151,6 +152,13 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#9B2335" />
       </head>
       <body className="min-h-screen bg-gray-50 antialiased" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+        <Script
+          id="adsbygoogle-init"
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4357894821158922"
+          crossOrigin="anonymous"
+          strategy="lazyOnload"
+        />
         <ConditionalLayoutClient>
           {children}
         </ConditionalLayoutClient>

@@ -30,6 +30,19 @@ export default function HeaderV2() {
     };
   }, [mobileMenuOpen]);
 
+  // Close menu on ESC key press
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [mobileMenuOpen]);
+
   return (
     <>
       <header className="bg-[#9B2335] sticky top-0 z-50 safe-top">
@@ -85,32 +98,48 @@ export default function HeaderV2() {
             <div className="lg:hidden w-[44px]"></div>
           </div>
 
-          {/* Mobile Navigation - Dropdown menu in one column */}
-          {mobileMenuOpen && (
-            <>
-              {/* Backdrop - click to close */}
-              <div 
-                className="lg:hidden fixed inset-0 bg-black/50 z-40 top-16 sm:top-20"
-                onClick={() => setMobileMenuOpen(false)}
-                aria-hidden="true"
-              />
-              {/* Mobile menu panel - dropdown, doesn't span full vertical space */}
-              <div className="lg:hidden absolute left-0 top-full w-full bg-[#9B2335] shadow-xl z-50 border-t border-[#7A1C2A]">
-                <nav className="py-2" aria-label="Mobile navigation">
-                  {NAVIGATION_ITEMS.map((item) => (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      className="block px-6 py-4 text-white hover:text-[#D4A017] hover:bg-[#7A1C2A]/30 active:bg-[#7A1C2A]/50 transition-colors font-medium text-body-large min-h-[48px] flex items-center touch-manipulation border-b border-[#7A1C2A]/30 last:border-b-0 font-body"
+          {/* Mobile Navigation - Side Menu */}
+          <>
+            {/* Backdrop */}
+            <div 
+              className={`lg:hidden fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ease-in-out ${
+                mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+              aria-hidden="true"
+            />
+            {/* Side Menu Panel */}
+            <div className={`lg:hidden fixed left-0 top-0 h-full w-64 sm:w-80 bg-[#9B2335] shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
+              mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}>
+                <div className="flex flex-col h-full">
+                  {/* Menu Header */}
+                  <div className="flex items-center justify-between p-4 border-b border-[#7A1C2A]">
+                    <span className="text-white font-semibold text-lg font-body">Menu</span>
+                    <button
                       onClick={() => setMobileMenuOpen(false)}
+                      className="p-2 text-white hover:text-[#D4A017] transition-colors"
+                      aria-label="Close menu"
                     >
-                      {item.label}
-                    </Link>
-                  ))}
-                </nav>
+                      <X className="h-6 w-6" />
+                    </button>
+                  </div>
+                  {/* Navigation Links */}
+                  <nav className="flex-1 py-4 overflow-y-auto" aria-label="Mobile navigation">
+                    {NAVIGATION_ITEMS.map((item) => (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        className="block w-full px-6 py-4 text-white hover:text-[#D4A017] hover:bg-[#7A1C2A]/30 active:bg-[#7A1C2A]/50 transition-colors font-medium text-body-large min-h-[48px] flex items-center touch-manipulation border-b border-[#7A1C2A]/30 last:border-b-0 font-body"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </nav>
+                </div>
               </div>
-            </>
-          )}
+          </>
         </div>
       </header>
       {/* Gold border at bottom */}

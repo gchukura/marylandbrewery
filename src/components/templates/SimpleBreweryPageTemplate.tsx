@@ -544,8 +544,13 @@ export default function SimpleBreweryPageTemplate({
           
           {/* Logo overlapping into header - Positioned to sit on top of hero and be fully visible */}
           {brewery.logo && (
-            <div className="absolute bottom-0 left-4 sm:left-6 md:left-8 lg:left-8" style={{ transform: 'translateY(50%)', zIndex: 20, maxWidth: 'calc(100% - 1rem)' }}>
-              <div className="bg-white p-1.5 sm:p-2 rounded-lg shadow-lg flex items-center justify-center h-24 w-24 sm:h-32 sm:w-32 md:h-40 md:w-40 lg:h-[176px] lg:w-[176px]">
+            <div className="absolute bottom-0 left-2 sm:left-4 md:left-6 lg:left-8" style={{ transform: 'translateY(50%)', zIndex: 20, maxWidth: 'min(calc(100vw - 1rem), 176px)' }}>
+              <div className="bg-white p-1 sm:p-1.5 md:p-2 rounded-lg shadow-lg flex items-center justify-center overflow-hidden" style={{ 
+                width: 'clamp(80px, 20vw, 176px)', 
+                height: 'clamp(80px, 20vw, 176px)',
+                maxWidth: 'min(calc(100vw - 2rem), 176px)',
+                minWidth: '80px'
+              }}>
                 <BreweryLogo 
                   logo={brewery.logo} 
                   breweryName={brewery.name}
@@ -564,7 +569,7 @@ export default function SimpleBreweryPageTemplate({
             <div className="hidden lg:block lg:col-span-2">
               <div className="sticky top-8">
                 {/* Left sidebar is intentionally empty - logo overlaps from hero section */}
-                {/* Add spacing to account for logo height */}
+                {/* Add spacing to account for logo height (176px / 2 = 88px) */}
                 <div className="h-[88px]"></div>
               </div>
             </div>
@@ -573,7 +578,7 @@ export default function SimpleBreweryPageTemplate({
             <div className="lg:col-span-7">
               {/* Business Name */}
               <h1 
-                className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-[#1C1C1C] mb-3 sm:mb-4 break-words font-display leading-tight"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#1C1C1C] mb-4 sm:mb-5 md:mb-4 break-words font-display leading-tight"
               >
                 {brewery.name}
               </h1>
@@ -661,18 +666,18 @@ export default function SimpleBreweryPageTemplate({
               {/* About Section - Enhanced */}
               <section className="mb-6 sm:mb-8">
                 <h2 
-                  className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
+                  className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-4 sm:mb-5 md:mb-4 font-display"
                 >
                   About Brewery
                 </h2>
                 
                 {/* Primary Description - Generated from review themes */}
                 {aboutContent ? (
-                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-xl font-body">{aboutContent}</p>
+                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-lg sm:text-xl font-body">{aboutContent}</p>
                 ) : brewery.description ? (
-                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-xl font-body">{brewery.description}</p>
+                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-lg sm:text-xl font-body">{brewery.description}</p>
                 ) : (
-                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-xl font-body">
+                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-lg sm:text-xl font-body">
                     {brewery.name} is a {Array.isArray(brewery.type) ? brewery.type.join(' and ').toLowerCase() : (brewery.type || 'brewery').toLowerCase()} located in {brewery.city}, {brewery.county} County, Maryland.
                     {brewery.amenities && brewery.amenities.length > 0 && (
                       <> Featuring {brewery.amenities.slice(0, 3).join(', ').toLowerCase()}, this local brewery welcomes craft beer enthusiasts.</>
@@ -684,7 +689,7 @@ export default function SimpleBreweryPageTemplate({
                 {brewery.awards && brewery.awards.length > 0 && (
                   <>
                     <h3 
-                      className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mt-6 sm:mt-8 mb-3 sm:mb-4 font-display"
+                      className="text-xl sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mt-6 sm:mt-8 mb-3 sm:mb-4 font-display"
                     >
                       Awards & Recognition
                     </h3>
@@ -722,7 +727,7 @@ export default function SimpleBreweryPageTemplate({
                 <div className="mb-6 sm:mb-8">
                   <div className="border-t-2 border-[#E8E6E1] my-4 sm:my-6"></div>
                   <h2 
-                    className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-4 sm:mb-6 md:mb-8 font-display"
+                    className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-4 sm:mb-5 md:mb-8 font-display"
                   >
                     Beers Brewed
                   </h2>
@@ -753,13 +758,171 @@ export default function SimpleBreweryPageTemplate({
                 </div>
               )}
 
+              {/* Mobile Right Sidebar Content - Shown above Brewery Type on mobile */}
+              <div className="lg:hidden mb-6 sm:mb-8 space-y-4 sm:space-y-6">
+                {/* Phone Number Button - CTA */}
+                {brewery.phone && (
+                  <div>
+                    <a
+                      href={`tel:${brewery.phone}`}
+                      className="inline-flex items-center justify-center gap-2 w-full bg-[#14532d] hover:bg-[#166534] text-white font-bold py-3 px-6 rounded text-base sm:text-body-large transition-colors font-body min-h-[44px]"
+                      style={{ color: '#ffffff' }}
+                      aria-label={`Call ${brewery.name} at ${brewery.phone}`}
+                    >
+                      <Phone className="h-5 w-5" style={{ color: '#ffffff' }} aria-hidden="true" />
+                      <span style={{ color: '#ffffff' }}>{brewery.phone}</span>
+                    </a>
+                  </div>
+                )}
+                
+                {/* Open/Closed Status */}
+                {computed && (computed.isOpenNow !== undefined) && (
+                  <div className="text-center font-body">
+                    {computed.isOpenNow ? (
+                      <span className="text-body text-[#6B6B6B]">
+                        <span className="font-bold">Open</span>
+                        {computed.closingTime 
+                          ? ` now until ${computed.closingTime}`
+                          : ' now'}
+                      </span>
+                    ) : (
+                      <span className="text-body text-[#6B6B6B]">
+                        <span className="font-bold">Closed</span>
+                        {computed.nextOpenDay && computed.nextOpenTime ? (
+                          <>
+                            , open again{' '}
+                            <span className="font-bold">
+                              {computed.nextOpenDay.charAt(0).toUpperCase() + computed.nextOpenDay.slice(1)} at {computed.nextOpenTime}
+                            </span>
+                          </>
+                        ) : null}
+                      </span>
+                    )}
+                  </div>
+                )}
+                
+                {/* Map */}
+                <div>
+                  <div className="h-48 sm:h-64 rounded-lg overflow-hidden border border-[#E8E6E1]">
+                    <GoogleMap 
+                      breweries={[brewery]} 
+                      height="100%" 
+                      center={{ lat: brewery.latitude, lng: brewery.longitude }}
+                      zoom={14}
+                      showClusters={false}
+                      autoOpenPopup={false}
+                      useFitBounds={false}
+                    />
+                  </div>
+                </div>
+                
+                {/* Address */}
+                <div>
+                  <h3 
+                    className="text-xl sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
+                  >
+                    Address
+                  </h3>
+                  <div className="flex items-start gap-2 font-body">
+                    <MapPin className="h-5 w-5 text-[#6B6B6B] mt-0.5 flex-shrink-0" />
+                    <div className="text-[#1C1C1C]">
+                      <div className="text-body font-medium">{brewery.street}</div>
+                      <div className="text-body">{brewery.city}, {brewery.state} {brewery.zip} US</div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Hours of Operation Section */}
+                {brewery.hours && (
+                  <div>
+                    <h3 
+                      className="text-xl sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
+                    >
+                      Hours of Operation
+                    </h3>
+                    <ul className="space-y-1 text-body font-body">
+                      {(() => {
+                        // Group Monday-Friday if they have the same hours
+                        const mondayHours = brewery.hours?.monday;
+                        const tuesdayHours = brewery.hours?.tuesday;
+                        const wednesdayHours = brewery.hours?.wednesday;
+                        const thursdayHours = brewery.hours?.thursday;
+                        const fridayHours = brewery.hours?.friday;
+                        
+                        const allWeekdaysSame = mondayHours && 
+                          mondayHours === tuesdayHours &&
+                          mondayHours === wednesdayHours &&
+                          mondayHours === thursdayHours &&
+                          mondayHours === fridayHours;
+                        
+                        const hoursList = [];
+                        
+                        // Add Monday-Friday grouped if same
+                        if (allWeekdaysSame) {
+                          hoursList.push(
+                            <li key="weekdays" className="flex items-center">
+                              <span className="font-medium text-[#1C1C1C] w-32 font-body">Monday - Friday</span>
+                              <span className="text-[#1C1C1C] ml-2 font-body">
+                                {mondayHours && mondayHours !== 'Closed' ? formatHoursString(mondayHours) : 'Closed'}
+                              </span>
+                            </li>
+                          );
+                        } else {
+                          // Add individual weekdays
+                          ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'].forEach(day => {
+                            const dayName = day.charAt(0).toUpperCase() + day.slice(1);
+                            const hours = brewery.hours?.[day as keyof typeof brewery.hours];
+                            if (hours) {
+                              hoursList.push(
+                                <li key={day} className="flex items-center">
+                                  <span className="font-medium text-[#1C1C1C] w-32 font-body">{dayName}</span>
+                                  <span className="text-[#1C1C1C] ml-2 font-body">
+                                    {hours !== 'Closed' ? formatHoursString(hours) : 'Closed'}
+                                  </span>
+                                </li>
+                              );
+                            }
+                          });
+                        }
+                        
+                        // Add Saturday
+                        if (brewery.hours?.saturday) {
+                          hoursList.push(
+                            <li key="saturday" className="flex items-center">
+                              <span className="font-medium text-[#1C1C1C] w-32 font-body">Saturday</span>
+                              <span className="text-[#1C1C1C] ml-2 font-body">
+                                {brewery.hours.saturday !== 'Closed' ? formatHoursString(brewery.hours.saturday) : 'Closed'}
+                              </span>
+                            </li>
+                          );
+                        }
+                        
+                        // Add Sunday
+                        if (brewery.hours?.sunday) {
+                          hoursList.push(
+                            <li key="sunday" className="flex items-center">
+                              <span className="font-medium text-[#1C1C1C] w-32 font-body">Sunday</span>
+                              <span className="text-[#1C1C1C] ml-2 font-body">
+                                {brewery.hours.sunday !== 'Closed' ? formatHoursString(brewery.hours.sunday) : 'Closed'}
+                              </span>
+                            </li>
+                          );
+                        }
+                        
+                        return hoursList;
+                      })()}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
               {/* Additional Information Sections */}
               <div className="space-y-6 sm:space-y-8 md:space-y-10">
               {/* Brewery Type */}
               {brewery.type && (
                 <div>
                   <h3 
-                    className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
+                    className="text-xl sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                   >
                     Brewery Type
                   </h3>
@@ -792,7 +955,7 @@ export default function SimpleBreweryPageTemplate({
               {brewery.articles && brewery.articles.length > 0 && (
                 <div>
                   <h3 
-                    className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
+                    className="text-xl sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                   >
                     Articles
                   </h3>
@@ -809,7 +972,7 @@ export default function SimpleBreweryPageTemplate({
               {/* Social Media */}
               <div>
                 <h3 
-                  className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
+                  className="text-xl sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                 >
                   Social Media
                 </h3>
@@ -856,25 +1019,27 @@ export default function SimpleBreweryPageTemplate({
                   return (
                     <div>
                       <h3 
-                        className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
+                        className="text-xl sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                       >
                         Amenities
                       </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-2 sm:gap-y-3 font-body">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-1.5 sm:gap-y-2 font-body">
                         {columns.map((column, columnIndex) => (
-                          <div key={columnIndex} className="space-y-3">
+                          <div key={columnIndex} className="space-y-1.5">
                             {column.map((amenity, index) => (
-                              <div key={index} className="flex items-center gap-2">
-                                {getAmenityIcon(amenity.name)}
+                              <div key={index} className="flex items-baseline gap-3">
+                                <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center mt-0.5">
+                                  {getAmenityIcon(amenity.name)}
+                                </div>
                                 {amenity.hasIt ? (
                                   <Link 
                                     href={amenity.url}
-                                    className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium text-body"
+                                    className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium text-body leading-normal"
                                   >
                                     {amenity.name}
                                   </Link>
                                 ) : (
-                              <span className="text-[#6B6B6B] font-medium text-body">
+                              <span className="text-[#6B6B6B] font-medium text-body leading-normal">
                                 {amenity.name}
                               </span>
                                 )}
@@ -891,7 +1056,7 @@ export default function SimpleBreweryPageTemplate({
                   {brewery.memberships && brewery.memberships.length > 0 && (
                     <div>
                       <h3 
-                        className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
+                        className="text-xl sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                       >
                         Memberships
                       </h3>
@@ -1001,8 +1166,8 @@ export default function SimpleBreweryPageTemplate({
               </div>
             </div>
 
-            {/* Right Sidebar - Map and Contact Info (Bimmershops style) */}
-            <div className="lg:col-span-3">
+            {/* Right Sidebar - Map and Contact Info (Bimmershops style) - Desktop Only */}
+            <div className="hidden lg:block lg:col-span-3">
               <div className="lg:sticky lg:top-8">
                 {/* Phone Number Button - CTA */}
                 {brewery.phone && (
@@ -1063,7 +1228,7 @@ export default function SimpleBreweryPageTemplate({
                 {/* Address */}
                 <div className="mb-6 sm:mb-8">
                   <h3 
-                    className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
+                    className="text-xl sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                   >
                     Address
                   </h3>
@@ -1080,7 +1245,7 @@ export default function SimpleBreweryPageTemplate({
                 {brewery.hours && (
                   <div className="mb-6 sm:mb-8">
                     <h3 
-                      className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
+                      className="text-xl sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                     >
                       Hours of Operation
                     </h3>

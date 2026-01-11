@@ -58,7 +58,7 @@ export default function BreweryLogo({
   const sizePx = sizePixels[size];
 
   return (
-    <div className={`${sizeClasses[size]} flex-shrink-0 relative flex items-center justify-center ${className}`}>
+    <div className={`${sizeClasses[size]} flex-shrink-0 relative flex items-center justify-center ${className}`} style={{ maxWidth: '100%', maxHeight: '100%' }}>
       {imageLoading && (
         <div className={`absolute inset-0 bg-gray-100 animate-pulse rounded ${sizeClasses[size]}`} />
       )}
@@ -67,9 +67,10 @@ export default function BreweryLogo({
         <img
           src={logoUrl}
           alt={`${breweryName} logo`}
-          className={`${sizeClasses[size]} object-contain ${
+          className={`w-full h-full object-contain ${
             imageLoading ? 'opacity-0' : 'opacity-100'
           } transition-opacity duration-300`}
+          style={{ maxWidth: '100%', maxHeight: '100%' }}
           onLoad={() => setImageLoading(false)}
           onError={() => {
             setImageError(true);
@@ -84,9 +85,10 @@ export default function BreweryLogo({
           alt={`${breweryName} logo`}
           width={sizePx}
           height={sizePx}
-          className={`object-contain ${
+          className={`w-full h-full object-contain ${
             imageLoading ? 'opacity-0' : 'opacity-100'
           } transition-opacity duration-300`}
+          style={{ maxWidth: '100%', maxHeight: '100%' }}
           onLoad={() => setImageLoading(false)}
           onError={() => {
             setImageError(true);

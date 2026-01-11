@@ -1324,7 +1324,6 @@ export default function SimpleBreweryPageTemplate({
             </div>
           </div>
 
-<<<<<<< HEAD
           {/* News & Articles Section */}
           {articles && articles.length > 0 && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8">

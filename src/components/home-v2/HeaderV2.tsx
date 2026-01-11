@@ -74,7 +74,7 @@ export default function HeaderV2() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="text-white hover:text-white transition-colors py-2 font-medium text-base font-body"
+                  className="text-white hover:text-white transition-colors py-2 font-medium text-body-large font-body"
                 >
                   {item.label}
                 </Link>
@@ -101,7 +101,7 @@ export default function HeaderV2() {
                     <Link
                       key={item.label}
                       href={item.href}
-                      className="block px-6 py-4 text-white hover:text-[#D4A017] hover:bg-[#7A1C2A]/30 active:bg-[#7A1C2A]/50 transition-colors font-medium text-base min-h-[48px] flex items-center touch-manipulation border-b border-[#7A1C2A]/30 last:border-b-0 font-body"
+                      className="block px-6 py-4 text-white hover:text-[#D4A017] hover:bg-[#7A1C2A]/30 active:bg-[#7A1C2A]/50 transition-colors font-medium text-body-large min-h-[48px] flex items-center touch-manipulation border-b border-[#7A1C2A]/30 last:border-b-0 font-body"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {item.label}

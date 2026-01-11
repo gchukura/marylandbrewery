@@ -12,7 +12,7 @@ export default function FooterAd() {
   useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        (window.adsbygoogle = window.adsbygoogle || [] as any).push({});
       }
     } catch (error) {
       console.error('AdSense error:', error);

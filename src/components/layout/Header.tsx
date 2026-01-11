@@ -61,12 +61,7 @@ export default function Header() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="text-white hover:text-white transition-colors py-2 font-medium text-sm"
-                    style={{ 
-                      fontFamily: "'Source Sans 3', sans-serif",
-                      letterSpacing: 'normal',
-                      fontSize: '0.875rem'
-                    }}
+                    className="text-white hover:text-white transition-colors py-2 font-medium text-body-large font-body"
                   >
                     {item.label}
                   </Link>
@@ -91,12 +86,7 @@ export default function Header() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="block px-4 py-3 text-white hover:text-[#D4A017] transition-colors font-medium text-sm"
-                    style={{ 
-                      fontFamily: "'Source Sans 3', sans-serif",
-                      letterSpacing: 'normal',
-                      fontSize: '0.875rem'
-                    }}
+                    className="block px-4 py-3 text-white hover:text-[#D4A017] transition-colors font-medium text-body-large font-body"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {item.label}

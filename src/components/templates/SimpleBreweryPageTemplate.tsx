@@ -476,7 +476,7 @@ export default function SimpleBreweryPageTemplate({
 
       <div className="min-h-screen bg-white">
         {/* Hero Photo Section with Overlapping Logo - Matching PageHero structure */}
-        <section className="bg-white border-b-4 border-[#9B2335] relative" style={{ marginBottom: 'calc(4rem + 88px)' }}>
+        <section className="bg-white border-b-4 border-[#9B2335] relative overflow-visible" style={{ marginBottom: 'calc(4rem + 88px)' }}>
           {(() => {
             // Use first photo from photos array (local) if available, otherwise fall back to photoUrl
             // This avoids external API calls for the hero image
@@ -515,7 +515,7 @@ export default function SimpleBreweryPageTemplate({
           })()}
           
           {/* Content Container - Increased height for better visual impact */}
-          <div className="container mx-auto px-4 py-16 md:py-20 lg:py-24 relative z-10">
+          <div className="container mx-auto px-4 py-12 md:py-20 lg:py-24 relative z-10">
             {/* Breadcrumb Navigation - Consistent with PageHero style */}
             {breadcrumbs && breadcrumbs.length > 0 && (
               <nav className="mb-6" aria-label="Breadcrumb">
@@ -544,8 +544,8 @@ export default function SimpleBreweryPageTemplate({
           
           {/* Logo overlapping into header - Positioned to sit on top of hero and be fully visible */}
           {brewery.logo && (
-            <div className="absolute bottom-0 left-4 lg:left-8" style={{ transform: 'translateY(50%)', zIndex: 20 }}>
-              <div className="bg-white p-2 rounded-lg shadow-lg flex items-center justify-center h-[176px] w-[176px]">
+            <div className="absolute bottom-0 left-4 sm:left-6 md:left-8 lg:left-8" style={{ transform: 'translateY(50%)', zIndex: 20, maxWidth: 'calc(100% - 1rem)' }}>
+              <div className="bg-white p-1.5 sm:p-2 rounded-lg shadow-lg flex items-center justify-center h-24 w-24 sm:h-32 sm:w-32 md:h-40 md:w-40 lg:h-[176px] lg:w-[176px]">
                 <BreweryLogo 
                   logo={brewery.logo} 
                   breweryName={brewery.name}
@@ -557,15 +557,15 @@ export default function SimpleBreweryPageTemplate({
         </section>
 
         {/* Main Content Area - Bimmershops Style Layout */}
-        <div className="max-w-7xl mx-auto px-4 pt-0 pb-6 md:pt-2 md:pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-4 pt-0 pb-6 md:pt-2 md:pb-8">
           {/* Three Column Layout: Left Sidebar | Main Content | Right Sidebar */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8">
             {/* Left Sidebar - Empty (logo overlaps into header) */}
-            <div className="lg:col-span-2">
+            <div className="hidden lg:block lg:col-span-2">
               <div className="sticky top-8">
                 {/* Left sidebar is intentionally empty - logo overlaps from hero section */}
                 {/* Add spacing to account for logo height */}
-                <div className="h-[88px] lg:h-[88px]"></div>
+                <div className="h-[88px]"></div>
               </div>
             </div>
 
@@ -573,13 +573,13 @@ export default function SimpleBreweryPageTemplate({
             <div className="lg:col-span-7">
               {/* Business Name */}
               <h1 
-                className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1C1C1C] mb-4 break-words font-display leading-tight"
+                className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-[#1C1C1C] mb-3 sm:mb-4 break-words font-display leading-tight"
               >
                 {brewery.name}
               </h1>
               
               {/* City, State, Rating, and Website Link on same line */}
-              <div className="mb-6 flex items-center gap-4 sm:gap-8 flex-wrap font-body">
+              <div className="mb-4 sm:mb-6 flex items-center gap-3 sm:gap-4 md:gap-8 flex-wrap font-body">
                 <div className="text-[#6B6B6B] text-body-large font-medium">
                   {brewery.city}, {brewery.state}
                 </div>
@@ -656,12 +656,12 @@ export default function SimpleBreweryPageTemplate({
               </div>
               
               {/* Dividing line between brewery name section and about section */}
-              <div className="border-t-2 border-[#E8E6E1] my-6"></div>
+              <div className="border-t-2 border-[#E8E6E1] my-4 sm:my-6"></div>
               
               {/* About Section - Enhanced */}
-              <section className="mb-8">
+              <section className="mb-6 sm:mb-8">
                 <h2 
-                  className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-4 font-display"
+                  className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                 >
                   About Brewery
                 </h2>
@@ -684,7 +684,7 @@ export default function SimpleBreweryPageTemplate({
                 {brewery.awards && brewery.awards.length > 0 && (
                   <>
                     <h3 
-                      className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mt-8 mb-4 font-display"
+                      className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mt-6 sm:mt-8 mb-3 sm:mb-4 font-display"
                     >
                       Awards & Recognition
                     </h3>
@@ -707,7 +707,7 @@ export default function SimpleBreweryPageTemplate({
                     .slice(0, 9); // Limit to 9 photos (all same size in 3x3 grid)
                   
                   return galleryPhotos.length > 0 ? (
-                    <div className="mt-8">
+                    <div className="mt-6 sm:mt-8">
                       <BreweryPhotoGallery 
                         photos={galleryPhotos} 
                         breweryName={brewery.name}
@@ -719,45 +719,47 @@ export default function SimpleBreweryPageTemplate({
 
               {/* Beers Table */}
               {brewery.beers && brewery.beers.length > 0 && (
-                <div className="mb-8">
-                  <div className="border-t-2 border-[#E8E6E1] my-6"></div>
+                <div className="mb-6 sm:mb-8">
+                  <div className="border-t-2 border-[#E8E6E1] my-4 sm:my-6"></div>
                   <h2 
-                    className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-8 font-display"
+                    className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-4 sm:mb-6 md:mb-8 font-display"
                   >
                     Beers Brewed
                   </h2>
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="bg-[#9B2335] text-white font-body">
-                          <th className="text-left py-4 px-4 font-bold text-body-large">Name</th>
-                          <th className="text-left py-4 px-4 font-bold text-body-large">Style</th>
-                          <th className="text-left py-4 px-4 font-bold text-body-large">ABV</th>
-                          <th className="text-left py-4 px-4 font-bold text-body-large">Availability</th>
-                        </tr>
-                      </thead>
-                      <tbody className="font-body">
-                        {brewery.beers.map((beer: BeerType, index: number) => (
-                          <tr key={index} className={`border-b border-[#E8E6E1] ${index % 2 === 0 ? 'bg-[#FAF9F6]' : 'bg-white'}`}>
-                            <td className="py-4 px-4 font-semibold text-[#1C1C1C] text-body">{beer.name}</td>
-                            <td className="py-4 px-4 text-[#1C1C1C] text-body">{beer.style}</td>
-                            <td className="py-4 px-4 text-[#1C1C1C] text-body">{formatABV(beer.abv)}</td>
-                            <td className="py-4 px-4 text-[#1C1C1C] text-body">{beer.availability}</td>
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
+                    <div className="inline-block min-w-full px-4 sm:px-0">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="bg-[#9B2335] text-white font-body">
+                            <th className="text-left py-3 px-3 sm:py-4 sm:px-4 font-bold text-sm sm:text-body-large">Name</th>
+                            <th className="text-left py-3 px-3 sm:py-4 sm:px-4 font-bold text-sm sm:text-body-large">Style</th>
+                            <th className="text-left py-3 px-3 sm:py-4 sm:px-4 font-bold text-sm sm:text-body-large">ABV</th>
+                            <th className="text-left py-3 px-3 sm:py-4 sm:px-4 font-bold text-sm sm:text-body-large">Availability</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="font-body">
+                          {brewery.beers.map((beer: BeerType, index: number) => (
+                            <tr key={index} className={`border-b border-[#E8E6E1] ${index % 2 === 0 ? 'bg-[#FAF9F6]' : 'bg-white'}`}>
+                              <td className="py-3 px-3 sm:py-4 sm:px-4 font-semibold text-[#1C1C1C] text-sm sm:text-body">{beer.name}</td>
+                              <td className="py-3 px-3 sm:py-4 sm:px-4 text-[#1C1C1C] text-sm sm:text-body">{beer.style}</td>
+                              <td className="py-3 px-3 sm:py-4 sm:px-4 text-[#1C1C1C] text-sm sm:text-body">{formatABV(beer.abv)}</td>
+                              <td className="py-3 px-3 sm:py-4 sm:px-4 text-[#1C1C1C] text-sm sm:text-body">{beer.availability}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               )}
 
               {/* Additional Information Sections */}
-              <div className="space-y-10">
+              <div className="space-y-6 sm:space-y-8 md:space-y-10">
               {/* Brewery Type */}
               {brewery.type && (
                 <div>
                   <h3 
-                    className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
+                    className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                   >
                     Brewery Type
                   </h3>
@@ -790,7 +792,7 @@ export default function SimpleBreweryPageTemplate({
               {brewery.articles && brewery.articles.length > 0 && (
                 <div>
                   <h3 
-                    className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
+                    className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                   >
                     Articles
                   </h3>
@@ -807,31 +809,31 @@ export default function SimpleBreweryPageTemplate({
               {/* Social Media */}
               <div>
                 <h3 
-                  className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
+                  className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                 >
                   Social Media
                 </h3>
-                <div className="flex flex-wrap items-center gap-4 font-body">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 font-body">
                   {brewery.socialMedia?.facebook && (
-                    <a href={brewery.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
+                    <a href={brewery.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A] min-h-[44px] py-2">
                       <img src={getSocialMediaIcon('facebook')} alt={`${brewery.name} on Facebook`} className="h-5 w-5" />
                       <span className="text-body">Facebook</span>
                     </a>
                   )}
                   {brewery.socialMedia?.twitter && (
-                    <a href={brewery.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
+                    <a href={brewery.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A] min-h-[44px] py-2">
                       <img src={getSocialMediaIcon('twitter')} alt={`${brewery.name} on Twitter`} className="h-5 w-5" />
                       <span className="text-body">Twitter</span>
                     </a>
                   )}
                   {brewery.socialMedia?.instagram && (
-                    <a href={brewery.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
+                    <a href={brewery.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A] min-h-[44px] py-2">
                       <img src={getSocialMediaIcon('instagram')} alt={`${brewery.name} on Instagram`} className="h-5 w-5" />
                       <span className="text-body">Instagram</span>
                     </a>
                   )}
                   {brewery.socialMedia?.untappd && (
-                    <a href={brewery.socialMedia.untappd} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
+                    <a href={brewery.socialMedia.untappd} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A] min-h-[44px] py-2">
                       <img src={getSocialMediaIcon('untappd')} alt={`${brewery.name} on Untappd`} className="h-5 w-5" />
                       <span className="text-body">Untappd</span>
                     </a>
@@ -854,11 +856,11 @@ export default function SimpleBreweryPageTemplate({
                   return (
                     <div>
                       <h3 
-                        className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
+                        className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                       >
                         Amenities
                       </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3 font-body">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-2 sm:gap-y-3 font-body">
                         {columns.map((column, columnIndex) => (
                           <div key={columnIndex} className="space-y-3">
                             {column.map((amenity, index) => (
@@ -889,11 +891,11 @@ export default function SimpleBreweryPageTemplate({
                   {brewery.memberships && brewery.memberships.length > 0 && (
                     <div>
                       <h3 
-                        className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
+                        className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                       >
                         Memberships
                       </h3>
-                      <div className="flex flex-wrap gap-4">
+                      <div className="flex flex-wrap gap-3 sm:gap-4">
                         {brewery.memberships.map((membership: Membership, index: number) => {
                           const membershipIcon = getMembershipIcon(membership.name);
                           return (
@@ -1001,13 +1003,13 @@ export default function SimpleBreweryPageTemplate({
 
             {/* Right Sidebar - Map and Contact Info (Bimmershops style) */}
             <div className="lg:col-span-3">
-              <div className="sticky top-8">
+              <div className="lg:sticky lg:top-8">
                 {/* Phone Number Button - CTA */}
                 {brewery.phone && (
                   <div className="mb-4">
                     <a
                       href={`tel:${brewery.phone}`}
-                      className="inline-flex items-center justify-center gap-2 w-full bg-[#14532d] hover:bg-[#166534] text-white font-bold py-3 px-6 rounded text-body-large transition-colors font-body"
+                      className="inline-flex items-center justify-center gap-2 w-full bg-[#14532d] hover:bg-[#166534] text-white font-bold py-3 sm:py-3 px-6 rounded text-base sm:text-body-large transition-colors font-body min-h-[44px]"
                       style={{ color: '#ffffff' }}
                       aria-label={`Call ${brewery.name} at ${brewery.phone}`}
                     >
@@ -1044,8 +1046,8 @@ export default function SimpleBreweryPageTemplate({
                 )}
                 
                 {/* Map */}
-                <div className="mb-4">
-                  <div className="h-64 rounded-lg overflow-hidden border border-[#E8E6E1]">
+                <div className="mb-4 sm:mb-6">
+                  <div className="h-48 sm:h-64 rounded-lg overflow-hidden border border-[#E8E6E1]">
                     <GoogleMap 
                       breweries={[brewery]} 
                       height="100%" 
@@ -1059,9 +1061,9 @@ export default function SimpleBreweryPageTemplate({
                 </div>
                 
                 {/* Address */}
-                <div className="mb-8">
+                <div className="mb-6 sm:mb-8">
                   <h3 
-                    className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
+                    className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                   >
                     Address
                   </h3>
@@ -1076,9 +1078,9 @@ export default function SimpleBreweryPageTemplate({
                 
                 {/* Hours of Operation Section */}
                 {brewery.hours && (
-                  <div className="mb-8">
+                  <div className="mb-6 sm:mb-8">
                     <h3 
-                      className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
+                      className="text-lg sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
                     >
                       Hours of Operation
                     </h3>
@@ -1162,9 +1164,9 @@ export default function SimpleBreweryPageTemplate({
 
           {/* News & Articles Section */}
           {articles && articles.length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8">
               {/* Left Sidebar - Empty (logo overlaps into header) */}
-              <div className="lg:col-span-2">
+              <div className="hidden lg:block lg:col-span-2">
                 <div className="sticky top-8">
                   {/* Left sidebar is intentionally empty - logo overlaps from hero section */}
                 </div>
@@ -1172,23 +1174,23 @@ export default function SimpleBreweryPageTemplate({
 
               {/* Main Content - Center Column */}
               <div className="lg:col-span-7">
-                <div className="border-t-2 border-[#E8E6E1] my-6"></div>
+                <div className="border-t-2 border-[#E8E6E1] my-4 sm:my-6"></div>
                 <BreweryArticles articles={articles} breweryName={brewery.name} />
               </div>
 
               {/* Right Sidebar - Empty */}
-              <div className="lg:col-span-3"></div>
+              <div className="hidden lg:block lg:col-span-3"></div>
             </div>
           )}
 
           {/* Reviews Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8">
             {/* Left Sidebar - Empty */}
-            <div className="lg:col-span-2"></div>
+            <div className="hidden lg:block lg:col-span-2"></div>
 
             {/* Main Content - Center Column */}
             <div className="lg:col-span-7">
-              <div className="border-t-2 border-[#E8E6E1] my-6"></div>
+              <div className="border-t-2 border-[#E8E6E1] my-4 sm:my-6"></div>
               <BreweryReviews 
                 breweryId={brewery.id} 
                 reviewsPerPage={5}
@@ -1200,7 +1202,7 @@ export default function SimpleBreweryPageTemplate({
             </div>
 
             {/* Right Sidebar - Empty */}
-            <div className="lg:col-span-3"></div>
+            <div className="hidden lg:block lg:col-span-3"></div>
           </div>
         </div>
       </div>

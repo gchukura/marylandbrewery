@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import FooterAd from '@/components/ads/FooterAd';
 import NewsletterSignup from '@/components/ui/NewsletterSignup';
@@ -26,14 +27,17 @@ const ABOUT_LINKS = [
 
 export default function FooterV2() {
   const currentYear = new Date().getFullYear();
+  const [isAdVisible, setIsAdVisible] = useState(true);
 
   return (
     <>
-      {/* Newsletter Signup */}
-      <NewsletterSignup />
+      {/* Newsletter Signup - remove bottom padding if ad is hidden */}
+      <div className={isAdVisible ? '' : '[&>section]:!pb-0'}>
+        <NewsletterSignup />
+      </div>
       
       {/* AdSense Footer Ad */}
-      <FooterAd />
+      <FooterAd onVisibilityChange={setIsAdVisible} />
       
       <footer className="bg-[#1C1C1C] border-t border-[#2A2A2A]">
         <div className="container mx-auto px-4 py-8">
@@ -108,7 +112,12 @@ export default function FooterV2() {
           <div 
             className="text-xs text-[#9CA3AF] text-center font-body"
           >
-            © {currentYear} MarylandBrewery.com. This site is for information purposes only and not affiliated with any of the companies mentioned. Enjoy responsibly!
+              <div className="mb-1">
+                MarylandBrewery.com is a copyright © {currentYear} of <Link href="https://bluestonebrands.com" className="text-white underline hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">BluestoneBrands.com</Link>
+              </div>
+            <div>
+              This site is for information purposes only and not affiliated with any of the companies mentioned. Enjoy responsibly!
+            </div>
           </div>
         </div>
       </div>

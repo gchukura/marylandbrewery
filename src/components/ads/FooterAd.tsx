@@ -2,15 +2,6 @@
 
 import { useEffect } from 'react';
 
-// AdSense type declaration
-declare global {
-  interface Window {
-    adsbygoogle?: {
-      push: (adConfig: Record<string, never>) => void;
-    }[];
-  }
-}
-
 /**
  * Footer AdSense Ad Component
  * 

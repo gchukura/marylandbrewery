@@ -4,6 +4,8 @@
  * This script fetches brewery-themed hero images for:
  * - /cities index page
  * - /counties index page
+ * - /map page
+ * - /blog page
  * 
  * Usage:
  *   npx tsx scripts/fetch-index-hero-images.ts
@@ -205,6 +207,31 @@ async function fetchIndexHeroImages() {
       }
     } else {
       console.log('⊘ Map hero image already exists (use --force to re-download)\n');
+    }
+
+    // Blog page - brewery blog themed image
+    const blogImagePath = join(INDEX_IMAGES_DIR, 'blog-hero.jpg');
+    
+    if (!existsSync(blogImagePath) || forceRedownload) {
+      console.log('📥 Fetching brewery blog image for /blog page...');
+      const blogPhoto = await searchPexels('craft brewery article beer news');
+      
+      if (blogPhoto) {
+        const imageUrl = blogPhoto.src.large2x || blogPhoto.src.large || blogPhoto.src.original;
+        console.log(`   📥 Downloading image (${blogPhoto.width}x${blogPhoto.height})...`);
+        console.log(`   📸 Photo by ${blogPhoto.photographer}`);
+        
+        const success = await downloadImage(imageUrl, blogImagePath);
+        if (success) {
+          console.log(`   ✓ Saved: blog-hero.jpg\n`);
+        } else {
+          console.log(`   ✗ Failed to download\n`);
+        }
+      } else {
+        console.log(`   ⚠️  No image found\n`);
+      }
+    } else {
+      console.log('⊘ Blog hero image already exists (use --force to re-download)\n');
     }
 
     console.log('✅ Done!');

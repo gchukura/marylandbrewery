@@ -616,21 +616,18 @@ export default function SimpleBreweryPageTemplate({
                       <div className="flex items-center">
                         {[...Array(5)].map((_, i) => {
                           const starValue = displayRating! - i;
-                          const isFull = starValue >= 1;
-                          const isPartial = starValue > 0 && starValue < 1;
-                          const partialWidth = isPartial ? starValue : 0;
+                          let fillPercentage = 0;
+                          if (starValue >= 1) {
+                            fillPercentage = 100;
+                          } else if (starValue > 0) {
+                            fillPercentage = starValue * 100;
+                          }
                           
                           return (
                             <div key={i} className="relative h-5 w-5 flex-shrink-0">
-                              {/* Base empty star */}
-                              <Star className="h-5 w-5 absolute text-[#E8E6E1] fill-[#E8E6E1]" />
-                              {/* Full star overlay */}
-                              {isFull && (
-                                <Star className="h-5 w-5 absolute fill-[#D4A017] text-[#D4A017]" />
-                              )}
-                              {/* Partial star overlay */}
-                              {isPartial && (
-                                <div className="absolute overflow-hidden" style={{ width: `${partialWidth * 100}%` }}>
+                              <Star className="h-5 w-5 absolute text-[#E8E6E1]" />
+                              {fillPercentage > 0 && (
+                                <div className="absolute overflow-hidden" style={{ width: `${fillPercentage}%` }}>
                                   <Star className="h-5 w-5 fill-[#D4A017] text-[#D4A017]" />
                                 </div>
                               )}
@@ -1069,7 +1066,7 @@ export default function SimpleBreweryPageTemplate({
                                 <img 
                                   src={membershipIcon} 
                                   alt={`${membership.name} membership`}
-                                  className="h-36 w-36 object-contain"
+                                  className="h-20 w-20 object-contain"
                                 />
                               ) : (
                                 <div className="h-36 w-36 bg-[#E8E6E1] rounded flex items-center justify-center">
@@ -1327,6 +1324,7 @@ export default function SimpleBreweryPageTemplate({
             </div>
           </div>
 
+<<<<<<< HEAD
           {/* News & Articles Section */}
           {articles && articles.length > 0 && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8">

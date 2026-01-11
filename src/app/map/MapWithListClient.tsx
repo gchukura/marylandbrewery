@@ -142,9 +142,8 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
               {paginatedBreweries.map((brewery) => {
                 const slug = (brewery as any).slug || brewery.id;
                 return (
-                  <div
+                  <Link
                     key={brewery.id}
-<<<<<<< HEAD
                     href={`/breweries/${slug}`}
                     className="block p-4 font-body"
                   >
@@ -233,176 +232,12 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                             <div className="flex items-center gap-1 mt-1">
                               <Phone className="h-4 w-4 flex-shrink-0" />
                               <span>{brewery.phone}</span>
-=======
-                    className="p-4"
-                    style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-                  >
-                    <Link
-                      href={`/breweries/${slug}`}
-                      className="block"
-                    >
-                      <div className="flex items-start gap-3">
-                        {/* Logo on the left - square with border like inspiration */}
-                        {brewery.logo ? (
-                          <div className="flex-shrink-0">
-                            <div className="w-16 h-16 border-2 border-gray-300 rounded bg-white flex items-center justify-center p-1.5 shadow-sm">
-                              <BreweryLogo 
-                                logo={brewery.logo} 
-                                breweryName={brewery.name}
-                                size="sm"
-                                className="w-full h-full"
-                              />
                             </div>
-                          </div>
-                        ) : (
-                          // Placeholder for breweries without logos
-                          <div className="flex-shrink-0">
-                            <div className="w-16 h-16 border-2 border-gray-200 rounded bg-gray-50 flex items-center justify-center">
-                              <div className="text-gray-400 text-xs font-semibold text-center px-1">
-                                {brewery.name?.substring(0, 2).toUpperCase() || 'BW'}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Content on the right - Two columns */}
-                        <div className="flex-1 min-w-0 grid grid-cols-2 gap-4">
-                          {/* Name Column */}
-                          <div className="min-w-0">
-                            <h3 className="font-semibold text-[#9B2335] text-sm mb-1">
-                              {brewery.name}
-                            </h3>
-                            {/* Maryland Brewery in City, MD */}
-                            {brewery.city && (
-                              <div className="text-xs font-bold text-gray-700 mb-1">
-                                Maryland Brewery in {brewery.city}, MD
-                              </div>
-                            )}
-                            {/* Reviews below name - same star handling as brewery detail page */}
-                            {(() => {
-                              // Calculate the rating to display - use combined average if both Google and Yelp exist
-                              const hasGoogle = brewery.googleRating && brewery.googleRating > 0 && brewery.googleRatingCount && brewery.googleRatingCount > 0;
-                              const hasYelp = (brewery as any).yelpRating && (brewery as any).yelpRating > 0 && (brewery as any).yelpRatingCount && (brewery as any).yelpRatingCount > 0;
-                              
-                              let displayRating: number | null = null;
-                              let totalReviewCount = 0;
-                              
-                              if (hasGoogle && hasYelp) {
-                                // Calculate combined weighted average
-                                const totalReviews = brewery.googleRatingCount! + (brewery as any).yelpRatingCount!;
-                                displayRating = (brewery.googleRating! * brewery.googleRatingCount! + (brewery as any).yelpRating! * (brewery as any).yelpRatingCount!) / totalReviews;
-                                totalReviewCount = totalReviews;
-                              } else if (hasGoogle) {
-                                displayRating = brewery.googleRating!;
-                                totalReviewCount = (brewery as any).actualReviewCount || brewery.googleRatingCount || 0;
-                              } else if (hasYelp) {
-                                displayRating = (brewery as any).yelpRating!;
-                                totalReviewCount = (brewery as any).yelpRatingCount || 0;
-                              }
-                              
-                              if (!displayRating) return null;
-                              
-                              return (
-                                <div className="flex items-center gap-1 mt-1">
-                                  <div className="flex items-center">
-                                    {[...Array(5)].map((_, i) => {
-                                      const decimal = displayRating! % 1;
-                                      const fullStars = Math.floor(displayRating!);
-                                      // Round up to full star if decimal >= 0.75
-                                      const effectiveFullStars = decimal >= 0.75 ? fullStars + 1 : fullStars;
-                                      const hasHalfStar = decimal >= 0.25 && decimal < 0.75;
-                                      const isFull = i < effectiveFullStars;
-                                      const isHalf = i === fullStars && hasHalfStar;
-                                      
-                                      return (
-                                        <div key={i} className="relative h-3 w-3 flex-shrink-0">
-                                          {/* Base empty star */}
-                                          <Star className="h-3 w-3 absolute text-gray-300" />
-                                          {/* Full star overlay */}
-                                          {isFull && (
-                                            <Star className="h-3 w-3 absolute fill-[#D4A017] text-[#D4A017]" />
-                                          )}
-                                          {/* Half star overlay */}
-                                          {isHalf && (
-                                            <div className="absolute overflow-hidden" style={{ width: '50%' }}>
-                                              <Star className="h-3 w-3 fill-[#D4A017] text-[#D4A017]" />
-                                            </div>
-                                          )}
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                  <span className="text-xs font-semibold text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
-                                    {displayRating.toFixed(1)}
-                                  </span>
-                                  {totalReviewCount > 0 && (
-                                    <span className="text-xs text-gray-500" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
-                                      ({totalReviewCount})
-                                    </span>
-                                  )}
-                                </div>
-                              );
-                            })()}
-                          </div>
-                          
-                          {/* Address Column */}
-                          <div className="min-w-0 text-xs text-gray-600">
-                            <div className="flex items-start mb-1">
-                              <MapPin className="h-3 w-3 mr-1 mt-0.5 flex-shrink-0" />
-                              <div className="flex-1">
-                                {brewery.street && (
-                                  <div>{brewery.street}</div>
-                                )}
-                                <div>
-                                  {[brewery.city, brewery.state, brewery.zip]
-                                    .filter(Boolean)
-                                    .join(', ')}
-                                </div>
-                              </div>
->>>>>>> 258d37a6754b4a766d41d3d3f95f7bc9970ff784
-                            </div>
-                            {/* Phone below address */}
-                            {brewery.phone && (
-                              <div className="flex items-center gap-1 mt-1">
-                                <Phone className="h-3 w-3 flex-shrink-0" />
-                                <span>{brewery.phone}</span>
-                              </div>
-                            )}
-                          </div>
+                          )}
                         </div>
                       </div>
-                    </Link>
-                    
-                    {/* Amenities spanning full width below both columns - outside the Link to avoid nested anchors */}
-                    {(() => {
-                      const amenityList = (brewery.amenities || brewery.features || []) as string[];
-                      if (!amenityList || amenityList.length === 0) return null;
-                      
-                      // Sort amenities alphabetically
-                      const sortedAmenities = [...amenityList].sort((a, b) => 
-                        (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' })
-                      );
-                      
-                      return (
-                        <div className="flex flex-wrap gap-x-1.5 gap-y-1 mt-6">
-                          {sortedAmenities.map((a: string) => {
-                            if (!a) return null;
-                            const amenitySlug = slugify(a);
-                            return (
-                              <Link
-                                key={a}
-                                href={`/amenities/${amenitySlug}`}
-                                className="inline-flex items-center justify-center text-xs text-[#9B2335] bg-white border border-[#9B2335] hover:bg-[#9B2335] hover:text-white px-2 py-1 rounded transition-colors font-medium whitespace-nowrap"
-                                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-                              >
-                                {a}
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      );
-                    })()}
-                  </div>
+                    </div>
+                  </Link>
                 );
               })}
             </div>

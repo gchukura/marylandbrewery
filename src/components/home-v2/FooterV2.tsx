@@ -1,11 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-<<<<<<< Updated upstream
-=======
 import FooterAd from '@/components/ads/FooterAd';
 import NewsletterSignup from '@/components/ui/NewsletterSignup';
->>>>>>> Stashed changes
 
 const BREWERY_ENTHUSIASTS_LINKS = [
   { name: 'Find a Maryland Brewery', href: '/map' },
@@ -31,10 +28,6 @@ export default function FooterV2() {
   const currentYear = new Date().getFullYear();
 
   return (
-<<<<<<< Updated upstream
-    <footer className="bg-[#1C1C1C] border-t border-[#2A2A2A]">
-      <div className="container mx-auto px-4 py-8">
-=======
     <>
       {/* Newsletter Signup */}
       <NewsletterSignup />
@@ -44,7 +37,6 @@ export default function FooterV2() {
       
       <footer className="bg-[#1C1C1C] border-t border-[#2A2A2A]">
         <div className="container mx-auto px-4 py-8">
->>>>>>> Stashed changes
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
           {/* Brewery Enthusiasts Column */}
@@ -128,5 +120,6 @@ export default function FooterV2() {
         </div>
       </div>
     </footer>
+    </>
   );
 }

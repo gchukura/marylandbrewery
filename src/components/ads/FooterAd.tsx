@@ -11,9 +11,7 @@ import { useEffect } from 'react';
 export default function FooterAd() {
   useEffect(() => {
     try {
-      if (window.adsbygoogle && !window.adsbygoogle.loaded) {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      }
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (error) {
       console.error('AdSense error:', error);
     }

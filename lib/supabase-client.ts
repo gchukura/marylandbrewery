@@ -156,7 +156,10 @@ export async function getBreweryDataFromSupabase(): Promise<Brewery[]> {
       .order('name');
 
     if (breweriesError) {
-      throw new Error(`Failed to fetch breweries: ${breweriesError.message}`);
+      const errorMessage = breweriesError.message || breweriesError.toString() || 'Unknown error';
+      const errorDetails = breweriesError.details ? ` Details: ${breweriesError.details}` : '';
+      const errorHint = breweriesError.hint ? ` Hint: ${breweriesError.hint}` : '';
+      throw new Error(`Failed to fetch breweries: ${errorMessage}${errorDetails}${errorHint}`);
     }
 
     if (!breweriesData || breweriesData.length === 0) {
@@ -207,8 +210,20 @@ export async function getBreweryDataFromSupabase(): Promise<Brewery[]> {
 
     return breweries;
   } catch (error) {
-    console.error('Failed to fetch brewery data from Supabase:', error);
-    throw error;
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : typeof error === 'string' 
+        ? error 
+        : 'Unknown error occurred while fetching brewery data';
+    
+    console.error('Failed to fetch brewery data from Supabase:', {
+      message: errorMessage,
+      error: error,
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Missing',
+      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Missing',
+    });
+    
+    throw new Error(`Failed to fetch brewery data: ${errorMessage}`);
   }
 }
 

@@ -18,7 +18,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const limit = parseInt(searchParams.get('limit') || '50');
 
     // Get brewery data from Supabase
-    const breweries = await getAllBreweryData();
+    let breweries;
+    try {
+      breweries = await getAllBreweryData();
+    } catch (fetchError) {
+      const errorMessage = fetchError instanceof Error 
+        ? fetchError.message 
+        : typeof fetchError === 'string' 
+          ? fetchError 
+          : 'Failed to fetch brewery data';
+      console.error('Error fetching brewery data:', errorMessage);
+      throw new Error(`Unable to retrieve brewery data: ${errorMessage}`);
+    }
     
     // Transform data to match frontend expectations
     const transformedBreweries = breweries.map(brewery => ({
@@ -99,10 +110,21 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('API Error:', error);
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : typeof error === 'string' 
+        ? error 
+        : 'Internal server error';
+    
+    console.error('API Error:', {
+      message: errorMessage,
+      error: error,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    
     const response: ApiResponse<never> = {
       success: false,
-      error: error instanceof Error ? error.message : 'Internal server error',
+      error: errorMessage,
     };
     
     return NextResponse.json(response, { status: 500 });

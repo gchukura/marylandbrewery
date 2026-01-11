@@ -14,26 +14,53 @@ interface BreweryPageProps {
 }
 
 export async function generateStaticParams() {
-  const processed = await getProcessedBreweryData();
-  
-  return processed.breweries
-    .map((brewery) => ({
-      slug: (brewery as any).slug || brewery.id,
-    }))
-    .filter(({ slug }) => {
-      // Filter out invalid slugs (URLs, empty strings, etc.)
-      if (!slug || typeof slug !== 'string') return false;
-      // Reject slugs that look like URLs
-      if (slug.includes('www.') || slug.includes('http://') || slug.includes('https://')) return false;
-      // Reject slugs with invalid characters
-      if (slug.includes('//') || slug.startsWith('/') || slug.endsWith('/')) return false;
-      return true;
-    });
+  try {
+    const processed = await getProcessedBreweryData();
+    
+    return processed.breweries
+      .map((brewery) => ({
+        slug: (brewery as any).slug || brewery.id,
+      }))
+      .filter(({ slug }) => {
+        // Filter out invalid slugs (URLs, empty strings, etc.)
+        if (!slug || typeof slug !== 'string') return false;
+        // Reject slugs that look like URLs
+        if (slug.includes('www.') || slug.includes('http://') || slug.includes('https://')) return false;
+        // Reject slugs with invalid characters
+        if (slug.includes('//') || slug.startsWith('/') || slug.endsWith('/')) return false;
+        return true;
+      });
+  } catch (error) {
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : typeof error === 'string' 
+        ? error 
+        : 'Failed to fetch brewery data';
+    console.error('Error in generateStaticParams:', errorMessage);
+    // Return empty array to prevent build failure, pages will be generated on-demand
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: BreweryPageProps) {
   const { slug } = await params;
-  const processed = await getProcessedBreweryData();
+  
+  let processed;
+  try {
+    processed = await getProcessedBreweryData();
+  } catch (error) {
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : typeof error === 'string' 
+        ? error 
+        : 'Failed to fetch brewery data';
+    console.error(`Error fetching brewery data for metadata (${slug}):`, errorMessage);
+    return {
+      title: 'Brewery Not Found',
+      description: 'The requested brewery could not be found.',
+    };
+  }
+  
   const brewery = processed.breweries.find(
     (b) => (b as any).slug === slug || b.id === slug
   );
@@ -92,7 +119,21 @@ export async function generateMetadata({ params }: BreweryPageProps) {
 
 export default async function BreweryPage({ params }: BreweryPageProps) {
   const { slug } = await params;
-  const processed = await getProcessedBreweryData();
+  
+  let processed;
+  try {
+    processed = await getProcessedBreweryData();
+  } catch (error) {
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : typeof error === 'string' 
+        ? error 
+        : 'Failed to fetch brewery data';
+    console.error(`Error fetching brewery data for ${slug}:`, errorMessage);
+    // During build, if we can't fetch data, return 404
+    notFound();
+  }
+  
   const brewery = processed.breweries.find(
     (b) => (b as any).slug === slug || b.id === slug
   );

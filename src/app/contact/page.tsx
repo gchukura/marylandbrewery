@@ -124,7 +124,7 @@ export default function ContactPage() {
 
           {/* Related Links Section - Wider Container */}
           <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-[#E8E6E1]">
-            <h2 className="text-h2 font-bold text-[#1C1C1C] mb-8 font-display">Explore More</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-6 font-display">Explore More</h2>
             <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
                 <Link href="/map" className="bg-white rounded-lg p-8 lg:p-10 border border-[#E8E6E1] hover:border-[#9B2335] hover:shadow-md transition-all group min-h-[160px] flex flex-col min-w-0">
                   <div className="flex items-center gap-4 mb-5 flex-shrink-0">

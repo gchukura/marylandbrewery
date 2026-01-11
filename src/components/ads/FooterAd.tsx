@@ -2,6 +2,15 @@
 
 import { useEffect } from 'react';
 
+// AdSense type declaration
+declare global {
+  interface Window {
+    adsbygoogle?: {
+      push: (adConfig: Record<string, never>) => void;
+    }[];
+  }
+}
+
 /**
  * Footer AdSense Ad Component
  * 
@@ -11,7 +20,9 @@ import { useEffect } from 'react';
 export default function FooterAd() {
   useEffect(() => {
     try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      if (typeof window !== 'undefined') {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      }
     } catch (error) {
       console.error('AdSense error:', error);
     }

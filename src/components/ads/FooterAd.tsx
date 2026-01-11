@@ -11,22 +11,54 @@ import { useEffect, useState, useRef } from 'react';
  * Automatically hides the ad container if no ad is displayed (e.g., ad blocker active)
  */
 export default function FooterAd() {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false); // Start hidden
   const adRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
+    if (typeof window === 'undefined') return;
+
+    const checkAndInitialize = () => {
+      // Check if adsbygoogle script is available (not blocked)
+      const adScriptLoaded = document.querySelector('script[src*="adsbygoogle.js"]') !== null;
+      const hasAdScript = !!(window.adsbygoogle && Array.isArray(window.adsbygoogle));
+      
+      // If script is loaded, initialize ad and mark as visible
+      if (adScriptLoaded || hasAdScript) {
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          setIsVisible(true);
+        } catch (error) {
+          console.error('AdSense error:', error);
+          setIsVisible(false);
+        }
+      } else {
+        // Script not loaded yet or blocked - check again after a delay
+        // If still not loaded after 1 second, assume blocked
+        setTimeout(() => {
+          const stillNotLoaded = !document.querySelector('script[src*="adsbygoogle.js"]') && !window.adsbygoogle;
+          if (stillNotLoaded) {
+            setIsVisible(false);
+          } else {
+            // Script loaded during delay, initialize now
+            try {
+              (window.adsbygoogle = window.adsbygoogle || []).push({});
+              setIsVisible(true);
+            } catch (error) {
+              console.error('AdSense error:', error);
+              setIsVisible(false);
+            }
+          }
+        }, 1000);
       }
-    } catch (error) {
-      console.error('AdSense error:', error);
-    }
+    };
+
+    // Initial check
+    checkAndInitialize();
   }, []);
 
   // Check if ad is actually displayed after a delay
   useEffect(() => {
-    if (!adRef.current) return;
+    if (!adRef.current || !isVisible) return;
 
     const checkAdDisplay = () => {
       const adElement = adRef.current?.querySelector('.adsbygoogle') as HTMLElement | null;
@@ -39,19 +71,16 @@ export default function FooterAd() {
       const height = adElement.offsetHeight;
       const hasContent = adElement.children.length > 0 || height > 60; // More than minHeight
 
-      // Also check if adsbygoogle script failed to load
-      const scriptLoaded = !!(window.adsbygoogle && Array.isArray(window.adsbygoogle));
-      const adBlocked = !scriptLoaded || (!hasContent && height <= 50);
-
-      if (adBlocked) {
+      // If ad has no content and is at minimal height, likely blocked
+      if (!hasContent && height <= 50) {
         setIsVisible(false);
       }
     };
 
     // Check after initial render delay (allow time for ad to load)
-    const timeout1 = setTimeout(checkAdDisplay, 2000);
+    const timeout1 = setTimeout(checkAdDisplay, 1500);
     // Check again after longer delay (in case ad loads slowly)
-    const timeout2 = setTimeout(checkAdDisplay, 5000);
+    const timeout2 = setTimeout(checkAdDisplay, 4000);
 
     // Use MutationObserver to watch for ad content changes
     const observer = new MutationObserver(checkAdDisplay);
@@ -69,8 +98,9 @@ export default function FooterAd() {
       clearTimeout(timeout2);
       observer.disconnect();
     };
-  }, []);
+  }, [isVisible]);
 
+  // Don't render anything if ad is not visible - this removes all space
   if (!isVisible) {
     return null;
   }

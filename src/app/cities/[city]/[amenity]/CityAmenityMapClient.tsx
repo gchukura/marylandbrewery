@@ -94,13 +94,47 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
     return rangeWithDots;
   };
 
-  // Render star rating
-  const renderStarRating = (rating: number | null | undefined) => {
+  // Render star rating - same logic as brewery detail page
+  const renderStarRating = (rating: number, reviewCount?: number) => {
     if (!rating) return null;
     return (
       <div className="flex items-center gap-1">
-        <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-        <span className="text-sm font-medium text-gray-700">{rating.toFixed(1)}</span>
+        <div className="flex items-center">
+          {[...Array(5)].map((_, i) => {
+            const decimal = rating % 1;
+            const fullStars = Math.floor(rating);
+            // Round up to full star if decimal >= 0.75
+            const effectiveFullStars = decimal >= 0.75 ? fullStars + 1 : fullStars;
+            const hasHalfStar = decimal >= 0.25 && decimal < 0.75;
+            const isFull = i < effectiveFullStars;
+            const isHalf = i === fullStars && hasHalfStar;
+            
+            return (
+              <div key={i} className="relative h-4 w-4 flex-shrink-0">
+                {/* Base empty star */}
+                <Star className="h-4 w-4 absolute text-gray-300" />
+                {/* Full star overlay */}
+                {isFull && (
+                  <Star className="h-4 w-4 absolute fill-[#D4A017] text-[#D4A017]" />
+                )}
+                {/* Half star overlay */}
+                {isHalf && (
+                  <div className="absolute overflow-hidden" style={{ width: '50%' }}>
+                    <Star className="h-4 w-4 fill-[#D4A017] text-[#D4A017]" />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <span className="text-sm font-semibold text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+          {rating.toFixed(1)}
+        </span>
+        {reviewCount !== undefined && reviewCount > 0 && (
+          <span className="text-sm text-gray-500" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+            ({reviewCount})
+          </span>
+        )}
       </div>
     );
   };
@@ -148,7 +182,26 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
           <div className="space-y-4">
             {paginated.map((brewery) => {
               const brewerySlug = brewery.slug || slugify(brewery.name);
-              const rating = brewery.googleRating || brewery.yelpRating;
+              
+              // Calculate the rating to display - use combined average if both Google and Yelp exist
+              const hasGoogle = brewery.googleRating && brewery.googleRating > 0 && brewery.googleRatingCount && brewery.googleRatingCount > 0;
+              const hasYelp = brewery.yelpRating && brewery.yelpRating > 0 && brewery.yelpRatingCount && brewery.yelpRatingCount > 0;
+              
+              let displayRating: number | null = null;
+              let totalReviewCount = 0;
+              
+              if (hasGoogle && hasYelp) {
+                // Calculate combined weighted average
+                const totalReviews = brewery.googleRatingCount! + brewery.yelpRatingCount!;
+                displayRating = (brewery.googleRating! * brewery.googleRatingCount! + brewery.yelpRating! * brewery.yelpRatingCount!) / totalReviews;
+                totalReviewCount = totalReviews;
+              } else if (hasGoogle) {
+                displayRating = brewery.googleRating!;
+                totalReviewCount = brewery.googleRatingCount || 0;
+              } else if (hasYelp) {
+                displayRating = brewery.yelpRating!;
+                totalReviewCount = brewery.yelpRatingCount || 0;
+              }
               
               return (
                 <div 
@@ -177,9 +230,9 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                       </Link>
                       
                       {/* Rating */}
-                      {rating && (
+                      {displayRating && (
                         <div className="mt-1">
-                          {renderStarRating(rating)}
+                          {renderStarRating(displayRating, totalReviewCount)}
                         </div>
                       )}
                       
@@ -205,23 +258,30 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                       )}
 
                       {/* Amenities preview */}
-                      {brewery.amenities && brewery.amenities.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-2">
-                          {brewery.amenities.slice(0, 3).map((amenity: string) => (
-                            <span 
-                              key={amenity}
-                              className="px-2 py-0.5 bg-amber-50 text-amber-700 text-xs rounded-full"
-                            >
-                              {amenity}
-                            </span>
-                          ))}
-                          {brewery.amenities.length > 3 && (
-                            <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
-                              +{brewery.amenities.length - 3} more
-                            </span>
-                          )}
-                        </div>
-                      )}
+                      {(() => {
+                        const amenityList = (brewery.amenities || []) as string[];
+                        if (!amenityList || amenityList.length === 0) return null;
+                        
+                        return (
+                          <div className="flex flex-wrap gap-x-1.5 gap-y-1 mt-2">
+                            {amenityList.map((amenity: string) => {
+                              if (!amenity) return null;
+                              const amenitySlug = slugify(amenity);
+                              return (
+                                <Link
+                                  key={amenity}
+                                  href={`/amenities/${amenitySlug}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="inline-flex items-center justify-center text-xs text-[#9B2335] bg-white border border-[#9B2335] hover:bg-[#9B2335] hover:text-white px-2 py-1 rounded transition-colors font-medium whitespace-nowrap"
+                                  style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                                >
+                                  {amenity}
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>

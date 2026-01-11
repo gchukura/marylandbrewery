@@ -4,10 +4,7 @@
 
 declare global {
   interface Window {
-    adsbygoogle?: {
-      loaded: boolean;
-      push: (adConfig: Record<string, never>) => void;
-    }[];
+    adsbygoogle?: Array<Record<string, unknown>>;
   }
 }
 

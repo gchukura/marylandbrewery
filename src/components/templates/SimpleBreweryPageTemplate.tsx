@@ -604,9 +604,12 @@ export default function SimpleBreweryPageTemplate({
                     <div className="flex items-center gap-2">
                       <div className="flex items-center">
                         {[...Array(5)].map((_, i) => {
+                          const decimal = displayRating! % 1;
                           const fullStars = Math.floor(displayRating!);
-                          const hasHalfStar = displayRating! % 1 >= 0.25 && displayRating! % 1 < 0.75;
-                          const isFull = i < fullStars;
+                          // Round up to full star if decimal >= 0.75
+                          const effectiveFullStars = decimal >= 0.75 ? fullStars + 1 : fullStars;
+                          const hasHalfStar = decimal >= 0.25 && decimal < 0.75;
+                          const isFull = i < effectiveFullStars;
                           const isHalf = i === fullStars && hasHalfStar;
                           
                           return (

@@ -125,13 +125,16 @@ export default function AmenityBreweriesMapClient({ breweries, amenityName, amen
               {paginatedBreweries.map((brewery) => {
                 const slug = (brewery as any).slug || brewery.id;
                 return (
-                  <Link
+                  <div
                     key={brewery.id}
-                    href={`/breweries/${slug}`}
-                    className="block p-4"
+                    className="p-4"
                     style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                   >
-                    <div className="flex items-start gap-3">
+                    <Link
+                      href={`/breweries/${slug}`}
+                      className="block"
+                    >
+                      <div className="flex items-start gap-3">
                       {/* Logo on the left */}
                       {brewery.logo ? (
                         <div className="flex-shrink-0">
@@ -166,32 +169,71 @@ export default function AmenityBreweriesMapClient({ breweries, amenityName, amen
                           <div className="text-xs font-bold text-gray-700 mt-0.5 mb-1">
                             Maryland Brewery in {brewery.city}, MD
                           </div>
-                          {/* Reviews below name */}
-                          {brewery.googleRating && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              <span className="text-xs text-gray-700">
-                                {brewery.googleRating.toFixed(1)}{brewery.googleRatingCount ? ` - ${brewery.googleRatingCount} ${brewery.googleRatingCount === 1 ? 'review' : 'reviews'}` : ''}
-                              </span>
-                            </div>
-                          )}
-                          {(brewery.amenities || brewery.features) && (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {((brewery.amenities || brewery.features) as string[]).slice(0, 3).map((a: string) => (
-                                <span
-                                  key={a}
-                                  className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
-                                >
-                                  {a}
+                          {/* Reviews below name - same star handling as brewery detail page */}
+                          {(() => {
+                            // Calculate the rating to display - use combined average if both Google and Yelp exist
+                            const hasGoogle = brewery.googleRating && brewery.googleRating > 0 && brewery.googleRatingCount && brewery.googleRatingCount > 0;
+                            const hasYelp = (brewery as any).yelpRating && (brewery as any).yelpRating > 0 && (brewery as any).yelpRatingCount && (brewery as any).yelpRatingCount > 0;
+                            
+                            let displayRating: number | null = null;
+                            let totalReviewCount = 0;
+                            
+                            if (hasGoogle && hasYelp) {
+                              // Calculate combined weighted average
+                              const totalReviews = brewery.googleRatingCount! + (brewery as any).yelpRatingCount!;
+                              displayRating = (brewery.googleRating! * brewery.googleRatingCount! + (brewery as any).yelpRating! * (brewery as any).yelpRatingCount!) / totalReviews;
+                              totalReviewCount = totalReviews;
+                            } else if (hasGoogle) {
+                              displayRating = brewery.googleRating!;
+                              totalReviewCount = (brewery as any).actualReviewCount || brewery.googleRatingCount || 0;
+                            } else if (hasYelp) {
+                              displayRating = (brewery as any).yelpRating!;
+                              totalReviewCount = (brewery as any).yelpRatingCount || 0;
+                            }
+                            
+                            if (!displayRating) return null;
+                            
+                            return (
+                              <div className="flex items-center gap-1 mt-1">
+                                <div className="flex items-center">
+                                  {[...Array(5)].map((_, i) => {
+                                    const decimal = displayRating! % 1;
+                                    const fullStars = Math.floor(displayRating!);
+                                    // Round up to full star if decimal >= 0.75
+                                    const effectiveFullStars = decimal >= 0.75 ? fullStars + 1 : fullStars;
+                                    const hasHalfStar = decimal >= 0.25 && decimal < 0.75;
+                                    const isFull = i < effectiveFullStars;
+                                    const isHalf = i === fullStars && hasHalfStar;
+                                    
+                                    return (
+                                      <div key={i} className="relative h-3 w-3 flex-shrink-0">
+                                        {/* Base empty star */}
+                                        <Star className="h-3 w-3 absolute text-gray-300" />
+                                        {/* Full star overlay */}
+                                        {isFull && (
+                                          <Star className="h-3 w-3 absolute fill-[#D4A017] text-[#D4A017]" />
+                                        )}
+                                        {/* Half star overlay */}
+                                        {isHalf && (
+                                          <div className="absolute overflow-hidden" style={{ width: '50%' }}>
+                                            <Star className="h-3 w-3 fill-[#D4A017] text-[#D4A017]" />
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                                <span className="text-xs font-semibold text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                                  {displayRating.toFixed(1)}
                                 </span>
-                              ))}
-                              {((brewery.amenities || brewery.features) as string[]).length > 3 && (
-                                <span className="text-xs text-gray-500">
-                                  +{((brewery.amenities || brewery.features) as string[]).length - 3} more
-                                </span>
-                              )}
-                            </div>
-                          )}
+                                {totalReviewCount > 0 && (
+                                  <span className="text-xs text-gray-500" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                                    ({totalReviewCount})
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </div>
                         
                         {/* Address Column */}
@@ -218,8 +260,33 @@ export default function AmenityBreweriesMapClient({ breweries, amenityName, amen
                           )}
                         </div>
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                    
+                    {/* Amenities spanning full width below both columns - outside the Link to avoid nested anchors */}
+                    {(() => {
+                      const amenityList = (brewery.amenities || brewery.features || []) as string[];
+                      if (!amenityList || amenityList.length === 0) return null;
+                      
+                      return (
+                        <div className="flex flex-wrap gap-x-1.5 gap-y-1 mt-6">
+                          {amenityList.map((a: string) => {
+                            if (!a) return null;
+                            const amenitySlug = slugify(a);
+                            return (
+                              <Link
+                                key={a}
+                                href={`/amenities/${amenitySlug}`}
+                                className="inline-flex items-center justify-center text-xs text-[#9B2335] bg-white border border-[#9B2335] hover:bg-[#9B2335] hover:text-white px-2 py-1 rounded transition-colors font-medium whitespace-nowrap"
+                                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                              >
+                                {a}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
+                  </div>
                 );
               })}
             </div>

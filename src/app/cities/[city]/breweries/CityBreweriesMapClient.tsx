@@ -232,23 +232,6 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                               {brewery.distance.toFixed(1)} miles away from {cityName}, MD
                             </div>
                           )}
-                          {(brewery.amenities || brewery.features) && (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {((brewery.amenities || brewery.features) as string[]).slice(0, 3).map((a: string) => (
-                                <span
-                                  key={a}
-                                  className="text-sm bg-gray-100 text-gray-700 px-2 py-1 rounded"
-                                >
-                                  {a}
-                                </span>
-                              ))}
-                              {((brewery.amenities || brewery.features) as string[]).length > 3 && (
-                                <span className="text-sm text-gray-500">
-                                  +{((brewery.amenities || brewery.features) as string[]).length - 3} more
-                                </span>
-                              )}
-                            </div>
-                          )}
                         </div>
                         
                         {/* Address Column */}
@@ -280,19 +263,35 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                     
                     {/* Amenities spanning full width below both columns - outside the Link to avoid nested anchors */}
                     {(() => {
-                      const amenityList = (brewery.amenities || brewery.features || []) as string[];
-                      if (!amenityList || amenityList.length === 0) return null;
+                      // Get amenities from either amenities or features field, handle various data formats
+                      const amenities = brewery.amenities || brewery.features;
+                      let amenityList: string[] = [];
+                      
+                      if (Array.isArray(amenities)) {
+                        amenityList = amenities;
+                      } else if (amenities && typeof amenities === 'string') {
+                        // Handle case where amenities might be a comma-separated string
+                        amenityList = amenities.split(',').map(a => a.trim()).filter(Boolean);
+                      } else if (amenities && typeof amenities === 'object') {
+                        // Handle case where amenities might be an object
+                        amenityList = Object.values(amenities).filter(Boolean) as string[];
+                      }
+                      
+                      // Filter out empty, null, or undefined values
+                      const validAmenities = amenityList.filter(a => a && typeof a === 'string' && a.trim().length > 0);
+                      
+                      if (validAmenities.length === 0) return null;
                       
                       // Sort amenities alphabetically
-                      const sortedAmenities = [...amenityList].sort((a, b) => 
+                      const sortedAmenities = [...validAmenities].sort((a, b) => 
                         (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' })
                       );
                       
                       return (
                         <div className="flex flex-wrap gap-x-1.5 gap-y-1 mt-6">
                           {sortedAmenities.map((a: string) => {
-                            if (!a) return null;
-                            const amenitySlug = slugify(a);
+                            if (!a || !a.trim()) return null;
+                            const amenitySlug = slugify(a.trim());
                             return (
                               <Link
                                 key={a}
@@ -300,7 +299,7 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                                 className="inline-flex items-center justify-center text-xs text-[#9B2335] bg-white border border-[#9B2335] hover:bg-[#9B2335] hover:text-white px-2 py-1 rounded transition-colors font-medium whitespace-nowrap"
                                 style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                               >
-                                {a}
+                                {a.trim()}
                               </Link>
                             );
                           })}

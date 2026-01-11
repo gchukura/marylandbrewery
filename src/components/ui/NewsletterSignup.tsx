@@ -40,10 +40,10 @@ export default function NewsletterSignup() {
 
   if (isSubscribed) {
     return (
-      <section className="bg-[#9B2335] py-12 md:py-14">
+      <section className="bg-white border-t-2 border-[#E8E6E1] py-12 md:py-14">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white/10 backdrop-blur-sm border-2 border-[#D4A017] rounded-lg p-8 md:p-10 text-center">
+            <div className="bg-[#9B2335] border-2 border-[#D4A017] rounded-lg p-8 md:p-10 text-center">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 font-display">
                 Thank you for subscribing!
               </h2>
@@ -58,10 +58,10 @@ export default function NewsletterSignup() {
   }
 
   return (
-    <section className="bg-[#9B2335] py-12 md:py-14">
+    <section className="bg-white border-t-2 border-[#E8E6E1] py-12 md:py-14">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white/10 backdrop-blur-sm border-2 border-[#D4A017] rounded-lg p-8 md:p-10">
+          <div className="bg-[#9B2335] border-2 border-[#D4A017] rounded-lg p-8 md:p-10">
             <div className="text-center mb-8">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 font-display">
                 Stay Updated on Maryland's Craft Beer Scene

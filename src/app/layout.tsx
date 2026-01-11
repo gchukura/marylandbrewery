@@ -173,7 +173,7 @@ export default function RootLayout({
         <ConditionalLayoutClient>
           {children}
         </ConditionalLayoutClient>
-        <Analytics />
+        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   );

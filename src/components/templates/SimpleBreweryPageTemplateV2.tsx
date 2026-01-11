@@ -1077,25 +1077,35 @@ export default function SimpleBreweryPageTemplateV2({
           </div>
 
         </div>
-      </div>
 
       {/* News & Articles Section */}
       {articles && articles.length > 0 && (
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <BreweryArticles articles={articles} breweryName={brewery.name} />
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-2"></div>
+            <div className="lg:col-span-7">
+              <BreweryArticles articles={articles} breweryName={brewery.name} />
+            </div>
+          </div>
         </div>
       )}
 
       {/* Reviews Section */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <BreweryReviews 
-          breweryId={brewery.id} 
-          reviewsPerPage={5}
-          placeId={brewery.placeId}
-          totalGoogleReviews={brewery.googleRatingCount}
-          reviews={reviews || []}
-          totalReviews={totalReviews || 0}
-        />
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-2"></div>
+          <div className="lg:col-span-7">
+            <BreweryReviews 
+              breweryId={brewery.id} 
+              reviewsPerPage={5}
+              placeId={brewery.placeId}
+              totalGoogleReviews={brewery.googleRatingCount}
+              reviews={reviews || []}
+              totalReviews={totalReviews || 0}
+            />
+          </div>
+        </div>
+      </div>
       </div>
     </>
   );

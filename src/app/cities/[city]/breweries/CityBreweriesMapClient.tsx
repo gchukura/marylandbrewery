@@ -314,6 +314,7 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                           )}
                         </div>
                       </div>
+                      </div>
                     </Link>
                     
                     {/* Amenities spanning full width below both columns - outside the Link to avoid nested anchors */}

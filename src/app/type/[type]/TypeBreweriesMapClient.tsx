@@ -260,6 +260,7 @@ export default function TypeBreweriesMapClient({ breweries, typeName, typeDefini
                           )}
                         </div>
                       </div>
+                      </div>
                     </Link>
                     
                     {/* Amenities spanning full width below both columns - outside the Link to avoid nested anchors */}

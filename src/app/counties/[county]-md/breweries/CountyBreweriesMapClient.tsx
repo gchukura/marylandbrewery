@@ -262,6 +262,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                           )}
                         </div>
                       </div>
+                      </div>
                     </Link>
                     
                     {/* Amenities spanning full width below both columns - outside the Link to avoid nested anchors */}

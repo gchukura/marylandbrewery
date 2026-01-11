@@ -21,7 +21,7 @@ export default function FooterAd() {
 
   return (
     <div className="w-full bg-white border-t border-gray-200">
-      <div className="container mx-auto px-4 py-2">
+      <div className="container mx-auto px-4 py-1">
         <div className="flex justify-center items-center">
           <ins
             className="adsbygoogle"
@@ -29,7 +29,7 @@ export default function FooterAd() {
               display: 'block',
               width: '100%',
               maxWidth: '728px',
-              minHeight: '90px',
+              minHeight: '50px',
             }}
             data-ad-client="ca-pub-4357894821158922"
             data-ad-slot="5210563601"

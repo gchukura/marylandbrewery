@@ -271,9 +271,14 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                       const amenityList = (brewery.amenities || brewery.features || []) as string[];
                       if (!amenityList || amenityList.length === 0) return null;
                       
+                      // Sort amenities alphabetically
+                      const sortedAmenities = [...amenityList].sort((a, b) => 
+                        (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' })
+                      );
+                      
                       return (
                         <div className="flex flex-wrap gap-x-1.5 gap-y-1 mt-6">
-                          {amenityList.map((a: string) => {
+                          {sortedAmenities.map((a: string) => {
                             if (!a) return null;
                             const amenitySlug = slugify(a);
                             return (

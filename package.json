@@ -52,7 +52,7 @@
     "dotenv": "^17.2.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.5.9",
-    "lightningcss": "^1.30.2",
+    "lightningcss": "^1.31.1",
     "linkinator": "^7.5.3",
     "playwright": "^1.56.1",
     "prettier": "^3.3.0",

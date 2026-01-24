@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@vercel/analytics/next";
 import { Playfair_Display, Source_Sans_3 } from "next/font/google";
 import ConditionalLayoutClient from "@/components/layout/ConditionalLayoutClient";
 import AdSenseScript from "@/components/ads/AdSenseScript";

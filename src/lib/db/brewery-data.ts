@@ -1,11 +1,11 @@
 /**
- * Brewery Data Management with Build-Time Caching
- * Optimized for generating 500+ static pages on Vercel
+ * Brewery data: one cached list, per-request lookup maps, and a per-slug detail cache.
+ * unstable_cache JSON-serializes results, so it only ever holds plain arrays and objects.
  */
 
 import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
-import { getBreweryDataFromSupabase } from './queries';
+import { fetchBreweryBySlug, getBreweryDataFromSupabase } from './queries';
 import { 
   Brewery, 
   ProcessedBreweryData, 
@@ -17,23 +17,23 @@ import {
   MARYLAND_COUNTIES
 } from '@/types/brewery';
 
-import { calculateDistance } from '@/lib/geo';
+import { sortByDistance } from '@/lib/geo';
+const CACHE = { tags: ['brewery-data'], revalidate: 3600 };
+
 /**
- * Cached function to get all brewery data from Supabase
- * This fetches once per build and caches for the entire build process
+ * Every brewery, list columns only (no review themes or beers). The one cross-request cache
+ * for listings; everything else is derived from it per request in getProcessedBreweryData.
  */
-export const getAllBreweryData = unstable_cache(
-  async (): Promise<Brewery[]> => {
-    // getBreweryDataFromSupabase already includes beers, so we don't need to fetch separately
-    const breweries = await getBreweryDataFromSupabase();
-    return breweries;
-  },
-  ['brewery-data'], // Cache key
-  {
-    tags: ['brewery-data'],
-    revalidate: 3600, // Revalidate every hour (3600 seconds)
-  }
+export const getAllBreweries = unstable_cache(
+  async (): Promise<Brewery[]> => getBreweryDataFromSupabase({ detail: false }),
+  ['all-breweries'],
+  CACHE
 );
+
+/** One brewery with everything its page needs (review themes, beers), cached per slug. */
+export function getBreweryBySlug(slug: string): Promise<Brewery | null> {
+  return unstable_cache(async () => fetchBreweryBySlug(slug), ['brewery-by-slug', slug], CACHE)();
+}
 
 /**
  * Process brewery data into efficient lookup structures
@@ -218,197 +218,32 @@ function calculateSiteStatistics(
  * here and memoized per request, because unstable_cache would serialize them to {}.
  */
 export const getProcessedBreweryData = cache(async (): Promise<ProcessedBreweryData> => {
-  const breweries = await getAllBreweryData();
+  const breweries = await getAllBreweries();
   return processBreweryData(breweries);
 });
 
-/**
- * Get breweries by city with caching
- */
-export const getBreweriesByCity = unstable_cache(
-  async (city: string): Promise<Brewery[]> => {
-    const processedData = await getProcessedBreweryData();
-    const cityKey = city.toLowerCase().trim();
-    return processedData.byCity.get(cityKey) || [];
-  },
-  ['breweries-by-city'],
-  {
-    tags: ['brewery-data'],
-    revalidate: 3600,
-  }
-);
+// Lookups below run on the per-request maps; only getAllBreweries crosses requests.
 
-/**
- * Get breweries by county with caching
- */
-export const getBreweriesByCounty = unstable_cache(
-  async (county: string): Promise<Brewery[]> => {
-    const processedData = await getProcessedBreweryData();
-    const countyKey = county.toLowerCase().trim();
-    return processedData.byCounty.get(countyKey) || [];
-  },
-  ['breweries-by-county'],
-  {
-    tags: ['brewery-data'],
-    revalidate: 3600,
-  }
-);
+export async function getBreweriesByCity(city: string): Promise<Brewery[]> {
+  return (await getProcessedBreweryData()).byCity.get(city.toLowerCase().trim()) ?? [];
+}
 
-/**
- * Get breweries by type with caching
- */
-export const getBreweriesByType = unstable_cache(
-  async (type: string): Promise<Brewery[]> => {
-    const processedData = await getProcessedBreweryData();
-    const typeKey = type.toLowerCase();
-    return processedData.byType.get(typeKey) || [];
-  },
-  ['breweries-by-type'],
-  {
-    tags: ['brewery-data'],
-    revalidate: 3600,
-  }
-);
+export async function getAllCities(): Promise<string[]> {
+  return (await getProcessedBreweryData()).cities;
+}
 
-/**
- * Get breweries by amenity with caching
- */
-export const getBreweriesByAmenity = unstable_cache(
-  async (amenity: string): Promise<Brewery[]> => {
-    const processedData = await getProcessedBreweryData();
-    const amenityKey = amenity.toLowerCase().trim();
-    return processedData.byAmenity.get(amenityKey) || [];
-  },
-  ['breweries-by-amenity'],
-  {
-    tags: ['brewery-data'],
-    revalidate: 3600,
-  }
-);
+export async function getAllAmenities(): Promise<string[]> {
+  return (await getProcessedBreweryData()).amenities;
+}
 
-/**
- * Get all unique cities with caching
- */
-export const getAllCities = unstable_cache(
-  async (): Promise<string[]> => {
-    const processedData = await getProcessedBreweryData();
-    return processedData.cities;
-  },
-  ['all-cities'],
-  {
-    tags: ['brewery-data'],
-    revalidate: 3600,
-  }
-);
+export async function getAllTypes(): Promise<string[]> {
+  return (await getProcessedBreweryData()).types;
+}
 
-/**
- * Get all unique counties with caching
- */
-export const getAllCounties = unstable_cache(
-  async (): Promise<string[]> => {
-    const processedData = await getProcessedBreweryData();
-    return processedData.counties;
-  },
-  ['all-counties'],
-  {
-    tags: ['brewery-data'],
-    revalidate: 3600,
-  }
-);
-
-/**
- * Get all unique amenities with caching
- */
-export const getAllAmenities = unstable_cache(
-  async (): Promise<string[]> => {
-    const processedData = await getProcessedBreweryData();
-    return processedData.amenities;
-  },
-  ['all-amenities'],
-  {
-    tags: ['brewery-data'],
-    revalidate: 3600,
-  }
-);
-
-/**
- * Get all unique types with caching
- */
-export const getAllTypes = unstable_cache(
-  async (): Promise<string[]> => {
-    const processedData = await getProcessedBreweryData();
-    return processedData.types;
-  },
-  ['all-types'],
-  {
-    tags: ['brewery-data'],
-    revalidate: 3600,
-  }
-);
-
-/**
- * Get site statistics with caching
- */
-export const getSiteStatistics = unstable_cache(
-  async (): Promise<SiteStatistics> => {
-    const processedData = await getProcessedBreweryData();
-    return processedData.stats;
-  },
-  ['site-statistics'],
-  {
-    tags: ['brewery-data'],
-    revalidate: 3600,
-  }
-);
-
-/**
- * Search breweries with caching
- */
-export const searchBreweries = unstable_cache(
-  async (query: string): Promise<Brewery[]> => {
-    const processedData = await getProcessedBreweryData();
-    const searchTerm = query.toLowerCase().trim();
-    
-    if (!searchTerm) return processedData.breweries;
-    
-    return processedData.breweries.filter(brewery => 
-      brewery.name.toLowerCase().includes(searchTerm) ||
-      brewery.city.toLowerCase().includes(searchTerm) ||
-      brewery.county.toLowerCase().includes(searchTerm) ||
-      brewery.description?.toLowerCase().includes(searchTerm) ||
-      brewery.amenities.some(amenity => amenity.toLowerCase().includes(searchTerm))
-    );
-  },
-  ['search-breweries'],
-  {
-    tags: ['brewery-data'],
-    revalidate: 3600,
-  }
-);
-
-/**
- * Get nearby breweries with caching
- */
-export const getNearbyBreweries = unstable_cache(
-  async (latitude: number, longitude: number, radiusMiles: number = 10): Promise<Brewery[]> => {
-    const processedData = await getProcessedBreweryData();
-    
-    return processedData.breweries.filter(brewery => {
-      const distance = calculateDistance(
-        latitude, longitude,
-        brewery.latitude, brewery.longitude
-      );
-      return distance <= radiusMiles;
-    }).sort((a, b) => {
-      const distanceA = calculateDistance(latitude, longitude, a.latitude, a.longitude);
-      const distanceB = calculateDistance(latitude, longitude, b.latitude, b.longitude);
-      return distanceA - distanceB;
-    });
-  },
-  ['nearby-breweries'],
-  {
-    tags: ['brewery-data'],
-    revalidate: 3600,
-  }
-);
-
+/** Breweries within radiusMiles of a point, nearest first. */
+export async function getNearbyBreweries(latitude: number, longitude: number, radiusMiles = 10): Promise<Brewery[]> {
+  const { breweries } = await getProcessedBreweryData();
+  return sortByDistance({ latitude, longitude }, breweries)
+    .filter((b) => b.distance <= radiusMiles)
+    .map(({ distance: _distance, ...brewery }) => brewery);
+}

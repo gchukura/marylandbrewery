@@ -1,11 +1,11 @@
 import { notFound } from 'next/navigation';
-import { getProcessedBreweryData, getNearbyBreweries } from '@/lib/db';
+import { getBreweryBySlug, getProcessedBreweryData, getNearbyBreweries } from '@/lib/db';
 import { deslugify } from '@/lib/slug';
 import { DAYS, isOpenAt, nextOpening, zonedDayAndMinutes } from '@/lib/hours';
 import { slugify } from '@/lib/slug';
 import SimpleBreweryPageTemplate from '@/components/templates/SimpleBreweryPageTemplate';
 import { generateBreweryTitle, generateEnhancedBreweryDescription } from '@/lib/seo-utils';
-import { getBreweryReviews, getBreweryArticles, getBeersForBrewery } from '@/lib/db';
+import { getBreweryReviews, getBreweryArticles } from '@/lib/db';
 import { generateAboutBreweryContent } from '@/lib/brewery-content-utils';
 import { BreweryArticle } from '@/types/brewery';
 
@@ -136,10 +136,13 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     notFound();
   }
   
-  const brewery = processed.breweries.find(
-    (b) => (b as any).slug === slug || b.id === slug
-  );
+  const listed = processed.breweries.find((b) => b.slug === slug || b.id === slug);
+  if (!listed) {
+    notFound();
+  }
 
+  // The cached list leaves out review themes and beers; load this brewery's full record
+  const brewery = await getBreweryBySlug(listed.slug);
   if (!brewery) {
     notFound();
   }
@@ -256,9 +259,6 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
   const actualReviewCount = reviewData.total;
   const allReviews = reviewData.reviews;
 
-  // Fetch beers for this brewery
-  const beersData = await getBeersForBrewery(brewery.id);
-
   // Generate dynamic About content using stored review themes
   const aboutContent = await generateAboutBreweryContent({
     brewery: {
@@ -273,7 +273,7 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
       description: brewery.description,
       reviewThemes: brewery.reviewThemes, // Pre-computed themes from DB
     },
-    beers: beersData || [],
+    beers: brewery.beers ?? [],
     yelpRating: brewery.yelpRating,
     yelpRatingCount: brewery.yelpRatingCount,
   });

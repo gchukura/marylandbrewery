@@ -88,6 +88,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!slug) {
     return {
       title: 'City Not Found',
+      robots: { index: false, follow: false },
     };
   }
   

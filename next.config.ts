@@ -81,6 +81,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Security headers live only here (not in vercel.json)
   async headers() {
     return [
       {
@@ -98,15 +99,10 @@ const nextConfig: NextConfig = {
             key: 'Referrer-Policy',
             value: 'origin-when-cross-origin',
           },
-        ],
-      },
-      // Prevent HTML caching to avoid stale CSS references
-      {
-        source: '/:path*',
-        headers: [
           {
-            key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+            // geolocation=(self) so the planned "Near me" feature can ask for location
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(self)',
           },
         ],
       },

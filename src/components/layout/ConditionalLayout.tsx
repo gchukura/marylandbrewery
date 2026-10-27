@@ -8,8 +8,8 @@ import NewsletterSignup from '../ui/NewsletterSignup';
 export function ConditionalHeader() {
   const pathname = usePathname();
   
-  // Use HeaderV2 for homepage and homepage-v2, Header for all other pages
-  if (pathname === '/' || pathname?.includes('/homepage-v2')) {
+  // Use HeaderV2 for the homepage, Header for all other pages
+  if (pathname === '/') {
     return null; // HeaderV2 will be rendered by layout
   }
   
@@ -19,8 +19,8 @@ export function ConditionalHeader() {
 export function ConditionalFooter() {
   const pathname = usePathname();
   
-  // Use FooterV2 for homepage and homepage-v2, Footer for all other pages
-  if (pathname === '/' || pathname?.includes('/homepage-v2')) {
+  // Use FooterV2 for the homepage, Footer for all other pages
+  if (pathname === '/') {
     return null; // FooterV2 will be rendered by layout
   }
   

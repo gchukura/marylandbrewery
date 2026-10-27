@@ -10,15 +10,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           // Internal endpoints
           '/api',
-          
-          // Test and development pages
-          '/test-',
-          '/simple-test',
-          '/test-brewery',
-          '/test-programmatic',
-          '/test-simple-programmatic',
-          '/test-templates',
-          
+
           // Next.js HMR (dev only)
           '/_next/webpack-hmr',
         ],

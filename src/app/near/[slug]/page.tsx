@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 import { getProcessedBreweryData } from '@/lib/db';
 import { slugify } from '@/lib/data-utils';
@@ -32,6 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!attraction) {
     return {
       title: 'Attraction Not Found',
+      robots: { index: false, follow: false },
     };
   }
 
@@ -113,7 +115,7 @@ export default async function NearAttractionPage({ params }: { params: Promise<{
   const attraction = await getAttractionBySlug(slug);
 
   if (!attraction) {
-    return <div>Attraction not found</div>;
+    notFound();
   }
 
   const processed = await getProcessedBreweryData();

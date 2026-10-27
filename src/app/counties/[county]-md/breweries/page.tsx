@@ -49,6 +49,7 @@ export async function generateMetadata({ params }: { params: Promise<{ county: s
   if (!isValidCountySlug(countySlugFromParam)) {
     return {
       title: 'County Not Found',
+      robots: { index: false, follow: false },
     };
   }
   
@@ -56,6 +57,7 @@ export async function generateMetadata({ params }: { params: Promise<{ county: s
   if (!countyName) {
     return {
       title: 'County Not Found',
+      robots: { index: false, follow: false },
     };
   }
   

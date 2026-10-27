@@ -3,6 +3,7 @@
  * Optimized for generating 500+ static pages on Vercel
  */
 
+import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
 import { getBreweryDataFromSupabase } from './queries';
 import { 
@@ -210,109 +211,15 @@ function calculateSiteStatistics(
 }
 
 /**
- * Safely get value from a Map or object (handles cache serialization)
- */
-function safeMapGet<T>(mapOrObj: Map<string, T> | Record<string, T> | undefined, key: string): T | undefined {
-  if (!mapOrObj) return undefined;
-  if (mapOrObj instanceof Map) {
-    return mapOrObj.get(key);
-  }
-  return (mapOrObj as Record<string, T>)[key];
-}
-
-/**
- * Ensure Maps are properly initialized (handles cache serialization)
- */
-function ensureMapsAreMaps(data: ProcessedBreweryData): ProcessedBreweryData {
-  // If byCity is already a Map, return as-is
-  if (data.byCity instanceof Map && 
-      data.byCounty instanceof Map && 
-      data.byType instanceof Map && 
-      data.byAmenity instanceof Map) {
-    return data;
-  }
-  
-  // Convert objects back to Maps if they were serialized
-  const byCity = new Map<string, Brewery[]>();
-  const byCounty = new Map<string, Brewery[]>();
-  const byType = new Map<string, Brewery[]>();
-  const byAmenity = new Map<string, Brewery[]>();
-  
-  // Convert byCity
-  if (data.byCity) {
-    if (data.byCity instanceof Map) {
-      data.byCity.forEach((value, key) => byCity.set(key, value));
-    } else if (typeof data.byCity === 'object') {
-      Object.entries(data.byCity as any).forEach(([key, value]) => {
-        byCity.set(key, value as Brewery[]);
-      });
-    }
-  }
-  
-  // Convert byCounty
-  if (data.byCounty) {
-    if (data.byCounty instanceof Map) {
-      data.byCounty.forEach((value, key) => byCounty.set(key, value));
-    } else if (typeof data.byCounty === 'object') {
-      Object.entries(data.byCounty as any).forEach(([key, value]) => {
-        byCounty.set(key, value as Brewery[]);
-      });
-    }
-  }
-  
-  // Convert byType
-  if (data.byType) {
-    if (data.byType instanceof Map) {
-      data.byType.forEach((value, key) => byType.set(key, value));
-    } else if (typeof data.byType === 'object') {
-      Object.entries(data.byType as any).forEach(([key, value]) => {
-        byType.set(key, value as Brewery[]);
-      });
-    }
-  }
-  
-  // Convert byAmenity
-  if (data.byAmenity) {
-    if (data.byAmenity instanceof Map) {
-      data.byAmenity.forEach((value, key) => byAmenity.set(key, value));
-    } else if (typeof data.byAmenity === 'object') {
-      Object.entries(data.byAmenity as any).forEach(([key, value]) => {
-        byAmenity.set(key, value as Brewery[]);
-      });
-    }
-  }
-  
-  return {
-    ...data,
-    byCity,
-    byCounty,
-    byType,
-    byAmenity,
-  };
-}
-
-/**
- * Get processed brewery data with caching
+ * Get processed brewery data
  * This is the main function that powers all 500+ pages
- * Cached to avoid reprocessing data on every page generation
+ * Only the raw array is cached across requests (getAllBreweryData). The Maps are rebuilt
+ * here and memoized per request, because unstable_cache would serialize them to {}.
  */
-export const getProcessedBreweryData = unstable_cache(
-  async (): Promise<ProcessedBreweryData> => {
-    // Get raw brewery data (cached)
-    const breweries = await getAllBreweryData();
-    
-    // Process data into efficient lookup structures
-    const processed = await processBreweryData(breweries);
-    
-    // Ensure Maps are properly initialized (handles cache serialization)
-    return ensureMapsAreMaps(processed);
-  },
-  ['processed-brewery-data'], // Cache key
-  {
-    tags: ['brewery-data'],
-    revalidate: 3600, // Revalidate every hour (3600 seconds)
-  }
-);
+export const getProcessedBreweryData = cache(async (): Promise<ProcessedBreweryData> => {
+  const breweries = await getAllBreweryData();
+  return processBreweryData(breweries);
+});
 
 /**
  * Get breweries by city with caching
@@ -321,7 +228,7 @@ export const getBreweriesByCity = unstable_cache(
   async (city: string): Promise<Brewery[]> => {
     const processedData = await getProcessedBreweryData();
     const cityKey = city.toLowerCase().trim();
-    return safeMapGet(processedData.byCity, cityKey) || [];
+    return processedData.byCity.get(cityKey) || [];
   },
   ['breweries-by-city'],
   {
@@ -337,7 +244,7 @@ export const getBreweriesByCounty = unstable_cache(
   async (county: string): Promise<Brewery[]> => {
     const processedData = await getProcessedBreweryData();
     const countyKey = county.toLowerCase().trim();
-    return safeMapGet(processedData.byCounty, countyKey) || [];
+    return processedData.byCounty.get(countyKey) || [];
   },
   ['breweries-by-county'],
   {
@@ -353,7 +260,7 @@ export const getBreweriesByType = unstable_cache(
   async (type: string): Promise<Brewery[]> => {
     const processedData = await getProcessedBreweryData();
     const typeKey = type.toLowerCase();
-    return safeMapGet(processedData.byType, typeKey) || [];
+    return processedData.byType.get(typeKey) || [];
   },
   ['breweries-by-type'],
   {
@@ -369,7 +276,7 @@ export const getBreweriesByAmenity = unstable_cache(
   async (amenity: string): Promise<Brewery[]> => {
     const processedData = await getProcessedBreweryData();
     const amenityKey = amenity.toLowerCase().trim();
-    return safeMapGet(processedData.byAmenity, amenityKey) || [];
+    return processedData.byAmenity.get(amenityKey) || [];
   },
   ['breweries-by-amenity'],
   {

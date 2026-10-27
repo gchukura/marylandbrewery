@@ -140,9 +140,7 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
   if (breweries.length === 0) {
     const processed = await getProcessedBreweryData();
     const cityKey = cityName.toLowerCase().trim();
-    breweries = (processed.byCity instanceof Map 
-      ? processed.byCity.get(cityKey)
-      : (processed.byCity as any)?.[cityKey]) || [];
+    breweries = processed.byCity.get(cityKey) || [];
   }
 
   // Sort breweries by rating (highest first), then by name

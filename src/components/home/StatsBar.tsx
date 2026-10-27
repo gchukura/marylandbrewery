@@ -1,6 +1,6 @@
 import React from 'react';
 import StatsBarClient from './StatsBarClient';
-import { getProcessedBreweryData } from '../../../lib/brewery-data';
+import { getProcessedBreweryData } from '@/lib/db';
 
 async function getStats() {
   const processed = await getProcessedBreweryData();

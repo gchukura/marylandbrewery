@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
-import { getProcessedBreweryData } from '../../../../lib/brewery-data';
+import { getProcessedBreweryData } from '@/lib/db';
 import { slugify } from '@/lib/data-utils';
-import { getAttractionBySlug } from '../../../../lib/supabase-attractions';
+import { getAttractionBySlug } from '@/lib/db';
 
 // Helper function to calculate distance between two points (Haversine formula)
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {

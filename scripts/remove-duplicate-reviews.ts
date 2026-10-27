@@ -18,8 +18,8 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
-import { supabaseAdmin } from '../lib/supabase';
-import { DatabaseReview } from '../lib/supabase-client';
+import { supabaseAdmin } from '../src/lib/db/client';
+import { DatabaseReview } from '../src/lib/db/queries';
 
 interface DuplicateGroup {
   key: string;

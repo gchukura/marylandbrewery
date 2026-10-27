@@ -27,7 +27,7 @@ import { join } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
-import { getBreweryDataFromSupabase } from '../lib/supabase-client';
+import { getBreweryDataFromSupabase } from '../src/lib/db/queries';
 import { slugify } from '../src/lib/data-utils';
 
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY;

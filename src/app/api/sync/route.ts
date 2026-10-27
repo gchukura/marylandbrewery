@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { getProcessedBreweryData } from '../../../../lib/brewery-data';
+import { getProcessedBreweryData } from '@/lib/db';
 import { isAdminRequest } from '@/lib/admin-auth';
 
 const SYNC_TIMEOUT_MS = 60_000;

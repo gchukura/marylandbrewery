@@ -4,7 +4,7 @@
  */
 
 import { ReviewThemes, Beer } from '@/types/brewery';
-import { getBreweryDataFromSupabase } from '../../lib/supabase-client';
+import { getBreweryDataFromSupabase } from '@/lib/db';
 
 // ============================================
 // LOCATION HELPERS

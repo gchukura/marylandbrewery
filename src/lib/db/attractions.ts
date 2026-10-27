@@ -3,7 +3,7 @@
  * Provides functions for querying and managing Maryland attractions
  */
 
-import { supabase, supabaseAdmin, DatabaseAttraction } from './supabase';
+import { supabase, supabaseAdmin, DatabaseAttraction } from './client';
 
 /**
  * Application-level Attraction type (camelCase)

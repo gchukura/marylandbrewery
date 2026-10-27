@@ -22,7 +22,7 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
-import { supabaseAdmin, DatabaseBrewery } from '../lib/supabase';
+import { supabaseAdmin, DatabaseBrewery } from '../src/lib/db/client';
 
 const MARYLAND_BEER_MEMBERS_URL =
   'https://marylandbeer.org/brewing-companies/current-members/';

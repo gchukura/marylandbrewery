@@ -1,7 +1,7 @@
 name: Sync site data
 
-# Run this after changing data in Supabase to refresh every page immediately.
-# (Pages also refresh on their own within an hour.)
+# Runs daily, and by hand (Actions → Sync site data → Run workflow) after changing data in
+# Supabase to refresh every page immediately. Pages also refresh on their own within an hour.
 #
 # Needs, in Settings → Secrets and variables → Actions:
 #   - variable SITE_URL          e.g. https://marylandbrewery-rdni.vercel.app (no trailing slash)
@@ -9,6 +9,8 @@ name: Sync site data
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '17 9 * * *' # 09:17 UTC daily
 
 jobs:
   sync:

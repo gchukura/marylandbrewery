@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities, getNeighborhoodsForSitemap } from '@/lib/db';
 import { slugify, deslugify, ALL_MD_COUNTIES, normalizeCountyName } from '../lib/data-utils';
+import { hasBestBreweriesPage } from '../lib/best-breweries';
 
 const BASE_URL = 'https://www.marylandbrewery.com';
 
@@ -96,10 +97,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (cityBreweries.length > 0) {
       const citySlug = slugify(city);
       urls.push({ url: `${BASE_URL}/cities/${citySlug}/breweries`, lastModified: lastMod, priority: 0.9 });
-      // Best breweries pages for cities
-      urls.push({ url: `${BASE_URL}/best-breweries/${citySlug}`, lastModified: lastMod, priority: 0.8 });
-      // Best breweries near city pages (regular)
-      urls.push({ url: `${BASE_URL}/best-breweries/near/${citySlug}`, lastModified: lastMod, priority: 0.7 });
+      // Best breweries pages exist only for cities with 5+ breweries
+      if (hasBestBreweriesPage(cityBreweries.length)) {
+        urls.push({ url: `${BASE_URL}/best-breweries/${citySlug}`, lastModified: lastMod, priority: 0.8 });
+      }
     }
   }
 
@@ -114,8 +115,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (countyBreweries.length > 0) {
       const countySlug = slugify(county);
       urls.push({ url: `${BASE_URL}/counties/${countySlug}/breweries`, lastModified: lastMod, priority: 0.7 });
-      // Best breweries pages for counties
-      urls.push({ url: `${BASE_URL}/best-breweries/${countySlug}`, lastModified: lastMod, priority: 0.7 });
     }
   }
 
@@ -189,22 +188,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  // Region pages for best-breweries - only include regions that have breweries
-  for (const region of MARYLAND_REGIONS) {
-    const regionCounties = REGION_COUNTIES[region] || [];
-    const regionBreweries = processed.breweries.filter((b: any) =>
-      b.county && regionCounties.some(county => 
-        b.county.toLowerCase() === county.toLowerCase() || 
-        (county === 'Baltimore' && b.county.toLowerCase() === 'baltimore county')
-      )
-    );
-    
-    // Only add to sitemap if there are breweries in this region
-    if (regionBreweries.length > 0) {
-      urls.push({ url: `${BASE_URL}/best-breweries/${region}`, lastModified: lastMod, priority: 0.7 });
-    }
-  }
-
   // Neighborhood pages - best-breweries routes (only include if city has breweries)
   for (const neighborhood of neighborhoods) {
     if (neighborhood.city && neighborhood.slug) {
@@ -217,7 +200,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         const citySlug = slugify(neighborhood.city);
         const neighborhoodSlug = `${neighborhood.slug}-${citySlug}-md`;
         urls.push({ url: `${BASE_URL}/best-breweries/${neighborhoodSlug}`, lastModified: lastMod, priority: 0.6 });
-        urls.push({ url: `${BASE_URL}/best-breweries/near/${neighborhoodSlug}`, lastModified: lastMod, priority: 0.6 });
       }
     }
   }

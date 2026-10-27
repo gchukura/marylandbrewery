@@ -34,9 +34,8 @@ The root README.md and the many root-level *.md notes are outdated; trust this f
 
 ## Current state (gaps between the code and the decisions above)
 These describe the code as of 2026-10-27. Fix them in their own PRs, not incidentally.
-- Data access lives in the root `lib/` (`brewery-data.ts`, `supabase-client.ts`, `supabase.ts`,
-  `supabase-attractions.ts`), imported by relative path. `src/lib/db` does not exist yet.
-  Some pages (`src/app/sitemap.ts`, `src/app/breweries/[slug]/page.tsx`) call Supabase directly.
+- `getProcessedBreweryData` in `src/lib/db/brewery-data.ts` caches `Map`s with `unstable_cache`
+  (see Known traps); several pages work around it with `instanceof Map` checks.
 - `src/app/api/contact/route.ts` still appends to a Google Sheet via `googleapis`.
   `lib/archived/google-sheets.ts` is the retired Sheets layer.
 - No `/neighborhoods` route yet; neighborhood-like pages are under `/cities/near/[slug]` and `/near/[slug]`.
@@ -50,16 +49,15 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
 - Shared helpers `src/lib/geo.ts`, `hours.ts`, `slug.ts`, `amenities.ts`, `seo/` do not exist yet;
   related logic is spread across `src/lib/*-utils.ts` and root `lib/`.
 - About 190 `as any` casts remain in `src/` and `lib/`.
-- No `typecheck` or `test` npm scripts yet (the tooling PR adds them). `lint` and `build` exist.
 
 ## Conventions
 - Server components by default. `"use client"` only for interactive islands, kept small.
-- All Supabase access goes through `src/lib/db` (after the data-layer PR).
-  No direct `supabase.from()` calls in pages or components.
+- All Supabase access goes through `src/lib/db`; import from `@/lib/db` only (ESLint enforces it).
+  The raw clients are private to that folder. Scripts in `scripts/` import its files directly.
 - No `as any` in new or touched code. No hex colors in className; use theme tokens.
 - Shared helpers live in one place: `src/lib/geo.ts`, `hours.ts`, `slug.ts`, `amenities.ts`, `seo/`.
 - One PR per task. Before opening a PR run: `npm run typecheck`, `npm run lint`, `npm test`,
-  `npm run build` (once these scripts exist). Include in the PR description what changed,
+  `npm run build`. CI runs the first three. Include in the PR description what changed,
   how it was verified, and anything left undone.
 - Never commit secrets, `.env` files, or generated images into `public/`.
 

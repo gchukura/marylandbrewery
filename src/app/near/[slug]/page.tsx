@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 import { getProcessedBreweryData } from '@/lib/db';
 import { slugify } from '@/lib/data-utils';
@@ -114,7 +115,7 @@ export default async function NearAttractionPage({ params }: { params: Promise<{
   const attraction = await getAttractionBySlug(slug);
 
   if (!attraction) {
-    return <div>Attraction not found</div>;
+    notFound();
   }
 
   const processed = await getProcessedBreweryData();

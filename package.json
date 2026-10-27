@@ -12,8 +12,8 @@
     "start": "next start",
     "start:clean": "rm -rf .next && npm run build && npm start",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src lib --ext .ts,.tsx",
-    "lint:fix": "eslint src lib --ext .ts,.tsx --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "lint:links": "npx tsx scripts/validate-internal-links.ts",
     "lint:links:deployed": "linkinator https://www.marylandbrewery.com --recurse --skip 'maps.googleapis.com|google.com|facebook.com|instagram.com|twitter.com|yelp.com|untappd.com' --timeout 30000",
     "indexnow": "npx tsx scripts/submit-indexnow.ts",
@@ -43,17 +43,15 @@
   },
   "devDependencies": {
     "@axe-core/cli": "^4.11.0",
-    "@eslint/eslintrc": "^3",
+    "@eslint/eslintrc": "^3.3.7",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/selenium-webdriver": "^4.35.4",
     "@types/xml2js": "^0.4.14",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
     "dotenv": "^17.2.3",
-    "eslint": "^8.57.0",
+    "eslint": "^9.39.5",
     "eslint-config-next": "^15.5.9",
     "lightningcss": "^1.33.0",
     "linkinator": "^7.5.3",
@@ -65,6 +63,7 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.20.6",
     "typescript": "^5",
+    "typescript-eslint": "^8.72.1",
     "vitest": "^3.2.7"
   }
 }

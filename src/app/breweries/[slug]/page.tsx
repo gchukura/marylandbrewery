@@ -317,9 +317,7 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
   ];
 
   // Get same city breweries for related links
-  const sameCityBreweriesForLinks: any[] = (processed.byCity instanceof Map 
-    ? processed.byCity.get(brewery.city.toLowerCase())
-    : (processed.byCity as any)?.[brewery.city.toLowerCase()]) || [];
+  const sameCityBreweriesForLinks = processed.byCity.get(brewery.city.toLowerCase()) || [];
   const sameCityOther = sameCityBreweriesForLinks
     .filter((b: any) => b.id !== brewery.id)
     .slice(0, 4)

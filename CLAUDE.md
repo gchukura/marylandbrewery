@@ -34,8 +34,6 @@ The root README.md and the many root-level *.md notes are outdated; trust this f
 
 ## Current state (gaps between the code and the decisions above)
 These describe the code as of 2026-10-27. Fix them in their own PRs, not incidentally.
-- `getProcessedBreweryData` in `src/lib/db/brewery-data.ts` caches `Map`s with `unstable_cache`
-  (see Known traps); several pages work around it with `instanceof Map` checks.
 - `src/app/api/contact/route.ts` still appends to a Google Sheet via `googleapis`.
   `lib/archived/google-sheets.ts` is the retired Sheets layer.
 - No `/neighborhoods` route yet; neighborhood-like pages are under `/cities/near/[slug]` and `/near/[slug]`.

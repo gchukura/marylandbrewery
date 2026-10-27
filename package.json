@@ -11,13 +11,16 @@
     "build:clean": "rm -rf .next && next build",
     "start": "next start",
     "start:clean": "rm -rf .next && npm run build && npm start",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src lib --ext .ts,.tsx",
+    "lint:fix": "eslint src lib --ext .ts,.tsx --fix",
     "lint:links": "npx tsx scripts/validate-internal-links.ts",
     "lint:links:deployed": "linkinator https://www.marylandbrewery.com --recurse --skip 'maps.googleapis.com|google.com|facebook.com|instagram.com|twitter.com|yelp.com|untappd.com' --timeout 30000",
     "indexnow": "npx tsx scripts/submit-indexnow.ts",
     "format": "prettier --write .",
-    "postinstall": "node scripts/ensure-lightningcss-binary.js"
+    "postinstall": "node scripts/ensure-lightningcss-binary.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@googlemaps/markerclusterer": "^2.6.2",
@@ -61,6 +64,7 @@
     "supabase": "^2.70.5",
     "tailwindcss": "^4.1.18",
     "tsx": "^4.20.6",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   }
 }

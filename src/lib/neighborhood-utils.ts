@@ -6,8 +6,8 @@
  */
 
 import { deslugify } from '@/lib/data-utils';
-import { getNeighborhoodsByCity, getNeighborhoodBySlug } from '../../lib/supabase-client';
-import { DatabaseNeighborhood } from '../../lib/supabase';
+import { getNeighborhoodsByCity, getNeighborhoodBySlug } from '@/lib/db';
+import { DatabaseNeighborhood } from '@/lib/db';
 
 /**
  * Check if a slug matches the neighborhood pattern

@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { getProcessedBreweryData } from '../../../lib/brewery-data';
+import { getProcessedBreweryData } from '@/lib/db';
 import { slugify } from '@/lib/data-utils';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';

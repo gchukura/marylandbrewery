@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllBreweryData } from '../../../../lib/brewery-data';
+import { getAllBreweryData } from '@/lib/db';
 import { ApiResponse, PaginatedResponse } from '@/types/api';
 
 export async function GET(request: NextRequest): Promise<NextResponse> {

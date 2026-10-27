@@ -28,12 +28,12 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
-import { getBreweryDataFromSupabase } from '../lib/supabase-client';
+import { getBreweryDataFromSupabase } from '../src/lib/db/queries';
 import { 
   writeReviewsToSupabase, 
   updateYelpReviewSummaryInSupabase, 
   storeYelpBusinessIdInSupabase 
-} from '../lib/supabase-client';
+} from '../src/lib/db/queries';
 
 const yelpApiKey = process.env.YELP_API_KEY;
 if (!yelpApiKey) {

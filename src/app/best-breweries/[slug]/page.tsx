@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProcessedBreweryData, getBreweriesByCity, getAllCities } from '../../../../lib/brewery-data';
+import { getProcessedBreweryData, getBreweriesByCity, getAllCities } from '@/lib/db';
 import { slugify, deslugify, normalizeCountyName, isValidCountySlug, ALL_MD_COUNTIES } from '@/lib/data-utils';
 import { parseNeighborhoodSlug, isNeighborhoodSlug } from '@/lib/neighborhood-utils';
-import { getNeighborhoodsByCity } from '../../../../lib/supabase-client';
+import { getNeighborhoodsByCity } from '@/lib/db';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';

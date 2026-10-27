@@ -27,7 +27,7 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
-import { supabaseAdmin, DatabaseBrewery } from '../lib/supabase';
+import { supabaseAdmin, DatabaseBrewery } from '../src/lib/db/client';
 import { chromium, Page } from 'playwright';
 
 // Check if admin client is available

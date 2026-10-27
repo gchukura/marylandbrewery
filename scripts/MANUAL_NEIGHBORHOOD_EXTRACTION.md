@@ -53,7 +53,7 @@ If you create a CSV manually, use this script to import:
 // scripts/import-neighborhoods-csv.ts
 import { parse } from 'csv-parse/sync';
 import { readFileSync } from 'fs';
-import { supabaseAdmin } from '../lib/supabase';
+import { supabaseAdmin } from '../src/lib/db/client';
 import { slugify } from '../src/lib/data-utils';
 
 const csv = readFileSync('neighborhoods.csv', 'utf-8');

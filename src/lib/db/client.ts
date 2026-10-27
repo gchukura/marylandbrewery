@@ -4,7 +4,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Brewery, Beer } from '../src/types/brewery';
+import { Brewery, Beer } from '@/types/brewery';
 
 // Lazy initialization of Supabase clients
 let supabaseClient: SupabaseClient | null = null;

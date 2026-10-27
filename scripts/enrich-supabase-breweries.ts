@@ -16,8 +16,8 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
-import { supabaseAdmin } from '../lib/supabase';
-import { getBreweryDataFromSupabase } from '../lib/supabase-client';
+import { supabaseAdmin } from '../src/lib/db/client';
+import { getBreweryDataFromSupabase } from '../src/lib/db/queries';
 
 const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
 

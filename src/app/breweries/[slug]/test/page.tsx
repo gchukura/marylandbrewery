@@ -1,12 +1,11 @@
 import { notFound } from 'next/navigation';
-import { getProcessedBreweryData, getNearbyBreweries } from '../../../../../lib/brewery-data';
+import { getProcessedBreweryData, getNearbyBreweries } from '@/lib/db';
 import { deslugify } from '../../../../../lib/utils';
 import { slugify } from '@/lib/data-utils';
 import SimpleBreweryPageTemplateV2 from '@/components/templates/SimpleBreweryPageTemplateV2';
 import { generateBreweryTitle, generateEnhancedBreweryDescription } from '@/lib/seo-utils';
-import { getBreweryReviews, getBreweryArticles } from '../../../../../lib/supabase-client';
+import { getBreweryReviews, getBreweryArticles, getBeersForBrewery } from '@/lib/db';
 import { generateAboutBreweryContent } from '@/lib/brewery-content-utils';
-import { supabase } from '../../../../../lib/supabase';
 import { BreweryArticle } from '@/types/brewery';
 
 interface BreweryPageProps {
@@ -309,10 +308,7 @@ export default async function BreweryPageTest({ params }: BreweryPageProps) {
   const allReviews = reviewData.reviews;
 
   // Fetch beers for this brewery
-  const { data: beersData } = await supabase
-    .from('beers')
-    .select('name, style, abv, availability')
-    .eq('brewery_id', brewery.id);
+  const beersData = await getBeersForBrewery(brewery.id);
 
   // Generate dynamic About content using stored review themes
   const aboutContent = await generateAboutBreweryContent({

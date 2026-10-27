@@ -4,6 +4,29 @@
     "prefer-const": "error",
     "no-var": "error",
     "react/no-unescaped-entities": "off",
-    "react-hooks/exhaustive-deps": "warn"
-  }
+    "react-hooks/exhaustive-deps": "warn",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "@supabase/supabase-js",
+            "message": "Supabase access goes through @/lib/db."
+          }
+        ],
+        "patterns": [
+          {
+            "group": ["@/lib/db/*", "**/lib/db/*"],
+            "message": "Import from @/lib/db, not its internal files."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/lib/db/**"],
+      "rules": { "no-restricted-imports": "off" }
+    }
+  ]
 }

@@ -17,8 +17,8 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
-import { supabaseAdmin } from '../src/lib/db/client';
-import { slugify } from '../src/lib/data-utils';
+import { supabaseAdmin } from '../../src/lib/db/client';
+import { slugify } from '../../src/lib/data-utils';
 
 // Check if admin client is available
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {

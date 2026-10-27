@@ -19,7 +19,7 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
-import { supabaseAdmin } from '../src/lib/db/client';
+import { supabaseAdmin } from '../../src/lib/db/client';
 
 if (!supabaseAdmin) {
   throw new Error('Supabase admin client not available');

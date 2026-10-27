@@ -1,12 +1,14 @@
 /**
- * Capitalize "microbrewery" to "Microbrewery" in breweries.type column
+ * Update "Nano" to "Nanobrewery" in breweries.type column
  *
- * This script updates all instances of "microbrewery" (lowercase) to "Microbrewery"
- * (capitalized) in the breweries table's type column.
+ * This script updates all instances of "Nano" to "Nanobrewery" in the
+ * breweries table's type column. The type column can be either:
+ * - A single string value
+ * - A JSONB array of strings
  *
  * Usage:
- *   npx tsx scripts/capitalize-microbrewery.ts
- *   npx tsx scripts/capitalize-microbrewery.ts --dry-run
+ *   npx tsx scripts/update-nano-to-nanobrewery.ts
+ *   npx tsx scripts/update-nano-to-nanobrewery.ts --dry-run
  *
  * Env required in `.env.local`:
  *   - NEXT_PUBLIC_SUPABASE_URL
@@ -17,7 +19,7 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
-import { supabaseAdmin } from '../src/lib/db/client';
+import { supabaseAdmin } from '../../src/lib/db/client';
 
 if (!supabaseAdmin) {
   throw new Error('Supabase admin client not available');
@@ -25,8 +27,8 @@ if (!supabaseAdmin) {
 
 const client = supabaseAdmin;
 
-async function capitalizeMicrobrewery() {
-  console.log('🔄 Capitalizing "microbrewery" to "Microbrewery" in breweries.type\n');
+async function updateNanoToNanobrewery() {
+  console.log('🔄 Updating "Nano" to "Nanobrewery" in breweries.type\n');
 
   const args = process.argv.slice(2);
   const DRY_RUN = args.includes('--dry-run');
@@ -74,9 +76,12 @@ async function capitalizeMicrobrewery() {
     if (Array.isArray(brewery.type)) {
       // Type is an array
       const updatedArray = brewery.type.map((t: string) => {
-        if (typeof t === 'string' && t.toLowerCase() === 'microbrewery') {
-          needsUpdate = true;
-          return 'Microbrewery';
+        if (typeof t === 'string') {
+          const lowerT = t.toLowerCase();
+          if (lowerT === 'nano' || lowerT === 'nanobrewery') {
+            needsUpdate = true;
+            return 'Nanobrewery';
+          }
         }
         return t;
       });
@@ -86,9 +91,10 @@ async function capitalizeMicrobrewery() {
       }
     } else if (typeof brewery.type === 'string') {
       // Type is a single string
-      if (brewery.type.toLowerCase() === 'microbrewery') {
+      const lowerType = brewery.type.toLowerCase();
+      if (lowerType === 'nano' || lowerType === 'nanobrewery') {
         needsUpdate = true;
-        newType = 'Microbrewery';
+        newType = 'Nanobrewery';
       }
     }
 
@@ -136,7 +142,7 @@ async function capitalizeMicrobrewery() {
 }
 
 // Run the script
-capitalizeMicrobrewery().catch(error => {
+updateNanoToNanobrewery().catch(error => {
   console.error('Fatal error:', error);
   process.exit(1);
 });

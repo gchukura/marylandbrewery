@@ -671,3 +671,40 @@ export async function getAllNeighborhoods(): Promise<DatabaseNeighborhood[]> {
     return [];
   }
 }
+
+export interface Region {
+  slug: string;
+  name: string;
+  /** Canonical county names, matching breweries.county */
+  counties: string[];
+  description: string;
+}
+
+/** The regions table says "Baltimore County" where breweries say "Baltimore"; map to the canonical name. */
+function canonicalCounty(name: string): string {
+  return normalizeCountyName(slugify(name.replace(/ County$/i, ''))) ?? name;
+}
+
+/**
+ * Get the Maryland regions from the maryland_regions table
+ */
+export async function fetchRegions(): Promise<Region[]> {
+  try {
+    const { data, error } = await supabase
+      .from('maryland_regions')
+      .select('region_slug, region_name, counties, description')
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+
+    return (data || []).map((row: { region_slug: string; region_name: string; counties: string[] | null; description: string | null }) => ({
+      slug: row.region_slug,
+      name: row.region_name,
+      counties: (row.counties || []).map(canonicalCounty),
+      description: row.description || '',
+    }));
+  } catch (error) {
+    throwDuringBuild(error);
+    console.error('Failed to fetch regions from Supabase:', error);
+    return [];
+  }
+}

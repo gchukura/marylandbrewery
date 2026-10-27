@@ -1,44 +1,17 @@
 import { Metadata } from 'next';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
-import { getProcessedBreweryData } from '@/lib/db';
+import { breweriesInRegion, getProcessedBreweryData, getRegions } from '@/lib/db';
 import { slugify, deslugify } from '@/lib/slug';
 
 // Region definitions (fallback if database not available)
-const MARYLAND_REGIONS: Record<string, { name: string; counties: string[]; description: string }> = {
-  'eastern-shore': {
-    name: 'Eastern Shore',
-    counties: ['Talbot', 'Dorchester', 'Wicomico', 'Worcester', 'Somerset', 'Caroline', 'Kent', "Queen Anne's", 'Cecil'],
-    description: "Maryland's Eastern Shore offers a relaxed, rural brewery experience with scenic waterfront locations and farm-to-glass craft beer.",
-  },
-  'western-maryland': {
-    name: 'Western Maryland',
-    counties: ['Allegany', 'Garrett', 'Washington'],
-    description: "The mountains of Western Maryland are home to breweries that celebrate the region's natural beauty and outdoor recreation culture.",
-  },
-  'central-maryland': {
-    name: 'Central Maryland',
-    counties: ['Baltimore City', 'Baltimore County', 'Howard', 'Carroll', 'Harford'],
-    description: "The heart of Maryland's craft beer scene, Central Maryland features the highest concentration of breweries from urban Baltimore to suburban Howard County.",
-  },
-  'southern-maryland': {
-    name: 'Southern Maryland',
-    counties: ['Calvert', 'Charles', "St. Mary's"],
-    description: "Southern Maryland's waterfront breweries combine craft beer with Chesapeake Bay culture and historic charm.",
-  },
-  'capital-region': {
-    name: 'Capital Region',
-    counties: ['Montgomery', "Prince George's"],
-    description: "The DC suburbs offer diverse brewery experiences, from upscale taprooms to community-focused brewpubs serving the metropolitan area.",
-  },
-};
 
 export async function generateStaticParams() {
-  return Object.keys(MARYLAND_REGIONS).map((region) => ({ region }));
+  return (await getRegions()).map((region) => ({ region: region.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ region: string }> }): Promise<Metadata> {
   const { region } = await params;
-  const regionData = MARYLAND_REGIONS[region];
+  const regionData = (await getRegions()).find((r) => r.slug === region);
   
   if (!regionData) {
     return {
@@ -48,11 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ region: s
   }
 
   const processed = await getProcessedBreweryData();
-  const breweries = processed.breweries.filter((b: any) =>
-    regionData.counties.some(county => 
-      b.county && b.county.toLowerCase() === county.toLowerCase()
-    )
-  );
+  const breweries = breweriesInRegion(regionData, processed.breweries);
 
   const title = `${regionData.name} Breweries | ${breweries.length} Craft Breweries in ${regionData.name}`;
   const description = `Explore ${breweries.length} breweries across ${regionData.name}. Plan your brewery tour through ${regionData.counties.join(', ')} with our complete guide.`;
@@ -105,18 +74,14 @@ function computeRegionStats(breweries: any[]) {
 
 export default async function RegionPage({ params }: { params: Promise<{ region: string }> }) {
   const { region } = await params;
-  const regionData = MARYLAND_REGIONS[region];
+  const regionData = (await getRegions()).find((r) => r.slug === region);
 
   if (!regionData) {
     return <div>Region not found</div>;
   }
 
   const processed = await getProcessedBreweryData();
-  const breweries = processed.breweries.filter((b: any) =>
-    regionData.counties.some(county => 
-      b.county && b.county.toLowerCase() === county.toLowerCase()
-    )
-  );
+  const breweries = breweriesInRegion(regionData, processed.breweries);
 
   // Intro text
   const introText = `Discover ${breweries.length} craft breweries across ${regionData.name}, spanning ${regionData.counties.length} counties. ${regionData.description}`;

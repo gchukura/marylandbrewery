@@ -5,7 +5,7 @@
 
 import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
-import { fetchBreweryBySlug, getBreweryDataFromSupabase } from './queries';
+import { fetchBreweryBySlug, fetchRegions, getBreweryDataFromSupabase, type Region } from './queries';
 import { 
   Brewery, 
   ProcessedBreweryData, 
@@ -29,6 +29,15 @@ export const getAllBreweries = unstable_cache(
   ['all-breweries'],
   CACHE
 );
+
+/** The five Maryland regions (maryland_regions), with canonical county names. */
+export const getRegions = unstable_cache(async (): Promise<Region[]> => fetchRegions(), ['regions'], CACHE);
+
+/** Breweries whose county is in the region. */
+export function breweriesInRegion(region: Region, breweries: Brewery[]): Brewery[] {
+  const counties = new Set(region.counties.map((c) => c.toLowerCase()));
+  return breweries.filter((b) => b.county && counties.has(b.county.toLowerCase()));
+}
 
 /** One brewery with everything its page needs (review themes, beers), cached per slug. */
 export function getBreweryBySlug(slug: string): Promise<Brewery | null> {

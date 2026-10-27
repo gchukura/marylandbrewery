@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
-import { getProcessedBreweryData, getBreweriesByCity } from '@/lib/db';
+import { getProcessedBreweryData, getBreweriesByCity, getRegions } from '@/lib/db';
 import { normalizeCountyName, isValidCountySlug } from '@/lib/data-utils';
 import { slugify, deslugify } from '@/lib/slug';
 import { bestBreweriesCityPath, hasBestBreweriesPage } from '@/lib/best-breweries';
@@ -16,9 +16,6 @@ import '@/components/home-v2/styles.css';
 import CityBreweriesMapClient from '../../cities/[city]/breweries/CityBreweriesMapClient';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
-
-// Region slugs match /region/[region]
-const MARYLAND_REGION_SLUGS = ['eastern-shore', 'western-maryland', 'central-maryland', 'southern-maryland', 'capital-region'];
 
 function calculateBreweryScore(brewery: any): number {
   const rating = brewery.googleRating || 0;
@@ -303,7 +300,7 @@ export default async function BestBreweriesSlugPage({ params }: { params: Promis
     }
   }
 
-  if (MARYLAND_REGION_SLUGS.includes(slugWithoutMd)) {
+  if ((await getRegions()).some((r) => r.slug === slugWithoutMd)) {
     permanentRedirect(`/region/${slugWithoutMd}`);
   }
 

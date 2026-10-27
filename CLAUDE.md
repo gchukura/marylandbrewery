@@ -1,9 +1,9 @@
 # CLAUDE.md
 
 Maryland brewery directory (marylandbrewery.com). Read this before changing anything.
-The root README.md and the many root-level *.md notes are outdated; trust this file and the code.
+Docs live in docs/ (setup, scripts, troubleshooting, seo-audit-2026, adsense). When docs and code disagree, trust the code.
 
-## Stack (actual, not what the old README says)
+## Stack
 - Next.js 15.5 App Router, React 19, TypeScript (`strict: true`).
 - Tailwind CSS v4 via `@tailwindcss/postcss`. Theme lives in `@theme` in `src/app/globals.css`.
 - Supabase Postgres is the only data store. Schema migrations in `supabase/migrations/`.
@@ -60,7 +60,7 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
 - No `as any` in new or touched code. No hex colors in className; use theme tokens.
 - Shared helpers live in one place: `src/lib/geo.ts`, `hours.ts`, `slug.ts`, `amenities.ts`, `seo/`.
 - One PR per task. Before opening a PR run: `npm run typecheck`, `npm run lint`, `npm test`,
-  `npm run build`. CI runs the first three. Include in the PR description what changed,
+  `npm run build` (and `npm run test:e2e` for UI changes). CI runs all but e2e. Include in the PR description what changed,
   how it was verified, and anything left undone.
 - Never commit secrets, `.env` files, or generated images into `public/`.
 

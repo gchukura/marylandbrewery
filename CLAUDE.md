@@ -19,7 +19,8 @@ The root README.md and the many root-level *.md notes are outdated; trust this f
 - `/best-breweries/[city]` exists only for cities with 5+ breweries. County, region and `near/`
   variants 301 to their main pages.
 - Images live in Supabase Storage (public bucket `brewery-media`), not in `public/`.
-- No admin web UI. Data sync is triggered by a GitHub Action calling `/api/sync` with a secret.
+- No admin web UI. Data sync is triggered by a GitHub Action calling `/api/sync` with a secret
+  (`.github/workflows/sync.yml`, run manually; needs `SITE_URL` variable and `ADMIN_SYNC_TOKEN` secret).
 - Ads: one footer unit site-wide, one 300x250 slot in the brewery page right rail.
   Reserved heights, no ad-block detection.
 - No blog until posts exist.
@@ -41,8 +42,7 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
   `/best-breweries`, `/best-breweries/near` and `/cities/near` redirect to `/neighborhoods/[slug]`.
 - `/near/[slug]` is attraction pages, not neighborhoods.
 - Redirects use `permanentRedirect()`, which sends 308 (Next.js's permanent redirect), not a literal 301.
-- No GitHub Action calls `/api/sync` yet; until one exists, sync is triggered by a POST with the
-  `x-admin-token` header. `/blog` temporarily redirects to `/`.
+- `/blog` temporarily redirects to `/`.
 - Fonts are Playfair Display + Source Sans 3 via `next/font/google` in `src/app/layout.tsx`;
   `globals.css` also names `'Source Sans 3'` directly. Design tokens from `docs/design/tokens.css`
   are not yet in `globals.css`.

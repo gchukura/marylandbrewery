@@ -81,6 +81,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Security headers live only here (not in vercel.json)
   async headers() {
     return [
       {
@@ -97,6 +98,11 @@ const nextConfig: NextConfig = {
           {
             key: 'Referrer-Policy',
             value: 'origin-when-cross-origin',
+          },
+          {
+            // geolocation=(self) so the planned "Near me" feature can ask for location
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(self)',
           },
         ],
       },

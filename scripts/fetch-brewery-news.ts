@@ -14,8 +14,8 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 import Parser from 'rss-parser';
-import { supabaseAdmin, DatabaseBreweryArticle } from '../src/lib/db/client';
-import { getBreweryDataFromSupabase } from '../src/lib/db/queries';
+import { supabaseAdmin, DatabaseBreweryArticle } from '@/lib/db/client';
+import { getBreweryDataFromSupabase } from '@/lib/db/queries';
 
 const parser = new Parser();
 

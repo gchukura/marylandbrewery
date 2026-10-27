@@ -3,9 +3,9 @@
  * Run with: npx tsx scripts/count-sitemap-urls.ts
  */
 
-import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities } from '../src/lib/db/brewery-data';
-import { slugify, deslugify, ALL_MD_COUNTIES, normalizeCountyName } from '../src/lib/data-utils';
-import { supabase } from '../src/lib/db/client';
+import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities } from '@/lib/db/brewery-data';
+import { slugify, deslugify, ALL_MD_COUNTIES, normalizeCountyName } from '@/lib/data-utils';
+import { supabase } from '@/lib/db/client';
 
 const BASE_URL = 'https://www.marylandbrewery.com';
 const MARYLAND_REGIONS = ['eastern-shore', 'western-maryland', 'central-maryland', 'southern-maryland', 'capital-region'];

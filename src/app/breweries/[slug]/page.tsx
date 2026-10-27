@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getProcessedBreweryData, getNearbyBreweries } from '@/lib/db';
-import { deslugify } from '../../../../lib/utils';
+import { deslugify } from '@/lib/data-utils';
 import { slugify } from '@/lib/data-utils';
 import SimpleBreweryPageTemplate from '@/components/templates/SimpleBreweryPageTemplate';
 import { generateBreweryTitle, generateEnhancedBreweryDescription } from '@/lib/seo-utils';

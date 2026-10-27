@@ -32,7 +32,7 @@ import { join } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
-import { supabaseAdmin, DatabaseBrewery } from '../src/lib/db/client';
+import { supabaseAdmin, DatabaseBrewery } from '@/lib/db/client';
 
 const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
 if (!apiKey) {

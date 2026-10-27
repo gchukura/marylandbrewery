@@ -32,7 +32,7 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
-import { supabaseAdmin, DatabaseBrewery } from '../src/lib/db/client';
+import { supabaseAdmin, DatabaseBrewery } from '@/lib/db/client';
 
 // Check if admin client is available
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {

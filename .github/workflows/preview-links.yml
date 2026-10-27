@@ -11,7 +11,6 @@ jobs:
   validate-deployed-links:
     name: Validate deployed links (non-blocking)
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     steps:
       - name: Wait for Vercel Preview
@@ -20,6 +19,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           max_timeout: 300
+        # Step-level, so a missing preview or broken links show as a warning, not a red X
+        continue-on-error: true
 
       - name: Check deployed links with Linkinator
         if: steps.wait-for-preview.outputs.url != ''
@@ -29,3 +30,4 @@ jobs:
             --skip "maps.googleapis.com|google.com|facebook.com|instagram.com|twitter.com|yelp.com|untappd.com" \
             --timeout 30000 \
             --verbosity error
+        continue-on-error: true

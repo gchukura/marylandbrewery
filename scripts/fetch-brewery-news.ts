@@ -309,12 +309,21 @@ async function main() {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+      // articles_last_updated isn't on the Brewery type, so read it from the table directly
+      const { data: updatedRows, error: updatedError } = await supabaseAdmin!
+        .from('breweries')
+        .select('id, articles_last_updated');
+      if (updatedError) throw updatedError;
+      const lastUpdatedById = new Map<string, string | null>(
+        (updatedRows || []).map((row: { id: string; articles_last_updated: string | null }) => [row.id, row.articles_last_updated])
+      );
+
       filteredBreweries = filteredBreweries.filter(brewery => {
-        if (!brewery.articles_last_updated) {
+        const lastUpdatedAt = lastUpdatedById.get(brewery.id);
+        if (!lastUpdatedAt) {
           return true; // Never updated, include it
         }
-        const lastUpdated = new Date(brewery.articles_last_updated);
-        return lastUpdated < sevenDaysAgo;
+        return new Date(lastUpdatedAt) < sevenDaysAgo;
       });
     }
 

@@ -6,6 +6,7 @@
 
 import { supabase, supabaseAdmin, DatabaseBrewery, DatabaseBeer, DatabaseNewsletterSubscriber, DatabaseBreweryArticle, DatabaseNeighborhood } from './client';
 import { Brewery, Beer, SocialMedia, OperatingHours, Membership, ReviewThemes } from '@/types/brewery';
+import { normalizeCountyName, slugify } from '@/lib/data-utils';
 
 /**
  * Convert database brewery to application brewery type
@@ -23,7 +24,8 @@ function dbBreweryToBrewery(dbBrewery: DatabaseBrewery, beers: Beer[] = []): Bre
     city: dbBrewery.city,
     state: dbBrewery.state,
     zip: dbBrewery.zip,
-    county: dbBrewery.county,
+    // Canonical county name, e.g. "Saint Marys" in the table becomes "St. Mary's"
+    county: (dbBrewery.county && normalizeCountyName(slugify(dbBrewery.county))) || dbBrewery.county,
     latitude: dbBrewery.latitude,
     longitude: dbBrewery.longitude,
     

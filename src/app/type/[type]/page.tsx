@@ -71,10 +71,7 @@ export async function generateMetadata({ params }: { params: Promise<{ type: str
   
   const typeKey = normalizedType.toLowerCase();
   const breweries = processed.breweries.filter((b) => {
-    if (Array.isArray(b.type)) {
-      return b.type.some(t => t.toLowerCase() === typeKey);
-    }
-    return b.type?.toLowerCase() === typeKey;
+    return b.type.some((t) => t.toLowerCase() === typeKey);
   });
   
   const typeLabel = normalizedType;
@@ -128,10 +125,7 @@ export default async function TypePage({ params }: { params: Promise<{ type: str
   
   // Filter breweries by type
   const breweries = processed.breweries.filter((b) => {
-    if (Array.isArray(b.type)) {
-      return b.type.some(t => t.toLowerCase() === typeKey);
-    }
-    return b.type?.toLowerCase() === typeKey;
+    return b.type.some((t) => t.toLowerCase() === typeKey);
   });
   
   // Return 404 if no breweries found

@@ -273,7 +273,7 @@ export default async function AmenitiesIndexPage() {
   // Get actual amenities from database and calculate counts
   const amenityCounts = new Map<string, number>();
   processed.breweries.forEach((brewery: any) => {
-    const amenities = (brewery.amenities || brewery.features || []) as string[];
+    const amenities = (brewery.amenities ?? []) as string[];
     amenities.forEach((amenity: string) => {
       const key = amenity.toLowerCase().trim();
       amenityCounts.set(key, (amenityCounts.get(key) || 0) + 1);
@@ -288,7 +288,7 @@ export default async function AmenitiesIndexPage() {
       // Find the original casing from a brewery
       let displayName = amenityKey;
       for (const brewery of processed.breweries) {
-        const amenities = ((brewery as any).amenities || (brewery as any).features || []) as string[];
+        const amenities = (brewery.amenities ?? []) as string[];
         const match = amenities.find((a: string) => a.toLowerCase().trim() === amenityKey);
         if (match) {
           displayName = match;

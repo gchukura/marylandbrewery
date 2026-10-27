@@ -130,7 +130,7 @@ export async function generateMetadata({ params }: { params: Promise<{ amenity: 
   
   const amenityKey = matchedAmenity.toLowerCase();
   const breweries = processed.breweries.filter(
-    (b) => ((b as any).amenities || (b as any).features || []).some((a: string) => 
+    (b) => (b.amenities ?? []).some((a: string) => 
       a.toLowerCase() === amenityKey || a.toLowerCase().includes(amenityKey) || amenityKey.includes(a.toLowerCase())
     )
   );
@@ -187,7 +187,7 @@ export default async function AmenityPage({ params }: { params: Promise<{ amenit
 
   // Filter breweries by amenity
   const breweries = processed.breweries.filter(
-    (b) => ((b as any).amenities || (b as any).features || []).some((a: string) => 
+    (b) => (b.amenities ?? []).some((a: string) => 
       a.toLowerCase() === amenityKey || a.toLowerCase().includes(amenityKey) || amenityKey.includes(a.toLowerCase())
     )
   );

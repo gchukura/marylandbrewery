@@ -15,7 +15,7 @@ export async function GET(req: Request) {
   for (const b of breweries) {
     const city = (b.city || '').trim();
     if (city) citySet.set(city, (citySet.get(city) || 0) + 1);
-    const features: string[] = (b as any).features || (b as any).amenities || [];
+    const features: string[] = b.amenities ?? [];
     for (const a of features) {
       if (a) amenitySet.add(a);
     }
@@ -27,7 +27,7 @@ export async function GET(req: Request) {
   const breweryMatches = breweries
     .filter(b => !q || b.name.toLowerCase().includes(q))
     .slice(0, limit)
-    .map(b => ({ type: 'brewery', id: b.id, name: b.name, city: b.city }));
+    .map(b => ({ type: 'brewery', id: b.id, slug: b.slug, name: b.name, city: b.city }));
 
   const cityMatches = cities
     .filter(c => !q || c.name.toLowerCase().includes(q))

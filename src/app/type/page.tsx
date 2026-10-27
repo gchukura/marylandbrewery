@@ -122,10 +122,7 @@ export default async function TypesIndexPage() {
   // Calculate counts for each type
   const items = TYPES.map((type) => {
     const breweries = processed.breweries.filter((b) => {
-      if (Array.isArray(b.type)) {
-        return b.type.some(t => t.toLowerCase() === type);
-      }
-      return b.type?.toLowerCase() === type;
+      return b.type.some((t) => t.toLowerCase() === type);
     });
     
     return {

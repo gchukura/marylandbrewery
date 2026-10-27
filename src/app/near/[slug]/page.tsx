@@ -173,7 +173,7 @@ export default async function NearAttractionPage({ params }: { params: Promise<{
       h1={`Breweries Near ${attraction.name}`}
       introText={introText}
       breadcrumbs={breadcrumbs}
-      breweries={nearbyBreweries as any}
+      breweries={nearbyBreweries}
       stats={stats}
       contentBlocks={contentBlocks}
       relatedPages={relatedPages}

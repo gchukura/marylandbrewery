@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: BreweryPageProps) {
   }
   
   const brewery = processed.breweries.find(
-    (b) => (b as any).slug === slug || b.id === slug
+    (b) => b.slug === slug || b.id === slug
   );
 
   if (!brewery) {
@@ -64,15 +64,15 @@ export async function generateMetadata({ params }: BreweryPageProps) {
   const description = generateEnhancedBreweryDescription({
     name: brewery.name,
     city: brewery.city,
-    county: (brewery as any).county,
-    type: (brewery as any).type,
+    county: brewery.county,
+    type: brewery.type,
     description: brewery.description,
-    googleRating: (brewery as any).googleRating,
-    amenities: (brewery as any).amenities || (brewery as any).features,
-    offersTours: (brewery as any).offersTours,
-    dogFriendly: (brewery as any).dogFriendly,
-    food: (brewery as any).food,
-    outdoorSeating: (brewery as any).outdoorSeating,
+    googleRating: brewery.googleRating,
+    amenities: brewery.amenities,
+    offersTours: brewery.offersTours,
+    dogFriendly: brewery.dogFriendly,
+    food: brewery.food,
+    outdoorSeating: brewery.outdoorSeating,
   });
 
   return {
@@ -154,8 +154,8 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
       brewery: {
         name: brewery.name,
         city: brewery.city,
-        county: (brewery as any).county,
-        type: (brewery as any).type,
+        county: brewery.county,
+        type: brewery.type,
         latitude: brewery.latitude,
         longitude: brewery.longitude,
         googleRating: brewery.googleRating,
@@ -174,23 +174,23 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     (b) => b.city.toLowerCase() === brewery.city.toLowerCase()
   );
   const cityRatings = sameCityBreweries
-    .filter((b) => (b as any).googleRating)
-    .map((b) => (b as any).googleRating!);
+    .filter((b) => b.googleRating)
+    .map((b) => b.googleRating!);
   const cityAverageRating = cityRatings.length > 0 
     ? cityRatings.reduce((a, b) => a + b, 0) / cityRatings.length 
     : 0;
 
   // Calculate state average rating
   const stateRatings = processed.breweries
-    .filter((b) => (b as any).googleRating)
-    .map((b) => (b as any).googleRating!);
+    .filter((b) => b.googleRating)
+    .map((b) => b.googleRating!);
   const stateAverageRating = stateRatings.length > 0
     ? stateRatings.reduce((a, b) => a + b, 0) / stateRatings.length
     : 0;
 
   // Calculate same county count
   const sameCountyCount = processed.breweries.filter(
-    (b) => (b as any).county?.toLowerCase() === (brewery as any).county?.toLowerCase()
+    (b) => b.county?.toLowerCase() === brewery.county?.toLowerCase()
   ).length;
 
   // Open/closed status and next opening, in Maryland time (src/lib/hours.ts)
@@ -204,7 +204,7 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
   const nextOpenTime = next?.time ?? null;
 
   // Generate breadcrumbs
-  const citySlug = (brewery as any).citySlug || slugify(brewery.city);
+  const citySlug = slugify(brewery.city);
   const breadcrumbs = [
     { name: 'Maryland Brewery', url: '/', position: 1, isActive: false },
     { name: brewery.city, url: `/cities/${citySlug}/breweries`, position: 2, isActive: false },
@@ -218,22 +218,22 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     .slice(0, 4)
     .map((b: any) => ({
       title: b.name,
-      url: `/breweries/${(b as any).slug || b.id}`,
+      url: `/breweries/${b.slug || b.id}`,
       type: 'brewery' as const,
     }));
 
   // Get breweries with similar amenities
-  const breweryAmenities = ((brewery as any).amenities || (brewery as any).features || []).map((a: string) => a.toLowerCase());
+  const breweryAmenities = (brewery.amenities ?? []).map((a: string) => a.toLowerCase());
   const similarAmenityBreweries = processed.breweries
     .filter(b => {
       if (b.id === brewery.id) return false;
-      const bAmenities = ((b as any).amenities || (b as any).features || []).map((a: string) => a.toLowerCase());
+      const bAmenities = (b.amenities ?? []).map((a: string) => a.toLowerCase());
       return breweryAmenities.some((a: string) => bAmenities.includes(a));
     })
     .slice(0, 3)
     .map(b => ({
       title: b.name,
-      url: `/breweries/${(b as any).slug || b.id}`,
+      url: `/breweries/${b.slug || b.id}`,
       type: 'brewery' as const,
     }));
 
@@ -250,15 +250,15 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
   const metaDescription = generateEnhancedBreweryDescription({
     name: brewery.name,
     city: brewery.city,
-    county: (brewery as any).county,
-    type: (brewery as any).type,
+    county: brewery.county,
+    type: brewery.type,
     description: brewery.description,
-    googleRating: (brewery as any).googleRating,
-    amenities: (brewery as any).amenities || (brewery as any).features,
-    offersTours: (brewery as any).offersTours,
-    dogFriendly: (brewery as any).dogFriendly,
-    food: (brewery as any).food,
-    outdoorSeating: (brewery as any).outdoorSeating,
+    googleRating: brewery.googleRating,
+    amenities: brewery.amenities,
+    offersTours: brewery.offersTours,
+    dogFriendly: brewery.dogFriendly,
+    food: brewery.food,
+    outdoorSeating: brewery.outdoorSeating,
   });
 
   const actualReviewCount = reviewData.total;
@@ -303,12 +303,12 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
 
   return (
     <SimpleBreweryPageTemplate
-      brewery={breweryWithReviewCount as any}
-      nearbyBreweries={nearbyBreweries as any}
+      brewery={breweryWithReviewCount}
+      nearbyBreweries={nearbyBreweries}
       title={title}
       metaDescription={metaDescription}
-      breadcrumbs={breadcrumbs as any}
-      relatedPages={relatedPages as any}
+      breadcrumbs={breadcrumbs}
+      relatedPages={relatedPages}
       computed={computed}
       aboutContent={aboutContent}
       articles={articles}

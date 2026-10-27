@@ -72,7 +72,7 @@ const getMembershipIcon = (membershipName: string): string => {
 
 interface SimpleBreweryPageTemplateProps {
   // Brewery data
-  brewery: Brewery;
+  brewery: Brewery & { actualReviewCount?: number };
   nearbyBreweries: Brewery[];
   
   // SEO
@@ -192,7 +192,7 @@ export default function SimpleBreweryPageTemplate({
     if (brewery.website && brewery.website.trim()) {
       structuredData.url = brewery.website;
     } else {
-      structuredData.url = `https://www.marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`;
+      structuredData.url = `https://www.marylandbrewery.com/breweries/${brewery.slug || brewery.id}`;
     }
 
     if (brewery.socialMedia) {
@@ -468,22 +468,22 @@ export default function SimpleBreweryPageTemplate({
                 {(() => {
                   // Calculate the rating to display - use combined average if both Google and Yelp exist
                   const hasGoogle = brewery.googleRating && brewery.googleRating > 0 && brewery.googleRatingCount && brewery.googleRatingCount > 0;
-                  const hasYelp = (brewery as any).yelpRating && (brewery as any).yelpRating > 0 && (brewery as any).yelpRatingCount && (brewery as any).yelpRatingCount > 0;
+                  const hasYelp = brewery.yelpRating && brewery.yelpRating > 0 && brewery.yelpRatingCount && brewery.yelpRatingCount > 0;
                   
                   let displayRating: number | null = null;
                   let totalReviewCount = 0;
                   
                   if (hasGoogle && hasYelp) {
                     // Calculate combined weighted average to match about content
-                    const totalReviews = brewery.googleRatingCount! + (brewery as any).yelpRatingCount!;
-                    displayRating = (brewery.googleRating! * brewery.googleRatingCount! + (brewery as any).yelpRating! * (brewery as any).yelpRatingCount!) / totalReviews;
+                    const totalReviews = brewery.googleRatingCount! + brewery.yelpRatingCount!;
+                    displayRating = (brewery.googleRating! * brewery.googleRatingCount! + brewery.yelpRating! * brewery.yelpRatingCount!) / totalReviews;
                     totalReviewCount = totalReviews;
                   } else if (hasGoogle) {
                     displayRating = brewery.googleRating!;
-                    totalReviewCount = (brewery as any).actualReviewCount || brewery.googleRatingCount || 0;
+                    totalReviewCount = brewery.actualReviewCount || brewery.googleRatingCount || 0;
                   } else if (hasYelp) {
-                    displayRating = (brewery as any).yelpRating!;
-                    totalReviewCount = (brewery as any).yelpRatingCount || 0;
+                    displayRating = brewery.yelpRating!;
+                    totalReviewCount = brewery.yelpRatingCount || 0;
                   }
                   
                   if (!displayRating) return null;
@@ -552,7 +552,7 @@ export default function SimpleBreweryPageTemplate({
                   <p className="text-[#1C1C1C] mb-4 leading-relaxed text-lg sm:text-xl font-body">{brewery.description}</p>
                 ) : (
                   <p className="text-[#1C1C1C] mb-4 leading-relaxed text-lg sm:text-xl font-body">
-                    {brewery.name} is a {Array.isArray(brewery.type) ? brewery.type.join(' and ').toLowerCase() : (brewery.type || 'brewery').toLowerCase()} located in {brewery.city}, {brewery.county} County, Maryland.
+                    {brewery.name} is a {brewery.type.join(' and ').toLowerCase()} located in {brewery.city}, {brewery.county} County, Maryland.
                     {brewery.amenities && brewery.amenities.length > 0 && (
                       <> Featuring {brewery.amenities.slice(0, 3).join(', ').toLowerCase()}, this local brewery welcomes craft beer enthusiasts.</>
                     )}
@@ -801,8 +801,7 @@ export default function SimpleBreweryPageTemplate({
                     Brewery Type
                   </h3>
                   <div className="text-[#1C1C1C] font-body">
-                    {Array.isArray(brewery.type) 
-                      ? brewery.type.map((type: string, index: number) => (
+                    {brewery.type.map((type: string, index: number) => (
                           <span key={index}>
                             <Link 
                               href={`/type/${type.toLowerCase().replace(/\s+/g, '-')}`}
@@ -812,36 +811,11 @@ export default function SimpleBreweryPageTemplate({
                             </Link>
                             {index < brewery.type.length - 1 && ', '}
                           </span>
-                        ))
-                      : (
-                          <Link 
-                            href={`/type/${brewery.type.toLowerCase().replace(/\s+/g, '-')}`}
-                            className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
-                          >
-                            {brewery.type}
-                          </Link>
-                        )}
+                        ))}
                   </div>
                 </div>
               )}
 
-              {/* Links to Articles */}
-              {brewery.articles && brewery.articles.length > 0 && (
-                <div>
-                  <h3 
-                    className="text-xl sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
-                  >
-                    Articles
-                  </h3>
-                  <div className="space-y-3 font-body">
-                    {brewery.articles.map((article: Article, index: number) => (
-                      <a key={index} href={article.url} target="_blank" rel="noopener noreferrer" className="block text-[#9B2335] hover:text-[#7A1C2A] text-body-large font-medium">
-                        {article.title}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Social Media */}
               <div>
@@ -959,14 +933,14 @@ export default function SimpleBreweryPageTemplate({
 
 
               {/* Opening Date */}
-              {(brewery.openingDate || brewery.openedDate) && (
+              {brewery.openedDate && (
                 <div>
                   <h3 
                     className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
                   >
                     Opening Date
                   </h3>
-                  <div className="text-[#1C1C1C] text-body font-body">{brewery.openingDate || brewery.openedDate}</div>
+                  <div className="text-[#1C1C1C] text-body font-body">{brewery.openedDate}</div>
                 </div>
               )}
 

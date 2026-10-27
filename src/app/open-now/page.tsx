@@ -41,7 +41,7 @@ export default async function OpenNowPage() {
   const openBreweries = processed.breweries
     .map(b => ({ b, status: isOpenAt(b.hours) }))
     .filter(x => x.status.open)
-    .map(x => ({ ...x.b, closeTime: x.status.closesAt })) as any[];
+    .map(x => ({ ...x.b, closeTime: x.status.closesAt }));
 
   // Group by city
   const byCity = new Map<string, any[]>();

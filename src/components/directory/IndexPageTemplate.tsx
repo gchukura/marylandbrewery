@@ -78,7 +78,7 @@ export default function IndexPageTemplate({
             </h2>
             <div className="h-[400px] md:h-[500px] rounded-lg overflow-hidden border border-gray-200 shadow-sm">
               <DynamicGoogleMap 
-                breweries={allBreweries as any} 
+                breweries={allBreweries} 
                 height="100%" 
                 showClusters={true}
                 zoom={mapZoom}

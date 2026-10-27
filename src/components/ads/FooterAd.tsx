@@ -29,7 +29,7 @@ export default function FooterAd({ onVisibilityChange }: FooterAdProps) {
   useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
-        (window.adsbygoogle = window.adsbygoogle || [] as any).push({});
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
       }
     } catch (error) {
       console.error('AdSense error:', error);

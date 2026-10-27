@@ -53,13 +53,7 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
 
   const uniqueTypes = useMemo(() => {
     const types = new Set<string>();
-    breweries.forEach(b => {
-      if (Array.isArray(b.type)) {
-        b.type.forEach(type => types.add(type));
-      } else {
-        types.add(b.type);
-      }
-    });
+    breweries.forEach(b => b.type.forEach(type => types.add(type)));
     return ['all', ...Array.from(types).sort()];
   }, [breweries]);
 
@@ -89,7 +83,7 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
       }
 
       // Type filter
-      if (filters.type !== 'all' && brewery.type !== filters.type) {
+      if (filters.type !== 'all' && !brewery.type.includes(filters.type)) {
         return false;
       }
 
@@ -116,8 +110,8 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
           bValue = b.city;
           break;
         case 'type':
-          aValue = Array.isArray(a.type) ? a.type.join(', ') : a.type;
-          bValue = Array.isArray(b.type) ? b.type.join(', ') : b.type;
+          aValue = a.type.join(', ');
+          bValue = b.type.join(', ');
           break;
         default:
           aValue = a.name;

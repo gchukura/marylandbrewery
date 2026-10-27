@@ -160,7 +160,7 @@ export default async function RegionPage({ params }: { params: Promise<{ region:
       h1={`Breweries in ${regionData.name}`}
       introText={introText}
       breadcrumbs={breadcrumbs}
-      breweries={breweries as any}
+      breweries={breweries}
       stats={stats}
       contentBlocks={contentBlocks}
       relatedPages={relatedPages}

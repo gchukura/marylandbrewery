@@ -33,7 +33,7 @@ export async function generateStaticParams() {
     const citiesWithAmenity = new Set<string>();
     
     for (const brewery of processed.breweries) {
-      const amenities = (brewery as any).amenities || (brewery as any).features || [];
+      const amenities = brewery.amenities ?? [];
       const hasAmenity = amenities.some((a: string) => 
         a.toLowerCase().includes(amenityLabel)
       );
@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
 
   const cityBreweries = processed.byCity.get(cityKey) || [];
   const breweries = cityBreweries.filter(
-    (b: any) => ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey))
+    (b: any) => (b.amenities ?? []).some((a: string) => a.toLowerCase().includes(amenityKey))
   );
 
   const title = `${amenityLabel} Breweries in ${cityName}, MD | ${breweries.length} Options`;
@@ -109,7 +109,7 @@ export default async function CityAmenityPage({ params }: { params: Promise<{ ci
   // Filter breweries by city and amenity
   const breweries = processed.breweries.filter(
     (b: any) => b.city.toLowerCase() === cityName.toLowerCase() &&
-      (((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey)))
+      ((b.amenities ?? []).some((a: string) => a.toLowerCase().includes(amenityKey)))
   );
 
   // Return 404 if no breweries match this city+amenity combination

@@ -7,7 +7,7 @@ function makeBrewery(overrides: Partial<Brewery>): Brewery {
     id: 'id',
     name: 'Brewery',
     slug: 'brewery',
-    type: 'Microbrewery',
+    type: ['Microbrewery'],
     street: '1 Main St',
     city: 'Baltimore',
     state: 'MD',
@@ -31,7 +31,7 @@ function makeBrewery(overrides: Partial<Brewery>): Brewery {
 describe('processBreweryData', () => {
   const breweries = [
     makeBrewery({ id: 'a', city: 'Baltimore', county: 'Baltimore City', amenities: ['Dog Friendly'] }),
-    makeBrewery({ id: 'b', city: 'baltimore ', county: 'Baltimore City', type: 'Brewpub' }),
+    makeBrewery({ id: 'b', city: 'baltimore ', county: 'Baltimore City', type: ['Brewpub'] }),
     makeBrewery({ id: 'c', city: 'Frederick', county: 'Frederick', amenities: ['Dog Friendly', 'Food'] }),
   ];
 

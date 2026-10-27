@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ day: stri
   const day = dayParam.charAt(0).toUpperCase() + dayParam.slice(1);
   const processed = await getProcessedBreweryData();
   const list = processed.breweries.filter((b) => {
-    const hours = b.hours as any;
+    const hours = b.hours;
     if (!hours) return false;
     const h = hours[dayParam.toLowerCase() as keyof typeof hours];
     if (!h || /closed/i.test(h)) return false;

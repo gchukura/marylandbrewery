@@ -14,7 +14,7 @@ import { writeFile } from 'fs/promises';
 import { join } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
-import { supabaseAdmin } from '../lib/supabase';
+import { supabaseAdmin } from '../src/lib/db/client';
 
 async function analyzeReviewThemes() {
   console.log('🔍 Analyzing Google Reviews for Common Themes...\n');

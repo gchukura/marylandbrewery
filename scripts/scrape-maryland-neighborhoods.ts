@@ -27,7 +27,7 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
-import { supabaseAdmin } from '../lib/supabase';
+import { supabaseAdmin } from '../src/lib/db/client';
 import { chromium, Page } from 'playwright';
 import { slugify } from '../src/lib/data-utils';
 

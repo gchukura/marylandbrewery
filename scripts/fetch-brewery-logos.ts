@@ -14,8 +14,8 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
-import { getBreweryDataFromSupabase } from '../lib/supabase-client';
-import { updateBreweryLogoInSupabase } from '../lib/supabase-client';
+import { getBreweryDataFromSupabase } from '../src/lib/db/queries';
+import { updateBreweryLogoInSupabase } from '../src/lib/db/queries';
 
 // Load environment variables
 config({ path: resolve(process.cwd(), '.env.local') });

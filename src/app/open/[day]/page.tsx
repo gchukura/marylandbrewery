@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { getProcessedBreweryData } from '../../../../lib/brewery-data';
+import { getProcessedBreweryData } from '@/lib/db';
 import PageHero from '@/components/directory/PageHero';
 import Link from 'next/link';
 import { slugify } from '@/lib/data-utils';

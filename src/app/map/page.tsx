@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
-import { getProcessedBreweryData } from '../../../lib/brewery-data';
+import { getProcessedBreweryData } from '@/lib/db';
 import MapWithListClient from './MapWithListClient';
 import PageHero from '@/components/directory/PageHero';
 import { existsSync } from 'fs';

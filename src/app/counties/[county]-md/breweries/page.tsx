@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProcessedBreweryData } from '../../../../../lib/brewery-data';
+import { getProcessedBreweryData } from '@/lib/db';
 import { slugify, normalizeCountyName, isValidCountySlug, ALL_MD_COUNTIES } from '@/lib/data-utils';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';

@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProcessedBreweryData, getBreweriesByCity } from '../../../../../lib/brewery-data';
+import { getProcessedBreweryData, getBreweriesByCity } from '@/lib/db';
 import { slugify, deslugify } from '@/lib/data-utils';
 import { parseNeighborhoodSlug, isNeighborhoodSlug, isCitySlug } from '@/lib/neighborhood-utils';
 import Link from 'next/link';

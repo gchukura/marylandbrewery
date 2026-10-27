@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { addNewsletterSubscriber } from '../../../../../lib/supabase-client';
+import { addNewsletterSubscriber } from '@/lib/db';
 import { isValidEmail } from '@/lib/utils';
 
 export async function POST(request: NextRequest) {

@@ -16,8 +16,8 @@ import { join } from 'path';
 // Load .env.local file
 config({ path: resolve(process.cwd(), '.env.local') });
 
-import { getBreweryDataFromSupabase } from '../lib/supabase-client';
-import { processBreweryData } from '../lib/brewery-data';
+import { getBreweryDataFromSupabase } from '../src/lib/db/queries';
+import { processBreweryData } from '../src/lib/db/brewery-data';
 import { slugify, deslugify } from '../src/lib/data-utils';
 
 async function checkBuildCache() {

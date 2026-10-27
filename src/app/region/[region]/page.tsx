@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
-import { getProcessedBreweryData } from '../../../../lib/brewery-data';
+import { getProcessedBreweryData } from '@/lib/db';
 import { slugify, deslugify } from '@/lib/data-utils';
 
 // Region definitions (fallback if database not available)

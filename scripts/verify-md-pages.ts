@@ -14,8 +14,8 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 import { slugify, deslugify } from '../src/lib/data-utils';
-import { getBreweryDataFromSupabase } from '../lib/supabase-client';
-import { processBreweryData } from '../lib/brewery-data';
+import { getBreweryDataFromSupabase } from '../src/lib/db/queries';
+import { processBreweryData } from '../src/lib/db/brewery-data';
 import type { Brewery, ProcessedBreweryData } from '../src/types/brewery';
 
 const ALL_MD_COUNTIES = [

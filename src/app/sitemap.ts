@@ -1,42 +1,18 @@
 import type { MetadataRoute } from 'next';
-import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities } from '../../lib/brewery-data';
+import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities, getNeighborhoodsForSitemap } from '@/lib/db';
 import { slugify, deslugify, ALL_MD_COUNTIES, normalizeCountyName } from '../lib/data-utils';
-import { supabase } from '../../lib/supabase';
 
 const BASE_URL = 'https://www.marylandbrewery.com';
 
 // Region definitions
 const MARYLAND_REGIONS = ['eastern-shore', 'western-maryland', 'central-maryland', 'southern-maryland', 'capital-region'];
 
-/**
- * Get all neighborhoods from database
- */
-async function getAllNeighborhoods() {
-  try {
-    const { data, error } = await supabase
-      .from('maryland_neighborhoods')
-      .select('slug, city, name')
-      .not('city', 'is', null)
-      .order('name', { ascending: true });
-    
-    if (error) {
-      console.error('Error fetching neighborhoods:', error);
-      return [];
-    }
-    
-    return data || [];
-  } catch (error) {
-    console.error('Failed to fetch neighborhoods:', error);
-    return [];
-  }
-}
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const processed = await getProcessedBreweryData();
   const cities = await getAllCities();
   const allAmenities = await getAllAmenities();
   const allTypes = await getAllTypes();
-  const neighborhoods = await getAllNeighborhoods();
+  const neighborhoods = await getNeighborhoodsForSitemap();
   
   // Get counties from breweries and filter to only valid Maryland counties
   const rawCounties = Array.from(new Set(processed.breweries.map((b) => (b as any).county).filter(Boolean))) as string[];

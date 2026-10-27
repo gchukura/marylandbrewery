@@ -933,15 +933,15 @@ export async function getNeighborhoodBySlug(slug: string): Promise<DatabaseNeigh
 
 
 /**
- * Get slug, city and name for every neighborhood that has a city (used by the sitemap)
+ * Get every neighborhood (used for static params and the sitemap)
  */
-export async function getNeighborhoodsForSitemap(): Promise<{ slug: string; city: string; name: string }[]> {
+export async function getAllNeighborhoods(): Promise<DatabaseNeighborhood[]> {
   try {
     const { data, error } = await supabase
       .from('maryland_neighborhoods')
-      .select('slug, city, name')
-      .not('city', 'is', null)
-      .order('name', { ascending: true });
+      .select('*')
+      .order('name', { ascending: true })
+      .range(0, 4999);
 
     if (error) {
       console.error('Error fetching neighborhoods:', error);

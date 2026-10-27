@@ -1,7 +1,9 @@
 import type { MetadataRoute } from 'next';
-import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities, getNeighborhoodsForSitemap } from '@/lib/db';
+import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities, getAllNeighborhoods } from '@/lib/db';
 import { slugify, deslugify, ALL_MD_COUNTIES, normalizeCountyName } from '../lib/data-utils';
 import { hasBestBreweriesPage } from '../lib/best-breweries';
+import { sortByDistance } from '../lib/geo';
+import { isIndexableNeighborhood, neighborhoodPath } from '../lib/neighborhoods';
 
 const BASE_URL = 'https://www.marylandbrewery.com';
 
@@ -13,7 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const cities = await getAllCities();
   const allAmenities = await getAllAmenities();
   const allTypes = await getAllTypes();
-  const neighborhoods = await getNeighborhoodsForSitemap();
+  const neighborhoods = await getAllNeighborhoods();
   
   // Get counties from breweries and filter to only valid Maryland counties
   const rawCounties = Array.from(new Set(processed.breweries.map((b) => (b as any).county).filter(Boolean))) as string[];
@@ -188,19 +190,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  // Neighborhood pages - best-breweries routes (only include if city has breweries)
+  // Neighborhood pages - only those with a brewery within 3 miles (the rest are noindex)
   for (const neighborhood of neighborhoods) {
-    if (neighborhood.city && neighborhood.slug) {
-      const cityBreweries = processed.breweries.filter((b: any) => 
-        b.city && b.city.toLowerCase() === neighborhood.city.toLowerCase()
-      );
-      
-      // Only add to sitemap if the city has breweries
-      if (cityBreweries.length > 0) {
-        const citySlug = slugify(neighborhood.city);
-        const neighborhoodSlug = `${neighborhood.slug}-${citySlug}-md`;
-        urls.push({ url: `${BASE_URL}/best-breweries/${neighborhoodSlug}`, lastModified: lastMod, priority: 0.6 });
-      }
+    if (neighborhood.latitude == null || neighborhood.longitude == null) continue;
+    const origin = { latitude: neighborhood.latitude, longitude: neighborhood.longitude };
+    const nearest = sortByDistance(origin, processed.breweries)[0];
+    if (isIndexableNeighborhood(nearest?.distance)) {
+      urls.push({ url: `${BASE_URL}${neighborhoodPath(neighborhood.slug)}`, lastModified: lastMod, priority: 0.6 });
     }
   }
 

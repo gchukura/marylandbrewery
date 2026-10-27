@@ -420,8 +420,7 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
               <div className="grid grid-cols-2 gap-3">
                 {(showAllNeighborhoods ? neighborhoods : neighborhoods.slice(0, 10)).map((neighborhood) => {
                   const neighborhoodSlug = neighborhood.slug || slugify(neighborhood.name);
-                  const citySlug = slugify(cityName);
-                  const neighborhoodUrl = `/cities/near/${neighborhoodSlug}-${citySlug}-md`;
+                  const neighborhoodUrl = `/neighborhoods/${neighborhoodSlug}`;
                   return (
                     <a
                       key={neighborhood.slug || neighborhood.id}

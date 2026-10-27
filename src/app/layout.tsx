@@ -49,10 +49,8 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  // No canonical here: every page that inherits it would claim to be the homepage
   metadataBase: new URL("https://www.marylandbrewery.com"),
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     type: "website",
     locale: "en_US",

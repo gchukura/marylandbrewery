@@ -124,6 +124,7 @@ export async function generateMetadata({ params }: { params: Promise<{ amenity: 
   if (!matchedAmenity) {
     return {
       title: 'Amenity Not Found',
+      robots: { index: false, follow: false },
     };
   }
   

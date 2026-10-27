@@ -43,6 +43,7 @@ export async function generateMetadata({ params }: { params: Promise<{ region: s
   if (!regionData) {
     return {
       title: 'Region Not Found',
+      robots: { index: false, follow: false },
     };
   }
 

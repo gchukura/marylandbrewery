@@ -65,6 +65,7 @@ export async function generateMetadata({ params }: { params: Promise<{ type: str
   if (!normalizedType) {
     return {
       title: 'Brewery Type Not Found',
+      robots: { index: false, follow: false },
     };
   }
   

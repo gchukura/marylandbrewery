@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { deslugify, normalizeCountyName, slugify } from './data-utils';
+import { normalizeCountyName } from './data-utils';
+import { deslugify, slugify } from '@/lib/slug';
 import { calculateDistance } from './geo';
 
 describe('slugify', () => {

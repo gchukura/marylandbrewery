@@ -3,27 +3,8 @@
  * Utility functions for data processing, formatting, and calculations
  */
 
-/**
- * Convert string to URL-friendly slug
- */
-export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '') // Remove special characters except spaces and hyphens
-    .replace(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
-    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
-}
-
-/**
- * Convert slug back to readable text
- */
-export function deslugify(slug: string): string {
-  return slug
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
+import { MARYLAND_COUNTIES } from '@/types/brewery';
+import { deslugify } from '@/lib/slug';
 
 /**
  * Maryland county names with their canonical forms (including apostrophes)
@@ -64,12 +45,6 @@ const COUNTY_NAME_MAP: Record<string, string> = {
 /**
  * All valid Maryland county names (canonical forms)
  */
-export const ALL_MD_COUNTIES = [
-  'Allegany', 'Anne Arundel', 'Baltimore', 'Baltimore City', 'Calvert', 'Caroline', 'Carroll', 'Cecil', 'Charles',
-  'Dorchester', 'Frederick', 'Garrett', 'Harford', 'Howard', 'Kent', 'Montgomery',
-  "Prince George's", "Queen Anne's", 'Somerset', "St. Mary's", 'Talbot', 'Washington', 'Wicomico', 'Worcester'
-];
-
 /**
  * Normalize county name from slug to canonical form
  * Handles apostrophes that deslugify() cannot restore
@@ -89,7 +64,7 @@ export function normalizeCountyName(slug: string): string | null {
   const deslugified = deslugify(slug);
   
   // Check if deslugified name matches any valid county (case-insensitive)
-  const matchingCounty = ALL_MD_COUNTIES.find(
+  const matchingCounty = MARYLAND_COUNTIES.find(
     county => county.toLowerCase() === deslugified.toLowerCase()
   );
   
@@ -101,16 +76,5 @@ export function normalizeCountyName(slug: string): string | null {
  */
 export function isValidCountySlug(slug: string): boolean {
   return normalizeCountyName(slug) !== null;
-}
-
-/**
- * Format phone number for display
- */
-export function formatPhoneNumber(phone: string): string {
-  const cleaned = phone.replace(/\D/g, '');
-  if (cleaned.length === 10) {
-    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
-  }
-  return phone;
 }
 

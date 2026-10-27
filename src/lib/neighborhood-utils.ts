@@ -5,7 +5,7 @@
  * Leverages enriched neighborhood data (city field) for accurate matching
  */
 
-import { deslugify } from '@/lib/data-utils';
+import { deslugify } from '@/lib/slug';
 import { getNeighborhoodsByCity, getNeighborhoodBySlug } from '@/lib/db';
 import { DatabaseNeighborhood } from '@/lib/db';
 

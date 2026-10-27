@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { MapPin, Phone, Search, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 import BreweryLogo from '@/components/brewery/BreweryLogo';
 
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 

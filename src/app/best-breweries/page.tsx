@@ -118,7 +118,7 @@ export default async function BestBreweriesPage() {
   // Top amenities among best breweries
   const amenityCounts = new Map<string, number>();
   breweriesWithScores.forEach((brewery: any) => {
-    const amenities = (brewery as any).amenities || (brewery as any).features || [];
+    const amenities = brewery.amenities ?? [];
     amenities.forEach((a: string) => {
       const key = a.trim().toLowerCase();
       amenityCounts.set(key, (amenityCounts.get(key) || 0) + 1);
@@ -146,7 +146,7 @@ export default async function BestBreweriesPage() {
       h1="Best Breweries in Maryland"
       introText={introText}
       breadcrumbs={breadcrumbs}
-      breweries={breweriesWithScores as any}
+      breweries={breweriesWithScores}
       stats={stats}
       contentBlocks={contentBlocks}
       relatedPages={relatedPages}

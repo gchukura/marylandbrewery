@@ -91,20 +91,16 @@ export async function processBreweryData(breweries: Brewery[]): Promise<Processe
       countySet.add(brewery.county);
     }
     
-    // Group by type
-    const typeKey = Array.isArray(brewery.type) 
-      ? brewery.type.join(', ').toLowerCase()
-      : brewery.type.toLowerCase();
-    if (!byType.has(typeKey)) {
-      byType.set(typeKey, []);
+    // Group by each type (a brewery can be a microbrewery and a taproom)
+    for (const type of brewery.type) {
+      const typeKey = type.toLowerCase();
+      if (!byType.has(typeKey)) {
+        byType.set(typeKey, []);
+      }
+      byType.get(typeKey)!.push(brewery);
+      typeSet.add(type);
     }
-    byType.get(typeKey)!.push(brewery);
-    if (Array.isArray(brewery.type)) {
-      brewery.type.forEach(type => typeSet.add(type));
-    } else {
-      typeSet.add(brewery.type);
-    }
-    
+
     // Group by amenities
     brewery.amenities.forEach(amenity => {
       const amenityKey = amenity.toLowerCase().trim();

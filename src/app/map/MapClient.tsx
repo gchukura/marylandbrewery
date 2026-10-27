@@ -20,7 +20,7 @@ export default function MapClient({ breweries }: { breweries: any[] }) {
     const a = amenity.trim().toLowerCase();
     return breweries.filter((b) => {
       const cityOk = c ? b.city?.toLowerCase().includes(c) : true;
-      const amenityList: string[] = (b.amenities || b.features || []) as string[];
+      const amenityList: string[] = (b.amenities ?? []) as string[];
       const amenityOk = a ? amenityList.some((x) => x?.toLowerCase().includes(a)) : true;
       return cityOk && amenityOk;
     });
@@ -54,7 +54,7 @@ export default function MapClient({ breweries }: { breweries: any[] }) {
             Map is unavailable: missing Google Maps API key. Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY and redeploy.
           </div>
         ) : (
-          <GoogleMap breweries={filtered as any} height="100%" />
+          <GoogleMap breweries={filtered} height="100%" />
         )}
       </div>
     </div>

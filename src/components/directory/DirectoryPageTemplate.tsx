@@ -86,7 +86,7 @@ export default function DirectoryPageTemplate({
         item: {
           '@type': 'Brewery',
           name: brewery.name || 'Brewery',
-          url: `https://www.marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`,
+          url: `https://www.marylandbrewery.com/breweries/${brewery.slug || brewery.id}`,
         },
       })),
     },
@@ -117,7 +117,7 @@ export default function DirectoryPageTemplate({
               </h2>
               <div className="h-[400px] md:h-[500px] rounded-lg overflow-hidden border border-gray-200 shadow-sm">
                 <GoogleMap 
-                  breweries={breweries as any} 
+                  breweries={breweries} 
                   height="100%" 
                   showClusters={true}
                   zoom={mapZoom}

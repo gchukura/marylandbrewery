@@ -66,7 +66,7 @@ export async function generateMetadata({ params }: { params: Promise<{ county: s
   const processed = await getProcessedBreweryData();
   const countyKey = countyName.toLowerCase();
   const list = processed.breweries.filter(b => {
-    const breweryCounty = (b as any).county;
+    const breweryCounty = b.county;
     return breweryCounty && breweryCounty.toLowerCase() === countyKey;
   });
   const total = list.length;
@@ -167,7 +167,7 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
   
   // Optimize filtering - use pre-indexed data if available
   const breweries = processed.breweries.filter(b => {
-    const breweryCounty = (b as any).county;
+    const breweryCounty = b.county;
     return breweryCounty && breweryCounty.toLowerCase() === countyKey;
   });
   

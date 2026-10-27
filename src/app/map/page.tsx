@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 
 export default async function MapPage() {
   const processed = await getProcessedBreweryData();
-  const breweries = processed.breweries as any[];
+  const breweries = processed.breweries;
 
   const breadcrumbs = [
     { name: 'Maryland Breweries', url: '/', isActive: false },

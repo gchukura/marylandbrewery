@@ -18,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const neighborhoods = await getAllNeighborhoods();
   
   // Get counties from breweries and filter to only valid Maryland counties
-  const rawCounties = Array.from(new Set(processed.breweries.map((b) => (b as any).county).filter(Boolean))) as string[];
+  const rawCounties = Array.from(new Set(processed.breweries.map((b) => b.county).filter(Boolean))) as string[];
   const counties = rawCounties.filter(county => {
     const slug = slugify(county);
     return normalizeCountyName(slug) !== null || MARYLAND_COUNTIES.some(c => c.toLowerCase() === county.toLowerCase());
@@ -61,7 +61,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   for (const day of days) {
     const dayBreweries = processed.breweries.filter((b) => {
-      const hours = b.hours as any;
+      const hours = b.hours;
       if (!hours) return false;
       const h = hours[day.toLowerCase() as keyof typeof hours];
       if (!h || /closed/i.test(h)) return false;
@@ -110,8 +110,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const b of processed.breweries) {
     // The brewery page 404s without a name and city; don't list it until the data is fixed
     if (!b.name || !b.city) continue;
-    const slug = (b as any).slug || b.id;
-    const lm = (b as any).lastUpdated ? new Date((b as any).lastUpdated) : lastMod;
+    const slug = b.slug || b.id;
+    const lm = b.lastUpdated ? new Date(b.lastUpdated) : lastMod;
     urls.push({ url: `${BASE_URL}/breweries/${slug}`, lastModified: lm, priority: 0.8 });
   }
 
@@ -120,10 +120,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const typeName = deslugify(typeSlug);
     const typeKey = typeName.toLowerCase();
     const typeBreweries = processed.breweries.filter((b) => {
-      if (Array.isArray(b.type)) {
-        return b.type.some(t => t.toLowerCase() === typeKey);
-      }
-      return b.type?.toLowerCase() === typeKey;
+      return b.type.some((t) => t.toLowerCase() === typeKey);
     });
     
     // Only add to sitemap if there are breweries of this type
@@ -136,7 +133,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const amenitySlug of amenitySlugs) {
     const amenityLabel = deslugify(amenitySlug).replace(/\bWifi\b/i, 'WiFi').toLowerCase();
     const amenityBreweries = processed.breweries.filter(
-      (b) => ((b as any).amenities || (b as any).features || []).some((a: string) => 
+      (b) => (b.amenities ?? []).some((a: string) => 
         a.toLowerCase() === amenityLabel || a.toLowerCase().includes(amenityLabel) || amenityLabel.includes(a.toLowerCase())
       )
     );
@@ -159,7 +156,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const brewery of processed.breweries) {
       if (!brewery.city) continue;
       
-      const amenities = (brewery as any).amenities || (brewery as any).features || [];
+      const amenities = brewery.amenities ?? [];
       const hasAmenity = amenities.some((a: string) => 
         a.toLowerCase().includes(amenityLabel)
       );

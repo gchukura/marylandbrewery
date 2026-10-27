@@ -10,6 +10,14 @@ import { normalizeCountyName } from '@/lib/data-utils';
 import { slugify } from '@/lib/slug';
 
 import { isProductionBuild, throwDuringBuild } from './build';
+/** The type column holds a string or (for one brewery) an array; always return a non-empty array. */
+function normalizeTypes(value: string | string[] | null | undefined): string[] {
+  const types = (Array.isArray(value) ? value : (value || '').split(','))
+    .map((t) => t.trim())
+    .filter(Boolean);
+  return types.length > 0 ? types : ['Microbrewery'];
+}
+
 /**
  * Convert database brewery to application brewery type
  */
@@ -19,7 +27,7 @@ function dbBreweryToBrewery(dbBrewery: DatabaseBrewery, beers: Beer[] = []): Bre
     name: dbBrewery.name,
     slug: dbBrewery.slug,
     description: dbBrewery.description,
-    type: dbBrewery.type || 'Microbrewery',
+    type: normalizeTypes(dbBrewery.type),
     
     // Location
     street: dbBrewery.street,

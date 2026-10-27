@@ -6,7 +6,8 @@
 
 import { supabase, supabaseAdmin, DatabaseBrewery, DatabaseBeer, DatabaseNewsletterSubscriber, DatabaseBreweryArticle, DatabaseNeighborhood } from './client';
 import { Brewery, Beer, SocialMedia, OperatingHours, Membership, ReviewThemes } from '@/types/brewery';
-import { normalizeCountyName, slugify } from '@/lib/data-utils';
+import { normalizeCountyName } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 
 import { calculateDistance } from '@/lib/geo';
 /**

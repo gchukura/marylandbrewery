@@ -9,7 +9,7 @@ import {
   getProcessedBreweryData,
 } from '@/lib/db';
 import type { DatabaseNeighborhood } from '@/lib/db';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 import { milesToKm, sortByDistance } from '@/lib/geo';
 import {
   NEIGHBORHOOD_INDEX_RADIUS_MILES,

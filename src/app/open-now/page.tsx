@@ -3,7 +3,7 @@ import { getProcessedBreweryData } from '@/lib/db';
 import PageHero from '@/components/directory/PageHero';
 import Link from 'next/link';
 import { isOpenAt } from '@/lib/hours';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 
 export const revalidate = 3600; // ISR hourly
 

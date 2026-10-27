@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { getProcessedBreweryData } from '@/lib/db';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 
 export const metadata: Metadata = {
   title: 'Best Breweries in Maryland | Top-Rated Craft Breweries 2025',

@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MapPin, Phone, Search, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 import BreweryLogo from '@/components/brewery/BreweryLogo';
 
 import { calculateDistance } from '@/lib/geo';

@@ -1,6 +1,6 @@
 import { notFound, permanentRedirect } from 'next/navigation';
 import { getBreweriesByCity } from '@/lib/db';
-import { deslugify } from '@/lib/data-utils';
+import { deslugify } from '@/lib/slug';
 import { bestBreweriesCityPath } from '@/lib/best-breweries';
 import { parseNeighborhoodSlug } from '@/lib/neighborhood-utils';
 import { neighborhoodPath } from '@/lib/neighborhoods';

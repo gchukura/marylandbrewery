@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 import { getProcessedBreweryData } from '@/lib/db';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 import { getAttractionBySlug } from '@/lib/db';
 
 import { calculateDistance } from '@/lib/geo';

@@ -1,7 +1,9 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getProcessedBreweryData } from '@/lib/db';
-import { slugify, normalizeCountyName, isValidCountySlug, ALL_MD_COUNTIES } from '@/lib/data-utils';
+import { normalizeCountyName, isValidCountySlug } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
+import { MARYLAND_COUNTIES } from '@/types/brewery';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
@@ -15,7 +17,7 @@ import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTab
 export const dynamic = 'force-dynamic';
 
 export async function generateStaticParams() {
-  return ALL_MD_COUNTIES.map(c => ({ county: `${slugify(c)}-md` }));
+  return MARYLAND_COUNTIES.map(c => ({ county: `${slugify(c)}-md` }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ county: string }> }): Promise<Metadata> {

@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation';
 import { getProcessedBreweryData, getNearbyBreweries } from '@/lib/db';
-import { deslugify } from '@/lib/data-utils';
+import { deslugify } from '@/lib/slug';
 import { DAYS, isOpenAt, nextOpening, zonedDayAndMinutes } from '@/lib/hours';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 import SimpleBreweryPageTemplate from '@/components/templates/SimpleBreweryPageTemplate';
 import { generateBreweryTitle, generateEnhancedBreweryDescription } from '@/lib/seo-utils';
 import { getBreweryReviews, getBreweryArticles, getBeersForBrewery } from '@/lib/db';

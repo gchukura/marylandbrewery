@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { getProcessedBreweryData, getBreweriesByCity } from '@/lib/db';
-import { slugify, deslugify, normalizeCountyName, isValidCountySlug } from '@/lib/data-utils';
+import { normalizeCountyName, isValidCountySlug } from '@/lib/data-utils';
+import { slugify, deslugify } from '@/lib/slug';
 import { bestBreweriesCityPath, hasBestBreweriesPage } from '@/lib/best-breweries';
 import { parseNeighborhoodSlug } from '@/lib/neighborhood-utils';
 import { neighborhoodPath } from '@/lib/neighborhoods';

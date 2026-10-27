@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 import { getProcessedBreweryData } from '@/lib/db';
-import { slugify, deslugify } from '@/lib/data-utils';
+import { slugify, deslugify } from '@/lib/slug';
 
 // Region definitions (fallback if database not available)
 const MARYLAND_REGIONS: Record<string, { name: string; counties: string[]; description: string }> = {

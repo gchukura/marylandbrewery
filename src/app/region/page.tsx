@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import IndexPageTemplate from '@/components/directory/IndexPageTemplate';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 import { getProcessedBreweryData } from '@/lib/db';
 import { existsSync } from 'fs';
 import { join } from 'path';

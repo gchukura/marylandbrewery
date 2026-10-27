@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { getProcessedBreweryData } from '@/lib/db';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 import Link from 'next/link';
 import { ChevronRight, Dog, Music, Utensils, TreePine, Gamepad2, Wifi, Car, Calendar, MapPin, Wine, ShoppingBag, Beer, Tv, Flame, Users, Heart, LucideIcon } from 'lucide-react';
 import Image from 'next/image';

@@ -1,6 +1,8 @@
 import type { MetadataRoute } from 'next';
 import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities, getAllNeighborhoods, getAttractionBySlug } from '@/lib/db';
-import { slugify, deslugify, ALL_MD_COUNTIES, normalizeCountyName } from '../lib/data-utils';
+import { normalizeCountyName } from '../lib/data-utils';
+import { slugify, deslugify } from '@/lib/slug';
+import { MARYLAND_COUNTIES } from '@/types/brewery';
 import { hasBestBreweriesPage } from '../lib/best-breweries';
 import { sortByDistance } from '../lib/geo';
 import { isIndexableNeighborhood, neighborhoodPath } from '../lib/neighborhoods';
@@ -21,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const rawCounties = Array.from(new Set(processed.breweries.map((b) => (b as any).county).filter(Boolean))) as string[];
   const counties = rawCounties.filter(county => {
     const slug = slugify(county);
-    return normalizeCountyName(slug) !== null || ALL_MD_COUNTIES.some(c => c.toLowerCase() === county.toLowerCase());
+    return normalizeCountyName(slug) !== null || MARYLAND_COUNTIES.some(c => c.toLowerCase() === county.toLowerCase());
   });
   
   // Convert amenity names to slugs

@@ -1,0 +1,37 @@
+name: Sync site data
+
+# Run this after changing data in Supabase to refresh every page immediately.
+# (Pages also refresh on their own within an hour.)
+#
+# Needs, in Settings → Secrets and variables → Actions:
+#   - variable SITE_URL          e.g. https://marylandbrewery-rdni.vercel.app (no trailing slash)
+#   - secret   ADMIN_SYNC_TOKEN  same value as ADMIN_SYNC_TOKEN in the Vercel project
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: POST /api/sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check configuration
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          ADMIN_SYNC_TOKEN: ${{ secrets.ADMIN_SYNC_TOKEN }}
+        run: |
+          if [ -z "$SITE_URL" ]; then echo "::error::Repository variable SITE_URL is not set"; exit 1; fi
+          if [ -z "$ADMIN_SYNC_TOKEN" ]; then echo "::error::Repository secret ADMIN_SYNC_TOKEN is not set"; exit 1; fi
+
+      - name: Trigger sync
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          ADMIN_SYNC_TOKEN: ${{ secrets.ADMIN_SYNC_TOKEN }}
+        run: |
+          status=$(curl -sS -o response.json -w '%{http_code}' -X POST \
+            -H "x-admin-token: $ADMIN_SYNC_TOKEN" \
+            "$SITE_URL/api/sync")
+          cat response.json; echo
+          if [ "$status" != "200" ]; then echo "::error::Sync failed with HTTP $status"; exit 1; fi

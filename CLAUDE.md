@@ -48,16 +48,16 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
   are not yet in `globals.css`.
 - `tailwind.config.ts` exists but is not loaded (no `@config`).
 - Images are still in `public/` (`logos/`, `photos/`, `cities/`, `counties/`, `regions/`).
-- `src/lib/geo.ts` exists; `hours.ts`, `slug.ts`, `amenities.ts`, `seo/` do not yet. Older distance code
-  in `data-utils.ts` and `db/` has not moved to `geo.ts`;
-  related logic is spread across `src/lib/*-utils.ts` and root `lib/`.
-- About 190 `as any` casts remain in `src/` and `lib/`.
+- `geo.ts`, `hours.ts`, `slug.ts`, `format.ts` exist; `amenities.ts` and `seo/` do not yet.
+- No `as any` in `src`; about 100 `: any` parameter annotations remain.
+- Hand-written row types (`DatabaseBrewery` etc. in `src/lib/db/client.ts`) until generated types land.
+- The regions table puts Frederick and Anne Arundel in no region (24 breweries on no region page).
 
 ## Conventions
 - Server components by default. `"use client"` only for interactive islands, kept small.
 - All Supabase access goes through `src/lib/db`; import from `@/lib/db` only (ESLint enforces it).
   The raw clients are private to that folder. Scripts in `scripts/` import its files directly.
-- No `as any` in new or touched code. No hex colors in className; use theme tokens.
+- No `as any`. No hex colors in className; use theme tokens.
 - Shared helpers live in one place: `src/lib/geo.ts`, `hours.ts`, `slug.ts`, `amenities.ts`, `seo/`.
 - One PR per task. Before opening a PR run: `npm run typecheck`, `npm run lint`, `npm test`,
   `npm run build` (and `npm run test:e2e` for UI changes). CI runs all but e2e. Include in the PR description what changed,
@@ -68,3 +68,8 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
 - `unstable_cache` JSON-serializes return values; never cache `Map` or `Set`.
 - `next/font` exposes fonts only through CSS variables; never reference a font by its family name.
 - Tailwind v4 ignores `tailwind.config.ts` unless `@config` is used; tokens go in `@theme` in `globals.css`.
+- Hours strings use an en-dash and often omit AM/PM on the opening time; parse only with `src/lib/hours.ts`,
+  which also evaluates "now" in Maryland time (the server runs in UTC).
+- Data reads return []/null at runtime but must throw during `next build` (`throwDuringBuild`), or a
+  Supabase outage ships empty pages. `server-only` is imported in `src/lib/db/index.ts`, not `client.ts`,
+  because scripts import the db files directly.

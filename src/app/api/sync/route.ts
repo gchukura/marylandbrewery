@@ -1,55 +1,40 @@
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
-import { getProcessedBreweryData } from '@/lib/db';
+import { revalidatePath, revalidateTag } from 'next/cache';
+import { getBreweryDataFromSupabase } from '@/lib/db';
 import { isAdminRequest } from '@/lib/admin-auth';
 
-const SYNC_TIMEOUT_MS = 60_000;
-
+/**
+ * Refresh the site after a data change. Called by .github/workflows/sync.yml with the
+ * x-admin-token header. Every cached brewery query is tagged 'brewery-data'; dropping that
+ * tag and revalidating the root layout makes every page re-read Supabase on its next request.
+ */
 export async function POST(req: Request) {
   const startedAt = Date.now();
+  if (!isAdminRequest(req)) {
+    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    if (!isAdminRequest(req)) {
-      return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+    // Read uncached first: if Supabase fails or comes back empty, keep the current cache
+    const breweries = await getBreweryDataFromSupabase();
+    if (breweries.length === 0) {
+      return NextResponse.json({ ok: false, error: 'Supabase returned no breweries; cache kept' }, { status: 502 });
     }
 
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), SYNC_TIMEOUT_MS);
-
-    let breweryCount = 0;
-    let finishedAt: string = new Date().toISOString();
-
-    try {
-      // Fetch fresh data from Google Sheets pipeline
-      const processed = await getProcessedBreweryData();
-      breweryCount = processed.breweries.length;
-      finishedAt = new Date().toISOString();
-    } finally {
-      clearTimeout(timer);
-    }
-
-    // Clear relevant caches by revalidating key routes
-    // Revalidate the root layout to cascade updates
+    revalidateTag('brewery-data');
     revalidatePath('/', 'layout');
-    // High-traffic landing pages and indexes
-    revalidatePath('/');
-    revalidatePath('/city');
-    revalidatePath('/county');
-    revalidatePath('/map');
-    revalidatePath('/open-now');
 
-    const durationMs = Date.now() - startedAt;
-    console.log('[SYNC] completed', { breweryCount, durationMs, finishedAt });
-
-    return NextResponse.json({
+    const result = {
       ok: true,
-      breweryCount,
-      finishedAt,
-      durationMs,
-      revalidated: ['/', '/city', '/county', '/map', '/open-now', 'layout'],
-    });
-  } catch (error: any) {
+      breweryCount: breweries.length,
+      finishedAt: new Date().toISOString(),
+      durationMs: Date.now() - startedAt,
+    };
+    console.log('[SYNC] completed', result);
+    return NextResponse.json(result);
+  } catch (error) {
     console.error('[SYNC] failed', error);
-    const message = error?.name === 'AbortError' ? 'Sync timed out' : (error?.message || 'Unknown error');
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 }

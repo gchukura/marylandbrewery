@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getBreweryBySlug, getProcessedBreweryData, getNearbyBreweries } from '@/lib/db';
+import { getBreweryBySlug, getProcessedBreweryData, getNearbyBreweries, throwDuringBuild } from '@/lib/db';
 import { deslugify } from '@/lib/slug';
 import { DAYS, isOpenAt, nextOpening, zonedDayAndMinutes } from '@/lib/hours';
 import { slugify } from '@/lib/slug';
@@ -14,32 +14,17 @@ interface BreweryPageProps {
 }
 
 export async function generateStaticParams() {
-  try {
-    const processed = await getProcessedBreweryData();
-    
-    return processed.breweries
-      .map((brewery) => ({
-        slug: (brewery as any).slug || brewery.id,
-      }))
-      .filter(({ slug }) => {
-        // Filter out invalid slugs (URLs, empty strings, etc.)
-        if (!slug || typeof slug !== 'string') return false;
-        // Reject slugs that look like URLs
-        if (slug.includes('www.') || slug.includes('http://') || slug.includes('https://')) return false;
-        // Reject slugs with invalid characters
-        if (slug.includes('//') || slug.startsWith('/') || slug.endsWith('/')) return false;
-        return true;
-      });
-  } catch (error) {
-    const errorMessage = error instanceof Error 
-      ? error.message 
-      : typeof error === 'string' 
-        ? error 
-        : 'Failed to fetch brewery data';
-    console.error('Error in generateStaticParams:', errorMessage);
-    // Return empty array to prevent build failure, pages will be generated on-demand
-    return [];
-  }
+  // No try/catch: a data error here should fail the build, not ship zero brewery pages
+  const processed = await getProcessedBreweryData();
+  return processed.breweries
+    .map((brewery) => ({ slug: brewery.slug || brewery.id }))
+    .filter(({ slug }) => {
+      // Filter out invalid slugs (URLs, empty strings, etc.)
+      if (!slug || typeof slug !== 'string') return false;
+      if (slug.includes('www.') || slug.includes('http://') || slug.includes('https://')) return false;
+      if (slug.includes('//') || slug.startsWith('/') || slug.endsWith('/')) return false;
+      return true;
+    });
 }
 
 export async function generateMetadata({ params }: BreweryPageProps) {
@@ -55,6 +40,7 @@ export async function generateMetadata({ params }: BreweryPageProps) {
         ? error 
         : 'Failed to fetch brewery data';
     console.error(`Error fetching brewery data for metadata (${slug}):`, errorMessage);
+    throwDuringBuild(error);
     return {
       title: 'Brewery Not Found',
       robots: { index: false, follow: false },
@@ -132,7 +118,7 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
         ? error 
         : 'Failed to fetch brewery data';
     console.error(`Error fetching brewery data for ${slug}:`, errorMessage);
-    // During build, if we can't fetch data, return 404
+    throwDuringBuild(error); // never bake a 404 into the build because Supabase failed
     notFound();
   }
   

@@ -18,3 +18,4 @@ export type {
 export * from './queries';
 export * from './attractions';
 export * from './brewery-data';
+export { isProductionBuild, throwDuringBuild } from './build';

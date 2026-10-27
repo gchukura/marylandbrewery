@@ -18,7 +18,6 @@
     "lint:links:deployed": "linkinator https://www.marylandbrewery.com --recurse --skip 'maps.googleapis.com|google.com|facebook.com|instagram.com|twitter.com|yelp.com|untappd.com' --timeout 30000",
     "indexnow": "tsx scripts/submit-indexnow.ts",
     "format": "prettier --write .",
-    "postinstall": "node scripts/ensure-lightningcss-binary.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "data:reviews:google": "tsx scripts/fetch-google-reviews.ts",
@@ -38,33 +37,26 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@googleapis/sheets": "^18.1.1",
     "@googlemaps/markerclusterer": "^2.6.2",
     "@supabase/supabase-js": "^2.81.1",
     "@vercel/analytics": "^1.3.0",
     "@vis.gl/react-google-maps": "^1.7.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "date-fns": "^3.6.0",
-    "googleapis": "^144.0.0",
     "lucide-react": "^0.400.0",
     "next": "^15.5.9",
-    "next-seo": "^6.8.0",
     "react": "^19.1.2",
     "react-dom": "^19.1.2",
-    "rss-parser": "^3.13.0",
-    "schema-dts": "^1.1.5",
-    "tailwind-merge": "^3.3.1",
-    "xml2js": "^0.6.2"
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
-    "@axe-core/cli": "^4.11.0",
     "@eslint/eslintrc": "^3.3.7",
     "@playwright/test": "^1.56.1",
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/node": "^20",
+    "@types/node": "^22.20.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/selenium-webdriver": "^4.35.4",
     "@types/xml2js": "^0.4.14",
     "dotenv": "^17.2.3",
     "eslint": "^9.39.5",
@@ -73,13 +65,13 @@
     "linkinator": "^7.5.3",
     "playwright": "^1.56.1",
     "prettier": "^3.3.0",
-    "selenium-webdriver": "^4.39.0",
-    "sharp": "^0.34.5",
+    "rss-parser": "^3.13.0",
     "supabase": "^2.70.5",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.20.6",
     "typescript": "^5",
     "typescript-eslint": "^8.72.1",
-    "vitest": "^3.2.7"
+    "vitest": "^5.0.5",
+    "xml2js": "^0.6.2"
   }
 }

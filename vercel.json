@@ -4,7 +4,7 @@
   ],
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "installCommand": "npm install --include=optional",
+  "installCommand": "npm ci",
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30

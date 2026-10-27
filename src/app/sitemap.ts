@@ -121,6 +121,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Individual breweries
   for (const b of processed.breweries) {
+    // The brewery page 404s without a name and city; don't list it until the data is fixed
+    if (!b.name || !b.city) continue;
     const slug = (b as any).slug || b.id;
     const lm = (b as any).lastUpdated ? new Date((b as any).lastUpdated) : lastMod;
     urls.push({ url: `${BASE_URL}/breweries/${slug}`, lastModified: lm, priority: 0.8 });

@@ -41,7 +41,8 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
   `/best-breweries`, `/best-breweries/near` and `/cities/near` redirect to `/neighborhoods/[slug]`.
 - `/near/[slug]` is attraction pages, not neighborhoods.
 - Redirects use `permanentRedirect()`, which sends 308 (Next.js's permanent redirect), not a literal 301.
-- `src/app/admin/sync` (admin UI) and `src/app/blog` still exist.
+- No GitHub Action calls `/api/sync` yet; until one exists, sync is triggered by a POST with the
+  `x-admin-token` header. `/blog` temporarily redirects to `/`.
 - Fonts are Playfair Display + Source Sans 3 via `next/font/google` in `src/app/layout.tsx`;
   `globals.css` also names `'Source Sans 3'` directly. Design tokens from `docs/design/tokens.css`
   are not yet in `globals.css`.

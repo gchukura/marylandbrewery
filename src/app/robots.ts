@@ -8,8 +8,7 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: '/',
         disallow: [
-          // Admin and internal pages
-          '/admin',
+          // Internal endpoints
           '/api',
           
           // Test and development pages

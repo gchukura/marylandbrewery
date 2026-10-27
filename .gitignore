@@ -50,6 +50,9 @@ Thumbs.db
 playwright-report/
 test-results/
 
+# Script reports
+scripts/output/
+
 # Tooling
 .turbo/
 supabase/.temp/

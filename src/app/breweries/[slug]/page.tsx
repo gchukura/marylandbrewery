@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getProcessedBreweryData, getNearbyBreweries } from '@/lib/db';
 import { deslugify } from '@/lib/data-utils';
+import { DAYS, isOpenAt, nextOpening, zonedDayAndMinutes } from '@/lib/hours';
 import { slugify } from '@/lib/data-utils';
 import SimpleBreweryPageTemplate from '@/components/templates/SimpleBreweryPageTemplate';
 import { generateBreweryTitle, generateEnhancedBreweryDescription } from '@/lib/seo-utils';
@@ -182,133 +183,15 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     (b) => (b as any).county?.toLowerCase() === (brewery as any).county?.toLowerCase()
   ).length;
 
-  // Get current day info
+  // Open/closed status and next opening, in Maryland time (src/lib/hours.ts)
   const now = new Date();
-  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const currentDay = days[now.getDay()];
-  const currentDayIndex = now.getDay() === 0 ? 7 : now.getDay(); // 1-7 Mon-Sun
-
-  // Helper function to parse time from hours string (e.g., "11:00 AM - 10:00 PM" or "2:00 – 9:00 PM")
-  const parseTimeRange = (hoursString: string): { open: string; close: string } | null => {
-    if (!hoursString || hoursString.toLowerCase() === 'closed') return null;
-    
-    // Match formats like "11:00 AM - 10:00 PM", "2:00 – 9:00 PM", or "11:00-21:00"
-    // Handle both regular hyphens (-) and en dashes (–)
-    const match = hoursString.match(/(\d{1,2}:\d{2}\s*(?:AM|PM)?)\s*[–-]\s*(\d{1,2}:\d{2}\s*(?:AM|PM)?)/i);
-    if (match) {
-      let openTime = match[1].trim();
-      const closeTime = match[2].trim();
-      
-      // If open time doesn't have AM/PM but close time does, infer it
-      const openHasAmPm = /AM|PM/i.test(openTime);
-      const closeHasAmPm = /AM|PM/i.test(closeTime);
-      
-      if (!openHasAmPm && closeHasAmPm) {
-        // Extract hour from open time
-        const openHourMatch = openTime.match(/(\d{1,2}):(\d{2})/);
-        if (openHourMatch) {
-          const openHour = parseInt(openHourMatch[1], 10);
-          const closeHourMatch = closeTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-          if (closeHourMatch) {
-            const closeHour = parseInt(closeHourMatch[1], 10);
-            const closeAmPm = closeHourMatch[3].toUpperCase();
-            
-            // If open hour is less than close hour, assume same AM/PM
-            // If open hour is greater, assume it's PM (afternoon/evening)
-            if (openHour < closeHour || (closeAmPm === 'PM' && openHour >= 12)) {
-              openTime = openTime + ' ' + closeAmPm;
-            } else {
-              // If open is later in the day, it's likely PM
-              openTime = openTime + ' PM';
-            }
-          }
-        }
-      }
-      
-      return {
-        open: openTime,
-        close: closeTime,
-      };
-    }
-    return null;
-  };
-
-  // Helper function to convert time string to minutes since midnight for comparison
-  const timeToMinutes = (timeStr: string): number => {
-    const isPM = timeStr.toUpperCase().includes('PM');
-    const isAM = timeStr.toUpperCase().includes('AM');
-    const timeMatch = timeStr.match(/(\d{1,2}):(\d{2})/);
-    if (!timeMatch) return 0;
-    
-    let hours = parseInt(timeMatch[1], 10);
-    const minutes = parseInt(timeMatch[2], 10);
-    
-    if (isPM && hours !== 12) hours += 12;
-    if (isAM && hours === 12) hours = 0;
-    
-    return hours * 60 + minutes;
-  };
-
-  // Check if open now and get closing time
-  const breweryHours = (brewery as any).hours;
-  const todayHours = breweryHours?.[currentDay];
-  const timeRange = todayHours ? parseTimeRange(todayHours) : null;
-  
-  // Determine if actually open now (not just if hours exist)
-  let isOpenNow = false;
-  let closingTime: string | null = null;
-  
-  if (timeRange) {
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    const openMinutes = timeToMinutes(timeRange.open);
-    const closeMinutes = timeToMinutes(timeRange.close);
-    
-    // Check if current time is within open hours
-    if (openMinutes <= closeMinutes) {
-      // Normal case: open time is before close time (e.g., 11 AM - 10 PM)
-      isOpenNow = currentMinutes >= openMinutes && currentMinutes < closeMinutes;
-    } else {
-      // Overnight case: open time is after close time (e.g., 10 PM - 2 AM)
-      isOpenNow = currentMinutes >= openMinutes || currentMinutes < closeMinutes;
-    }
-    
-    closingTime = timeRange.close;
-  }
-
-  // Calculate next open day and time (always calculate, even if open now)
-  let nextOpenDay: string | null = null;
-  let nextOpenTime: string | null = null;
-  
-  if (breweryHours) {
-    // Use the same day order as the days array for consistency
-    const dayOrder = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const currentDayIndexInOrder = dayOrder.indexOf(currentDay);
-    
-    // If closed today but has hours today, check if it opens later today
-    if (!isOpenNow && timeRange) {
-      // Closed now but has hours - will open later today
-      nextOpenDay = currentDay;
-      nextOpenTime = timeRange.open;
-    } else {
-      // Check next 7 days starting from tomorrow (if open now) or tomorrow (if closed)
-      const startDay = 1; // Always start from tomorrow
-      
-      for (let i = startDay; i <= 7; i++) {
-        const checkDayIndex = (currentDayIndexInOrder + i) % 7;
-        const checkDay = dayOrder[checkDayIndex];
-        const checkDayHours = breweryHours[checkDay];
-        
-        if (checkDayHours && checkDayHours.toLowerCase() !== 'closed') {
-          const checkTimeRange = parseTimeRange(checkDayHours);
-          if (checkTimeRange) {
-            nextOpenDay = checkDay;
-            nextOpenTime = checkTimeRange.open;
-            break;
-          }
-        }
-      }
-    }
-  }
+  const { day: currentDay } = zonedDayAndMinutes(now);
+  const currentDayIndex = DAYS.indexOf(currentDay) === 0 ? 7 : DAYS.indexOf(currentDay); // 1-7 Mon-Sun
+  const { open: isOpenNow, closesAt } = isOpenAt(brewery.hours, now);
+  const closingTime = closesAt ?? null;
+  const next = nextOpening(brewery.hours, now);
+  const nextOpenDay = next?.day ?? null;
+  const nextOpenTime = next?.time ?? null;
 
   // Generate breadcrumbs
   const citySlug = (brewery as any).citySlug || slugify(brewery.city);

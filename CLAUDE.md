@@ -37,7 +37,9 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
 - `src/app/api/contact/route.ts` still appends to a Google Sheet via `googleapis`.
   `lib/archived/google-sheets.ts` is the retired Sheets layer.
 - No `/neighborhoods` route yet; neighborhood-like pages are under `/cities/near/[slug]` and `/near/[slug]`.
-- `/best-breweries/near/[city]` and `/best-breweries/near/[city]-md` still exist.
+- `/best-breweries/{neighborhood}-{city}-md` neighborhood pages still render under `/best-breweries`
+  (they move to `/neighborhoods/[slug]` in the neighborhoods PR). The 5+ rule lives in `src/lib/best-breweries.ts`.
+- Redirects use `permanentRedirect()`, which sends 308 (Next.js's permanent redirect), not a literal 301.
 - `src/app/admin/sync` (admin UI) and `src/app/blog` still exist.
 - Fonts are Playfair Display + Source Sans 3 via `next/font/google` in `src/app/layout.tsx`;
   `globals.css` also names `'Source Sans 3'` directly. Design tokens from `docs/design/tokens.css`

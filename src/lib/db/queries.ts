@@ -9,7 +9,7 @@ import { Brewery, Beer, SocialMedia, OperatingHours, Membership, ReviewThemes } 
 import { normalizeCountyName } from '@/lib/data-utils';
 import { slugify } from '@/lib/slug';
 
-import { calculateDistance } from '@/lib/geo';
+import { isProductionBuild, throwDuringBuild } from './build';
 /**
  * Convert database brewery to application brewery type
  */
@@ -121,6 +121,8 @@ export async function getBreweryDataFromSupabase({ detail = true }: { detail?: b
     }
 
     if (!breweriesData || breweriesData.length === 0) {
+      // An empty table during a build is a failed read, not real data
+      if (isProductionBuild()) throw new Error('Supabase returned no breweries during the build');
       if (process.env.NODE_ENV === 'development') {
         console.warn('No breweries found in Supabase');
       }
@@ -256,11 +258,10 @@ export async function fetchBreweryBySlug(slug: string): Promise<Brewery | null> 
       .from('breweries')
       .select('*')
       .eq('slug', slug)
-      .single();
+      .maybeSingle();
 
-    if (error || !breweryData) {
-      return null;
-    }
+    if (error) throw error;
+    if (!breweryData) return null;
 
     // Fetch beers for this brewery
     const { data: beersData } = await supabase
@@ -277,6 +278,7 @@ export async function fetchBreweryBySlug(slug: string): Promise<Brewery | null> 
 
     return dbBreweryToBrewery(breweryData, beers);
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Error fetching brewery by slug:', error);
     return null;
   }
@@ -581,6 +583,7 @@ export async function getBreweryReviews(
 
     return { reviews, total: (count ?? rows.length) - (rows.length - reviews.length) };
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Failed to fetch reviews from Supabase:', error);
     return { reviews: [], total: 0 };
   }
@@ -596,13 +599,11 @@ export async function getBreweryArticles(breweryId: string, limit: number = 5): 
       .order('relevance_score', { ascending: false })
       .limit(limit);
     
-    if (error) {
-      console.error('Error fetching brewery articles:', error);
-      return [];
-    }
+    if (error) throw error;
     
     return data || [];
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Failed to fetch brewery articles from Supabase:', error);
     return [];
   }
@@ -619,13 +620,11 @@ export async function getNeighborhoodsByCity(city: string): Promise<DatabaseNeig
       .ilike('city', city)
       .order('name', { ascending: true });
     
-    if (error) {
-      console.error('Error fetching neighborhoods by city:', error);
-      return [];
-    }
+    if (error) throw error;
     
     return data || [];
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Failed to fetch neighborhoods from Supabase:', error);
     return [];
   }
@@ -640,15 +639,13 @@ export async function getNeighborhoodBySlug(slug: string): Promise<DatabaseNeigh
       .from('maryland_neighborhoods')
       .select('*')
       .eq('slug', slug)
-      .single();
+      .maybeSingle();
     
-    if (error) {
-      console.error('Error fetching neighborhood by slug:', error);
-      return null;
-    }
+    if (error) throw error;
     
     return data;
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Failed to fetch neighborhood from Supabase:', error);
     return null;
   }
@@ -665,13 +662,11 @@ export async function getAllNeighborhoods(): Promise<DatabaseNeighborhood[]> {
       .order('name', { ascending: true })
       .range(0, 4999);
 
-    if (error) {
-      console.error('Error fetching neighborhoods:', error);
-      return [];
-    }
+    if (error) throw error;
 
     return data || [];
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Failed to fetch neighborhoods:', error);
     return [];
   }

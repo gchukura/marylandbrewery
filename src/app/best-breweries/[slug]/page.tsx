@@ -29,15 +29,11 @@ function calculateBreweryScore(brewery: any): number {
 }
 
 export async function generateStaticParams() {
-  try {
-    const processed = await getProcessedBreweryData();
-    return Array.from(processed.byCity.entries())
-      .filter(([, breweries]) => hasBestBreweriesPage(breweries.length))
-      .map(([city]) => ({ slug: slugify(city) }));
-  } catch (error) {
-    console.error('Error fetching cities for generateStaticParams:', error);
-    return [];
-  }
+  // No try/catch: a data error here should fail the build
+  const processed = await getProcessedBreweryData();
+  return Array.from(processed.byCity.entries())
+    .filter(([, breweries]) => hasBestBreweriesPage(breweries.length))
+    .map(([city]) => ({ slug: slugify(city) }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {

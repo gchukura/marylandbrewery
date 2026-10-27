@@ -5,6 +5,7 @@
 
 import { supabase, supabaseAdmin, DatabaseAttraction } from './client';
 
+import { throwDuringBuild } from './build';
 import { calculateDistance } from '@/lib/geo';
 /**
  * Application-level Attraction type (camelCase)
@@ -142,7 +143,8 @@ export async function getAttractionsNearBrewery(
         query = query.eq('type', type);
       }
       
-      const { data: allAttractions } = await query;
+      const { data: allAttractions, error: fallbackError } = await query;
+      if (fallbackError) throw fallbackError;
       if (!allAttractions) return [];
 
       // Convert km to miles for client-side calculation
@@ -186,6 +188,7 @@ export async function getAttractionsNearBrewery(
 
     return attractions;
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Error fetching nearby attractions:', error);
     return [];
   }
@@ -202,10 +205,7 @@ export async function getAttractionsByCity(city: string, limit: number = 50): Pr
       .eq('city', city)
       .limit(limit);
 
-    if (error) {
-      console.error('Error fetching attractions by city:', error);
-      return [];
-    }
+    if (error) throw error;
 
     if (!data) {
       return [];
@@ -213,6 +213,7 @@ export async function getAttractionsByCity(city: string, limit: number = 50): Pr
 
     return data.map((dbAttraction: DatabaseAttraction) => dbAttractionToAttraction(dbAttraction));
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Error fetching attractions by city:', error);
     return [];
   }
@@ -229,10 +230,7 @@ export async function getAttractionsByType(type: string, limit: number = 50): Pr
       .eq('type', type)
       .limit(limit);
 
-    if (error) {
-      console.error('Error fetching attractions by type:', error);
-      return [];
-    }
+    if (error) throw error;
 
     if (!data) {
       return [];
@@ -240,6 +238,7 @@ export async function getAttractionsByType(type: string, limit: number = 50): Pr
 
     return data.map((dbAttraction: DatabaseAttraction) => dbAttractionToAttraction(dbAttraction));
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Error fetching attractions by type:', error);
     return [];
   }
@@ -298,14 +297,14 @@ export async function getAttractionBySlug(slug: string): Promise<Attraction | nu
       .from('maryland_attractions')
       .select('*')
       .eq('slug', slug)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
-      return null;
-    }
+    if (error) throw error;
+    if (!data) return null;
 
     return dbAttractionToAttraction(data);
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Error fetching attraction by slug:', error);
     return null;
   }
@@ -320,14 +319,14 @@ export async function getAttractionByPlaceId(placeId: string): Promise<Attractio
       .from('maryland_attractions')
       .select('*')
       .eq('place_id', placeId)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
-      return null;
-    }
+    if (error) throw error;
+    if (!data) return null;
 
     return dbAttractionToAttraction(data);
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Error fetching attraction by place_id:', error);
     return null;
   }

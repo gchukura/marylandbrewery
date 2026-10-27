@@ -1,22 +1,14 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { getProcessedBreweryData } from '../../../../lib/brewery-data';
+import { isAdminRequest } from '@/lib/admin-auth';
 
 const SYNC_TIMEOUT_MS = 60_000;
-
-function getAdminTokenFromRequest(req: Request): string | null {
-  const header = req.headers.get('x-admin-token');
-  if (header) return header;
-  // Fallback: read from JSON body if provided
-  return null;
-}
 
 export async function POST(req: Request) {
   const startedAt = Date.now();
   try {
-    const token = getAdminTokenFromRequest(req) || process.env.ADMIN_SYNC_TOKEN || '';
-    const provided = req.headers.get('x-admin-token') || '';
-    if (!token || provided !== token) {
+    if (!isAdminRequest(req)) {
       return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
     }
 

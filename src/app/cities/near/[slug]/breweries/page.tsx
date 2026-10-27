@@ -11,6 +11,7 @@ import '@/components/home-v2/styles.css';
 import CityBreweriesMapClient from '../../../[city]/breweries/CityBreweriesMapClient';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
+import { calculateDistance } from '@/lib/geo';
 // Major city coordinates (from brewery-content-utils.ts)
 const MAJOR_CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
   baltimore: { lat: 39.2904, lng: -76.6122 },
@@ -29,19 +30,6 @@ const MAJOR_CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
   salisbury: { lat: 38.3607, lng: -75.5994 },
   'ocean city': { lat: 38.3365, lng: -75.0849 },
 };
-
-// Helper function to calculate distance between two points (Haversine formula)
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 3959; // Earth's radius in miles
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
 
 // Get city coordinates - use major city coordinates or average of city breweries
 async function getCityCoordinates(cityName: string): Promise<{ lat: number; lng: number } | null> {

@@ -419,6 +419,12 @@ async function fetchYelpReviews() {
           await sleep(200); // Wait 200ms between requests = 5 requests/second
         }
         
+        // Both branches above either set yelpBusinessId or continue
+        if (!yelpBusinessId) {
+          skipped++;
+          continue;
+        }
+
         // Fetch business details (for rating and review count)
         const businessDetails = await getYelpBusinessDetails(yelpBusinessId);
         

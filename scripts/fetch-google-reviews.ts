@@ -334,8 +334,8 @@ async function fetchGoogleReviews() {
               console.error(`2. Create a NEW API key for server-side use`);
               console.error(`3. Set "Application restrictions" to "None"`);
               console.error(`4. Set "API restrictions" to only: Places API (Text Search) and Places API (Place Details)`);
-              console.error(`5. Add it to .env.local as: GOOGLE_MAPS_API_KEY=your_new_key`);
-              console.error(`\nSee TROUBLESHOOTING_API_KEY_RESTRICTIONS.md for detailed instructions.\n`);
+              console.error(`5. Run with it: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_new_key npm run data:reviews:google`);
+              console.error(`\nSee docs/troubleshooting.md for detailed instructions.\n`);
               throw new Error('API key has referer restrictions - cannot be used for server-side scripts. Please create a server-side API key without referer restrictions.');
             }
             // Re-throw other errors
@@ -383,8 +383,8 @@ async function fetchGoogleReviews() {
             console.error(`2. Create a NEW API key for server-side use`);
             console.error(`3. Set "Application restrictions" to "None"`);
             console.error(`4. Set "API restrictions" to only: Places API (Text Search) and Places API (Place Details)`);
-            console.error(`5. Add it to .env.local as: GOOGLE_MAPS_API_KEY=your_new_key`);
-            console.error(`\nSee TROUBLESHOOTING_API_KEY_RESTRICTIONS.md for detailed instructions.\n`);
+            console.error(`5. Run with it: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_new_key npm run data:reviews:google`);
+            console.error(`\nSee docs/troubleshooting.md for detailed instructions.\n`);
             throw new Error('API key has referer restrictions - cannot be used for server-side scripts. Please create a server-side API key without referer restrictions.');
           }
           // Re-throw other errors

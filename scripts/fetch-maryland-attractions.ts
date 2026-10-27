@@ -201,7 +201,7 @@ function extractLocationFromAddress(formattedAddress: string): { city: string; s
   const parts = formattedAddress.split(',').map(p => p.trim());
   
   // Typical format: "Street, City, State ZIP, Country"
-  let street = parts[0] || '';
+  const street = parts[0] || '';
   let city = '';
   let state = 'MD';
   let zip = '';

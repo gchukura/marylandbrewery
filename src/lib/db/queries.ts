@@ -86,78 +86,32 @@ function dbBreweryToBrewery(dbBrewery: DatabaseBrewery, beers: Beer[] = []): Bre
 }
 
 /**
- * Convert application brewery to database brewery type
- */
-function breweryToDbBrewery(brewery: Brewery): DatabaseBrewery {
-  return {
-    id: brewery.id,
-    name: brewery.name,
-    slug: brewery.slug,
-    description: brewery.description,
-    type: brewery.type,
-    
-    // Location
-    street: brewery.street,
-    city: brewery.city,
-    state: brewery.state,
-    zip: brewery.zip,
-    county: brewery.county,
-    latitude: brewery.latitude,
-    longitude: brewery.longitude,
-    
-    // Contact
-    phone: brewery.phone,
-    website: brewery.website,
-    social_media: brewery.socialMedia as Record<string, string>,
-    
-    // Hours
-    hours: brewery.hours,
-    
-    // Features
-    amenities: brewery.amenities,
-    allows_visitors: brewery.allowsVisitors,
-    offers_tours: brewery.offersTours,
-    beer_to_go: brewery.beerToGo,
-    has_merch: brewery.hasMerch,
-    memberships: brewery.memberships,
-    
-    // Additional fields
-    food: brewery.food,
-    other_drinks: brewery.otherDrinks,
-    parking: brewery.parking,
-    dog_friendly: brewery.dogFriendly,
-    outdoor_seating: brewery.outdoorSeating,
-    logo: brewery.logo,
-    photo_url: brewery.photoUrl,
-    photos: brewery.photos || [],
-    featured: brewery.featured,
-    special_events: brewery.specialEvents,
-    awards: brewery.awards,
-    certifications: brewery.certifications,
-    
-    // Metadata
-    opened_date: brewery.openedDate,
-    
-    // Google Reviews summary
-    google_rating: brewery.googleRating,
-    google_rating_count: brewery.googleRatingCount,
-    google_reviews_last_updated: brewery.googleReviewsLastUpdated,
-    place_id: brewery.placeId,
-  };
-}
-
-/**
  * Fetch all brewery data from Supabase
  */
-export async function getBreweryDataFromSupabase(): Promise<Brewery[]> {
+// Every breweries column except review_themes, which only brewery pages use (~100 KB of the list)
+const LIST_COLUMNS = [
+  'id', 'name', 'slug', 'description', 'type', 'street', 'city', 'state', 'zip', 'county', 'latitude', 'longitude',
+  'phone', 'website', 'social_media', 'hours', 'amenities', 'allows_visitors', 'offers_tours', 'beer_to_go', 'has_merch',
+  'memberships', 'food', 'other_drinks', 'parking', 'dog_friendly', 'outdoor_seating', 'logo', 'featured',
+  'special_events', 'awards', 'certifications', 'opened_date', 'created_at', 'updated_at', 'google_rating',
+  'google_rating_count', 'google_reviews_last_updated', 'place_id', 'photo_url', 'photos', 'yelp_business_id',
+  'yelp_rating', 'yelp_rating_count', 'yelp_reviews_last_updated', 'articles_last_updated',
+].join(',');
+
+/**
+ * All breweries. With detail: false (the site's cached list) it skips review_themes and beers;
+ * the default returns everything, which scripts rely on.
+ */
+export async function getBreweryDataFromSupabase({ detail = true }: { detail?: boolean } = {}): Promise<Brewery[]> {
   const startTime = Date.now();
 
   try {
     // Fetch breweries
     const { data: breweriesData, error: breweriesError } = await supabase
       .from('breweries')
-      .select('*')
-      .order('name');
+      .select(detail ? '*' : LIST_COLUMNS)
+      .order('name')
+      .returns<DatabaseBrewery[]>();
 
     if (breweriesError) {
       const errorMessage = breweriesError.message || breweriesError.toString() || 'Unknown error';
@@ -173,10 +127,10 @@ export async function getBreweryDataFromSupabase(): Promise<Brewery[]> {
       return [];
     }
 
-    // Fetch all beers
-    const { data: beersData, error: beersError } = await supabase
-      .from('beers')
-      .select('*');
+    // Fetch all beers (detail only; brewery pages load their own through fetchBreweryBySlug)
+    const { data: beersData, error: beersError } = detail
+      ? await supabase.from('beers').select('*')
+      : { data: [] as DatabaseBeer[], error: null };
 
     if (beersError && process.env.NODE_ENV === 'development') {
       console.warn(`Failed to fetch beers: ${beersError.message}`);
@@ -232,49 +186,9 @@ export async function getBreweryDataFromSupabase(): Promise<Brewery[]> {
 }
 
 /**
- * Fetch beer data from Supabase
- * Returns a map of brewery_id to beers array
+ * Check if an email is already subscribed
  */
-export async function getBeerDataFromSupabase(): Promise<Record<string, Beer[]>> {
-  try {
-    const { data: beersData, error } = await supabase
-      .from('beers')
-      .select('*');
-
-    if (error) {
-      console.error('Error fetching beer data from Supabase:', error);
-      return {};
-    }
-
-    if (!beersData) {
-      return {};
-    }
-
-    const beerData: Record<string, Beer[]> = {};
-
-    beersData.forEach((beer: DatabaseBeer) => {
-      if (!beerData[beer.brewery_id]) {
-        beerData[beer.brewery_id] = [];
-      }
-      beerData[beer.brewery_id].push({
-        name: beer.name,
-        style: beer.style || '',
-        abv: beer.abv || '',
-        availability: beer.availability || '',
-      });
-    });
-
-    return beerData;
-  } catch (error) {
-    console.error('Error fetching beer data from Supabase:', error);
-    return {};
-  }
-}
-
-/**
- * Check if email already exists in newsletter subscribers
- */
-export async function checkEmailExists(email: string): Promise<boolean> {
+async function checkEmailExists(email: string): Promise<boolean> {
   try {
     const normalizedEmail = email.toLowerCase().trim();
     
@@ -334,67 +248,9 @@ export async function addNewsletterSubscriber(email: string, metadata: any = {})
 }
 
 /**
- * Test connection to Supabase
- */
-export async function testSupabaseConnection(): Promise<boolean> {
-  try {
-    const { data, error } = await supabase
-      .from('breweries')
-      .select('count')
-      .limit(1);
-
-    if (error) {
-      console.error('Supabase connection test failed:', error);
-      return false;
-    }
-
-    console.log('Supabase connection test successful');
-    return true;
-  } catch (error) {
-    console.error('Supabase connection test failed:', error);
-    return false;
-  }
-}
-
-/**
- * Get brewery by ID
- */
-export async function getBreweryById(id: string): Promise<Brewery | null> {
-  try {
-    const { data: breweryData, error } = await supabase
-      .from('breweries')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error || !breweryData) {
-      return null;
-    }
-
-    // Fetch beers for this brewery
-    const { data: beersData } = await supabase
-      .from('beers')
-      .select('*')
-      .eq('brewery_id', id);
-
-    const beers: Beer[] = (beersData || []).map((beer: DatabaseBeer) => ({
-      name: beer.name,
-      style: beer.style || '',
-      abv: beer.abv || '',
-      availability: beer.availability || '',
-    }));
-
-    return dbBreweryToBrewery(breweryData, beers);
-  } catch (error) {
-    console.error('Error fetching brewery by ID:', error);
-    return null;
-  }
-}
-
-/**
  * Get brewery by slug
  */
-export async function getBreweryBySlug(slug: string): Promise<Brewery | null> {
+export async function fetchBreweryBySlug(slug: string): Promise<Brewery | null> {
   try {
     const { data: breweryData, error } = await supabase
       .from('breweries')
@@ -423,98 +279,6 @@ export async function getBreweryBySlug(slug: string): Promise<Brewery | null> {
   } catch (error) {
     console.error('Error fetching brewery by slug:', error);
     return null;
-  }
-}
-
-/**
- * Search breweries using full-text search
- */
-export async function searchBreweries(query: string): Promise<Brewery[]> {
-  try {
-    const { data, error } = await supabase
-      .from('breweries')
-      .select('*')
-      .textSearch('name,description', query, {
-        type: 'websearch',
-        config: 'english',
-      })
-      .limit(50);
-
-    if (error) {
-      console.error('Error searching breweries:', error);
-      return [];
-    }
-
-    if (!data) {
-      return [];
-    }
-
-    return data.map((dbBrewery: DatabaseBrewery) => dbBreweryToBrewery(dbBrewery));
-  } catch (error) {
-    console.error('Error searching breweries:', error);
-    return [];
-  }
-}
-
-/**
- * Get nearby breweries using PostGIS (if enabled)
- * Falls back to client-side calculation if PostGIS is not available
- */
-export async function getNearbyBreweries(
-  latitude: number,
-  longitude: number,
-  radiusMiles: number = 10
-): Promise<Brewery[]> {
-  try {
-    // Convert miles to meters (PostGIS uses meters)
-    const radiusMeters = radiusMiles * 1609.34;
-
-    // Use PostGIS if available, otherwise fetch all and filter client-side
-    let data: DatabaseBrewery[] | null = null;
-    let error: any = null;
-    
-    try {
-      const result = await supabase.rpc('get_nearby_breweries', {
-        lat: latitude,
-        lng: longitude,
-        radius_meters: radiusMeters,
-      });
-      data = result.data;
-      error = result.error;
-    } catch (rpcError) {
-      // RPC function doesn't exist, fall through to client-side filtering
-      error = rpcError;
-    }
-
-    if (error) {
-      // If RPC doesn't exist, fetch all and filter client-side
-      const { data: allBreweries } = await supabase.from('breweries').select('*');
-      if (!allBreweries) return [];
-
-      // Filter by distance
-      return allBreweries
-        .map((dbBrewery: DatabaseBrewery) => {
-          const distance = calculateDistance(
-            latitude,
-            longitude,
-            dbBrewery.latitude,
-            dbBrewery.longitude
-          );
-          return { brewery: dbBrewery, distance };
-        })
-        .filter((item) => item.distance <= radiusMiles)
-        .sort((a, b) => a.distance - b.distance)
-        .map((item) => dbBreweryToBrewery(item.brewery));
-    }
-
-    if (!data) {
-      return [];
-    }
-
-    return data.map((dbBrewery: DatabaseBrewery) => dbBreweryToBrewery(dbBrewery));
-  } catch (error) {
-    console.error('Error fetching nearby breweries:', error);
-    return [];
   }
 }
 
@@ -873,29 +637,6 @@ export async function getNeighborhoodsByCity(city: string): Promise<DatabaseNeig
 }
 
 /**
- * Get neighborhoods by county
- */
-export async function getNeighborhoodsByCounty(county: string): Promise<DatabaseNeighborhood[]> {
-  try {
-    const { data, error } = await supabase
-      .from('maryland_neighborhoods')
-      .select('*')
-      .ilike('county', county)
-      .order('name', { ascending: true });
-    
-    if (error) {
-      console.error('Error fetching neighborhoods by county:', error);
-      return [];
-    }
-    
-    return data || [];
-  } catch (error) {
-    console.error('Failed to fetch neighborhoods from Supabase:', error);
-    return [];
-  }
-}
-
-/**
  * Get neighborhood by slug
  */
 export async function getNeighborhoodBySlug(slug: string): Promise<DatabaseNeighborhood | null> {
@@ -918,7 +659,6 @@ export async function getNeighborhoodBySlug(slug: string): Promise<DatabaseNeigh
   }
 }
 
-
 /**
  * Get every neighborhood (used for static params and the sitemap)
  */
@@ -938,30 +678,6 @@ export async function getAllNeighborhoods(): Promise<DatabaseNeighborhood[]> {
     return data || [];
   } catch (error) {
     console.error('Failed to fetch neighborhoods:', error);
-    return [];
-  }
-}
-
-/**
- * Get the beer list for one brewery
- */
-export async function getBeersForBrewery(
-  breweryId: string
-): Promise<Pick<DatabaseBeer, 'name' | 'style' | 'abv' | 'availability'>[]> {
-  try {
-    const { data, error } = await supabase
-      .from('beers')
-      .select('name, style, abv, availability')
-      .eq('brewery_id', breweryId);
-
-    if (error) {
-      console.error('Error fetching beers for brewery:', error);
-      return [];
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error('Failed to fetch beers from Supabase:', error);
     return [];
   }
 }

@@ -29,11 +29,13 @@ interface DuplicateGroup {
 }
 
 function getDuplicateKey(review: DatabaseReview): string {
-  // Create a unique key based on brewery_id, review_timestamp, and reviewer_name
+  // Same columns as the reviews unique constraint (brewery_id, source, review_timestamp, reviewer_name)
   const timestamp = review.review_timestamp || 0;
   const reviewerName = (review.reviewer_name || '').toLowerCase().trim();
-  return `${review.brewery_id}|${timestamp}|${reviewerName}`;
+  return `${review.brewery_id}|${review.source}|${timestamp}|${reviewerName}`;
 }
+
+const PAGE_SIZE = 1000; // Supabase returns at most 1,000 rows per request
 
 async function findDuplicates(): Promise<DuplicateGroup[]> {
   if (!supabaseAdmin) {
@@ -42,17 +44,24 @@ async function findDuplicates(): Promise<DuplicateGroup[]> {
 
   console.log('📥 Fetching all reviews from Supabase...');
   
-  // Fetch all reviews
-  const { data: allReviews, error } = await supabaseAdmin
-    .from('reviews')
-    .select('*')
-    .order('created_at', { ascending: true });
+  // Fetch all reviews, a page at a time
+  const allReviews: DatabaseReview[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await supabaseAdmin
+      .from('reviews')
+      .select('*')
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
 
-  if (error) {
-    throw new Error(`Failed to fetch reviews: ${error.message}`);
+    if (error) {
+      throw new Error(`Failed to fetch reviews: ${error.message}`);
+    }
+    allReviews.push(...((data || []) as DatabaseReview[]));
+    if (!data || data.length < PAGE_SIZE) break;
   }
 
-  if (!allReviews || allReviews.length === 0) {
+  if (allReviews.length === 0) {
     console.log('   ℹ️  No reviews found');
     return [];
   }
@@ -62,7 +71,7 @@ async function findDuplicates(): Promise<DuplicateGroup[]> {
   // Group reviews by duplicate key
   const reviewMap = new Map<string, DatabaseReview[]>();
   
-  for (const review of allReviews as DatabaseReview[]) {
+  for (const review of allReviews) {
     const key = getDuplicateKey(review);
     if (!reviewMap.has(key)) {
       reviewMap.set(key, []);

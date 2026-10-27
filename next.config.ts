@@ -67,6 +67,12 @@ const nextConfig: NextConfig = {
         destination: '/counties/:path*',
         permanent: true,
       },
+      // No blog until posts exist. Temporary, so /blog can come back without stale permanent redirects
+      {
+        source: '/blog',
+        destination: '/',
+        permanent: false,
+      },
       // Redirect double-slash city amenity URLs to amenity pages
       {
         source: '/cities//:amenity',

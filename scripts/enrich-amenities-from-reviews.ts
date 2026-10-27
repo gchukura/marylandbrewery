@@ -29,7 +29,7 @@ import { config } from 'dotenv';
 import { resolve as resolvePath } from 'path';
 config({ path: resolvePath(process.cwd(), '.env.local') });
 
-import { supabaseAdmin } from '../src/lib/db/client';
+import { supabaseAdmin } from '@/lib/db/client';
 
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error(

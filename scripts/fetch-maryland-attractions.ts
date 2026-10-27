@@ -31,9 +31,9 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
-import { supabaseAdmin, DatabaseAttraction } from '../src/lib/db/client';
-import { getBreweryDataFromSupabase } from '../src/lib/db/queries';
-import { slugify } from '../src/lib/data-utils';
+import { supabaseAdmin, DatabaseAttraction } from '@/lib/db/client';
+import { getBreweryDataFromSupabase } from '@/lib/db/queries';
+import { slugify } from '@/lib/data-utils';
 
 const GOOGLE_PLACES_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
 

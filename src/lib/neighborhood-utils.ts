@@ -17,9 +17,10 @@ import { DatabaseNeighborhood } from '@/lib/db';
  */
 export function isNeighborhoodSlug(slug: string): boolean {
   const parts = slug.split('-');
-  // Must have 4+ parts and end with -md
-  // This ensures we don't confuse 3-word cities like "havre-de-grace" with neighborhoods
-  return parts.length >= 4 && slug.endsWith('-md');
+  // {neighborhood}-{city}-md has at least 3 parts (e.g. "canton-baltimore-md").
+  // City slugs like "havre-de-grace-md" also pass; parseNeighborhoodSlug returns null for
+  // them because no neighborhood matches, and callers fall through to city handling.
+  return parts.length >= 3 && slug.endsWith('-md');
 }
 
 /**

@@ -1,0 +1,33 @@
+name: Preview links
+
+# Crawls the Vercel preview for broken links. Informational: it never blocks a PR.
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-deployed-links:
+    name: Validate deployed links (non-blocking)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Wait for Vercel Preview
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
+        id: wait-for-preview
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          max_timeout: 300
+        # Step-level, so a missing preview or broken links show as a warning, not a red X
+        continue-on-error: true
+
+      - name: Check deployed links with Linkinator
+        if: steps.wait-for-preview.outputs.url != ''
+        run: |
+          npx --yes linkinator@7 ${{ steps.wait-for-preview.outputs.url }} \
+            --recurse \
+            --skip "maps.googleapis.com|google.com|facebook.com|instagram.com|twitter.com|yelp.com|untappd.com" \
+            --timeout 30000 \
+            --verbosity error
+        continue-on-error: true

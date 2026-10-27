@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { google } from "googleapis";
+import { auth, sheets } from "@googleapis/sheets";
 
 async function getSheets() {
-  const auth = new google.auth.GoogleAuth({
+  const googleAuth = new auth.GoogleAuth({
     credentials: {
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
       private_key: (process.env.GOOGLE_SERVICE_ACCOUNT_KEY || "").replace(/\\n/g, "\n"),
     },
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
-  return google.sheets({ version: "v4", auth });
+  return sheets({ version: "v4", auth: googleAuth });
 }
 
 export async function POST(req: NextRequest) {

@@ -1,0 +1,268 @@
+# Scripts
+
+The maintenance scripts live in `scripts/*.ts` and run with `tsx` through the npm scripts in `package.json`. Older one-off scripts are in `scripts/archived/` (see the last section); they have no npm script.
+
+## Before you run anything
+
+- **Environment.** Most scripts load `.env.local` themselves with `dotenv` (`config({ path: '.env.local' })`), so you do not need to export anything in your shell. There are three exceptions. `seo:count-urls` does not load `.env.local`. `indexnow` and `lint:links` read no environment variables.
+- **Writes go to the production database.** There is no separate staging Supabase project. Any script marked "Writes DB: yes" changes live data the moment it runs. Use `--dry-run` where a script offers it.
+- **Writes need `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.** Writes go through `supabaseAdmin` in `src/lib/db/client.ts`, which is only created when `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are both set. Some scripts check for the key at startup. The others fail later with an unclear error (for example `supabaseAdmin.from is not a function`), because `supabaseAdmin` is a Proxy, so the `if (!supabaseAdmin)` guards in the code never fire.
+- **Reads through `getBreweryDataFromSupabase()` use the anon client.** Any script that loads breweries through `src/lib/db/queries.ts` also needs `NEXT_PUBLIC_SUPABASE_ANON_KEY`. The per-script sections below say which scripts do.
+- **Google key precedence.** Scripts that call Google APIs use `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY`. If both are set, the public key wins. A browser key with HTTP referer restrictions gets `REQUEST_DENIED` from the server-side Places and Geocoding APIs. Adding `GOOGLE_MAPS_API_KEY` alone does not fix this. You also have to unset `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` for the run, for example `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY= npm run data:geocode`. That works because dotenv does not override variables that are already set in the shell.
+- `NODE_ENV` is read in `src/lib/db/queries.ts`, but only to turn on extra logging.
+
+## Summary
+
+| npm script | Purpose | Writes DB? |
+|---|---|---|
+| `data:reviews:google` | Fetch Google rating and up to 5 reviews per brewery and store place IDs | yes |
+| `data:reviews:yelp` | Fetch Yelp rating and up to 3 reviews per brewery and store Yelp business IDs | yes |
+| `data:reviews:themes` | Keyword-analyze stored reviews into `breweries.review_themes` | yes |
+| `data:reviews:dedupe` | Delete duplicate rows from `reviews` | yes (deletes) |
+| `data:reviews:counts` | Report review counts per brewery | no |
+| `data:news` | Fetch Google News RSS articles into `brewery_articles` | yes |
+| `data:logos` | Download logos to `public/logos/` and set `breweries.logo` | yes |
+| `data:photos` | Download Google Places photos to `public/photos/` and set `breweries.photos` | yes |
+| `data:geocode` | Re-geocode every brewery and overwrite lat/lng that moved by more than 0.01 degrees | yes |
+| `data:verify-coordinates` | Compare stored coordinates with Google geocoding and report differences | no |
+| `data:enrich` | Fill missing social links (from brewery websites) and hours (from Google) | yes |
+| `data:enrich:amenities` | Infer missing amenity flags from review text | yes |
+| `data:attractions` | Fetch Maryland attractions from Google Places into `maryland_attractions` | yes |
+| `seo:count-urls` | Estimate the number of sitemap URLs (currently broken, see below) | no |
+| `indexnow` | Submit every URL in the live sitemap to IndexNow | no |
+| `lint:links` | Statically check internal `href`s against `src/app` routes (runs in CI) | no |
+
+---
+
+## Reviews
+
+### `npm run data:reviews:google`
+
+File: `scripts/fetch-google-reviews.ts`
+
+What it does: Loads all breweries. For each one it uses the stored `place_id`, or finds it with Places Text Search and saves it. Text Search tries name + city + "brewery" first, then the query without "brewery", then the street address. It then calls Place Details for `reviews,rating,user_ratings_total`. New reviews are inserted into `reviews` with `source='google'`, skipping any that match an existing review on timestamp, reviewer name and the first 100 characters of text. It also updates `google_rating`, `google_rating_count` and `google_reviews_last_updated` on `breweries`. Breweries whose `google_reviews_last_updated` is less than 7 days old are skipped. The Places API returns at most 5 reviews per place, so the reviews table grows slowly over repeated runs.
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (brewery read), `SUPABASE_SERVICE_ROLE_KEY` (writes), `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY` (required; it throws without one). Google Cloud needs Places API Text Search and Place Details enabled.
+- Writes to Supabase: **yes**. Inserts into `reviews` and updates `place_id`, `google_rating`, `google_rating_count` and `google_reviews_last_updated` on `breweries`.
+- Flags: none. The 7-day skip cannot be overridden.
+- How often: weekly. Running it more often only re-skips breweries.
+
+### `npm run data:reviews:yelp`
+
+File: `scripts/fetch-yelp-reviews.ts`
+
+What it does: For each brewery it finds a Yelp business with the Fusion business search (name + "city, state"), stores `yelp_business_id`, and fetches the business details and the reviews endpoint (Yelp returns at most 3 reviews). It inserts the reviews into `reviews` with `source='yelp'`, using the same duplicate filter as the Google script. It also updates `yelp_rating`, `yelp_rating_count` and `yelp_reviews_last_updated`. It stops early on a Yelp authentication or rate-limit error.
+
+**Known bug:** the script reads `brewery.yelp_reviews_last_updated` and `brewery.yelp_business_id` (snake_case). The objects returned by `getBreweryDataFromSupabase()` use camelCase (`yelpReviewsLastUpdated`, `yelpBusinessId`), so both checks are always empty. As a result, the intended 7-day skip never happens, and the stored business ID is never reused. Every run searches Yelp again for every brewery.
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (brewery read), `SUPABASE_SERVICE_ROLE_KEY` (writes), `YELP_API_KEY` (required; it throws without it).
+- Writes to Supabase: **yes**. Inserts into `reviews` and updates `yelp_business_id`, `yelp_rating`, `yelp_rating_count` and `yelp_reviews_last_updated` on `breweries`.
+- Flags: none.
+- How often: weekly at most. Because of the bug above, each run makes about 3 Yelp calls per brewery, against the free tier's 5,000 calls per day.
+
+### `npm run data:reviews:themes`
+
+File: `scripts/analyze-and-store-review-themes.ts`
+
+What it does: For each brewery it reads every row in `reviews` with non-null text (Google and Yelp), runs regex keyword patterns for beer quality, food and menu, service and staff, atmosphere, and amenities, and writes the result as JSON to `breweries.review_themes`. It does not call an external API or LLM. Breweries with no reviews are skipped. The existing `review_themes` value is overwritten.
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`.
+- Writes to Supabase: **yes**. Updates `breweries.review_themes`.
+- Flags: `--brewery-id=<uuid>` processes one brewery.
+- How often: after each review fetch (weekly, after `data:reviews:google` / `data:reviews:yelp`).
+
+### `npm run data:reviews:dedupe`
+
+File: `scripts/remove-duplicate-reviews.ts`
+
+What it does: Reads `reviews` and groups rows by `brewery_id` + `review_timestamp` + lowercased `reviewer_name`. In each group it keeps the row with the earliest `created_at` and deletes the rest, in batches of 50. The key does not include `source`. The read is a single unpaginated `select('*')`, so with Supabase's default 1,000-row response limit it only sees the first 1,000 reviews once the table is larger than that.
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`.
+- Writes to Supabase: **yes, it deletes rows** from `reviews`.
+- Flags: `--dry-run` lists the first 10 groups and the counts without deleting anything. Always run this first.
+- How often: as needed, when `data:reviews:counts` or the site shows repeated reviews. The fetch scripts already skip duplicates on insert.
+
+### `npm run data:reviews:counts`
+
+File: `scripts/check-review-counts.ts`
+
+What it does: Reads `reviews` and prints the review count per brewery (top 20, and every brewery with more than 5). It also prints a "duplicate reviews" section, but that section is wrong. The query only selects `brewery_id, brewery_name, id`, so `review_timestamp` and `reviewer_name` are always missing, and every brewery with two or more reviews shows up as a duplicate. Use `data:reviews:dedupe --dry-run` to check for real duplicates. It has the same unpaginated 1,000-row read limit as the dedupe script.
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`. It creates its own client and exits if either is missing.
+- Writes to Supabase: **no** (read only).
+- Flags: none.
+- How often: as needed, for diagnostics.
+
+---
+
+## Brewery content
+
+### `npm run data:news`
+
+File: `scripts/fetch-brewery-news.ts`
+
+What it does: For each brewery it queries Google News RSS for `"<name>" Maryland brewery` (no API key), scores each article from 0 to 1, keeps articles that score above 0.4, and upserts the top 10 into `brewery_articles` (conflict on `brewery_id,url`). Scoring starts at 0.5 and adds points when the name is in the title or description, the source is a Maryland outlet, or the text has beer keywords. It subtracts points for articles older than a year. It then sets `breweries.articles_last_updated`. Breweries whose `articles_last_updated` is within the last 7 days are skipped unless you pass `--force`. `articles_last_updated` is only set when at least one article was saved, so breweries with no news are queried again on every run. It waits 1 second between breweries.
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (brewery read), `SUPABASE_SERVICE_ROLE_KEY`. The service key is needed for writes, and also for the 7-day check, which reads `articles_last_updated` through the admin client, so `--dry-run` without `--force` still needs it.
+- Writes to Supabase: **yes**. Upserts into `brewery_articles` and updates `breweries.articles_last_updated`. Nothing is written with `--dry-run`.
+- Flags:
+  - `--dry-run` prints the articles that would be saved.
+  - `--force` ignores the 7-day skip.
+  - `--limit=N` processes only the first N breweries. It must use `=`. The `--limit 10` form shown in the file's header comment is silently ignored.
+  - `--brewery=<name>` keeps breweries whose name contains the text (case-insensitive). It must use `=`, for example `--brewery="Flying Dog"`. The `--brewery "Name"` form in the header comment does not work.
+  - Pass flags through npm with `--`, for example `npm run data:news -- --dry-run --limit=5`.
+- How often: weekly.
+
+### `npm run data:logos`
+
+File: `scripts/fetch-brewery-logos.ts`
+
+What it does: Finds breweries whose `logo` is empty or an external `http(s)` URL. External URLs are downloaded to `public/logos/<slugified-name>.<ext>`. For breweries with no logo, it scrapes the Brewers Association of Maryland members page (`marylandbeer.org/brewing-companies/current-members/`) and matches names exactly, then by partial match, then after stripping "Brewing/Brewery/Company" suffixes. If that fails, it looks for a logo on the brewery's own website. It sets `breweries.logo` to the local path (`/logos/...`). Breweries it could not resolve are listed in `scripts/output/brewery-logos-missing.md` (gitignored). It overwrites existing files with the same name.
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (brewery read), `SUPABASE_SERVICE_ROLE_KEY` (writes).
+- Writes to Supabase: **yes**. Updates `breweries.logo`. It also writes files under `public/logos/`, which you need to review and commit, and a report in `scripts/output/` (gitignored).
+- Flags: none.
+- How often: after adding breweries.
+
+### `npm run data:photos`
+
+File: `scripts/download-google-photos.ts`
+
+What it does: For every brewery it uses `place_id`, or finds it with Text Search and saves it. It then gets the photo references from Place Details and downloads up to 11 photos per brewery (1600px wide) to `public/photos/`, named by brewery ID and index. Files that already exist are not downloaded again. The new paths are merged into `breweries.photos` without removing the old ones. It calls Place Details for every brewery on every run, even if all its photos are already on disk.
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (all reads and writes use the admin client), `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY` (required).
+- Writes to Supabase: **yes**. Updates `breweries.place_id` and `breweries.photos`. It also writes image files under `public/photos/`.
+- Flags: none.
+- How often: after adding breweries. Each run costs Google Places calls for every brewery.
+
+### `npm run data:enrich`
+
+File: `scripts/enrich-supabase-breweries.ts`
+
+What it does: For breweries with no social links, it fetches the brewery website and extracts the first Facebook, Instagram, Twitter/X and Untappd links. For breweries with no hours, it runs a Places Text Search and a Place Details (`opening_hours`) lookup. It only updates `social_media` and `hours` when something changed, and never overwrites existing values. The Google lookup does not save the `place_id` it finds.
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (brewery read), `SUPABASE_SERVICE_ROLE_KEY` (writes), and optionally `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY`. Without a Google key, the hours step is skipped.
+- Writes to Supabase: **yes**. Updates `breweries.social_media` and `breweries.hours`.
+- Flags: none.
+- How often: after adding breweries.
+
+### `npm run data:enrich:amenities`
+
+File: `scripts/enrich-amenities-from-reviews.ts`
+
+What it does: For each brewery it concatenates the text of its English (`language='en'`) reviews, from any source, and uses keyword heuristics to infer `allows_visitors`, `offers_tours`, `beer_to_go`, `has_merch`, `dog_friendly`, `outdoor_seating`, `food` ("In-House" / "Food Trucks"), `other_drinks` and `parking` ("yes"/"no"). It only fills fields that are currently empty or false. It never overwrites a set value and never sets anything back to false.
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (checked at startup).
+- Writes to Supabase: **yes**. Updates those amenity columns on `breweries`.
+- Flags: none.
+- How often: after review fetches, or after adding breweries. Because heuristic positives are permanent, check the output.
+
+---
+
+## Location data
+
+### `npm run data:geocode`
+
+File: `scripts/geocode-breweries.ts`
+
+What it does: For every brewery it gets coordinates from Places Text Search (name, city, state), and falls back to the Geocoding API with the full address, retrying twice. If the result differs from the stored latitude or longitude by more than 0.01 degrees (about 0.6 miles), it overwrites the stored coordinates. Breweries with no stored coordinates always count as changed. There is no review step: it updates every brewery that moved.
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (checked at startup), `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY` (required).
+- Writes to Supabase: **yes**. Updates `breweries.latitude` and `breweries.longitude`.
+- Flags: none.
+- How often: after adding breweries or changing addresses. Run `data:verify-coordinates` first to see what would change.
+
+### `npm run data:verify-coordinates`
+
+File: `scripts/verify-brewery-coordinates.ts`
+
+What it does: Geocodes each brewery's name and address with the Geocoding API and prints the distance from the stored coordinates. It counts more than 0.1 mile as a warning and more than 1 mile as an error. Breweries with no stored coordinates are reported and skipped. It geocodes each brewery twice (once for the detail output, once for the summary), so it costs twice as many API calls as needed.
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (checked at startup, even though it only reads), `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY` (required).
+- Writes to Supabase: **no** (read only).
+- Flags: one optional positional argument, a brewery name substring (`ilike '%name%'`), for example `npm run data:verify-coordinates -- "Silly Yak"`. With no argument it checks all breweries.
+- How often: as needed. Run it before `data:geocode`, or when a map pin looks wrong.
+
+### `npm run data:attractions`
+
+File: `scripts/fetch-maryland-attractions.ts`
+
+What it does: Builds a list of brewery cities, using the first brewery's coordinates for each city (not an average, despite the old README). For each city it runs Places Nearby Search (10 km radius) for about 20 Google place types. It then runs a coarse grid search across Maryland (0.5 degree spacing, 25 km radius, 5 key types, capped at 500 requests). Each new place gets a Place Details call. Places outside Maryland are dropped. The rest are mapped to a category (landmark, museum, park, entertainment, shopping, restaurant) and upserted into `maryland_attractions` on `place_id`. It waits 200 ms between requests.
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (brewery read), `SUPABASE_SERVICE_ROLE_KEY` (writes), `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY` (required). Google Cloud needs Places API Nearby Search and Place Details enabled.
+- Writes to Supabase: **yes**. Upserts into `maryland_attractions`. Nothing is written with `--dry-run`.
+- Flags:
+  - `--dry-run` skips the upsert. It still makes all the Google API calls, including Place Details, so it is not free.
+  - `--city=<name>` searches one city (case-insensitive) and skips the grid search.
+  - `--type=<category>` keeps only one of the mapped categories (`landmark`, `museum`, `park`, `entertainment`, `shopping`, `restaurant`), not a raw Google type. In the grid search the filter is applied after the Place Details call.
+- How often: rarely, for example a few times a year. One full run makes a few thousand Places calls.
+
+---
+
+## SEO and site checks
+
+### `npm run seo:count-urls`
+
+File: `scripts/count-sitemap-urls.ts`
+
+What it does: Meant to print a breakdown of how many URLs the sitemap should contain (static, region, city, county, brewery, type, amenity, city + amenity, neighborhood and attraction pages). Some counts are hard-coded (8 static pages, 4 attraction pages) and may have drifted from `src/app/sitemap.ts`.
+
+**Currently broken outside Next.** It calls `getProcessedBreweryData`, `getAllCities`, `getAllTypes` and `getAllAmenities` from `src/lib/db/brewery-data.ts`. Those are wrapped in `unstable_cache` from `next/cache`, which throws "incrementalCache missing" when called from a plain `tsx` process. The script catches the error with `main().catch(console.error)` and exits with code 0, so the failure is easy to miss. It also does not load `.env.local`. To count URLs today, fetch the deployed `/sitemap.xml` and count the `<loc>` entries.
+
+- Env: none read directly. Through `src/lib/db/client.ts` it would need `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`, which must already be in the shell because the script does not load `.env.local`.
+- Writes to Supabase: **no**.
+- Flags: none.
+- How often: as needed, once it is fixed.
+
+### `npm run indexnow`
+
+File: `scripts/submit-indexnow.ts`
+
+What it does: Checks that the IndexNow key file `https://www.marylandbrewery.com/457bccd4eef437d8877d15d3e947fa02.txt` is reachable (it is served from `public/`). It then fetches the live `https://www.marylandbrewery.com/sitemap.xml` and POSTs every URL to `api.indexnow.org` in batches of up to 10,000. Bing and Yandex use IndexNow; Google does not. The host and key are hard-coded. Because it reads the live sitemap, it only submits what is already deployed.
+
+- Env: none.
+- Writes to Supabase: **no**. It makes an external POST to IndexNow.
+- Flags: none.
+- How often: after a production deploy that adds or changes many pages. Do not run it on every small change, because IndexNow can rate-limit (HTTP 429).
+
+### `npm run lint:links`
+
+File: `scripts/validate-internal-links.ts`
+
+What it does: Builds the route list from `page.tsx` / `page.ts` files under `src/app`, treating `[param]` folders as wildcards. It then scans every `.ts` / `.tsx` file in `src/` for literal `href="/..."`, `href={'/...'}` and template-literal hrefs. Each one must match a route, a special route (sitemap, robots, `/api/`, OG images) or a file in `public/`. Template literals with `${...}` are reported as warnings. It exits with code 1 if any link is invalid.
+
+- Env: none.
+- Writes to Supabase: **no**. It does not touch the network or the database.
+- Flags: none.
+- How often: on every change. It runs in CI (`.github/workflows/ci.yml`). For a crawl of the deployed site, use `npm run lint:links:deployed` (linkinator).
+
+---
+
+## Archived scripts
+
+These are in `scripts/archived/`. They have no npm script, are not typechecked, and are kept for reference only. Several of them write to the production database, so read one before you run it.
+
+- `capitalize-microbrewery.ts`: one-off rename of `breweries.type` from "microbrewery" to "Microbrewery".
+- `check-nano-breweries.ts`: read-only listing of breweries whose `type` contains "nano".
+- `cleanup-memberships.ts`: one-off removal of `description` and `benefits` from each `breweries.memberships` entry.
+- `combine-logo-with-text.ts`: sharp image tool that built `public/logo.png` from `public/logo-beer-mug.png` plus text.
+- `create-text-logo.ts`: sharp image tool that generated a text-only `public/logo.png`.
+- `enrich-ba-memberships-selenium.ts`: Selenium version of the Brewers Association membership scrape.
+- `enrich-ba-memberships.ts`: scraped Brewers Association membership and Independent Craft seal data into `breweries.memberships`.
+- `enrich-mbam-memberships.ts`: scraped Brewers Association of Maryland membership (marylandbeer.org) into `breweries.memberships`.
+- `enrich-neighborhoods-city-county.ts`: reverse-geocoded missing city and county on `maryland_neighborhoods`.
+- `fetch-city-images.ts`: downloaded city hero images from the Pexels API to `public/cities/` (needed `PEXELS_API_KEY`).
+- `fetch-county-images.ts`: downloaded county hero images from Pexels to `public/counties/`.
+- `fetch-index-hero-images.ts`: downloaded brewery-themed hero images for index pages.
+- `fetch-region-images.ts`: downloaded region hero images from Pexels.
+- `import-neighborhoods-csv.ts`: imported a hand-made `neighborhoods.csv` into `maryland_neighborhoods`. This was the manual fallback after homes.com blocked scraping.
+- `migrate-neighborhoods-csv.ts`: imported neighborhoods from CSV, inferred city from descriptions, geocoded them, and upserted into `maryland_neighborhoods`.
+- `migrate-to-supabase.ts`: the original Google Sheets to Supabase migration.
+- `preview-amenities-migration.sql`: SQL preview for the amenities column migration.
+- `scrape-maryland-neighborhoods.ts`: Playwright scrape of homes.com's Maryland neighborhood list into `maryland_neighborhoods` (blocked by homes.com).
+- `scrape-maryland-neighborhoods-fetch.ts`: fetch-based version of the same scrape.
+- `split-logo.ts`: sharp image tool that split `public/logo.png` into separate pieces.
+- `sync-logos-to-supabase.ts`: synced `breweries.logo` from the old Google Sheet (the Sheet is no longer used).
+- `update-micro-to-microbrewery.ts`: one-off rename of `breweries.type` from "micro" to "microbrewery".
+- `update-nano-to-nanobrewery.ts`: one-off type rename from "Nano" to "Nanobrewery".
+- `verify-md-pages.ts`: checked the routing logic for `-md`-suffixed pages without building them.

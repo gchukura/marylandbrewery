@@ -574,10 +574,13 @@ async function fetchBreweryLogos() {
     
     // Write missing logos and errors to markdown file
     if (notFoundBreweries.length > 0 || errorBreweries.length > 0) {
-      const reportPath = resolve(process.cwd(), 'BREWERY_LOGOS_MISSING.md');
+      // scripts/output/ is gitignored, so reports never land in the repo
+      const reportDir = resolve(process.cwd(), 'scripts', 'output');
+      await mkdir(reportDir, { recursive: true });
+      const reportPath = resolve(reportDir, 'brewery-logos-missing.md');
       const reportContent = generateMissingLogosReport(notFoundBreweries, errorBreweries);
       await writeFile(reportPath, reportContent);
-      console.log(`📝 Report written to: BREWERY_LOGOS_MISSING.md\n`);
+      console.log(`📝 Report written to: scripts/output/brewery-logos-missing.md\n`);
     }
     
     console.log('🎉 Logo fetch completed!');

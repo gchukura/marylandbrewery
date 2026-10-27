@@ -363,11 +363,16 @@ export async function writeReviewsToSupabase(
       return;
     }
 
+    // Upsert on the reviews unique constraint (migration 20261027000000_reviews_unique.sql)
     const { error } = await supabaseAdmin
       .from('reviews')
-      .insert(newReviewRecords);
+      .upsert(newReviewRecords, { onConflict: REVIEW_CONFLICT_COLUMNS, ignoreDuplicates: true });
 
-    if (error) {
+    if (error?.code === '42P10') {
+      // The constraint isn't applied yet; the records above are already de-duplicated, so insert
+      const { error: insertError } = await supabaseAdmin.from('reviews').insert(newReviewRecords);
+      if (insertError) throw insertError;
+    } else if (error) {
       throw error;
     }
   } catch (error) {
@@ -536,8 +541,16 @@ export interface DatabaseReview {
   created_at: string;
 }
 
+const REVIEW_CONFLICT_COLUMNS = 'brewery_id,source,review_timestamp,reviewer_name';
+
+function reviewKey(review: DatabaseReview): string {
+  return `${review.brewery_id}|${review.source}|${review.review_timestamp ?? 0}|${(review.reviewer_name || '').toLowerCase().trim()}`;
+}
+
 /**
- * Fetch reviews for a brewery from Supabase
+ * One page of a brewery's reviews, newest first, with the total count.
+ * Paginated in the database. Copies within the page are dropped as a safety net until the
+ * reviews unique constraint is applied (then there are none to drop).
  */
 export async function getBreweryReviews(
   breweryId: string,
@@ -545,46 +558,28 @@ export async function getBreweryReviews(
   offset: number = 0
 ): Promise<{ reviews: DatabaseReview[]; total: number }> {
   try {
-    // Get all reviews for this brewery to properly deduplicate and count
-    const { data: allReviews, error: fetchError } = await supabase
+    const { data, count, error } = await supabase
       .from('reviews')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('brewery_id', breweryId)
-      .order('review_timestamp', { ascending: false, nullsFirst: false });
+      .order('review_timestamp', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: true })
+      .range(offset, offset + limit - 1);
 
-    if (fetchError) {
-      throw fetchError;
+    if (error) {
+      throw error;
     }
 
-    // Deduplicate by content (brewery_id + review_timestamp + reviewer_name + review_text) in case of duplicates in database
-    // Use review_text as part of the key since timestamp might be 0 for many reviews
-    const uniqueReviewsMap = new Map<string, DatabaseReview>();
-    
-    (allReviews || []).forEach((review: DatabaseReview) => {
-      const timestamp = review.review_timestamp || 0;
-      const reviewerName = (review.reviewer_name || '').toLowerCase().trim();
-      // Use first 100 chars of review text as part of key to better identify unique reviews
-      const reviewTextSnippet = (review.review_text || '').substring(0, 100).toLowerCase().trim();
-      // Create a more robust duplicate key that includes review text
-      const duplicateKey = `${review.brewery_id}|${timestamp}|${reviewerName}|${reviewTextSnippet}`;
-      
-      // Only add if we haven't seen this exact review before
-      if (!uniqueReviewsMap.has(duplicateKey)) {
-        uniqueReviewsMap.set(duplicateKey, review);
-      }
+    const rows = (data || []) as DatabaseReview[];
+    const seen = new Set<string>();
+    const reviews = rows.filter((review) => {
+      const key = reviewKey(review);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
     });
 
-    // Convert map to array and get total count
-    const allUniqueReviews = Array.from(uniqueReviewsMap.values());
-    const total = allUniqueReviews.length;
-
-    // Apply pagination to deduplicated reviews
-    const paginatedReviews = allUniqueReviews.slice(offset, offset + limit);
-
-    return {
-      reviews: paginatedReviews,
-      total: total,
-    };
+    return { reviews, total: (count ?? rows.length) - (rows.length - reviews.length) };
   } catch (error) {
     console.error('Failed to fetch reviews from Supabase:', error);
     return { reviews: [], total: 0 };

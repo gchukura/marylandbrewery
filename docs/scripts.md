@@ -75,7 +75,7 @@ What it does: For each brewery it reads every row in `reviews` with non-null tex
 
 File: `scripts/remove-duplicate-reviews.ts`
 
-What it does: Reads `reviews` and groups rows by `brewery_id` + `review_timestamp` + lowercased `reviewer_name`. In each group it keeps the row with the earliest `created_at` and deletes the rest, in batches of 50. The key does not include `source`. The read is a single unpaginated `select('*')`, so with Supabase's default 1,000-row response limit it only sees the first 1,000 reviews once the table is larger than that.
+What it does: Reads every row of `reviews` (paginated, 1,000 at a time) and groups rows by `brewery_id` + `source` + `review_timestamp` + lowercased `reviewer_name`, the same columns as the reviews unique constraint in `supabase/migrations/20261027000000_reviews_unique.sql`. In each group it keeps the row with the earliest `created_at` and deletes the rest, in batches of 50. Run it (dry run first) before applying that migration.
 
 - Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`.
 - Writes to Supabase: **yes, it deletes rows** from `reviews`.
@@ -86,7 +86,7 @@ What it does: Reads `reviews` and groups rows by `brewery_id` + `review_timestam
 
 File: `scripts/check-review-counts.ts`
 
-What it does: Reads `reviews` and prints the review count per brewery (top 20, and every brewery with more than 5). It also prints a "duplicate reviews" section, but that section is wrong. The query only selects `brewery_id, brewery_name, id`, so `review_timestamp` and `reviewer_name` are always missing, and every brewery with two or more reviews shows up as a duplicate. Use `data:reviews:dedupe --dry-run` to check for real duplicates. It has the same unpaginated 1,000-row read limit as the dedupe script.
+What it does: Reads `reviews` and prints the review count per brewery (top 20, and every brewery with more than 5). It also prints a "duplicate reviews" section, but that section is wrong. The query only selects `brewery_id, brewery_name, id`, so `review_timestamp` and `reviewer_name` are always missing, and every brewery with two or more reviews shows up as a duplicate. Use `data:reviews:dedupe --dry-run` to check for real duplicates. Its read is unpaginated, so it only sees the first 1,000 reviews.
 
 - Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`. It creates its own client and exits if either is missing.
 - Writes to Supabase: **no** (read only).

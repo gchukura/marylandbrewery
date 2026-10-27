@@ -159,8 +159,29 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     notFound();
   }
 
-  // Get nearby breweries (within 10 miles)
-  const nearbyBreweries = await getNearbyBreweries(brewery.latitude, brewery.longitude, 10);
+  // Independent fetches run together: nearby breweries (10 miles), reviews, articles, About copy
+  const [nearbyBreweries, reviewData, dbArticles, aboutContent] = await Promise.all([
+    getNearbyBreweries(brewery.latitude, brewery.longitude, 10),
+    getBreweryReviews(brewery.id, 100, 0), // Google returns ~5 and Yelp ~3 per brewery
+    getBreweryArticles(brewery.id, 5),
+    generateAboutBreweryContent({
+      brewery: {
+        name: brewery.name,
+        city: brewery.city,
+        county: (brewery as any).county,
+        type: (brewery as any).type,
+        latitude: brewery.latitude,
+        longitude: brewery.longitude,
+        googleRating: brewery.googleRating,
+        googleRatingCount: brewery.googleRatingCount,
+        description: brewery.description,
+        reviewThemes: brewery.reviewThemes, // Pre-computed themes from DB
+      },
+      beers: brewery.beers ?? [],
+      yelpRating: brewery.yelpRating,
+      yelpRatingCount: brewery.yelpRatingCount,
+    }),
+  ]);
 
   // Calculate city average rating
   const sameCityBreweries = processed.breweries.filter(
@@ -254,29 +275,8 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     outdoorSeating: (brewery as any).outdoorSeating,
   });
 
-  // Fetch all reviews from database (Google Places API only returns max 5 reviews per place)
-  const reviewData = await getBreweryReviews(brewery.id, 100, 0); // Get up to 100 reviews (though Google only provides ~5)
   const actualReviewCount = reviewData.total;
   const allReviews = reviewData.reviews;
-
-  // Generate dynamic About content using stored review themes
-  const aboutContent = await generateAboutBreweryContent({
-    brewery: {
-      name: brewery.name,
-      city: brewery.city,
-      county: (brewery as any).county,
-      type: (brewery as any).type,
-      latitude: brewery.latitude,
-      longitude: brewery.longitude,
-      googleRating: brewery.googleRating,
-      googleRatingCount: brewery.googleRatingCount,
-      description: brewery.description,
-      reviewThemes: brewery.reviewThemes, // Pre-computed themes from DB
-    },
-    beers: brewery.beers ?? [],
-    yelpRating: brewery.yelpRating,
-    yelpRatingCount: brewery.yelpRatingCount,
-  });
 
   // Computed values for enhanced template
   const computed = {
@@ -299,8 +299,6 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     actualReviewCount,
   };
 
-  // Fetch articles for this brewery
-  const dbArticles = await getBreweryArticles(brewery.id, 5);
   
   // Convert database articles to BreweryArticle type (snake_case to camelCase)
   const articles: BreweryArticle[] = dbArticles.map((dbArticle) => ({

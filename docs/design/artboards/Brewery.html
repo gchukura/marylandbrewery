@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brewery detail — Attaboy Beer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+body{margin:0;background:#FFFDF7}
+a{color:#141414;text-decoration:none}a:hover{color:#B3121B}
+</style>
+</helmet>
+<div style="box-sizing: border-box; background: #FFFDF7; color: #141414; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column; min-height: 100%">
+
+  <div style="height: 8px; display: grid; grid-template-columns: repeat(16, minmax(0, 1fr))"><div style="background:#141414"></div><div style="background:#EAAA00"></div><div style="background:#141414"></div><div style="background:#EAAA00"></div><div style="background:#E03A3E"></div><div style="background:#FFFFFF"></div><div style="background:#E03A3E"></div><div style="background:#FFFFFF"></div><div style="background:#141414"></div><div style="background:#EAAA00"></div><div style="background:#141414"></div><div style="background:#EAAA00"></div><div style="background:#E03A3E"></div><div style="background:#FFFFFF"></div><div style="background:#E03A3E"></div><div style="background:#FFFFFF"></div></div>
+
+  <header style="border-bottom: 1px solid #E8E2D4; background: #FFFDF7">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap">
+      <a href="Home.dc.html" style="display: flex; align-items: center; gap: 12px">
+        <svg width="38" height="38" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="#141414"></circle><clipPath id="mfbr1g"><path d="M31 32 H69 L64 86 Q64 91 59 91 H41 Q36 91 36 86 Z"></path></clipPath><path d="M31 32 H69 L64 86 Q64 91 59 91 H41 Q36 91 36 86 Z" fill="#EAAA00"></path><g clip-path="url(#mfbr1g)"><g transform="translate(34.5 43) scale(0.10333)"><clipPath id="mfbr1aq"><rect x="0" y="0" width="150" height="100"></rect></clipPath><clipPath id="mfbr1ab"><polygon points="0,-20 150,80 150,120 0,20"></polygon></clipPath><g clip-path="url(#mfbr1aq)"><rect x="0" y="0" width="25" height="100" fill="#EAAA00"></rect><rect x="25" y="0" width="25" height="100" fill="#141414"></rect><rect x="50" y="0" width="25" height="100" fill="#EAAA00"></rect><rect x="75" y="0" width="25" height="100" fill="#141414"></rect><rect x="100" y="0" width="25" height="100" fill="#EAAA00"></rect><rect x="125" y="0" width="25" height="100" fill="#141414"></rect><g clip-path="url(#mfbr1ab)"><rect x="0" y="0" width="25" height="100" fill="#141414"></rect><rect x="25" y="0" width="25" height="100" fill="#EAAA00"></rect><rect x="50" y="0" width="25" height="100" fill="#141414"></rect><rect x="75" y="0" width="25" height="100" fill="#EAAA00"></rect><rect x="100" y="0" width="25" height="100" fill="#141414"></rect><rect x="125" y="0" width="25" height="100" fill="#EAAA00"></rect></g></g><rect x="150" y="0" width="75" height="50" fill="#FFFFFF"></rect><rect x="225" y="0" width="75" height="50" fill="#E03A3E"></rect><rect x="150" y="50" width="75" height="50" fill="#E03A3E"></rect><rect x="225" y="50" width="75" height="50" fill="#FFFFFF"></rect><clipPath id="mfbr1bw"><rect x="150" y="0" width="75" height="50"></rect><rect x="225" y="50" width="75" height="50"></rect></clipPath><clipPath id="mfbr1br"><rect x="225" y="0" width="75" height="50"></rect><rect x="150" y="50" width="75" height="50"></rect></clipPath><g clip-path="url(#mfbr1bw)"><g fill="#E03A3E"><rect x="219" y="8" width="12" height="84"></rect><rect x="172" y="44" width="106" height="12"></rect><circle cx="225" cy="8" r="7"></circle><circle cx="216" cy="8" r="6"></circle><circle cx="234" cy="8" r="6"></circle><circle cx="225" cy="92" r="7"></circle><circle cx="216" cy="92" r="6"></circle><circle cx="234" cy="92" r="6"></circle><circle cx="172" cy="50" r="7"></circle><circle cx="172" cy="41" r="6"></circle><circle cx="172" cy="59" r="6"></circle><circle cx="278" cy="50" r="7"></circle><circle cx="278" cy="41" r="6"></circle><circle cx="278" cy="59" r="6"></circle></g></g><g clip-path="url(#mfbr1br)"><g fill="#FFFFFF"><rect x="219" y="8" width="12" height="84"></rect><rect x="172" y="44" width="106" height="12"></rect><circle cx="225" cy="8" r="7"></circle><circle cx="216" cy="8" r="6"></circle><circle cx="234" cy="8" r="6"></circle><circle cx="225" cy="92" r="7"></circle><circle cx="216" cy="92" r="6"></circle><circle cx="234" cy="92" r="6"></circle><circle cx="172" cy="50" r="7"></circle><circle cx="172" cy="41" r="6"></circle><circle cx="172" cy="59" r="6"></circle><circle cx="278" cy="50" r="7"></circle><circle cx="278" cy="41" r="6"></circle><circle cx="278" cy="59" r="6"></circle></g></g><rect x="0" y="100" width="75" height="50" fill="#FFFFFF"></rect><rect x="75" y="100" width="75" height="50" fill="#E03A3E"></rect><rect x="0" y="150" width="75" height="50" fill="#E03A3E"></rect><rect x="75" y="150" width="75" height="50" fill="#FFFFFF"></rect><clipPath id="mfbr1cw"><rect x="0" y="100" width="75" height="50"></rect><rect x="75" y="150" width="75" height="50"></rect></clipPath><clipPath id="mfbr1cr"><rect x="75" y="100" width="75" height="50"></rect><rect x="0" y="150" width="75" height="50"></rect></clipPath><g clip-path="url(#mfbr1cw)"><g fill="#E03A3E"><rect x="69" y="108" width="12" height="84"></rect><rect x="22" y="144" width="106" height="12"></rect><circle cx="75" cy="108" r="7"></circle><circle cx="66" cy="108" r="6"></circle><circle cx="84" cy="108" r="6"></circle><circle cx="75" cy="192" r="7"></circle><circle cx="66" cy="192" r="6"></circle><circle cx="84" cy="192" r="6"></circle><circle cx="22" cy="150" r="7"></circle><circle cx="22" cy="141" r="6"></circle><circle cx="22" cy="159" r="6"></circle><circle cx="128" cy="150" r="7"></circle><circle cx="128" cy="141" r="6"></circle><circle cx="128" cy="159" r="6"></circle></g></g><g clip-path="url(#mfbr1cr)"><g fill="#FFFFFF"><rect x="69" y="108" width="12" height="84"></rect><rect x="22" y="144" width="106" height="12"></rect><circle cx="75" cy="108" r="7"></circle><circle cx="66" cy="108" r="6"></circle><circle cx="84" cy="108" r="6"></circle><circle cx="75" cy="192" r="7"></circle><circle cx="66" cy="192" r="6"></circle><circle cx="84" cy="192" r="6"></circle><circle cx="22" cy="150" r="7"></circle><circle cx="22" cy="141" r="6"></circle><circle cx="22" cy="159" r="6"></circle><circle cx="128" cy="150" r="7"></circle><circle cx="128" cy="141" r="6"></circle><circle cx="128" cy="159" r="6"></circle></g></g><clipPath id="mfbr1dq"><rect x="150" y="100" width="150" height="100"></rect></clipPath><clipPath id="mfbr1db"><polygon points="150,80 300,180 300,220 150,120"></polygon></clipPath><g clip-path="url(#mfbr1dq)"><rect x="150" y="100" width="25" height="100" fill="#EAAA00"></rect><rect x="175" y="100" width="25" height="100" fill="#141414"></rect><rect x="200" y="100" width="25" height="100" fill="#EAAA00"></rect><rect x="225" y="100" width="25" height="100" fill="#141414"></rect><rect x="250" y="100" width="25" height="100" fill="#EAAA00"></rect><rect x="275" y="100" width="25" height="100" fill="#141414"></rect><g clip-path="url(#mfbr1db)"><rect x="150" y="100" width="25" height="100" fill="#141414"></rect><rect x="175" y="100" width="25" height="100" fill="#EAAA00"></rect><rect x="200" y="100" width="25" height="100" fill="#141414"></rect><rect x="225" y="100" width="25" height="100" fill="#EAAA00"></rect><rect x="250" y="100" width="25" height="100" fill="#141414"></rect><rect x="275" y="100" width="25" height="100" fill="#EAAA00"></rect></g></g></g><rect x="34.5" y="43" width="31" height="20.67" fill="none" stroke="#141414" stroke-width="1.5"></rect></g><g fill="#FFFFFF"><circle cx="37" cy="29" r="8"></circle><circle cx="50" cy="26" r="10"></circle><circle cx="63" cy="29" r="8"></circle><rect x="31" y="28" width="38" height="6"></rect></g></svg>
+        <span style="font-family: Fraunces, Georgia, serif; font-weight: 700; font-size: 24px; letter-spacing: -0.01em">Maryland Brewery</span>
+      </a>
+      <nav aria-label="Primary" style="display: flex; gap: 28px; font-size: 15px; font-weight: 500; flex-wrap: wrap">
+        <a href="City.dc.html">Map</a>
+        <a href="City.dc.html">Cities</a>
+        <a href="City.dc.html">Counties</a>
+        <a href="City.dc.html">Open now</a>
+        <a href="City.dc.html">Amenities</a>
+      </nav>
+      <a href="Brewery.dc.html" style="padding: 10px 16px; border: 1.5px solid #141414; border-radius: 10px; font-size: 14px; font-weight: 600">Add a brewery</a>
+    </div>
+  </header>
+
+  <!-- photo hero: 2 + 1 -->
+  <div style="max-width: 1240px; width: 100%; margin: 0 auto; padding: 24px 24px 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px">
+    <nav aria-label="Breadcrumb" style="font-size: 13px; color: #5B5853; display: flex; gap: 8px">
+      <a href="Home.dc.html" style="color: #5B5853">Home</a><span>/</span><a href="City.dc.html" style="color: #5B5853">Frederick</a><span>/</span><span aria-current="page" style="color: #141414; font-weight: 500">Attaboy Beer</span>
+    </nav>
+    <div style="display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 220px 220px; gap: 10px; border-radius: 18px; overflow: hidden">
+      <div style="grid-row: span 2; background: #F5EFE0"><img src="/_blob/7a33cd2b75e5f0e3a42207eac61a4af7" alt="Flight of four beers on the Attaboy bar" style="width: 100%; height: 100%; object-fit: cover; display: block"></div>
+      <div style="background: #F5EFE0"><img src="/_blob/f697fc444bd9c83174be6a85aac9c853" alt="Beers on the patio table" style="width: 100%; height: 100%; object-fit: cover; display: block"></div>
+      <div style="position: relative; background: #F5EFE0"><img src="/_blob/2672a775797a1e74f1bf2ececaa966dc" alt="Taproom interior" style="width: 100%; height: 100%; object-fit: cover; display: block"><a href="Brewery.dc.html" style="position: absolute; right: 12px; bottom: 12px; padding: 8px 12px; background: #FFFFFF; border-radius: 8px; font-size: 13px; font-weight: 600">All 18 photos</a></div>
+    </div>
+  </div>
+
+  <!-- title band -->
+  <div style="max-width: 1240px; width: 100%; margin: 0 auto; padding: 28px 24px 0; box-sizing: border-box; display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap">
+    <div style="display: flex; gap: 18px; align-items: center">
+      <div style="width: 84px; height: 84px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E8E2D4; display: flex; align-items: center; justify-content: center; font-family: Fraunces, Georgia, serif; font-weight: 700; font-size: 26px; color: #141414; flex-shrink: 0">AB</div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap">
+          <h1 style="margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 700; font-size: 44px; line-height: 1.05; letter-spacing: -0.01em">Attaboy Beer</h1>
+          <span style="padding: 6px 12px; background: #EAAA00; color: #141414; border-radius: 999px; font-size: 13px; font-weight: 600">Open until 10 PM</span>
+        </div>
+        <div style="font-size: 16px; color: #5B5853">Microbrewery and taproom · Frederick, Frederick County · Opened 2016</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap">
+      <a href="Brewery.dc.html" style="padding: 12px 18px; background: #B3121B; color: #FFFDF7; border-radius: 10px; font-size: 14px; font-weight: 600">Get directions</a>
+      <a href="Brewery.dc.html" style="padding: 12px 18px; border: 1.5px solid #141414; border-radius: 10px; font-size: 14px; font-weight: 600">Website</a>
+      <button aria-label="Save Attaboy Beer" style="width: 46px; height: 46px; border: 1.5px solid #141414; border-radius: 10px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4z"></path></svg></button>
+    </div>
+  </div>
+
+  <!-- body: 8 / 4 -->
+  <div style="max-width: 1240px; width: 100%; margin: 0 auto; padding: 36px 24px 64px; box-sizing: border-box; display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start">
+
+    <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 40px">
+
+      <!-- Visit block -->
+      <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px">
+        <div style="padding: 16px; background: #F5EFE0; border-radius: 14px; display: flex; flex-direction: column; gap: 6px"><div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5B5853">Today</div><div style="font-size: 18px; font-weight: 600">4:00 – 10:00 PM</div><div style="font-size: 13px; color: #5B5853">Food truck from 5 PM</div></div>
+        <div style="padding: 16px; background: #F5EFE0; border-radius: 14px; display: flex; flex-direction: column; gap: 6px"><div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5B5853">Seating</div><div style="font-size: 18px; font-weight: 600">Covered patio</div><div style="font-size: 13px; color: #5B5853">Dogs and kids welcome</div></div>
+        <div style="padding: 16px; background: #F5EFE0; border-radius: 14px; display: flex; flex-direction: column; gap: 6px"><div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5B5853">Parking</div><div style="font-size: 18px; font-weight: 600">Free lot</div><div style="font-size: 13px; color: #5B5853">Street parking after 6 PM</div></div>
+        <div style="padding: 16px; background: #F5EFE0; border-radius: 14px; display: flex; flex-direction: column; gap: 6px"><div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5B5853">To go</div><div style="font-size: 18px; font-weight: 600">Cans, crowlers</div><div style="font-size: 13px; color: #5B5853">Growler fills on tap</div></div>
+      </section>
+
+      <!-- About -->
+      <section style="display: flex; flex-direction: column; gap: 12px">
+        <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 28px">About</h2>
+        <p style="margin: 0; font-size: 17px; line-height: 1.6; max-width: 680px">[Brewery description from the database. Two or three sentences on the space, the beer and what it's known for. No SEO filler.]</p>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px">
+          <span style="padding: 6px 12px; background: #FFFFFF; border: 1px solid #D9D3C5; border-radius: 999px; font-size: 13px; font-weight: 500">Patio</span><span style="padding: 6px 12px; background: #FFFFFF; border: 1px solid #D9D3C5; border-radius: 999px; font-size: 13px; font-weight: 500">Dog-friendly</span><span style="padding: 6px 12px; background: #FFFFFF; border: 1px solid #D9D3C5; border-radius: 999px; font-size: 13px; font-weight: 500">Kid-friendly</span><span style="padding: 6px 12px; background: #FFFFFF; border: 1px solid #D9D3C5; border-radius: 999px; font-size: 13px; font-weight: 500">Food truck</span><span style="padding: 6px 12px; background: #FFFFFF; border: 1px solid #D9D3C5; border-radius: 999px; font-size: 13px; font-weight: 500">Growlers</span><span style="padding: 6px 12px; background: #FFFFFF; border: 1px solid #D9D3C5; border-radius: 999px; font-size: 13px; font-weight: 500">Private events</span>
+        </div>
+      </section>
+
+      <!-- On tap -->
+      <section style="display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 28px">On tap</h2><span style="font-size: 13px; color: #5B5853">Updated from Untappd · 2 days ago</span></div>
+        <div style="overflow-x: auto; border: 1px solid #E8E2D4; border-radius: 14px; background: #FFFFFF">
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 520px">
+            <thead><tr style="text-align: left; color: #5B5853; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em"><th style="padding: 12px 16px; border-bottom: 1px solid #E8E2D4; font-weight: 600">Beer</th><th style="padding: 12px 16px; border-bottom: 1px solid #E8E2D4; font-weight: 600">Style</th><th style="padding: 12px 16px; border-bottom: 1px solid #E8E2D4; font-weight: 600">ABV</th><th style="padding: 12px 16px; border-bottom: 1px solid #E8E2D4; font-weight: 600">Availability</th></tr></thead>
+            <tbody>
+              <tr><td style="padding: 12px 16px; border-bottom: 1px solid #F0EBDF; font-weight: 600">[Beer name]</td><td style="padding: 12px 16px; border-bottom: 1px solid #F0EBDF">Hazy IPA</td><td style="padding: 12px 16px; border-bottom: 1px solid #F0EBDF">6.5%</td><td style="padding: 12px 16px; border-bottom: 1px solid #F0EBDF"><span style="padding: 3px 9px; background: #EAAA00; border-radius: 999px; font-size: 12px; font-weight: 600">Year-round</span></td></tr>
+              <tr><td style="padding: 12px 16px; border-bottom: 1px solid #F0EBDF; font-weight: 600">[Beer name]</td><td style="padding: 12px 16px; border-bottom: 1px solid #F0EBDF">Pilsner</td><td style="padding: 12px 16px; border-bottom: 1px solid #F0EBDF">4.8%</td><td style="padding: 12px 16px; border-bottom: 1px solid #F0EBDF"><span style="padding: 3px 9px; background: #EAAA00; border-radius: 999px; font-size: 12px; font-weight: 600">Year-round</span></td></tr>
+              <tr><td style="padding: 12px 16px; border-bottom: 1px solid #F0EBDF; font-weight: 600">[Beer name]</td><td style="padding: 12px 16px; border-bottom: 1px solid #F0EBDF">Oktoberfest</td><td style="padding: 12px 16px; border-bottom: 1px solid #F0EBDF">5.6%</td><td style="padding: 12px 16px; border-bottom: 1px solid #F0EBDF"><span style="padding: 3px 9px; background: #F5EFE0; border-radius: 999px; font-size: 12px; font-weight: 600">Seasonal</span></td></tr>
+              <tr><td style="padding: 12px 16px; font-weight: 600">[Beer name]</td><td style="padding: 12px 16px">Imperial stout</td><td style="padding: 12px 16px">10.2%</td><td style="padding: 12px 16px"><span style="padding: 3px 9px; background: #F5EFE0; border-radius: 999px; font-size: 12px; font-weight: 600">Limited</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Reviews -->
+      <section style="display: flex; flex-direction: column; gap: 14px">
+        <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 28px">What people mention</h2>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap">
+          <span style="padding: 8px 14px; background: #141414; color: #FFFDF7; border-radius: 999px; font-size: 13px; font-weight: 600">Patio · 48 mentions</span>
+          <span style="padding: 8px 14px; background: #141414; color: #FFFDF7; border-radius: 999px; font-size: 13px; font-weight: 600">Friendly staff · 31</span>
+          <span style="padding: 8px 14px; background: #141414; color: #FFFDF7; border-radius: 999px; font-size: 13px; font-weight: 600">Dog-friendly · 27</span>
+          <span style="padding: 8px 14px; background: #141414; color: #FFFDF7; border-radius: 999px; font-size: 13px; font-weight: 600">Food trucks · 19</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px">
+          <blockquote style="margin: 0; padding: 18px; background: #FFFFFF; border: 1px solid #E8E2D4; border-radius: 14px; font-size: 15px; line-height: 1.55"><p style="margin: 0 0 10px">[Review excerpt from Google or Yelp, attributed.]</p><footer style="font-size: 13px; color: #5B5853">— [Reviewer], Google · Sep 2026</footer></blockquote>
+          <blockquote style="margin: 0; padding: 18px; background: #FFFFFF; border: 1px solid #E8E2D4; border-radius: 14px; font-size: 15px; line-height: 1.55"><p style="margin: 0 0 10px">[Review excerpt from Google or Yelp, attributed.]</p><footer style="font-size: 13px; color: #5B5853">— [Reviewer], Yelp · Aug 2026</footer></blockquote>
+        </div>
+      </section>
+
+      <!-- Nearby -->
+      <section style="display: flex; flex-direction: column; gap: 14px">
+        <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 28px">Nearby breweries</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px">
+          <a href="City.dc.html" style="display: flex; flex-direction: column; gap: 8px"><div style="aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; background: #F5EFE0"><img src="/_blob/c9c69bbe3f499912bb9cb793afb1846c" alt="" style="width: 100%; height: 100%; object-fit: cover"></div><div style="font-weight: 600; font-size: 15px">Brewer's Alley</div><div style="font-size: 13px; color: #5B5853">0.3 mi · Open until 11 PM</div></a>
+          <a href="City.dc.html" style="display: flex; flex-direction: column; gap: 8px"><div style="aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; background: #F5EFE0"><img src="/_blob/30ab7564b560e43bbf6147d727b3c84f" alt="" style="width: 100%; height: 100%; object-fit: cover"></div><div style="font-weight: 600; font-size: 15px">Idiom Brewing</div><div style="font-size: 13px; color: #5B5853">0.5 mi · Open until 9 PM</div></a>
+          <a href="City.dc.html" style="display: flex; flex-direction: column; gap: 8px"><div style="aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; background: #F5EFE0"><img src="/_blob/ff0a410cd575871c3f9625505681295d" alt="" style="width: 100%; height: 100%; object-fit: cover"></div><div style="font-weight: 600; font-size: 15px">Olde Mother Brewing</div><div style="font-size: 13px; color: #5B5853">0.6 mi · Closed</div></a>
+        </div>
+      </section>
+    </div>
+
+    <!-- sticky rail -->
+    <aside style="flex: 1 1 340px; min-width: 0; max-width: 380px; position: sticky; top: 24px; display: flex; flex-direction: column; gap: 16px">
+      <div style="background: #FFFFFF; border: 1px solid #E8E2D4; border-radius: 16px; overflow: hidden">
+        <div style="height: 180px; background: #ECE6D6; position: relative">
+          <svg viewBox="0 0 380 180" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%"><rect width="380" height="180" fill="#ECE6D6"></rect><path d="M0 60 L380 50 M0 130 L380 120 M120 0 L130 180 M260 0 L250 180" stroke="#FFFDF7" stroke-width="8"></path><path d="M190 108 C190 108 172 86 172 74 A18 18 0 0 1 208 74 C208 86 190 108 190 108Z" fill="#B3121B"></path><circle cx="190" cy="74" r="7" fill="#EAAA00"></circle></svg>
+        </div>
+        <div style="padding: 18px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; flex-direction: column; gap: 2px"><div style="font-weight: 600; font-size: 15px">400 Sagner Ave</div><div style="font-size: 14px; color: #5B5853">Frederick, MD 21701</div></div>
+          <a href="Brewery.dc.html" style="font-size: 14px; font-weight: 600; color: #B3121B">(301) 555-0100</a>
+          <div style="border-top: 1px solid #E8E2D4; padding-top: 14px; display: flex; flex-direction: column; gap: 6px; font-size: 14px">
+            <div style="display: flex; justify-content: space-between"><span style="color: #5B5853">Mon</span><span>Closed</span></div>
+            <div style="display: flex; justify-content: space-between"><span style="color: #5B5853">Tue</span><span style="font-weight: 600">4:00 – 10:00 PM</span></div>
+            <div style="display: flex; justify-content: space-between"><span style="color: #5B5853">Wed</span><span>4:00 – 10:00 PM</span></div>
+            <div style="display: flex; justify-content: space-between"><span style="color: #5B5853">Thu</span><span>4:00 – 10:00 PM</span></div>
+            <div style="display: flex; justify-content: space-between"><span style="color: #5B5853">Fri</span><span>12:00 – 11:00 PM</span></div>
+            <div style="display: flex; justify-content: space-between"><span style="color: #5B5853">Sat</span><span>12:00 – 11:00 PM</span></div>
+            <div style="display: flex; justify-content: space-between"><span style="color: #5B5853">Sun</span><span>12:00 – 8:00 PM</span></div>
+          </div>
+          <div style="font-size: 12px; color: #5B5853">Hours verified Oct 20, 2026 · <a href="Brewery.dc.html" style="color: #B3121B; font-weight: 600">Report a change</a></div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px">
+        <a href="Brewery.dc.html" aria-label="Instagram" style="flex: 1; height: 44px; border: 1.5px solid #D9D3C5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">Instagram</a>
+        <a href="Brewery.dc.html" aria-label="Facebook" style="flex: 1; height: 44px; border: 1.5px solid #D9D3C5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">Facebook</a>
+        <a href="Brewery.dc.html" aria-label="Untappd" style="flex: 1; height: 44px; border: 1.5px solid #D9D3C5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">Untappd</a>
+      </div>
+      <div style="padding: 16px; background: #F5EFE0; border-radius: 14px; font-size: 13px; color: #5B5853; line-height: 1.5">Ad slot · 300×250 · reserved height so nothing shifts when it loads</div>
+    </aside>
+  </div>
+
+  <footer style="margin-top: auto; background: #141414; color: #FFFDF7">
+    <div style="height: 8px; display: grid; grid-template-columns: repeat(16, minmax(0, 1fr))"><div style="background:#EAAA00"></div><div style="background:#141414"></div><div style="background:#EAAA00"></div><div style="background:#141414"></div><div style="background:#FFFFFF"></div><div style="background:#E03A3E"></div><div style="background:#FFFFFF"></div><div style="background:#E03A3E"></div><div style="background:#EAAA00"></div><div style="background:#141414"></div><div style="background:#EAAA00"></div><div style="background:#141414"></div><div style="background:#FFFFFF"></div><div style="background:#E03A3E"></div><div style="background:#FFFFFF"></div><div style="background:#E03A3E"></div></div>
+    <div style="max-width: 1240px; margin: 0 auto; padding: 32px 24px; display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; font-size: 14px; color: rgba(255,253,247,0.75)">
+      <span>© Maryland Brewery Directory</span>
+      <div style="display: flex; gap: 20px"><a href="Home.dc.html" style="color: rgba(255,253,247,0.75)">Cities</a><a href="Home.dc.html" style="color: rgba(255,253,247,0.75)">Counties</a><a href="Home.dc.html" style="color: rgba(255,253,247,0.75)">Amenities</a><a href="Home.dc.html" style="color: rgba(255,253,247,0.75)">Contact</a></div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2120}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

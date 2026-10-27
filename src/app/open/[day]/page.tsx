@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { getProcessedBreweryData } from '@/lib/db';
 import PageHero from '@/components/directory/PageHero';
 import Link from 'next/link';
+import { isOpenOnDay } from '@/lib/hours';
 import { slugify } from '@/lib/data-utils';
 
 export const revalidate = 3600; // ISR hourly
@@ -54,18 +55,11 @@ export async function generateStaticParams() {
   return DAYS.map((d) => ({ day: d }));
 }
 
-function isOpenOnDay(hours?: Record<string, string>, day?: string) {
-  if (!hours || !day) return false;
-  const h = hours[day as keyof typeof hours];
-  if (!h || /closed/i.test(h)) return false;
-  return true;
-}
-
 export default async function OpenDayPage({ params }: { params: Promise<{ day: string }> }) {
   const { day: dayParam } = await params;
   const day = (dayParam || '').toLowerCase();
   const processed = await getProcessedBreweryData();
-  const list = processed.breweries.filter((b) => isOpenOnDay(b.hours as any, day));
+  const list = processed.breweries.filter((b) => isOpenOnDay(b.hours, day));
 
   const groups = new Map<string, any[]>();
   for (const b of list) {

@@ -29,7 +29,7 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
-import { supabaseAdmin, DatabaseBrewery } from '../lib/supabase';
+import { supabaseAdmin, DatabaseBrewery } from '../src/lib/db/client';
 import { Builder, By, until, WebDriver } from 'selenium-webdriver';
 import * as chrome from 'selenium-webdriver/chrome';
 

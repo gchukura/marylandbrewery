@@ -4,7 +4,7 @@
  */
 
 import { unstable_cache } from 'next/cache';
-import { getBreweryDataFromSupabase } from './supabase-client';
+import { getBreweryDataFromSupabase } from './queries';
 import { 
   Brewery, 
   ProcessedBreweryData, 
@@ -14,7 +14,7 @@ import {
   Amenity,
   COMMON_AMENITIES,
   MARYLAND_COUNTIES
-} from '../src/types/brewery';
+} from '@/types/brewery';
 
 /**
  * Cached function to get all brewery data from Supabase

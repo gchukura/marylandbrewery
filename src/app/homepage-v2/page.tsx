@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { getProcessedBreweryData } from '../../../lib/brewery-data';
+import { getProcessedBreweryData } from '@/lib/db';
 import HeroV2 from '@/components/home-v2/HeroV2';
 import ValuePropsV2 from '@/components/home-v2/ValuePropsV2';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';

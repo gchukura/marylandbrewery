@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
-import { getAllCities, getBreweriesByCity, getProcessedBreweryData } from '../../../../../lib/brewery-data';
+import { getAllCities, getBreweriesByCity, getProcessedBreweryData } from '@/lib/db';
 import { slugify, deslugify } from '@/lib/data-utils';
 import { generateCityTitle, generateCityDescription } from '@/lib/seo-utils';
-import { getNeighborhoodsByCity } from '../../../../../lib/supabase-client';
+import { getNeighborhoodsByCity } from '@/lib/db';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';

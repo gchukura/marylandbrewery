@@ -4,8 +4,8 @@
  * Provides the same interface as google-sheets.ts but uses Supabase
  */
 
-import { supabase, supabaseAdmin, DatabaseBrewery, DatabaseBeer, DatabaseNewsletterSubscriber, DatabaseBreweryArticle, DatabaseNeighborhood } from './supabase';
-import { Brewery, Beer, SocialMedia, OperatingHours, Membership, ReviewThemes } from '../src/types/brewery';
+import { supabase, supabaseAdmin, DatabaseBrewery, DatabaseBeer, DatabaseNewsletterSubscriber, DatabaseBreweryArticle, DatabaseNeighborhood } from './client';
+import { Brewery, Beer, SocialMedia, OperatingHours, Membership, ReviewThemes } from '@/types/brewery';
 
 /**
  * Convert database brewery to application brewery type
@@ -929,3 +929,50 @@ export async function getNeighborhoodBySlug(slug: string): Promise<DatabaseNeigh
   }
 }
 
+
+/**
+ * Get slug, city and name for every neighborhood that has a city (used by the sitemap)
+ */
+export async function getNeighborhoodsForSitemap(): Promise<{ slug: string; city: string; name: string }[]> {
+  try {
+    const { data, error } = await supabase
+      .from('maryland_neighborhoods')
+      .select('slug, city, name')
+      .not('city', 'is', null)
+      .order('name', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching neighborhoods:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Failed to fetch neighborhoods:', error);
+    return [];
+  }
+}
+
+/**
+ * Get the beer list for one brewery
+ */
+export async function getBeersForBrewery(
+  breweryId: string
+): Promise<Pick<DatabaseBeer, 'name' | 'style' | 'abv' | 'availability'>[]> {
+  try {
+    const { data, error } = await supabase
+      .from('beers')
+      .select('name, style, abv, availability')
+      .eq('brewery_id', breweryId);
+
+    if (error) {
+      console.error('Error fetching beers for brewery:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Failed to fetch beers from Supabase:', error);
+    return [];
+  }
+}

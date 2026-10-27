@@ -1,0 +1,35 @@
+/* Maryland Brewery design tokens — paste into src/app/globals.css after @import "tailwindcss"; */
+@theme {
+  /* Flag colors */
+  --color-ink: #141414;          /* text, nav, dark surfaces */
+  --color-gold: #EAAA00;         /* flag gold — fills and "open now" only; always black text on it */
+  --color-flag-red: #E03A3E;     /* flag red — checker bands and motifs only, never text under 24px */
+  --color-brand-red: #B3121B;    /* buttons, links, active states (6.8:1 on paper) */
+  --color-cream: #F5EFE0;        /* section bands, chips */
+  --color-paper: #FFFDF7;        /* page background */
+  --color-line: #E8E2D4;         /* borders, dividers */
+  --color-line-strong: #D9D3C5;  /* input and chip borders */
+  --color-muted: #5B5853;        /* secondary text (7:1 on paper) */
+  --color-map: #ECE6D6;          /* map placeholder ground */
+
+  /* Type — wire to next/font variables in layout.tsx */
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  /* Radii */
+  --radius-chip: 999px;
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --radius-panel: 16px;
+  --radius-hero: 18px;
+}
+
+/* Scale used in the mockups
+   Display XL 64/1.0 Fraunces 700, -0.015em  (home hero)
+   Display L  44/1.05 Fraunces 700, -0.01em  (page h1)
+   Display M  36/1.1 Fraunces 600             (section h2, home)
+   Display S  28/1.15 Fraunces 600            (section h2, detail pages)
+   Card title 20–22/1.15 Fraunces 600
+   Body L 17–19/1.55 Inter 400; Body 15–16/1.55; Small 13–14; Eyebrow 12–13 600 uppercase 0.14em
+   Content width: max-width 1240px, 24px gutter. Card image ratio 4:3.
+   Checker band: 8px tall (6px on phone), 16 cells: ink/gold x2, flag-red/white x2, repeated. */

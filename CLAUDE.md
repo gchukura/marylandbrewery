@@ -36,9 +36,10 @@ The root README.md and the many root-level *.md notes are outdated; trust this f
 These describe the code as of 2026-10-27. Fix them in their own PRs, not incidentally.
 - `src/app/api/contact/route.ts` still appends to a Google Sheet via `googleapis`.
   `lib/archived/google-sheets.ts` is the retired Sheets layer.
-- No `/neighborhoods` route yet; neighborhood-like pages are under `/cities/near/[slug]` and `/near/[slug]`.
-- `/best-breweries/{neighborhood}-{city}-md` neighborhood pages still render under `/best-breweries`
-  (they move to `/neighborhoods/[slug]` in the neighborhoods PR). The 5+ rule lives in `src/lib/best-breweries.ts`.
+- Neighborhood rules (radii, noindex, attraction filter) live in `src/lib/neighborhoods.ts`; the 5+
+  best-of rule lives in `src/lib/best-breweries.ts`. Old `{neighborhood}-{city}-md` URLs under
+  `/best-breweries`, `/best-breweries/near` and `/cities/near` redirect to `/neighborhoods/[slug]`.
+- `/near/[slug]` is attraction pages, not neighborhoods.
 - Redirects use `permanentRedirect()`, which sends 308 (Next.js's permanent redirect), not a literal 301.
 - `src/app/admin/sync` (admin UI) and `src/app/blog` still exist.
 - Fonts are Playfair Display + Source Sans 3 via `next/font/google` in `src/app/layout.tsx`;
@@ -46,7 +47,8 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
   are not yet in `globals.css`.
 - `tailwind.config.ts` exists but is not loaded (no `@config`).
 - Images are still in `public/` (`logos/`, `photos/`, `cities/`, `counties/`, `regions/`).
-- Shared helpers `src/lib/geo.ts`, `hours.ts`, `slug.ts`, `amenities.ts`, `seo/` do not exist yet;
+- `src/lib/geo.ts` exists; `hours.ts`, `slug.ts`, `amenities.ts`, `seo/` do not yet. Older distance code
+  in `data-utils.ts` and `db/` has not moved to `geo.ts`;
   related logic is spread across `src/lib/*-utils.ts` and root `lib/`.
 - About 190 `as any` casts remain in `src/` and `lib/`.
 

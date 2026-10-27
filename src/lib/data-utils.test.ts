@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { calculateDistance, deslugify, normalizeCountyName, slugify } from './data-utils';
+import { deslugify, normalizeCountyName, slugify } from './data-utils';
+import { calculateDistance } from './geo';
 
 describe('slugify', () => {
   it('lowercases, strips punctuation and collapses separators', () => {

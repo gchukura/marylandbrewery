@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities, getAllNeighborhoods } from '@/lib/db';
+import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities, getAllNeighborhoods, getAttractionBySlug } from '@/lib/db';
 import { slugify, deslugify, ALL_MD_COUNTIES, normalizeCountyName } from '../lib/data-utils';
 import { hasBestBreweriesPage } from '../lib/best-breweries';
 import { sortByDistance } from '../lib/geo';
@@ -200,12 +200,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  // Near attraction pages (only include if attractions exist with nearby breweries)
-  // This will be populated dynamically based on maryland_attractions table
-  // For now, we'll add a few known high-value ones
+  // Near attraction pages: a few known high-value ones, only if they exist in maryland_attractions
+  // (prompt 4 replaces this with the full list from the table)
   const highValueAttractions = ['deep-creek-lake', 'inner-harbor', 'national-aquarium', 'ocean-city-boardwalk'];
-  for (const attraction of highValueAttractions) {
-    urls.push({ url: `${BASE_URL}/near/${attraction}`, lastModified: lastMod, priority: 0.6 });
+  const existingAttractions = await Promise.all(highValueAttractions.map((slug) => getAttractionBySlug(slug)));
+  for (const attraction of existingAttractions) {
+    if (attraction) {
+      urls.push({ url: `${BASE_URL}/near/${attraction.slug}`, lastModified: lastMod, priority: 0.6 });
+    }
   }
 
   return urls;

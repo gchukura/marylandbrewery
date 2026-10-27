@@ -20,7 +20,7 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
-import { supabaseAdmin, DatabaseBrewery } from '../src/lib/db/client';
+import { supabaseAdmin, DatabaseBrewery } from '../../src/lib/db/client';
 
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error(

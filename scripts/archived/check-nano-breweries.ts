@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
-import { supabaseAdmin } from '../src/lib/db/client';
+import { supabaseAdmin } from '../../src/lib/db/client';
 
 async function checkNanoBreweries() {
   const { data: breweries } = await supabaseAdmin

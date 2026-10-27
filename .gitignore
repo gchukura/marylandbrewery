@@ -46,3 +46,14 @@ next-env.d.ts
 
 # OS
 Thumbs.db
+# Test output
+playwright-report/
+test-results/
+
+# Tooling
+.turbo/
+supabase/.temp/
+*.log
+
+# Data exports dropped in the repo root (e.g. Google Sheets CSV downloads)
+/*.csv

@@ -60,9 +60,7 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   const amenityLabel = normalizeAmenityLabel(amenity);
   const amenityKey = amenityLabel.toLowerCase();
 
-  const cityBreweries: any[] = (processed.byCity instanceof Map 
-    ? processed.byCity.get(cityKey)
-    : (processed.byCity as any)?.[cityKey]) || [];
+  const cityBreweries = processed.byCity.get(cityKey) || [];
   const breweries = cityBreweries.filter(
     (b: any) => ((b as any).amenities || (b as any).features || []).some((a: string) => a.toLowerCase().includes(amenityKey))
   );

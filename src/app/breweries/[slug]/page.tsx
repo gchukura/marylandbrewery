@@ -56,6 +56,7 @@ export async function generateMetadata({ params }: BreweryPageProps) {
     console.error(`Error fetching brewery data for metadata (${slug}):`, errorMessage);
     return {
       title: 'Brewery Not Found',
+      robots: { index: false, follow: false },
       description: 'The requested brewery could not be found.',
     };
   }
@@ -67,6 +68,7 @@ export async function generateMetadata({ params }: BreweryPageProps) {
   if (!brewery) {
     return {
       title: 'Brewery Not Found',
+      robots: { index: false, follow: false },
       description: 'The requested brewery could not be found.',
     };
   }

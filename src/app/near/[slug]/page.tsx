@@ -32,6 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!attraction) {
     return {
       title: 'Attraction Not Found',
+      robots: { index: false, follow: false },
     };
   }
 

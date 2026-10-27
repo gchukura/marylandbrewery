@@ -46,6 +46,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!slug) {
     return {
       title: 'Location Not Found',
+      robots: { index: false, follow: false },
     };
   }
 
@@ -101,6 +102,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   return {
     title: 'Location Not Found',
+    robots: { index: false, follow: false },
   };
 }
 

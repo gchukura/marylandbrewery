@@ -52,7 +52,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const data = await loadNeighborhood(slug);
-  if (!data) return { title: 'Neighborhood Not Found' };
+  if (!data) return { title: 'Neighborhood Not Found', robots: { index: false, follow: false } };
 
   const { neighborhood, city, breweries, nearestMiles } = data;
   const title = `Breweries near ${neighborhood.name}, ${city}, MD`;

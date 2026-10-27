@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Page Not Found',
+  robots: { index: false, follow: false },
   description: 'The page you are looking for could not be found. Explore Maryland breweries, browse by city, or use the interactive map.',
 };
 

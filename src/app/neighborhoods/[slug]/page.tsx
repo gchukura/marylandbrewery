@@ -8,7 +8,7 @@ import {
   getProcessedBreweryData,
 } from '@/lib/db';
 import type { Tables } from '@/lib/db';
-import { slugify } from '@/lib/slug';
+import { cityListingPath } from '@/lib/listing-links';
 import { milesToKm, sortByDistance } from '@/lib/geo';
 import {
   NEIGHBORHOOD_INDEX_RADIUS_MILES,
@@ -50,7 +50,8 @@ async function loadNeighborhood(slug: string) {
     processed.breweries
   );
   const nearestMiles = breweries[0]?.distance;
-  return { neighborhood, city: neighborhood.city, breweries, nearestMiles };
+  const cityPath = cityListingPath(processed.byCity, neighborhood.city);
+  return { neighborhood, city: neighborhood.city, cityPath, breweries, nearestMiles };
 }
 
 // Prerender the neighborhoods that are indexed; the rest render on first request.
@@ -100,8 +101,7 @@ export default async function NeighborhoodPage({
   const data = await loadNeighborhood(slug);
   if (!data) notFound();
 
-  const { neighborhood, city, breweries, nearestMiles } = data;
-  const citySlug = slugify(city);
+  const { neighborhood, city, cityPath, breweries, nearestMiles } = data;
   const withinIndexRadius = breweries.filter(
     (b) => b.distance <= NEIGHBORHOOD_INDEX_RADIUS_MILES
   ).length;
@@ -139,7 +139,7 @@ export default async function NeighborhoodPage({
         breadcrumbs={[
           { name: 'Home', path: '/' },
           { name: 'Cities', path: '/cities' },
-          { name: `${city}, MD`, path: `/cities/${citySlug}/breweries` },
+          ...(cityPath ? [{ name: `${city}, MD`, path: cityPath }] : []),
           { name: neighborhood.name, path: pagePath },
         ]}
         breweries={breweries}
@@ -153,17 +153,16 @@ export default async function NeighborhoodPage({
           latitude: neighborhood.latitude,
           longitude: neighborhood.longitude,
         }}
-        related={[
-          {
-            title: `More in ${city}`,
-            links: [
-              {
-                label: `All ${city} breweries`,
-                href: `/cities/${citySlug}/breweries`,
-              },
-            ],
-          },
-        ]}
+        related={
+          cityPath
+            ? [
+                {
+                  title: `More in ${city}`,
+                  links: [{ label: `All ${city} breweries`, href: cityPath }],
+                },
+              ]
+            : undefined
+        }
       >
         {attractions.length > 0 && (
           <section className="flex flex-col gap-4">

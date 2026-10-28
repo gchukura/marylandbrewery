@@ -4,6 +4,7 @@
  * the brand: the layout template adds " | Maryland Brewery".
  */
 import { MAX_PAGE_TITLE_LENGTH, pickDescription, pickTitle } from './metadata';
+import { neighborhoodPlace } from '@/lib/neighborhoods';
 
 export interface PageMeta {
   title: string;
@@ -133,19 +134,28 @@ export function bestBreweriesMeta(city: string, count: number): PageMeta {
 }
 
 export function neighborhoodMeta(neighborhood: string, city: string, count: number): PageMeta {
+  const place = neighborhoodPlace(neighborhood, city);
+  const short = neighborhoodPlace(shortName(neighborhood), city);
   return {
     title: pickTitle([
-      `Breweries near ${neighborhood}, ${city}`,
+      `Breweries near ${place}`,
       `Breweries near ${neighborhood}`,
       `Near ${neighborhood}`,
-      `Breweries near ${shortName(neighborhood)}, ${city}`,
+      `Breweries near ${short}`,
       `Breweries near ${shortName(neighborhood)}`,
       clipTitle(`Near ${shortName(neighborhood)}`),
     ]),
-    description: pickDescription([
-      `${breweries(count)} near ${neighborhood} in ${city}, Maryland, sorted by distance, plus parks and things to do nearby.`,
-      `${breweries(count)} near ${neighborhood}, ${city}, sorted by distance.`,
-    ]),
+    description: pickDescription(
+      place === neighborhood
+        ? [
+            `${breweries(count)} near ${neighborhood}, Maryland, sorted by distance, plus parks and things to do nearby.`,
+            `${breweries(count)} near ${neighborhood}, sorted by distance.`,
+          ]
+        : [
+            `${breweries(count)} near ${neighborhood} in ${city}, Maryland, sorted by distance, plus parks and things to do nearby.`,
+            `${breweries(count)} near ${neighborhood}, ${city}, sorted by distance.`,
+          ]
+    ),
   };
 }
 

@@ -12,6 +12,11 @@ export function neighborhoodPath(slug: string): string {
   return `/neighborhoods/${slug}`;
 }
 
+/** "Canton, Baltimore", or just "Gaithersburg" when the neighborhood is named after its city. */
+export function neighborhoodPlace(name: string, city: string): string {
+  return name.trim().toLowerCase() === city.trim().toLowerCase() ? name : `${name}, ${city}`;
+}
+
 /**
  * The slug the old sitemap gave a neighborhood under /best-breweries: "{slug}-{city}-md"
  * (e.g. "canton-baltimore-md"). Null when the row has no city.

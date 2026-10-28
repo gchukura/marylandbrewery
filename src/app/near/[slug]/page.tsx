@@ -1,22 +1,30 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 import { getIndexableAttractions, getProcessedBreweryData } from '@/lib/db';
 import { slugify } from '@/lib/slug';
 import { getAttractionBySlug } from '@/lib/db';
 
 import { buildMetadata } from '@/lib/seo/metadata';
-import { attractionMeta } from '@/lib/seo/page-meta';
+import { attractionMeta, countyLabel } from '@/lib/seo/page-meta';
+import { collectionPage } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
+import ListingPage from '@/components/listing/ListingPage';
 import { isIndexableAttraction } from '@/lib/attractions';
-import { calculateDistance } from '@/lib/geo';
+import { calculateDistance, sortByDistance } from '@/lib/geo';
+
+const NEARBY_MILES = 10;
 // Prerender the indexed attraction pages (the same list as the sitemap); others render on demand
 export async function generateStaticParams() {
   return (await getIndexableAttractions()).map((a) => ({ slug: a.slug }));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
   const { slug } = await params;
-  
+
   const attraction = await getAttractionBySlug(slug);
 
   if (!attraction) {
@@ -57,110 +65,88 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   });
 }
 
-function computeNearStats(breweries: any[]) {
-  const total = breweries.length;
-  const avgDistance = breweries.length > 0
-    ? (breweries.reduce((sum, b: any) => sum + (b.distance || 0), 0) / breweries.length).toFixed(1)
-    : '0.0';
-  const closest = breweries.length > 0 ? breweries[0].distance?.toFixed(1) || '0.0' : '0.0';
-  const farthest = breweries.length > 0 
-    ? breweries[breweries.length - 1].distance?.toFixed(1) || '0.0' 
-    : '0.0';
-
-  return [
-    { label: 'Nearby Breweries', value: total },
-    { label: 'Avg Distance', value: `${avgDistance} mi` },
-    { label: 'Closest', value: `${closest} mi` },
-    { label: 'Farthest', value: `${farthest} mi` },
-  ];
-}
-
-export default async function NearAttractionPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function NearAttractionPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
-  
   const attraction = await getAttractionBySlug(slug);
-
-  if (!attraction) {
-    notFound();
-  }
+  if (!attraction) notFound();
 
   const processed = await getProcessedBreweryData();
-  const nearbyBreweries = processed.breweries
-    .filter((brewery: any) => {
-      if (!brewery.latitude || !brewery.longitude) return false;
-      const distance = calculateDistance(
-        attraction.latitude,
-        attraction.longitude,
-        brewery.latitude,
-        brewery.longitude
-      );
-      return distance <= 10;
-    })
-    .map((brewery: any) => ({
-      ...brewery,
-      distance: calculateDistance(
-        attraction.latitude,
-        attraction.longitude,
-        brewery.latitude,
-        brewery.longitude
-      ),
-    }))
-    .sort((a: any, b: any) => a.distance - b.distance);
+  const origin = {
+    latitude: attraction.latitude,
+    longitude: attraction.longitude,
+  };
+  const nearby = sortByDistance(origin, processed.breweries).filter(
+    (b) => b.distance <= NEARBY_MILES
+  );
 
-  // Intro text
-  const introText = `Discover ${nearbyBreweries.length} craft breweries within 10 miles of ${attraction.name} in ${attraction.city || 'Maryland'}. Perfect for planning your visit to ${attraction.name} and exploring the local craft beer scene.`;
-
-  // Breadcrumbs
-  const breadcrumbs = [
-    { name: 'Maryland Breweries', url: '/', isActive: false },
-    { name: 'Near Attractions', url: '/near', isActive: false },
-    { name: attraction.name, url: `/near/${slug}`, isActive: true },
-  ];
-
-  // Stats
-  const stats = computeNearStats(nearbyBreweries);
-
-  // Content blocks
-  const contentBlocks = [
-    {
-      title: `About ${attraction.name}`,
-      content: attraction.description || `${attraction.name} is a popular ${attraction.type || 'attraction'} in ${attraction.city || 'Maryland'}.`,
-    },
-    {
-      title: 'Plan Your Visit',
-      content: `Combine your visit to ${attraction.name} with a brewery tour. The nearby breweries offer a great way to relax after exploring ${attraction.name}. Many breweries are within a short drive, making it easy to visit multiple locations in one day.`,
-    },
-  ];
-
-  // Related pages
-  const relatedPages = [
-    ...(attraction.city ? [{
-      title: `${attraction.city} Breweries`,
-      url: `/cities/${slugify(attraction.city)}/breweries`,
-    }] : []),
-    ...(attraction.county ? [{
-      title: `${attraction.county} Breweries`,
-      url: `/counties/${slugify(attraction.county)}/breweries`,
-    }] : []),
-    { title: 'Interactive Map', url: '/map' },
-    { title: 'Best Breweries', url: '/best-breweries' },
-  ];
-
+  const pagePath = `/near/${attraction.slug}`;
+  const title = `Breweries near ${attraction.name}`;
+  const nearest = nearby[0]?.distance;
   return (
-    <DirectoryPageTemplate
-      h1={`Breweries Near ${attraction.name}`}
-      introText={introText}
-      breadcrumbs={breadcrumbs}
-      breweries={nearbyBreweries}
-      stats={stats}
-      contentBlocks={contentBlocks}
-      relatedPages={relatedPages}
-      pageType="search"
-      showMap={true}
-      showStats={true}
-      showTable={true}
-      mapZoom={11}
-    />
+    <>
+      <JsonLd
+        data={collectionPage({
+          name: title,
+          path: pagePath,
+          breweries: nearby,
+        })}
+      />
+      <ListingPage
+        scope="neighborhood"
+        title={title}
+        breadcrumbs={[
+          { name: 'Home', path: '/' },
+          ...(attraction.city
+            ? [
+                {
+                  name: `${attraction.city}, MD`,
+                  path: `/cities/${slugify(attraction.city)}/breweries`,
+                },
+              ]
+            : []),
+          { name: attraction.name, path: pagePath },
+        ]}
+        breweries={nearby}
+        summary={
+          nearest === undefined
+            ? `No breweries within ${NEARBY_MILES} miles.`
+            : `${nearby.length} ${nearby.length === 1 ? 'brewery' : 'breweries'} within ${NEARBY_MILES} miles. The nearest is ${nearest.toFixed(1)} miles away.`
+        }
+        intro={
+          attraction.description ? (
+            <p className="m-0">{attraction.description}</p>
+          ) : undefined
+        }
+        origin={origin}
+        related={[
+          {
+            title: 'More nearby',
+            links: [
+              ...(attraction.city
+                ? [
+                    {
+                      label: `${attraction.city} breweries`,
+                      href: `/cities/${slugify(attraction.city)}/breweries`,
+                    },
+                  ]
+                : []),
+              ...(attraction.county
+                ? [
+                    {
+                      label: `${countyLabel(attraction.county)} breweries`,
+                      href: `/counties/${slugify(attraction.county)}/breweries`,
+                    },
+                  ]
+                : []),
+              { label: 'Brewery map', href: '/map' },
+            ],
+          },
+        ]}
+      />
+    </>
   );
 }
-

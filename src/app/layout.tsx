@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import { Fraunces, Inter } from "next/font/google";
-import ConditionalLayoutClient from "@/components/layout/ConditionalLayoutClient";
+import SiteHeader from "@/components/layout/SiteHeader";
+import SiteFooter from "@/components/layout/SiteFooter";
+import NewsletterSignup from "@/components/ui/NewsletterSignup";
 import AdSenseScript from "@/components/ads/AdSenseScript";
 import "./globals.css";
 
@@ -149,11 +151,14 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="msapplication-TileColor" content="#141414" />
       </head>
-      <body className="min-h-screen bg-paper font-sans text-ink antialiased">
+      <body className="flex min-h-screen flex-col bg-paper font-sans text-ink antialiased">
         <AdSenseScript />
-        <ConditionalLayoutClient>
+        <SiteHeader />
+        <main id="main" className="flex min-h-0 flex-1 flex-col">
           {children}
-        </ConditionalLayoutClient>
+        </main>
+        <NewsletterSignup />
+        <SiteFooter />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

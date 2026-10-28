@@ -18,10 +18,24 @@ import {
 import { sortByDistance } from '@/lib/geo';
 import { isIndexableNeighborhood, neighborhoodPath } from '@/lib/neighborhoods';
 import { countyLabel, typePlural } from '@/lib/seo/page-meta';
-import { slugify } from '@/lib/slug';
+import { deslugify, slugify } from '@/lib/slug';
 import type { RelatedGroup } from '@/components/listing/RelatedLinks';
 
 type Link = RelatedGroup['links'][number];
+
+/**
+ * /cities/{city}/breweries for a city that has a listing, else null. Neighborhoods and attractions
+ * carry the city from their own tables, which includes towns with no breweries (their page 404s).
+ */
+export function cityListingPath(
+  byCity: Map<string, Brewery[]>,
+  city: string | null | undefined
+): string | null {
+  if (!city) return null;
+  const slug = slugify(city);
+  // Same lookup as the city page: getBreweriesByCity(deslugify(slug))
+  return byCity.has(deslugify(slug).toLowerCase()) ? `/cities/${slug}/breweries` : null;
+}
 
 /** Group by a key, with counts, largest first. */
 function counted(

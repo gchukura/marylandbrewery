@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { getAllCities, getBreweriesByCity, getProcessedBreweryData } from '@/lib/db';
 import { slugify, deslugify } from '@/lib/slug';
-import { generateCityTitle, generateCityDescription } from '@/lib/seo-utils';
 import { getNeighborhoodsByCity } from '@/lib/db';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
@@ -10,6 +9,8 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import '@/components/home-v2/styles.css';
 import CityBreweriesMapClient from './CityBreweriesMapClient';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { cityMeta } from '@/lib/seo/page-meta';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 // Build all city pages (no limit)
@@ -40,46 +41,9 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   const breweries = await getBreweriesByCity(cityName);
   const total = breweries.length;
 
-  let title: string;
-  let description: string;
-  
-  if (cityName.toLowerCase() === 'frederick') {
-    title = `Breweries in Frederick Maryland | ${total} Local Craft Breweries`;
-    description = `Explore ${total} breweries in Frederick, Maryland. Find the best craft beer spots in downtown Frederick and the surrounding area. Plan your Frederick brewery tour today!`;
-  } else if (cityName.toLowerCase() === 'ocean city') {
-    title = `Breweries in Ocean City Maryland | Beach Town Craft Beer Guide`;
-    description = `Discover breweries in Ocean City, Maryland and nearby beach towns. Perfect for your next vacation or weekend getaway. Find ${total} craft breweries in the Ocean City area.`;
-  } else {
-    title = generateCityTitle(cityName, total);
-    description = generateCityDescription(cityName, total, '');
-  }
-
-  return {
-    title,
-    description,
-    alternates: { canonical: `/cities/${city}/breweries` },
-    openGraph: {
-      title,
-      description,
-      url: `https://www.marylandbrewery.com/cities/${city}/breweries`,
-      siteName: 'Maryland Brewery Directory',
-      type: 'website',
-      images: [
-        {
-          url: '/opengraph-image',
-          width: 1200,
-          height: 630,
-          alt: `${cityName} Breweries`,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/opengraph-image'],
-    },
-  };
+  // Proper casing ("Havre de Grace") comes from the data, not the slug
+  const displayName = breweries[0]?.city ?? cityName;
+  return buildMetadata({ ...cityMeta(displayName, total), path: `/cities/${citySlug}/breweries` });
 }
 
 export default async function CityBreweriesPage({ params }: { params: Promise<{ city: string }> }) {

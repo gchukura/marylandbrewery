@@ -11,6 +11,8 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import '@/components/home-v2/styles.css';
 import CountyBreweriesMapClient from './CountyBreweriesMapClient';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { countyMeta } from '@/lib/seo/page-meta';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 export async function generateStaticParams() {
@@ -52,37 +54,7 @@ export async function generateMetadata({ params }: { params: Promise<{ county: s
   });
   const total = list.length;
 
-  const title = `${countyName} County Breweries | ${total} in MD`;
-  const description = total > 0
-    ? `Explore ${total} craft breweries across ${countyName} County, Maryland. From historic downtowns to scenic countryside, discover taprooms, brewpubs, and tasting rooms with detailed information, hours, and amenities.`
-    : `Discover Maryland's craft beer scene. While ${countyName} County doesn't have listed breweries yet, check nearby counties like Baltimore, Anne Arundel, and Montgomery for great craft beer options.`;
-
-  return {
-    title,
-    description,
-    alternates: { canonical: `/counties/${county}/breweries` },
-    openGraph: {
-      title,
-      description,
-      url: `https://www.marylandbrewery.com/counties/${county}/breweries`,
-      siteName: 'Maryland Brewery Directory',
-      type: 'website',
-      images: [
-        {
-          url: '/opengraph-image',
-          width: 1200,
-          height: 630,
-          alt: `${countyName} County Breweries`,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/opengraph-image'],
-    },
-  };
+  return buildMetadata({ ...countyMeta(countyName, total), path: `/counties/${slugify(countyName)}/breweries` });
 }
 
 export default async function CountyBreweriesPage({ params }: { params: Promise<{ county: string }> }) {

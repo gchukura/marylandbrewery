@@ -4,6 +4,7 @@
  */
 
 import { openingHoursSpecification } from '@/lib/hours';
+import { buildMetadata } from '@/lib/seo/metadata';
 import { Metadata } from 'next';
 
 // Maryland flag colors for consistent theming
@@ -27,82 +28,24 @@ export const MARYLAND_COLORS = {
 } as const;
 
 // Base metadata template for consistent SEO
+/**
+ * Metadata for static pages (FAQ, terms, ...). A thin wrapper over buildMetadata; the title
+ * must not include the brand, which the layout template adds.
+ */
 export function createPageMetadata({
   title,
   description,
   path,
   keywords = [],
-  image = '/opengraph-image',
-  type = 'website'
+  image,
 }: {
   title: string;
   description: string;
   path: string;
   keywords?: string[];
   image?: string;
-  type?: 'website' | 'article';
 }): Metadata {
-  const fullTitle = title.includes('Maryland Brewery Directory') 
-    ? title 
-    : `${title} | Maryland Brewery Directory`;
-
-  return {
-    title: fullTitle,
-    description,
-    keywords: [
-      'Maryland breweries',
-      'craft beer Maryland',
-      'Maryland brewery directory',
-      'breweries near me',
-      ...keywords
-    ],
-    authors: [{ name: 'Maryland Brewery Directory' }],
-    creator: 'Maryland Brewery Directory',
-    publisher: 'Maryland Brewery Directory',
-    formatDetection: {
-      email: false,
-      address: false,
-      telephone: false,
-    },
-    metadataBase: new URL('https://www.marylandbrewery.com'),
-    alternates: {
-      canonical: path,
-    },
-    openGraph: {
-      type,
-      locale: 'en_US',
-      url: `https://www.marylandbrewery.com${path}`,
-      siteName: 'Maryland Brewery Directory',
-      title: fullTitle,
-      description,
-      images: [
-        {
-          url: image,
-          width: 1200,
-          height: 630,
-          alt: `${title} - Maryland Brewery Directory`,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: fullTitle,
-      description,
-      images: [image],
-      creator: '@marylandbrewery',
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
+  return { ...buildMetadata({ title, description, path, image }), keywords };
 }
 
 // Generate breadcrumb structured data

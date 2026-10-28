@@ -4,38 +4,16 @@ import { getProcessedBreweryData } from '@/lib/db';
 import MapWithListClient from './MapWithListClient';
 import PageHero from '@/components/directory/PageHero';
 import { existsSync } from 'fs';
+import { buildMetadata } from '@/lib/seo/metadata';
 import { join } from 'path';
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: 'Brewery Map - Maryland Brewery Directory',
-  description: 'Explore all Maryland breweries on an interactive map with filterable directory. Search by name, city, type, or amenities to find the perfect brewery. Discover taprooms, brewpubs, and microbreweries across Baltimore, Annapolis, Frederick, and more.',
-  alternates: {
-    canonical: '/map',
-  },
-  openGraph: {
-    title: 'Brewery Map - Maryland Brewery Directory',
-    description: 'Interactive map of all Maryland breweries. Find breweries near you and explore the craft beer scene across the state.',
-    url: 'https://www.marylandbrewery.com/map',
-    siteName: 'Maryland Brewery Directory',
-    type: 'website',
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: 'Maryland Brewery Directory - Brewery Map',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Brewery Map - Maryland Brewery Directory',
-    description: 'Interactive map of all Maryland breweries. Find breweries near you and explore the craft beer scene across the state.',
-    images: ['/opengraph-image'],
-  },
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Maryland Brewery Map",
+  description: "Every craft brewery in Maryland on one interactive map. Filter by amenity, see what's open and get directions.",
+  path: '/map',
+});
 
 export default async function MapPage() {
   const processed = await getProcessedBreweryData();

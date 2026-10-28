@@ -13,6 +13,8 @@ import {
   isListedAttraction,
   neighborhoodPath,
 } from '@/lib/neighborhoods';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { neighborhoodMeta } from '@/lib/seo/page-meta';
 import CityBreweriesMapClient from '../../cities/[city]/breweries/CityBreweriesMapClient';
 
 const ATTRACTION_LIMIT = 6;
@@ -50,25 +52,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!data) return { title: 'Neighborhood Not Found', robots: { index: false, follow: false } };
 
   const { neighborhood, city, breweries, nearestMiles } = data;
-  const title = `Breweries near ${neighborhood.name}, ${city}, MD`;
-  const description = `${breweries.length} craft ${breweries.length === 1 ? 'brewery' : 'breweries'} near ${neighborhood.name} in ${city}, Maryland, sorted by distance, plus things to do nearby.`;
-  const path = neighborhoodPath(neighborhood.slug);
-
-  return {
-    title,
-    description,
-    alternates: { canonical: path },
+  return buildMetadata({
+    ...neighborhoodMeta(neighborhood.name, city, breweries.length),
+    path: neighborhoodPath(neighborhood.slug),
     // Thin pages: only index neighborhoods with a brewery within 3 miles
-    robots: isIndexableNeighborhood(nearestMiles) ? undefined : { index: false, follow: true },
-    openGraph: {
-      title,
-      description,
-      url: `https://www.marylandbrewery.com${path}`,
-      siteName: 'Maryland Brewery Directory',
-      type: 'website',
-      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: title }],
-    },
-  };
+    noindex: !isIndexableNeighborhood(nearestMiles),
+  });
 }
 
 export default async function NeighborhoodPage({ params }: { params: Promise<{ slug: string }> }) {

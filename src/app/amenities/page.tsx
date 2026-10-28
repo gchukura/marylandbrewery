@@ -6,36 +6,14 @@ import { ChevronRight, Dog, Music, Utensils, TreePine, Gamepad2, Wifi, Car, Cale
 import Image from 'next/image';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import { buildMetadata } from '@/lib/seo/metadata';
 import '@/components/home-v2/styles.css';
 
-export const metadata: Metadata = {
-  title: 'Brewery Amenities & Features - Maryland Brewery Directory',
-  description: 'Browse Maryland breweries by amenities and features. Find dog-friendly breweries, outdoor seating, live music, food options, tours, and more across the state.',
-  alternates: {
-    canonical: '/amenities',
-  },
-  openGraph: {
-    title: 'Brewery Amenities & Features - Maryland Brewery Directory',
-    description: 'Browse Maryland breweries by amenities and features. Find dog-friendly breweries, outdoor seating, live music, and more.',
-    url: 'https://www.marylandbrewery.com/amenities',
-    siteName: 'Maryland Brewery Directory',
-    type: 'website',
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: 'Maryland Brewery Directory - Amenities',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Brewery Amenities & Features - Maryland Brewery Directory',
-    description: 'Browse Maryland breweries by amenities and features.',
-    images: ['/opengraph-image'],
-  },
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Maryland Breweries by Amenity",
+  description: "Find Maryland breweries with a full kitchen, outdoor seating, beer to go, parking, tours and more, with how many offer each.",
+  path: '/amenities',
+});
 
 // Amenity definitions with descriptions - keyed by lowercase amenity name
 const AMENITY_DEFINITIONS: Record<string, {

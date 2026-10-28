@@ -10,6 +10,8 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import '@/components/home-v2/styles.css';
 import AmenityBreweriesMapClient from './AmenityBreweriesMapClient';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { amenityMeta } from '@/lib/seo/page-meta';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 export async function generateStaticParams() {
@@ -30,37 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ amenity: 
   const breweries = processed.breweries.filter((b) => hasAmenity(b, amenityDef));
   const displayName = amenityDef.label;
 
-  const title = `${displayName} Breweries in Maryland | ${breweries.length} Local Craft Breweries`;
-  const description = breweries.length > 0
-    ? `Explore ${breweries.length} breweries with ${displayName.toLowerCase()} across Maryland. Find the best ${displayName.toLowerCase()} breweries in Baltimore, Annapolis, Frederick, and more with hours, locations, and visitor information.`
-    : `Discover Maryland's craft beer scene. While breweries with ${displayName.toLowerCase()} aren't listed yet, check other amenities for great craft beer options.`;
-
-  return {
-    title,
-    description,
-    alternates: { canonical: `/amenities/${amenity}` },
-    openGraph: {
-      title,
-      description,
-      url: `https://www.marylandbrewery.com/amenities/${amenity}`,
-      siteName: 'Maryland Brewery Directory',
-      type: 'website',
-      images: [
-        {
-          url: '/opengraph-image',
-          width: 1200,
-          height: 630,
-          alt: `${displayName} Breweries in Maryland`,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/opengraph-image'],
-    },
-  };
+  return buildMetadata({ ...amenityMeta(displayName, breweries.length), path: `/amenities/${amenityDef.slug}` });
 }
 
 export default async function AmenityPage({ params }: { params: Promise<{ amenity: string }> }) {

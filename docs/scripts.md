@@ -299,3 +299,11 @@ With `GOOGLE_MAPS_API_KEY` set, it also asks Google Places for each brewery's `b
 
 `data:logos` uses the same name check and skips a brewery's website when the page doesn't mention the brewery.
 
+### `npm run map:counties`
+
+File: `scripts/generate-county-map.ts`. Builds `src/components/home/maryland-counties.svg` (the homepage county map) from the US Census cartographic boundary file `cb_2023_us_county_500k` (public domain): downloads it into `scripts/output/census/` (gitignored) if missing, keeps Maryland (STATEFP 24, 24 shapes), simplifies it with mapshaper, projects it with Maryland State Plane parameters and fails if the result isn't 24 counties under 60 KB. Also writes an unsimplified `scripts/output/census/maryland-counties.geojson` for point-in-county lookups. Writes to Supabase: no.
+
+### `npm run home:blur`
+
+File: `scripts/generate-home-blur.ts`. After editing `HERO_PHOTOS` in `src/config/home.ts`, fetches each photo and writes its tiny blurred preview (`blurDataURL`) back into that file. Writes to Supabase: no.
+

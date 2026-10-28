@@ -47,7 +47,7 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
 - Design system is in place: tokens in `@theme` in `globals.css`, Fraunces + Inter via next/font
   (`font-display`, `font-sans`), shared UI in `src/components/ui/` (Button, Chip/FilterChip, StatusBadge,
   BreweryCard, BreweryListRow, Breadcrumbs, CheckerBand, SectionHeading, Logo), header/footer in
-  `src/components/layout/`. Listings and the brewery page use them; the home and static pages don't yet.
+  `src/components/layout/`. Listings, the brewery page and the homepage use them; the static pages don't yet.
 - Every brewery listing (cities, counties, regions, amenities, types, city x amenity, best-of, open now,
   neighborhoods, /near, /map) is `src/components/listing/ListingPage.tsx` (server) + `BreweryListMap.tsx`
   (client island). Filters live in the URL and run in the browser on the static list (`src/lib/listing.ts`);
@@ -56,6 +56,11 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
   `src/components/search/SearchCombobox.tsx`.
 - The brewery page (`src/app/breweries/[slug]/page.tsx`) is a server component; its derivations are in
   `src/lib/brewery-page.ts`, islands in `src/components/brewery/`. Saved breweries: `src/lib/saved.ts`, `/saved`.
+- Homepage: `src/app/page.tsx` (revalidate 300), hero photos in `src/config/home.ts` (`npm run home:blur` after
+  editing), county map `src/components/home/CountyMap.tsx` from `maryland-counties.svg` (`npm run map:counties`).
+  The phone tab bar (`src/components/layout/BottomNav.tsx`) is site-wide below 768px.
+- Tailwind v4: `row-span-*`/`col-span-*` set the whole `grid-row`/`grid-column` shorthand and can override a
+  `row-start-*` from another breakpoint; use `row-end-*` with `row-start-*` instead.
 - `cn()` is plain clsx (no tailwind-merge): never pass a class that conflicts with a component's base class;
   add a variant instead.
 - Brewery photos and logos are in Storage; `public/photos` and `public/logos` are deleted but still in git

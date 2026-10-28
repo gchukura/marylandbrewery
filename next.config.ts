@@ -6,6 +6,10 @@ const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
   : undefined;
 
 const nextConfig: NextConfig = {
+  // The homepage reads the county map SVG at render time (also during revalidation on Vercel)
+  outputFileTracingIncludes: {
+    '/': ['./src/components/home/maryland-counties.svg'],
+  },
   experimental: {
     staticGenerationRetryCount: 1, // Reduced from 3 to speed up builds
     largePageDataBytes: 512 * 1024, // 512KB (default is 128KB, but allow for larger pages)

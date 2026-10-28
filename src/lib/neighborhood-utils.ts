@@ -3,21 +3,29 @@ import { getAllNeighborhoods } from '@/lib/db';
 import { legacyNeighborhoodSlug } from '@/lib/neighborhoods';
 
 /**
- * Old URL slug -> /neighborhoods slug, built from every row: each neighborhood answers to its
- * own slug and to the "{neighborhood}-{city}-md" slug the old sitemap generated. Exact matches
- * only; anything else is not a neighborhood. Built once per request (a Map can't go in unstable_cache).
+ * Every neighborhood slug, and old "{neighborhood}-{city}-md" slug -> neighborhood slug. Exact
+ * matches only. Built once per request (a Map can't go in unstable_cache).
  */
-const legacyNeighborhoodIndex = cache(async (): Promise<Map<string, string>> => {
-  const index = new Map<string, string>();
+const neighborhoodSlugs = cache(async () => {
+  const slugs = new Set<string>();
+  const legacy = new Map<string, string>();
   for (const n of await getAllNeighborhoods()) {
-    index.set(n.slug, n.slug);
-    const legacy = legacyNeighborhoodSlug(n);
-    if (legacy) index.set(legacy, n.slug);
+    slugs.add(n.slug);
+    const old = legacyNeighborhoodSlug(n);
+    if (old) legacy.set(old, n.slug);
   }
-  return index;
+  return { slugs, legacy };
 });
 
-/** The neighborhood an old URL slug ("canton-baltimore-md" or "canton") refers to, or null. */
-export async function resolveLegacyNeighborhoodSlug(slug: string): Promise<string | null> {
-  return (await legacyNeighborhoodIndex()).get(slug) ?? null;
+/**
+ * The neighborhood an old URL slug refers to, or null. "canton-baltimore-md" always counts. A bare
+ * slug ("canton") counts only with `bareSlugs`: under /best-breweries a bare slug is a city, and
+ * 28 neighborhoods share their slug with a city (gaithersburg, westminster...).
+ */
+export async function resolveLegacyNeighborhoodSlug(
+  slug: string,
+  { bareSlugs = false }: { bareSlugs?: boolean } = {}
+): Promise<string | null> {
+  const { slugs, legacy } = await neighborhoodSlugs();
+  return legacy.get(slug) ?? (bareSlugs && slugs.has(slug) ? slug : null);
 }

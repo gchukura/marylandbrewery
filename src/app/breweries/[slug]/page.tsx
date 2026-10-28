@@ -12,7 +12,10 @@ import {
   getProcessedBreweryData,
   throwDuringBuild,
 } from '@/lib/db';
-import { NEIGHBORHOOD_INDEX_RADIUS_MILES, neighborhoodPath } from '@/lib/neighborhoods';
+import {
+  NEIGHBORHOOD_INDEX_RADIUS_MILES,
+  neighborhoodPath,
+} from '@/lib/neighborhoods';
 import type { Brewery } from '@/types/brewery';
 import { amenityForValue, amenityPath } from '@/lib/amenities';
 import {
@@ -159,7 +162,13 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
   const brewery = await getBreweryBySlug(listed.slug);
   if (!brewery?.name || !brewery.city) notFound();
 
-  const [processed, reviewData, articles, indexableNeighborhoods, indexableAttractions] = await Promise.all([
+  const [
+    processed,
+    reviewData,
+    articles,
+    indexableNeighborhoods,
+    indexableAttractions,
+  ] = await Promise.all([
     getProcessedBreweryData(),
     getBreweryReviews(brewery.id, 20, 0),
     getBreweryArticles(brewery.id, 5),
@@ -220,7 +229,16 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
   ]
     .filter(Boolean)
     .join(', ');
-  const updated = monthYear(brewery.lastUpdated);
+  // Only a real check counts: updated_at moves on every bulk data fix
+  const hoursChecked = monthYear(brewery.hoursVerifiedAt);
+  // Beer rows are imported once and not refreshed, so they're dated and sent to the live tap list
+  const beersAsOf = monthYear(
+    beers
+      .map((b) => b.updatedAt ?? '')
+      .sort()
+      .at(-1)
+  );
+  const untappd = externalUrl(brewery.socialMedia?.untappd);
 
   return (
     <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-7 px-4 pb-16 pt-6 sm:px-6">
@@ -262,13 +280,19 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
               {[
                 headline.type,
                 <span key="place">
-                  <Link href={`/cities/${citySlug}/breweries`} className="text-muted underline decoration-line-strong underline-offset-2 hover:text-brand-red">
+                  <Link
+                    href={`/cities/${citySlug}/breweries`}
+                    className="text-muted underline decoration-line-strong underline-offset-2 hover:text-brand-red"
+                  >
                     {brewery.city}
                   </Link>
                   {brewery.county && (
                     <>
                       ,{' '}
-                      <Link href={`/counties/${slugify(brewery.county)}/breweries`} className="text-muted underline decoration-line-strong underline-offset-2 hover:text-brand-red">
+                      <Link
+                        href={`/counties/${slugify(brewery.county)}/breweries`}
+                        className="text-muted underline decoration-line-strong underline-offset-2 hover:text-brand-red"
+                      >
                         {countyLabel(brewery.county)}
                       </Link>
                     </>
@@ -399,7 +423,9 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
                 </tbody>
               </table>
               <p className="m-0 text-[13px] text-muted">
-                {updated && <>Details updated {updated} · </>}
+                {hoursChecked && (
+                  <>Hours checked against Google {hoursChecked} · </>
+                )}
                 <Link
                   href={`/contact?brewery=${brewery.slug}`}
                   className="font-semibold text-brand-red hover:text-brand-red-dark"
@@ -472,7 +498,7 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
         )}
 
         {beers.length > 0 && (
-          <Section id="on-tap" title="On tap">
+          <Section id="beers" title="Beers">
             <div className="overflow-x-auto rounded-card border border-line bg-white">
               <table className="table w-full min-w-[520px] border-collapse text-left text-[15px]">
                 <thead className="bg-cream text-[12px] uppercase tracking-[0.08em] text-muted">
@@ -514,6 +540,40 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
                 </tbody>
               </table>
             </div>
+            <p className="m-0 text-[13px] text-muted">
+              {beersAsOf
+                ? `Lineup as of ${beersAsOf}; it may have changed.`
+                : 'This lineup may have changed.'}
+              {untappd && (
+                <>
+                  {' '}
+                  <a
+                    href={untappd}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-brand-red hover:text-brand-red-dark"
+                  >
+                    See what&apos;s pouring now on Untappd →
+                  </a>
+                </>
+              )}
+            </p>
+          </Section>
+        )}
+
+        {beers.length === 0 && untappd && (
+          <Section id="on-tap" title="On tap">
+            <p className="m-0 text-[15px] text-ink">
+              {brewery.name} keeps its current tap list on Untappd.{' '}
+              <a
+                href={untappd}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-brand-red hover:text-brand-red-dark"
+              >
+                See what&apos;s on tap →
+              </a>
+            </p>
           </Section>
         )}
 
@@ -600,24 +660,53 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
           <Section id="around" title={`Around ${brewery.name}`}>
             <div className="grid gap-6 sm:grid-cols-2">
               {[
-                { title: 'Neighborhoods nearby', items: aroundNeighborhoods.map((n) => ({ label: n.name, href: neighborhoodPath(n.slug), distance: n.distance })), more: { label: 'All neighborhoods', href: '/neighborhoods' } },
-                { title: 'Things to do nearby', items: aroundAttractions.map((a) => ({ label: a.name, href: `/near/${a.slug}`, distance: a.distance })), more: { label: 'All things to do', href: '/near' } },
+                {
+                  title: 'Neighborhoods nearby',
+                  items: aroundNeighborhoods.map((n) => ({
+                    label: n.name,
+                    href: neighborhoodPath(n.slug),
+                    distance: n.distance,
+                  })),
+                  more: { label: 'All neighborhoods', href: '/neighborhoods' },
+                },
+                {
+                  title: 'Things to do nearby',
+                  items: aroundAttractions.map((a) => ({
+                    label: a.name,
+                    href: `/near/${a.slug}`,
+                    distance: a.distance,
+                  })),
+                  more: { label: 'All things to do', href: '/near' },
+                },
               ]
                 .filter((g) => g.items.length > 0)
                 .map((g) => (
                   <div key={g.title} className="flex flex-col gap-2">
-                    <h3 className="m-0 text-[13px] font-semibold uppercase tracking-[0.12em] text-muted">{g.title}</h3>
+                    <h3 className="m-0 text-[13px] font-semibold uppercase tracking-[0.12em] text-muted">
+                      {g.title}
+                    </h3>
                     <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-[15px]">
                       {g.items.map((item) => (
-                        <li key={item.href} className="flex justify-between gap-3">
-                          <Link href={item.href} className="text-ink hover:text-brand-red">
+                        <li
+                          key={item.href}
+                          className="flex justify-between gap-3"
+                        >
+                          <Link
+                            href={item.href}
+                            className="text-ink hover:text-brand-red"
+                          >
                             {item.label}
                           </Link>
-                          <span className="shrink-0 text-muted">{item.distance.toFixed(1)} mi</span>
+                          <span className="shrink-0 text-muted">
+                            {item.distance.toFixed(1)} mi
+                          </span>
                         </li>
                       ))}
                     </ul>
-                    <Link href={g.more.href} className="text-[13px] font-semibold text-brand-red hover:text-brand-red-dark">
+                    <Link
+                      href={g.more.href}
+                      className="text-[13px] font-semibold text-brand-red hover:text-brand-red-dark"
+                    >
                       {g.more.label} →
                     </Link>
                   </div>

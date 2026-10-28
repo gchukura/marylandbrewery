@@ -35,6 +35,7 @@
     "data:photos": "tsx scripts/download-google-photos.ts",
     "data:geocode": "tsx scripts/geocode-breweries.ts",
     "data:verify-coordinates": "tsx scripts/verify-brewery-coordinates.ts",
+    "data:verify-hours": "tsx scripts/verify-hours.ts",
     "data:enrich": "tsx scripts/enrich-supabase-breweries.ts",
     "data:enrich:amenities": "tsx scripts/enrich-amenities-from-reviews.ts",
     "data:attractions": "tsx scripts/fetch-maryland-attractions.ts",

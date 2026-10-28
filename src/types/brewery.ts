@@ -23,6 +23,8 @@ export interface Beer {
   style: string;
   abv: string;
   availability: string;
+  /** When this row was last written (beer lists aren't refreshed automatically) */
+  updatedAt?: string;
 }
 
 /**
@@ -162,6 +164,8 @@ export interface Brewery {
   // Metadata
   openedDate?: string;
   lastUpdated: string;
+  /** When data:verify-hours last found these hours matching Google's (cleared when hours change) */
+  hoursVerifiedAt?: string;
   
   // Google Reviews summary
   googleRating?: number;

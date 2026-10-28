@@ -11,6 +11,7 @@ const COLUMNS = [
       { label: 'Counties', href: '/counties' },
       { label: 'Regions', href: '/region' },
       { label: 'Brewery types', href: '/type' },
+      { label: 'Saved breweries', href: '/saved' },
     ],
   },
   {
@@ -50,14 +51,23 @@ export default function SiteFooter() {
           <div className="col-span-2 flex flex-col gap-3">
             <Logo size="sm" tone="paper" />
             <p className="m-0 max-w-[320px] text-sm leading-[1.55] text-paper/70">
-              An independent directory of Maryland&apos;s breweries, taprooms, cideries and meaderies.
+              An independent directory of Maryland&apos;s breweries, taprooms,
+              cideries and meaderies.
             </p>
           </div>
           {COLUMNS.map((column) => (
-            <nav key={column.title} aria-label={column.title} className="flex flex-col gap-2 text-sm">
+            <nav
+              key={column.title}
+              aria-label={column.title}
+              className="flex flex-col gap-2 text-sm"
+            >
               <div className="mb-1 font-semibold text-gold">{column.title}</div>
               {column.links.map((link) => (
-                <Link key={link.href} href={link.href} className="text-paper/80 hover:text-gold">
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-paper/80 hover:text-gold"
+                >
                   {link.label}
                 </Link>
               ))}
@@ -70,7 +80,10 @@ export default function SiteFooter() {
             <ul className="flex gap-5">
               {LEGAL.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="text-paper/70 hover:text-gold">
+                  <Link
+                    href={link.href}
+                    className="text-paper/70 hover:text-gold"
+                  >
                     {link.label}
                   </Link>
                 </li>

@@ -38,12 +38,8 @@ export default function Footer() {
           {/* Brewery Enthusiasts Column */}
           <div>
             <h3 
-              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider"
-              style={{ 
-                fontFamily: "'Source Sans 3', sans-serif",
-                letterSpacing: '0.05em',
-                fontSize: '0.875rem'
-              }}
+              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider" style={{ letterSpacing: '0.05em',
+                fontSize: '0.875rem' }}
             >
               Brewery Enthusiasts
             </h3>
@@ -52,12 +48,8 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link 
                     href={link.href} 
-                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm"
-                    style={{ 
-                      fontFamily: "'Source Sans 3', sans-serif",
-                      letterSpacing: 'normal',
-                      fontSize: '0.875rem'
-                    }}
+                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm" style={{ letterSpacing: 'normal',
+                      fontSize: '0.875rem' }}
                   >
                     {link.name}
                   </Link>
@@ -69,12 +61,8 @@ export default function Footer() {
           {/* Brewery Owners Column */}
           <div>
             <h3 
-              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider"
-              style={{ 
-                fontFamily: "'Source Sans 3', sans-serif",
-                letterSpacing: '0.05em',
-                fontSize: '0.875rem'
-              }}
+              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider" style={{ letterSpacing: '0.05em',
+                fontSize: '0.875rem' }}
             >
               Brewery Owners
             </h3>
@@ -83,12 +71,8 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link 
                     href={link.href} 
-                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm"
-                    style={{ 
-                      fontFamily: "'Source Sans 3', sans-serif",
-                      letterSpacing: 'normal',
-                      fontSize: '0.875rem'
-                    }}
+                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm" style={{ letterSpacing: 'normal',
+                      fontSize: '0.875rem' }}
                   >
                     {link.name}
                   </Link>
@@ -100,12 +84,8 @@ export default function Footer() {
           {/* About Column */}
           <div>
             <h3 
-              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider"
-              style={{ 
-                fontFamily: "'Source Sans 3', sans-serif",
-                letterSpacing: '0.05em',
-                fontSize: '0.875rem'
-              }}
+              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider" style={{ letterSpacing: '0.05em',
+                fontSize: '0.875rem' }}
             >
               About
             </h3>
@@ -114,12 +94,8 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link 
                     href={link.href} 
-                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm"
-                    style={{ 
-                      fontFamily: "'Source Sans 3', sans-serif",
-                      letterSpacing: 'normal',
-                      fontSize: '0.875rem'
-                    }}
+                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm" style={{ letterSpacing: 'normal',
+                      fontSize: '0.875rem' }}
                   >
                     {link.name}
                   </Link>
@@ -132,12 +108,8 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-[#2A2A2A] pt-4">
           <div 
-            className="text-xs text-[#9CA3AF]"
-            style={{ 
-              fontFamily: "'Source Sans 3', sans-serif",
-              letterSpacing: 'normal',
-              fontSize: '0.75rem'
-            }}
+            className="text-xs text-[#9CA3AF]" style={{ letterSpacing: 'normal',
+              fontSize: '0.75rem' }}
           >
             <div className="mb-1">
               MarylandBrewery.com is a copyright © {currentYear} of <Link href="https://bluestonebrands.com" className="text-white underline hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">BluestoneBrands.com</Link>

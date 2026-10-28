@@ -13,20 +13,17 @@ export default function NotFound() {
       {/* Large 404 */}
       <div className="text-center mb-8">
         <h1 
-          className="text-8xl md:text-9xl font-bold text-[#9B2335] mb-4"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          className="font-display text-8xl md:text-9xl font-bold text-[#9B2335] mb-4"
         >
           404
         </h1>
         <h2 
-          className="text-2xl md:text-3xl font-semibold text-[#1C1C1C] mb-4"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          className="font-display text-2xl md:text-3xl font-semibold text-[#1C1C1C] mb-4"
         >
           Page Not Found
         </h2>
         <p 
           className="text-lg text-[#6B6B6B] max-w-md mx-auto mb-8"
-          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
         >
           Looks like this page wandered off to the taproom. Let's get you back on track to discover Maryland's best craft breweries.
         </p>
@@ -37,14 +34,12 @@ export default function NotFound() {
         <Link
           href="/"
           className="inline-flex items-center justify-center px-6 py-3 bg-[#9B2335] text-white font-medium rounded-md hover:bg-[#7A1C2A] transition-colors"
-          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
         >
           Back to Homepage
         </Link>
         <Link
           href="/map"
           className="inline-flex items-center justify-center px-6 py-3 border-2 border-[#9B2335] text-[#9B2335] font-medium rounded-md hover:bg-[#9B2335] hover:text-white transition-colors"
-          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
         >
           Explore the Map
         </Link>
@@ -53,8 +48,7 @@ export default function NotFound() {
       {/* Popular Links */}
       <div className="w-full max-w-2xl">
         <h3 
-          className="text-lg font-semibold text-[#1C1C1C] text-center mb-6"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          className="font-display text-lg font-semibold text-[#1C1C1C] text-center mb-6"
         >
           Popular Destinations
         </h3>
@@ -93,7 +87,6 @@ export default function NotFound() {
       {/* Search suggestion */}
       <p 
         className="mt-12 text-sm text-[#6B6B6B]"
-        style={{ fontFamily: "'Source Sans 3', sans-serif" }}
       >
         Looking for a specific brewery?{' '}
         <Link href="/map" className="text-[#9B2335] hover:underline">

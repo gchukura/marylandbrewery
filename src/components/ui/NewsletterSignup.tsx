@@ -47,7 +47,7 @@ export default function NewsletterSignup() {
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 font-display">
                 Thank you for subscribing!
               </h2>
-              <p className="text-body-large text-white/90 font-body">
+              <p className="text-body-large text-white/90 font-sans">
                 You'll receive updates about Maryland's craft beer scene.
               </p>
             </div>
@@ -66,14 +66,14 @@ export default function NewsletterSignup() {
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 font-display">
                 Stay Updated on Maryland's Craft Beer Scene
               </h2>
-              <p className="text-body-large text-white/90 font-body">
+              <p className="text-body-large text-white/90 font-sans">
                 Get the latest brewery news, events, and stories delivered to your inbox.
               </p>
             </div>
             
             <form onSubmit={handleSubmit} className="max-w-md mx-auto">
               {error && (
-                <div className="mb-4 p-4 bg-white/20 border border-white/30 text-white rounded-lg text-body font-body">
+                <div className="mb-4 p-4 bg-white/20 border border-white/30 text-white rounded-lg text-body font-sans">
                   {error}
                 </div>
               )}
@@ -86,7 +86,7 @@ export default function NewsletterSignup() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email address"
-                    className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-white/30 bg-white/90 text-[#1C1C1C] placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#D4A017] focus:border-[#D4A017] focus:bg-white text-body font-body disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-white/30 bg-white/90 text-[#1C1C1C] placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#D4A017] focus:border-[#D4A017] focus:bg-white text-body font-sans disabled:opacity-50 disabled:cursor-not-allowed"
                     required
                     disabled={isLoading}
                   />
@@ -94,7 +94,7 @@ export default function NewsletterSignup() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="bg-[#D4A017] hover:bg-[#B8870F] text-[#1C1C1C] font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-body font-body whitespace-nowrap"
+                  className="bg-[#D4A017] hover:bg-[#B8870F] text-[#1C1C1C] font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-body font-sans whitespace-nowrap"
                 >
                   {isLoading ? 'Subscribing...' : 'Subscribe'}
                 </button>

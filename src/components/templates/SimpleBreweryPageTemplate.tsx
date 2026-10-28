@@ -319,7 +319,7 @@ export default function SimpleBreweryPageTemplate({
             {/* Breadcrumb Navigation - Consistent with PageHero style */}
             {breadcrumbs && breadcrumbs.length > 0 && (
               <nav className="mb-6" aria-label="Breadcrumb">
-                <ol className="flex items-center flex-wrap gap-2 text-sm font-body text-white/90">
+                <ol className="flex items-center flex-wrap gap-2 text-sm font-sans text-white/90">
                   {breadcrumbs.map((crumb, index) => (
                     <li key={index} className="flex items-center">
                       {index > 0 && (
@@ -327,7 +327,7 @@ export default function SimpleBreweryPageTemplate({
                       )}
                       <Link 
                         href={crumb.url} 
-                        className={`transition-colors font-medium font-body drop-shadow-md ${
+                        className={`transition-colors font-medium font-sans drop-shadow-md ${
                           crumb.isActive 
                             ? 'text-white' 
                             : 'hover:text-white'
@@ -384,7 +384,7 @@ export default function SimpleBreweryPageTemplate({
               </h1>
               
               {/* City, State, Rating, and Website Link on same line */}
-              <div className="mb-4 sm:mb-6 flex items-center gap-3 sm:gap-4 md:gap-8 flex-wrap font-body">
+              <div className="mb-4 sm:mb-6 flex items-center gap-3 sm:gap-4 md:gap-8 flex-wrap font-sans">
                 <div className="text-[#6B6B6B] text-body-large font-medium">
                   {brewery.city}, {brewery.state}
                 </div>
@@ -435,8 +435,8 @@ export default function SimpleBreweryPageTemplate({
                           );
                         })}
                       </div>
-                      <span className="text-body-large font-semibold font-body">{displayRating.toFixed(1)}</span>
-                      <span className="text-[#1C1C1C] text-body font-body">
+                      <span className="text-body-large font-semibold font-sans">{displayRating.toFixed(1)}</span>
+                      <span className="text-[#1C1C1C] text-body font-sans">
                         ({totalReviewCount})
                       </span>
                     </div>
@@ -449,7 +449,7 @@ export default function SimpleBreweryPageTemplate({
                       href={externalUrl(brewery.website)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-body-large font-medium hover:underline font-body"
+                      className="text-body-large font-medium hover:underline font-sans"
                     >
                       Visit our Website
                     </a>
@@ -470,11 +470,11 @@ export default function SimpleBreweryPageTemplate({
                 
                 {/* Primary Description - Generated from review themes */}
                 {aboutContent ? (
-                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-lg sm:text-xl font-body">{aboutContent}</p>
+                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-lg sm:text-xl font-sans">{aboutContent}</p>
                 ) : brewery.description ? (
-                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-lg sm:text-xl font-body">{brewery.description}</p>
+                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-lg sm:text-xl font-sans">{brewery.description}</p>
                 ) : (
-                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-lg sm:text-xl font-body">
+                  <p className="text-[#1C1C1C] mb-4 leading-relaxed text-lg sm:text-xl font-sans">
                     {brewery.name} is a {brewery.type.join(' and ').toLowerCase()} located in {brewery.city}, {brewery.county} County, Maryland.
                     {brewery.amenities && brewery.amenities.length > 0 && (
                       <> Featuring {brewery.amenities.slice(0, 3).join(', ').toLowerCase()}, this local brewery welcomes craft beer enthusiasts.</>
@@ -490,7 +490,7 @@ export default function SimpleBreweryPageTemplate({
                     >
                       Awards & Recognition
                     </h3>
-                    <ul className="list-disc list-inside text-[#1C1C1C] text-body-large font-body space-y-2">
+                    <ul className="list-disc list-inside text-[#1C1C1C] text-body-large font-sans space-y-2">
                       {brewery.awards.map((award, index) => (
                         <li key={index}>{award}</li>
                       ))}
@@ -532,14 +532,14 @@ export default function SimpleBreweryPageTemplate({
                     <div className="inline-block min-w-full px-4 sm:px-0">
                       <table className="w-full border-collapse">
                         <thead>
-                          <tr className="bg-[#9B2335] text-white font-body">
+                          <tr className="bg-[#9B2335] text-white font-sans">
                             <th className="text-left py-3 px-3 sm:py-4 sm:px-4 font-bold text-sm sm:text-body-large">Name</th>
                             <th className="text-left py-3 px-3 sm:py-4 sm:px-4 font-bold text-sm sm:text-body-large">Style</th>
                             <th className="text-left py-3 px-3 sm:py-4 sm:px-4 font-bold text-sm sm:text-body-large">ABV</th>
                             <th className="text-left py-3 px-3 sm:py-4 sm:px-4 font-bold text-sm sm:text-body-large">Availability</th>
                           </tr>
                         </thead>
-                        <tbody className="font-body">
+                        <tbody className="font-sans">
                           {brewery.beers.map((beer: BeerType, index: number) => (
                             <tr key={index} className={`border-b border-[#E8E6E1] ${index % 2 === 0 ? 'bg-[#FAF9F6]' : 'bg-white'}`}>
                               <td className="py-3 px-3 sm:py-4 sm:px-4 font-semibold text-[#1C1C1C] text-sm sm:text-body">{beer.name}</td>
@@ -562,7 +562,7 @@ export default function SimpleBreweryPageTemplate({
                   <div>
                     <a
                       href={`tel:${brewery.phone}`}
-                      className="inline-flex items-center justify-center gap-2 w-full bg-[#14532d] hover:bg-[#166534] text-white font-bold py-3 px-6 rounded text-base sm:text-body-large transition-colors font-body min-h-[44px]"
+                      className="inline-flex items-center justify-center gap-2 w-full bg-[#14532d] hover:bg-[#166534] text-white font-bold py-3 px-6 rounded text-base sm:text-body-large transition-colors font-sans min-h-[44px]"
                       style={{ color: '#ffffff' }}
                       aria-label={`Call ${brewery.name} at ${brewery.phone}`}
                     >
@@ -574,7 +574,7 @@ export default function SimpleBreweryPageTemplate({
                 
                 {/* Open/Closed Status */}
                 {computed && (computed.isOpenNow !== undefined) && (
-                  <div className="text-center font-body">
+                  <div className="text-center font-sans">
                     {computed.isOpenNow ? (
                       <span className="text-body text-[#6B6B6B]">
                         <span className="font-bold">Open</span>
@@ -620,7 +620,7 @@ export default function SimpleBreweryPageTemplate({
                   >
                     Address
                   </h3>
-                  <div className="flex items-start gap-2 font-body">
+                  <div className="flex items-start gap-2 font-sans">
                     <MapPin className="h-5 w-5 text-[#6B6B6B] mt-0.5 flex-shrink-0" />
                     <div className="text-[#1C1C1C]">
                       <div className="text-body font-medium">{brewery.street}</div>
@@ -637,7 +637,7 @@ export default function SimpleBreweryPageTemplate({
                     >
                       Hours of Operation
                     </h3>
-                    <ul className="space-y-1 text-body font-body">
+                    <ul className="space-y-1 text-body font-sans">
                       {(() => {
                         // Group Monday-Friday if they have the same hours
                         const mondayHours = brewery.hours?.monday;
@@ -658,8 +658,8 @@ export default function SimpleBreweryPageTemplate({
                         if (allWeekdaysSame) {
                           hoursList.push(
                             <li key="weekdays" className="flex items-center">
-                              <span className="font-medium text-[#1C1C1C] w-32 font-body">Monday - Friday</span>
-                              <span className="text-[#1C1C1C] ml-2 font-body">
+                              <span className="font-medium text-[#1C1C1C] w-32 font-sans">Monday - Friday</span>
+                              <span className="text-[#1C1C1C] ml-2 font-sans">
                                 {mondayHours && mondayHours !== 'Closed' ? formatDayHours(mondayHours) : 'Closed'}
                               </span>
                             </li>
@@ -672,8 +672,8 @@ export default function SimpleBreweryPageTemplate({
                             if (hours) {
                               hoursList.push(
                                 <li key={day} className="flex items-center">
-                                  <span className="font-medium text-[#1C1C1C] w-32 font-body">{dayName}</span>
-                                  <span className="text-[#1C1C1C] ml-2 font-body">
+                                  <span className="font-medium text-[#1C1C1C] w-32 font-sans">{dayName}</span>
+                                  <span className="text-[#1C1C1C] ml-2 font-sans">
                                     {hours !== 'Closed' ? formatDayHours(hours) : 'Closed'}
                                   </span>
                                 </li>
@@ -686,8 +686,8 @@ export default function SimpleBreweryPageTemplate({
                         if (brewery.hours?.saturday) {
                           hoursList.push(
                             <li key="saturday" className="flex items-center">
-                              <span className="font-medium text-[#1C1C1C] w-32 font-body">Saturday</span>
-                              <span className="text-[#1C1C1C] ml-2 font-body">
+                              <span className="font-medium text-[#1C1C1C] w-32 font-sans">Saturday</span>
+                              <span className="text-[#1C1C1C] ml-2 font-sans">
                                 {brewery.hours.saturday !== 'Closed' ? formatDayHours(brewery.hours.saturday) : 'Closed'}
                               </span>
                             </li>
@@ -698,8 +698,8 @@ export default function SimpleBreweryPageTemplate({
                         if (brewery.hours?.sunday) {
                           hoursList.push(
                             <li key="sunday" className="flex items-center">
-                              <span className="font-medium text-[#1C1C1C] w-32 font-body">Sunday</span>
-                              <span className="text-[#1C1C1C] ml-2 font-body">
+                              <span className="font-medium text-[#1C1C1C] w-32 font-sans">Sunday</span>
+                              <span className="text-[#1C1C1C] ml-2 font-sans">
                                 {brewery.hours.sunday !== 'Closed' ? formatDayHours(brewery.hours.sunday) : 'Closed'}
                               </span>
                             </li>
@@ -723,7 +723,7 @@ export default function SimpleBreweryPageTemplate({
                   >
                     Brewery Type
                   </h3>
-                  <div className="text-[#1C1C1C] font-body">
+                  <div className="text-[#1C1C1C] font-sans">
                     {brewery.type.map((type: string, index: number) => (
                           <span key={index}>
                             <Link 
@@ -746,7 +746,7 @@ export default function SimpleBreweryPageTemplate({
                 >
                   Social Media
                 </h3>
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 font-body">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 font-sans">
                   {brewery.socialMedia?.facebook && (
                     <a href={externalUrl(brewery.socialMedia.facebook)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A] min-h-[44px] py-2">
                       <img src={getSocialMediaIcon('facebook')} alt={`${brewery.name} on Facebook`} className="h-5 w-5" />
@@ -793,7 +793,7 @@ export default function SimpleBreweryPageTemplate({
                       >
                         Amenities
                       </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-1.5 sm:gap-y-2 font-body">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-1.5 sm:gap-y-2 font-sans">
                         {columns.map((column, columnIndex) => (
                           <div key={columnIndex} className="space-y-1.5">
                             {column.map((amenity, index) => (
@@ -861,7 +861,7 @@ export default function SimpleBreweryPageTemplate({
                   >
                     Opening Date
                   </h3>
-                  <div className="text-[#1C1C1C] text-body font-body">{brewery.openedDate}</div>
+                  <div className="text-[#1C1C1C] text-body font-sans">{brewery.openedDate}</div>
                 </div>
               )}
 
@@ -873,7 +873,7 @@ export default function SimpleBreweryPageTemplate({
                       >
                         Awards
                       </h3>
-                      <div className="space-y-2 font-body">
+                      <div className="space-y-2 font-sans">
                         {brewery.awards.map((award: string, index: number) => (
                           <div key={index} className="text-[#1C1C1C] text-body">🏆 {award}</div>
                         ))}
@@ -889,7 +889,7 @@ export default function SimpleBreweryPageTemplate({
                       >
                         Certifications
                       </h3>
-                      <div className="space-y-2 font-body">
+                      <div className="space-y-2 font-sans">
                         {brewery.certifications.map((cert: string, index: number) => (
                           <div key={index} className="text-[#1C1C1C] text-body">📜 {cert}</div>
                         ))}
@@ -905,7 +905,7 @@ export default function SimpleBreweryPageTemplate({
                       >
                         Special Events
                       </h3>
-                      <div className="space-y-2 font-body">
+                      <div className="space-y-2 font-sans">
                         {brewery.specialEvents.map((event: string, index: number) => (
                           <div key={index} className="text-[#1C1C1C] text-body">🎉 {event}</div>
                         ))}
@@ -921,7 +921,7 @@ export default function SimpleBreweryPageTemplate({
                       >
                         Last Updated
                       </h3>
-                      <div className="text-[#1C1C1C] font-body">{
+                      <div className="text-[#1C1C1C] font-sans">{
                         (() => {
                           const date = new Date(brewery.lastUpdated);
                           const month = date.toLocaleDateString('en-US', { month: 'long' });
@@ -943,7 +943,7 @@ export default function SimpleBreweryPageTemplate({
                   <div className="mb-4">
                     <a
                       href={`tel:${brewery.phone}`}
-                      className="inline-flex items-center justify-center gap-2 w-full bg-[#14532d] hover:bg-[#166534] text-white font-bold py-3 sm:py-3 px-6 rounded text-base sm:text-body-large transition-colors font-body min-h-[44px]"
+                      className="inline-flex items-center justify-center gap-2 w-full bg-[#14532d] hover:bg-[#166534] text-white font-bold py-3 sm:py-3 px-6 rounded text-base sm:text-body-large transition-colors font-sans min-h-[44px]"
                       style={{ color: '#ffffff' }}
                       aria-label={`Call ${brewery.name} at ${brewery.phone}`}
                     >
@@ -955,7 +955,7 @@ export default function SimpleBreweryPageTemplate({
                 
                 {/* Open/Closed Status - Moved from main content, centered */}
                 {computed && (computed.isOpenNow !== undefined) && (
-                  <div className="mb-4 text-center font-body">
+                  <div className="mb-4 text-center font-sans">
                     {computed.isOpenNow ? (
                       <span className="text-body text-[#6B6B6B]">
                         <span className="font-bold">Open</span>
@@ -1001,7 +1001,7 @@ export default function SimpleBreweryPageTemplate({
                   >
                     Address
                   </h3>
-                  <div className="flex items-start gap-2 font-body">
+                  <div className="flex items-start gap-2 font-sans">
                     <MapPin className="h-5 w-5 text-[#6B6B6B] mt-0.5 flex-shrink-0" />
                     <div className="text-[#1C1C1C]">
                       <div className="text-body font-medium">{brewery.street}</div>
@@ -1018,7 +1018,7 @@ export default function SimpleBreweryPageTemplate({
                     >
                       Hours of Operation
                     </h3>
-                    <ul className="space-y-1 text-body font-body">
+                    <ul className="space-y-1 text-body font-sans">
                       {(() => {
                         // Group Monday-Friday if they have the same hours
                         const mondayHours = brewery.hours?.monday;
@@ -1039,8 +1039,8 @@ export default function SimpleBreweryPageTemplate({
                         if (allWeekdaysSame) {
                           hoursList.push(
                             <li key="weekdays" className="flex items-center">
-                              <span className="font-medium text-[#1C1C1C] w-32 font-body">Monday - Friday</span>
-                              <span className="text-[#1C1C1C] ml-2 font-body">
+                              <span className="font-medium text-[#1C1C1C] w-32 font-sans">Monday - Friday</span>
+                              <span className="text-[#1C1C1C] ml-2 font-sans">
                                 {mondayHours && mondayHours !== 'Closed' ? formatDayHours(mondayHours) : 'Closed'}
                               </span>
                             </li>
@@ -1052,8 +1052,8 @@ export default function SimpleBreweryPageTemplate({
                             const hours = brewery.hours?.[day as keyof typeof brewery.hours];
                             hoursList.push(
                               <li key={day} className="flex items-center">
-                                <span className="font-medium text-[#1C1C1C] w-32 font-body">{dayName}</span>
-                                <span className="text-[#1C1C1C] ml-2 font-body">
+                                <span className="font-medium text-[#1C1C1C] w-32 font-sans">{dayName}</span>
+                                <span className="text-[#1C1C1C] ml-2 font-sans">
                                   {hours && hours !== 'Closed' ? formatDayHours(hours) : 'Closed'}
                                 </span>
                               </li>
@@ -1066,8 +1066,8 @@ export default function SimpleBreweryPageTemplate({
                         if (satHours !== undefined) {
                           hoursList.push(
                             <li key="saturday" className="flex items-center">
-                              <span className="font-medium text-[#1C1C1C] w-32 font-body">Saturday</span>
-                              <span className="text-[#1C1C1C] ml-2 font-body">
+                              <span className="font-medium text-[#1C1C1C] w-32 font-sans">Saturday</span>
+                              <span className="text-[#1C1C1C] ml-2 font-sans">
                                 {satHours && satHours !== 'Closed' ? formatDayHours(satHours) : 'Closed'}
                               </span>
                             </li>
@@ -1079,8 +1079,8 @@ export default function SimpleBreweryPageTemplate({
                         if (sunHours !== undefined) {
                           hoursList.push(
                             <li key="sunday" className="flex items-center">
-                              <span className="font-medium text-[#1C1C1C] w-32 font-body">Sunday</span>
-                              <span className="text-[#1C1C1C] ml-2 font-body">
+                              <span className="font-medium text-[#1C1C1C] w-32 font-sans">Sunday</span>
+                              <span className="text-[#1C1C1C] ml-2 font-sans">
                                 {sunHours && sunHours !== 'Closed' ? formatDayHours(sunHours) : 'Closed'}
                               </span>
                             </li>

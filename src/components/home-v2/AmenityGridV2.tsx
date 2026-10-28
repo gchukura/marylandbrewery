@@ -36,8 +36,7 @@ export default function AmenityGridV2({ amenities }: AmenityGridV2Props) {
         {/* Section Header */}
         <div className="text-center mb-12">
           <h2 
-            className="text-3xl md:text-4xl font-semibold text-[#1C1C1C] mb-4"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-display text-3xl md:text-4xl font-semibold text-[#1C1C1C] mb-4"
           >
             Filter by Amenities
           </h2>
@@ -48,7 +47,6 @@ export default function AmenityGridV2({ amenities }: AmenityGridV2Props) {
           </div>
           <p 
             className="text-[#6B6B6B] mt-4 max-w-xl mx-auto"
-            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
             Find breweries with exactly what you're looking for
           </p>
@@ -67,7 +65,6 @@ export default function AmenityGridV2({ amenities }: AmenityGridV2Props) {
                 <Icon className="h-4 w-4 text-[#9B2335] group-hover:text-[#D4A017] transition-colors" strokeWidth={2} />
                 <span 
                   className="text-[#1C1C1C] group-hover:text-[#9B2335] font-medium transition-colors"
-                  style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                 >
                   {amenity.name}
                 </span>

@@ -74,7 +74,7 @@ export default function HeaderV2() {
               />
               {/* Text Logo - Visible on mobile and desktop with responsive sizing */}
               <span 
-                className="text-white whitespace-nowrap text-sm sm:text-base lg:text-xl font-semibold -ml-4 sm:-ml-5 lg:-ml-6 font-body"
+                className="text-white whitespace-nowrap text-sm sm:text-base lg:text-xl font-semibold -ml-4 sm:-ml-5 lg:-ml-6 font-sans"
               >
                 MarylandBrewery.com
               </span>
@@ -86,7 +86,7 @@ export default function HeaderV2() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="text-white hover:text-white transition-colors py-2 font-medium text-body-large font-body"
+                  className="text-white hover:text-white transition-colors py-2 font-medium text-body-large font-sans"
                 >
                   {item.label}
                 </Link>
@@ -114,7 +114,7 @@ export default function HeaderV2() {
                 <div className="flex flex-col h-full">
                   {/* Menu Header */}
                   <div className="flex items-center justify-between p-4 border-b border-[#7A1C2A]">
-                    <span className="text-white font-semibold text-lg font-body">Menu</span>
+                    <span className="text-white font-semibold text-lg font-sans">Menu</span>
                     <button
                       onClick={() => setMobileMenuOpen(false)}
                       className="p-2 text-white hover:text-[#D4A017] transition-colors"
@@ -129,7 +129,7 @@ export default function HeaderV2() {
                       <Link
                         key={item.label}
                         href={item.href}
-                        className="block w-full px-6 py-4 text-white hover:text-[#D4A017] hover:bg-[#7A1C2A]/30 active:bg-[#7A1C2A]/50 transition-colors font-medium text-body-large min-h-[48px] flex items-center touch-manipulation border-b border-[#7A1C2A]/30 last:border-b-0 font-body"
+                        className="block w-full px-6 py-4 text-white hover:text-[#D4A017] hover:bg-[#7A1C2A]/30 active:bg-[#7A1C2A]/50 transition-colors font-medium text-body-large min-h-[48px] flex items-center touch-manipulation border-b border-[#7A1C2A]/30 last:border-b-0 font-sans"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {item.label}

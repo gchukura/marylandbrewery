@@ -20,14 +20,12 @@ export default function Error({ error, reset }: ErrorProps) {
       <div className="text-center mb-8">
         <div className="text-6xl mb-4">🍺</div>
         <h1 
-          className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-4"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          className="font-display text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-4"
         >
           Something Went Wrong
         </h1>
         <p 
           className="text-lg text-[#6B6B6B] max-w-md mx-auto mb-8"
-          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
         >
           We hit an unexpected issue while loading this page. Our team has been notified and we're working on it.
         </p>
@@ -38,14 +36,12 @@ export default function Error({ error, reset }: ErrorProps) {
         <button
           onClick={reset}
           className="inline-flex items-center justify-center px-6 py-3 bg-[#9B2335] text-white font-medium rounded-md hover:bg-[#7A1C2A] transition-colors"
-          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
         >
           Try Again
         </button>
         <Link
           href="/"
           className="inline-flex items-center justify-center px-6 py-3 border-2 border-[#9B2335] text-[#9B2335] font-medium rounded-md hover:bg-[#9B2335] hover:text-white transition-colors"
-          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
         >
           Back to Homepage
         </Link>
@@ -55,7 +51,6 @@ export default function Error({ error, reset }: ErrorProps) {
       <div className="text-center">
         <p 
           className="text-sm text-[#6B6B6B] mb-4"
-          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
         >
           Or try one of these instead:
         </p>

@@ -5,12 +5,14 @@ import MapWithListClient from './MapWithListClient';
 import PageHero from '@/components/directory/PageHero';
 import { existsSync } from 'fs';
 import { buildMetadata } from '@/lib/seo/metadata';
+import { breadcrumbList } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import { join } from 'path';
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = buildMetadata({
-  title: "Maryland Brewery Map",
+  title: "Interactive Brewery Map of Maryland",
   description: "Every craft brewery in Maryland on one interactive map. Filter by amenity, see what's open and get directions.",
   path: '/map',
 });
@@ -40,6 +42,7 @@ export default async function MapPage() {
 
   return (
     <div className="bg-[#FAF9F6] min-h-screen">
+      <JsonLd data={breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Brewery Map', path: '/map' }])} />
       <PageHero
         h1="Brewery Map"
         introText="Explore all Maryland breweries on an interactive map with a filterable directory. Search by name, city, type, or amenities to find the perfect brewery for your visit."

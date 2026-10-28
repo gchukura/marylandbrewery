@@ -31,6 +31,8 @@ The maintenance scripts live in `scripts/*.ts` and run with `tsx` through the np
 | `seo:count-urls` | Estimate the number of sitemap URLs (currently broken, see below) | no |
 | `indexnow` | Submit every URL in the live sitemap to IndexNow | no |
 | `lint:links` | Statically check internal `href`s against `src/app` routes (runs in CI) | no |
+| `seo:check` | Crawl every sitemap URL of a running build: status, redirects, canonical, noindex, title/description length | no |
+| `seo:fixture` | Refresh the real-name snapshot the page-title test uses | no |
 
 ---
 
@@ -266,3 +268,12 @@ These are in `scripts/archived/`. They have no npm script, are not typechecked, 
 - `update-micro-to-microbrewery.ts`: one-off rename of `breweries.type` from "micro" to "microbrewery".
 - `update-nano-to-nanobrewery.ts`: one-off type rename from "Nano" to "Nanobrewery".
 - `verify-md-pages.ts`: checked the routing logic for `-md`-suffixed pages without building them.
+
+### `npm run seo:check`
+
+File: `scripts/check-sitemap.ts`. Fetches `/sitemap.xml` from a base URL (default `http://localhost:3000`, so run `npm run build && npm start` first, or pass a preview URL: `npm run seo:check -- https://marylandbrewery-rdni.vercel.app`) and requests every URL. Reports any status other than 200, any redirect, a canonical that isn't the URL itself, a noindex page, a missing title or description, a title over 60 or a description over 155 characters, and duplicate sitemap URLs. Exits 1 on any problem. Reads no env vars; writes nothing. Run before SEO-related PRs and after deploys.
+
+### `npm run seo:fixture`
+
+File: `scripts/dump-seo-fixture.ts`. Writes `src/lib/seo/__fixtures__/real-names.json`: the brewery, city, county, region, type, indexable neighborhood and indexable attraction names that `src/lib/seo/page-meta.test.ts` checks titles against. Reads Supabase with the anon key; writes no data. Run after large data changes (new attractions, neighborhoods or breweries) and commit the result.
+

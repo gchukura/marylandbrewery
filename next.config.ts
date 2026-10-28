@@ -1,5 +1,10 @@
 import type { NextConfig } from "next";
 
+// Brewery photos and logos are served from this project's public Storage bucket
+const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
+  : undefined;
+
 const nextConfig: NextConfig = {
   experimental: {
     staticGenerationRetryCount: 1, // Reduced from 3 to speed up builds
@@ -7,10 +12,12 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react', '@vis.gl/react-google-maps', '@googlemaps/markerclusterer'],
   },
   images: {
-    domains: [
-      'images.unsplash.com',
-      'via.placeholder.com',
-      'maps.googleapis.com',
+    remotePatterns: [
+      ...(supabaseHost
+        ? [{ protocol: 'https' as const, hostname: supabaseHost, pathname: '/storage/v1/object/public/**' }]
+        : []),
+      // Google Places photos (breweries.photo_url)
+      { protocol: 'https', hostname: 'maps.googleapis.com' },
     ],
     formats: ['image/webp', 'image/avif'],
   },

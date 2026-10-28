@@ -8,6 +8,8 @@ const PAGES = [
   ['county', '/counties/frederick/breweries'],
   ['neighborhood', '/neighborhoods/canton'],
   ['brewery', '/breweries/7-locks-brewing'],
+  ['neighborhoods index', '/neighborhoods'],
+  ['things to do index', '/near'],
 ] as const;
 
 /** Serious and critical WCAG 2.x A/AA violations, ignoring third-party frames (ads, maps). */

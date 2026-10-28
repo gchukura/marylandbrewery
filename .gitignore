@@ -60,3 +60,4 @@ supabase/.temp/
 
 # Data exports dropped in the repo root (e.g. Google Sheets CSV downloads)
 /*.csv
+.lighthouseci/

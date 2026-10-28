@@ -39,6 +39,8 @@ const STATUS_PROBES: [string, number, string?][] = [
   ['/neighborhoods/no-such-neighborhood', 404],
   ['/near/no-such-attraction', 404],
   ['/best-breweries/no-such-city', 404],
+  // A city that shares its slug with a neighborhood keeps its best-of page
+  ['/best-breweries/gaithersburg', 200],
   ['/best-breweries/frederick-md', 308, '/best-breweries/frederick'],
   ['/best-breweries/near/frederick-md', 308, '/best-breweries/frederick'],
   ['/best-breweries/canton-baltimore-md', 308, '/neighborhoods/canton'],

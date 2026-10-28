@@ -9,7 +9,11 @@ import { neighborhoodPath } from '@/lib/neighborhoods';
  * /cities/near/{slug}/breweries is retired. Cities go to their best-of page (5+ breweries) or
  * city listing; neighborhoods ("canton" or "canton-baltimore-md") go to /neighborhoods/{slug}.
  */
-export default async function CitiesNearBreweriesRedirect({ params }: { params: Promise<{ slug: string }> }) {
+export default async function CitiesNearBreweriesRedirect({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
 
   const citySlug = slug.endsWith('-md') ? slug.slice(0, -3) : slug;
@@ -18,7 +22,9 @@ export default async function CitiesNearBreweriesRedirect({ params }: { params: 
     permanentRedirect(bestBreweriesCityPath(citySlug, cityBreweries.length));
   }
 
-  const neighborhoodSlug = await resolveLegacyNeighborhoodSlug(slug);
+  const neighborhoodSlug = await resolveLegacyNeighborhoodSlug(slug, {
+    bareSlugs: true,
+  });
   if (neighborhoodSlug) {
     permanentRedirect(neighborhoodPath(neighborhoodSlug));
   }

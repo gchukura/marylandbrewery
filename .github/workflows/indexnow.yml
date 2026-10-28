@@ -1,0 +1,56 @@
+name: IndexNow
+
+# After a successful production deploy, submits sitemap URLs that are new since the last run to
+# IndexNow (Bing, Yandex). The URL list from each run is kept as an artifact; the next run diffs
+# against it. With no earlier artifact (first run, or older than the 90-day retention) it submits
+# every URL. Changed pages are left to the normal sitemap crawl: lastmod is the build time.
+# Needs no secrets: it reads only the public sitemap and key file.
+
+on: deployment_status
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: false
+
+jobs:
+  indexnow:
+    name: Submit new URLs to IndexNow
+    if: github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download the last submitted URL list
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run_id=$(gh run list --workflow indexnow.yml --status success --limit 1 \
+            --json databaseId --jq '.[0].databaseId // empty')
+          if [ -n "$run_id" ]; then
+            gh run download "$run_id" --name indexnow-urls --dir previous || echo "No artifact in run $run_id"
+          fi
+
+      - name: Submit new URLs
+        run: npm run indexnow -- --previous previous/urls.json --save urls.json
+
+      - name: Keep the URL list for the next run
+        uses: actions/upload-artifact@v4
+        with:
+          name: indexnow-urls
+          path: urls.json
+          retention-days: 90

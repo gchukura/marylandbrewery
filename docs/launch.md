@@ -107,7 +107,7 @@ After this merges and production redeploys:
 1. Rerun `npm run seo:check -- https://www.marylandbrewery.com` and confirm 0 problems.
 2. Google Search Console: submit `https://www.marylandbrewery.com/sitemap.xml` (Indexing > Sitemaps). Then use URL Inspection to request indexing for `/`, `/neighborhoods` and `/near`.
 3. Bing Webmaster Tools: submit the same sitemap (row 15 in `docs/seo-audit-2026.md`).
-4. Run `npm run indexnow`. It submits every URL in the live sitemap to IndexNow (Bing, Yandex).
+4. Run `npm run indexnow`. It submits every URL in the live sitemap to IndexNow (Bing, Yandex). After that, `.github/workflows/indexnow.yml` submits new URLs after each production deploy.
 5. After one week, run a fresh Ahrefs site audit and fill in the table above with its numbers.
 
 ## Rerunning

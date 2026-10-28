@@ -5,10 +5,17 @@
  * by Bing, Yandex, and other participating search engines.
  * 
  * Usage: npx tsx scripts/submit-indexnow.ts
+ *        npx tsx scripts/submit-indexnow.ts --previous prev-urls.json --save urls.json
+ *
+ * --previous: submit only the sitemap URLs missing from this JSON list (all of them if the
+ *             file does not exist). --save: write the current sitemap URLs there after a
+ *             successful submission. The production-deploy workflow (.github/workflows/indexnow.yml)
+ *             uses both so each deploy submits only new pages.
  * 
  * Note: Google does not participate in IndexNow, but Bing and Yandex do.
  */
 
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { parseStringPromise } from 'xml2js';
 
 const INDEXNOW_KEY = '457bccd4eef437d8877d15d3e947fa02';
@@ -45,6 +52,11 @@ interface SitemapData {
   };
 }
 
+function flag(name: string): string | undefined {
+  const i = process.argv.indexOf(name);
+  return i === -1 ? undefined : process.argv[i + 1];
+}
+
 /**
  * Fetch and parse the sitemap
  */
@@ -68,11 +80,12 @@ async function fetchSitemap(): Promise<string[]> {
 /**
  * Submit URLs to IndexNow in batches
  */
-async function submitToIndexNow(urls: string[]): Promise<void> {
+async function submitToIndexNow(urls: string[]): Promise<boolean> {
   const endpoint = INDEXNOW_ENDPOINTS[0]; // Use main API endpoint
   const batchSize = 10000; // IndexNow allows up to 10,000 URLs per request
   
   console.log(`${colors.blue}🚀 Submitting ${urls.length} URLs to IndexNow...${colors.reset}\n`);
+  let ok = true;
   
   // Split into batches if needed
   for (let i = 0; i < urls.length; i += batchSize) {
@@ -101,6 +114,7 @@ async function submitToIndexNow(urls: string[]): Promise<void> {
       if (response.ok || response.status === 200 || response.status === 202) {
         console.log(`   ${colors.green}✅ Batch ${batchNum} submitted successfully (${response.status})${colors.reset}`);
       } else {
+        ok = false;
         const errorText = await response.text();
         console.log(`   ${colors.red}❌ Batch ${batchNum} failed: ${response.status} - ${errorText}${colors.reset}`);
         
@@ -116,6 +130,7 @@ async function submitToIndexNow(urls: string[]): Promise<void> {
         }
       }
     } catch (error) {
+      ok = false;
       console.log(`   ${colors.red}❌ Batch ${batchNum} error: ${error}${colors.reset}`);
     }
     
@@ -124,6 +139,8 @@ async function submitToIndexNow(urls: string[]): Promise<void> {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
+
+  return ok;
 }
 
 /**
@@ -151,9 +168,27 @@ async function main(): Promise<void> {
     
     // Fetch sitemap URLs
     const urls = await fetchSitemap();
-    
+
+    // With --previous, submit only URLs that were not in the last submitted sitemap
+    const previousPath = flag('--previous');
+    const savePath = flag('--save');
+    let toSubmit = urls;
+    if (previousPath && existsSync(previousPath)) {
+      const previous = new Set<string>(JSON.parse(readFileSync(previousPath, 'utf8')));
+      toSubmit = urls.filter((url) => !previous.has(url));
+      console.log(`${colors.cyan}${toSubmit.length} new URLs since ${previousPath}${colors.reset}\n`);
+    } else if (previousPath) {
+      console.log(`${colors.yellow}No ${previousPath}; submitting every URL${colors.reset}\n`);
+    }
+
     // Submit to IndexNow
-    await submitToIndexNow(urls);
+    if (toSubmit.length > 0 && !(await submitToIndexNow(toSubmit))) {
+      process.exit(1);
+    }
+    if (savePath) {
+      writeFileSync(savePath, JSON.stringify(urls));
+      console.log(`${colors.green}✅ Saved ${urls.length} URLs to ${savePath}${colors.reset}`);
+    }
     
     console.log(`\n${colors.green}═══════════════════════════════════════════${colors.reset}`);
     console.log(`${colors.green}   ✅ IndexNow submission complete!${colors.reset}`);

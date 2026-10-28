@@ -202,3 +202,27 @@ export function openingHoursSpecification(hours: WeeklyHours | null | undefined)
     }))
   );
 }
+
+/** "10:00 PM" -> "10 PM"; "4:30 PM" stays. */
+function shortTime(time: string): string {
+  return time.replace(':00 ', ' ');
+}
+
+const DAY_ABBR: Record<DayName, string> = {
+  sunday: 'Sun', monday: 'Mon', tuesday: 'Tue', wednesday: 'Wed', thursday: 'Thu', friday: 'Fri', saturday: 'Sat',
+};
+
+export interface OpenStatusLabel {
+  open: boolean;
+  /** "Open until 10 PM", "Closed · opens 4 PM", "Closed · opens Thu 4 PM" */
+  label: string;
+}
+
+/** The status badge text at a moment (default: now) in Maryland time; null when there are no usable hours. */
+export function openStatusLabel(hours: WeeklyHours | null | undefined, date = new Date(), timeZone = MARYLAND_TZ): OpenStatusLabel | null {
+  const status = isOpenAt(hours, date, timeZone);
+  if (status.open && status.closesAt) return { open: true, label: `Open until ${shortTime(status.closesAt)}` };
+  const next = nextOpening(hours, date, timeZone);
+  if (!next) return null;
+  return { open: false, label: `Closed · opens ${next.isToday ? '' : `${DAY_ABBR[next.day]} `}${shortTime(next.time)}` };
+}

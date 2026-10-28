@@ -75,6 +75,7 @@ export type Database = {
           google_reviews_last_updated: string | null
           has_merch: boolean | null
           hours: Json | null
+          hours_verified_at: string | null
           id: string
           latitude: number
           logo: string | null
@@ -124,6 +125,7 @@ export type Database = {
           google_reviews_last_updated?: string | null
           has_merch?: boolean | null
           hours?: Json | null
+          hours_verified_at?: string | null
           id: string
           latitude: number
           logo?: string | null
@@ -173,6 +175,7 @@ export type Database = {
           google_reviews_last_updated?: string | null
           has_merch?: boolean | null
           hours?: Json | null
+          hours_verified_at?: string | null
           id?: string
           latitude?: number
           logo?: string | null

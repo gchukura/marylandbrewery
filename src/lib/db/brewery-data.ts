@@ -5,19 +5,11 @@
 
 import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
-import { fetchBreweryBySlug, fetchRegions, getBreweryDataFromSupabase, type Region } from './queries';
+import { fetchBreweryBySlug, fetchRegions, getAllNeighborhoods as fetchAllNeighborhoods, getBreweryDataFromSupabase, type Region } from './queries';
+import { isIndexableNeighborhood } from '@/lib/neighborhoods';
 import { fetchAttractionSummaries, type AttractionSummary } from './attractions';
 import { isIndexableAttraction } from '@/lib/attractions';
-import { 
-  Brewery, 
-  ProcessedBreweryData, 
-  SiteStatistics, 
-  BreweryType, 
-  MarylandCounty,
-  Amenity,
-  COMMON_AMENITIES,
-  MARYLAND_COUNTIES
-} from '@/types/brewery';
+import { Brewery, ProcessedBreweryData, SiteStatistics, MARYLAND_COUNTIES } from '@/types/brewery';
 
 import { sortByDistance } from '@/lib/geo';
 const CACHE = { tags: ['brewery-data'], revalidate: 3600 };
@@ -26,7 +18,7 @@ const CACHE = { tags: ['brewery-data'], revalidate: 3600 };
  * Every brewery, list columns only (no review themes or beers). The one cross-request cache
  * for listings; everything else is derived from it per request in getProcessedBreweryData.
  */
-export const getAllBreweries = unstable_cache(
+const getAllBreweries = unstable_cache(
   async (): Promise<Brewery[]> => getBreweryDataFromSupabase({ detail: false }),
   ['all-breweries'],
   CACHE
@@ -247,23 +239,36 @@ export async function getAllTypes(): Promise<string[]> {
   return (await getProcessedBreweryData()).types;
 }
 
-/** Breweries within radiusMiles of a point, nearest first. */
-export async function getNearbyBreweries(latitude: number, longitude: number, radiusMiles = 10): Promise<Brewery[]> {
-  const { breweries } = await getProcessedBreweryData();
-  return sortByDistance({ latitude, longitude }, breweries)
-    .filter((b) => b.distance <= radiusMiles)
-    .map(({ distance: _distance, ...brewery }) => brewery);
-}
-
 /** All attractions (slug, name, type, location), cached like the brewery list. */
-export const getAttractionSummaries = unstable_cache(
+const getAttractionSummaries = unstable_cache(
   async (): Promise<AttractionSummary[]> => fetchAttractionSummaries(),
-  ['attraction-summaries'],
+  ['attraction-summaries-v2'], // v2: added city (the data cache outlives deploys)
   CACHE
 );
 
-/** Attractions whose /near page is indexed: real sights with a brewery within 3 miles. */
-export const getIndexableAttractions = cache(async (): Promise<AttractionSummary[]> => {
-  const [attractions, { breweries }] = await Promise.all([getAttractionSummaries(), getProcessedBreweryData()]);
-  return attractions.filter((a) => isIndexableAttraction(a, sortByDistance(a, breweries)[0]?.distance));
-});
+/**
+ * Attractions whose /near page is indexed: real sights with a brewery within 3 miles. Cached
+ * across requests: finding each of ~4,000 attractions' nearest brewery is too slow to repeat on
+ * every brewery page.
+ */
+export const getIndexableAttractions = unstable_cache(
+  async (): Promise<AttractionSummary[]> => {
+    const [attractions, { breweries }] = await Promise.all([getAttractionSummaries(), getProcessedBreweryData()]);
+    return attractions.filter((a) => isIndexableAttraction(a, sortByDistance(a, breweries)[0]?.distance));
+  },
+  ['indexable-attractions-v1'],
+  CACHE
+);
+
+/** Neighborhoods whose page is indexed: a brewery within 3 miles (src/lib/neighborhoods.ts). */
+export const getIndexableNeighborhoods = unstable_cache(
+  async () => {
+    const [neighborhoods, { breweries }] = await Promise.all([fetchAllNeighborhoods(), getProcessedBreweryData()]);
+    return neighborhoods
+      .filter((n): n is typeof n & { latitude: number; longitude: number } => typeof n.latitude === 'number' && typeof n.longitude === 'number')
+      .filter((n) => isIndexableNeighborhood(sortByDistance(n, breweries)[0]?.distance))
+      .map((n) => ({ slug: n.slug, name: n.name, city: n.city, latitude: n.latitude, longitude: n.longitude }));
+  },
+  ['indexable-neighborhoods-v1'],
+  CACHE
+);

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   directionsUrl,
-  headlineMeta,
+  headlineParts,
   pickExcerpts,
   reviewerShortName,
   themeChips,
@@ -142,32 +142,12 @@ describe('reviews', () => {
 });
 
 describe('headline and directions', () => {
-  const label = (c: string) => `${c} County`;
-  it('joins type, place and opening year, skipping what is missing', () => {
-    expect(
-      headlineMeta(
-        {
-          type: ['Microbrewery', 'Taproom'],
-          city: 'Frederick',
-          county: 'Frederick',
-          openedDate: '2016-05-01',
-        },
-        label
-      )
-    ).toBe(
-      'Microbrewery and Taproom · Frederick, Frederick County · Opened 2016'
-    );
-    expect(
-      headlineMeta(
-        {
-          type: ['Planned'],
-          city: 'Bethesda',
-          county: '',
-          openedDate: undefined,
-        },
-        label
-      )
-    ).toBe('Bethesda');
+  it('gives the type and opening year, skipping what is missing', () => {
+    expect(headlineParts({ type: ['Microbrewery', 'Taproom'], openedDate: '2016-05-01' })).toEqual({
+      type: 'Microbrewery and Taproom',
+      opened: 'Opened 2016',
+    });
+    expect(headlineParts({ type: ['Planned'], openedDate: undefined })).toEqual({ type: undefined, opened: undefined });
   });
 
   it('links Google Maps directions, by place ID when known', () => {

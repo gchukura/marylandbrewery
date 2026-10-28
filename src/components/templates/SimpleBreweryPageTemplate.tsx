@@ -42,6 +42,7 @@ import BreweryReviews from '../brewery/BreweryReviews';
 import { formatDayHours, isOpenAt, zonedDayAndMinutes } from '@/lib/hours';
 import { amenityByDbValue, amenityPath } from '@/lib/amenities';
 import { externalUrl } from '@/lib/format';
+import { canOptimizeImage } from '@/lib/images';
 import { brewerySchema, breadcrumbList } from '@/lib/seo/jsonld';
 import JsonLd from '@/components/seo/JsonLd';
 import BreweryArticles from '../brewery/BreweryArticles';
@@ -287,7 +288,8 @@ export default function SimpleBreweryPageTemplate({
                 {/* Hero Image Background */}
                 {heroImage && (
                   <div className="absolute inset-0">
-                    {heroImage.startsWith('http') ? (
+                    {!canOptimizeImage(heroImage) ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- host outside next.config remotePatterns
                       <img 
                         src={heroImage} 
                         alt={`${brewery.name} exterior`}

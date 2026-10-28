@@ -15,6 +15,7 @@ import { buildMetadata } from '@/lib/seo/metadata';
 import { cityAmenityMeta } from '@/lib/seo/page-meta';
 import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
 import JsonLd from '@/components/seo/JsonLd';
+import { canOptimizeImage } from '@/lib/images';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 function cityAmenityBreweries(breweries: Brewery[], cityName: string, amenityDef: AmenityDefinition): Brewery[] {
@@ -138,7 +139,8 @@ export default async function CityAmenityPage({ params }: { params: Promise<{ ci
         {/* City Hero Image Background */}
         {cityHeroImage && (
           <div className="absolute inset-0">
-            {cityHeroImage.startsWith('http') ? (
+            {!canOptimizeImage(cityHeroImage) ? (
+              // eslint-disable-next-line @next/next/no-img-element -- host outside next.config remotePatterns
               <img 
                 src={cityHeroImage} 
                 alt={`${amenityLabel} breweries in ${cityName}`}

@@ -8,6 +8,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { canOptimizeImage } from '@/lib/images';
 
 interface BreweryLogoProps {
   logo: string;
@@ -48,8 +49,8 @@ export default function BreweryLogo({
     ? logo  // External URL - use as-is
     : `/${logo}`; // Assume local path if no leading slash
 
-  // Check if it's an external URL
-  const isExternal = logoUrl.startsWith('http://') || logoUrl.startsWith('https://');
+  // next/image for local files and our Storage bucket; a logo on another site stays a plain <img>
+  const isExternal = !canOptimizeImage(logoUrl);
 
   if (imageError) {
     return null; // Don't show anything if image fails to load
@@ -63,7 +64,8 @@ export default function BreweryLogo({
         <div className={`absolute inset-0 bg-gray-100 animate-pulse rounded ${sizeClasses[size]}`} />
       )}
       {isExternal ? (
-        // For external URLs, use regular img tag (Next.js Image requires domain config)
+        // Hosts outside next.config remotePatterns can't go through next/image
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={logoUrl}
           alt={`${breweryName} logo`}
@@ -79,7 +81,7 @@ export default function BreweryLogo({
           loading="lazy"
         />
       ) : (
-        // For local paths, use Next.js Image component for optimization
+        // Local files and Supabase Storage: optimized by next/image
         <Image
           src={logoUrl}
           alt={`${breweryName} logo`}

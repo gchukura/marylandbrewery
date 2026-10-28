@@ -5,7 +5,8 @@
  * 1. Fetches all breweries from Supabase
  * 2. Uses Google Places API to find Place IDs (if not stored)
  * 3. Fetches multiple photos from Place Details API
- * 4. Downloads photos and saves them to public/photos/
+ * 4. Downloads photos, converts them to WebP and uploads them to Supabase Storage
+ *    (brewery-media/photos/<slug>/<n>.webp), storing the public URLs in breweries.photos
  * 5. Updates photos array in Supabase with local paths
  * 
  * Usage:
@@ -24,10 +25,8 @@
 // Load environment variables from .env.local BEFORE any other imports
 import { config } from 'dotenv';
 import { resolve } from 'path';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import { join } from 'path';
 
+import { existingObjectSizes, photoPath as mediaPhotoPath, processPhoto, publicMediaUrl, uploadIfChanged } from './lib/media';
 import { getAdminClient } from '@/lib/db/client';
 // Load .env.local file
 config({ path: resolve(process.cwd(), '.env.local') });
@@ -47,7 +46,6 @@ if (!adminClient) {
 
 const client = adminClient as NonNullable<typeof adminClient>;
 
-const PHOTOS_DIR = join(process.cwd(), 'public', 'photos');
 const MAX_PHOTOS_PER_BREWERY = 11; // Limit number of photos to download per brewery (11 total = 10 in gallery after removing hero)
 
 /**
@@ -58,34 +56,22 @@ function getPhotoUrl(photoReference: string, maxWidth: number = 1600): string {
 }
 
 /**
- * Download image from URL and save to file
+ * Download an image into memory
  */
-async function downloadImage(url: string, filePath: string): Promise<boolean> {
+async function downloadImage(url: string): Promise<Buffer | null> {
   try {
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       console.warn(`  ⚠️  Failed to download image: ${response.status} ${response.statusText}`);
-      return false;
+      return null;
     }
-    
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    
-    await writeFile(filePath, buffer);
-    return true;
+
+    return Buffer.from(await response.arrayBuffer());
   } catch (error) {
     console.warn(`  ⚠️  Error downloading image: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    return false;
+    return null;
   }
-}
-
-/**
- * Generate filename for photo
- */
-function generatePhotoFilename(breweryId: string, index: number, extension: string = 'jpg'): string {
-  // Use brewery ID and index to create unique filename
-  return `${breweryId}-${index + 1}.${extension}`;
 }
 
 /**
@@ -182,20 +168,15 @@ function sleep(ms: number): Promise<void> {
  */
 async function downloadGooglePhotos() {
   console.log('🚀 Starting Google Places photos download...\n');
-  console.log('📋 Using Places API to download photos and store in public/photos/\n');
+  console.log('📋 Using Places API to download photos and upload them to Supabase Storage\n');
 
   try {
-    // Ensure photos directory exists
-    if (!existsSync(PHOTOS_DIR)) {
-      await mkdir(PHOTOS_DIR, { recursive: true });
-      console.log(`   ✓ Created photos directory: ${PHOTOS_DIR}\n`);
-    }
 
     // Step 1: Fetch all breweries from Supabase
     console.log('📥 Step 1: Fetching breweries from Supabase...');
     const { data: breweries, error: fetchError } = await client
       .from('breweries')
-      .select('id, name, city, state, place_id, photos')
+      .select('id, slug, name, city, state, place_id, photos')
       .order('name');
     
     if (fetchError) {
@@ -267,33 +248,35 @@ async function downloadGooglePhotos() {
         const photosToDownload = photos.slice(0, MAX_PHOTOS_PER_BREWERY);
         const photoPaths: string[] = [];
         
-        // Download each photo
+        // Photos already in Storage for this brewery (skip re-downloading them)
+        const existing = await existingObjectSizes(client, `photos/${brewery.slug}`);
+
+        // Download, convert and upload each photo
         for (let j = 0; j < photosToDownload.length; j++) {
           const photo = photosToDownload[j];
-          const filename = generatePhotoFilename(brewery.id, j);
-          const filePath = join(PHOTOS_DIR, filename);
-          const photoPath = `/photos/${filename}`;
-          
-          // Skip if file already exists
-          if (existsSync(filePath)) {
-            console.log(`   ⊘ Photo ${j + 1} already exists: ${filename}`);
-            photoPaths.push(photoPath);
+          const objectPath = mediaPhotoPath(brewery.slug, j + 1);
+          const publicUrl = publicMediaUrl(objectPath);
+
+          if (existing.has(objectPath)) {
+            console.log(`   ⊘ Photo ${j + 1} already in Storage: ${objectPath}`);
+            photoPaths.push(publicUrl);
             continue;
           }
-          
+
           // Get photo URL
           const photoUrl = getPhotoUrl(photo.photo_reference, 1600);
-          
+
           console.log(`   📥 Downloading photo ${j + 1}/${photosToDownload.length}...`);
-          
-          // Download and save
-          const success = await downloadImage(photoUrl, filePath);
-          
-          if (success) {
-            photoPaths.push(photoPath);
+
+          const downloaded = await downloadImage(photoUrl);
+
+          if (downloaded) {
+            const processed = await processPhoto(downloaded);
+            await uploadIfChanged(client, objectPath, processed.buffer, existing);
+            photoPaths.push(publicUrl);
             photosDownloaded++;
             photosStored++;
-            console.log(`   ✓ Saved: ${filename}`);
+            console.log(`   ✓ Uploaded: ${objectPath}`);
           } else {
             console.log(`   ✗ Failed to download photo ${j + 1}`);
           }
@@ -367,8 +350,7 @@ async function downloadGooglePhotos() {
     console.log(`  - Breweries updated: ${breweriesUpdated}`);
     console.log(`  - Skipped: ${skipped}`);
     console.log(`  - Errors: ${errorCount}`);
-    console.log(`\n📁 Photos stored in: ${PHOTOS_DIR}`);
-    console.log(`   Accessible at: /photos/filename.jpg`);
+    console.log(`\n📁 Photos stored in Supabase Storage: brewery-media/photos/<slug>/<n>.webp`);
 
   } catch (error) {
     console.error('\n❌ Photo download failed:', error);

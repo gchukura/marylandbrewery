@@ -3,7 +3,7 @@
  * 
  * This script:
  * 1. Fetches brewery logos from marylandbeer.org/brewing-companies/current-members/
- * 2. Downloads logos to public/logos/ directory
+ * 2. Converts logos to WebP and uploads them to Supabase Storage (brewery-media/logos/<slug>.webp)
  * 3. Updates Supabase with local logo paths
  * 
  * Usage:
@@ -13,15 +13,15 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
 import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
 import { getBreweryDataFromSupabase } from '@/lib/db/queries';
+import { MEDIA_BUCKET, logoPath as mediaLogoPath, processLogo, publicMediaUrl, uploadIfChanged } from './lib/media';
+import { getAdminClient } from '@/lib/db/client';
 import { updateBreweryLogoInSupabase } from '@/lib/db/queries';
 
 // Load environment variables
 config({ path: resolve(process.cwd(), '.env.local') });
 
 const MARYLAND_BEER_URL = 'https://marylandbeer.org/brewing-companies/current-members/';
-const LOGOS_DIR = resolve(process.cwd(), 'public', 'logos');
 
 /**
  * Normalize brewery name for matching
@@ -132,50 +132,28 @@ async function fetchMarylandBeerPage(): Promise<Map<string, string>> {
 }
 
 /**
- * Download logo image and save to public/logos/
+ * Download a logo, convert it to WebP and upload it to Storage; returns its public URL
  */
-async function downloadLogo(logoUrl: string, breweryName: string): Promise<string> {
+async function downloadLogo(logoUrl: string, brewerySlug: string): Promise<string> {
   try {
     console.log(`   📥 Downloading: ${logoUrl}`);
-    
+
     const response = await fetch(logoUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; BreweryDirectoryBot/1.0)',
       },
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    
-    const buffer = await response.arrayBuffer();
-    const contentType = response.headers.get('content-type') || 'image/png';
-    
-    // Determine file extension from URL or content type
-    let ext = 'png';
-    if (logoUrl.match(/\.(jpg|jpeg)$/i) || contentType.includes('jpeg') || contentType.includes('jpg')) {
-      ext = 'jpg';
-    } else if (logoUrl.match(/\.svg$/i) || contentType.includes('svg')) {
-      ext = 'svg';
-    } else if (logoUrl.match(/\.png$/i) || contentType.includes('png')) {
-      ext = 'png';
-    }
-    
-    // Create safe filename from brewery name
-    const safeName = breweryName
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
-      .substring(0, 50); // Limit length
-    
-    const filename = `${safeName}.${ext}`;
-    const filepath = resolve(LOGOS_DIR, filename);
-    
-    await writeFile(filepath, Buffer.from(buffer));
-    
-    console.log(`   ✓ Saved: ${filename}`);
-    return `/logos/${filename}`;
+
+    const processed = await processLogo(Buffer.from(await response.arrayBuffer()));
+    const objectPath = mediaLogoPath(brewerySlug);
+    await uploadIfChanged(getAdminClient(), objectPath, processed.buffer, new Map());
+
+    console.log(`   ✓ Uploaded: ${objectPath} (from ${processed.sourceFormat})`);
+    return publicMediaUrl(objectPath);
   } catch (error) {
     console.error(`   ✗ Failed to download: ${error instanceof Error ? error.message : 'Unknown error'}`);
     throw error;
@@ -354,7 +332,7 @@ function generateMissingLogosReport(
   content += `## Next Steps\n\n`;
   content += `1. Review the breweries listed above\n`;
   content += `2. Manually find logos for these breweries\n`;
-  content += `3. Download logos and save to \`public/logos/\` directory\n`;
+  content += `3. Re-run npm run data:logos, or upload a logo to brewery-media/logos/<slug>.webp\n`;
   content += `4. Update Supabase with the logo path (e.g., \`/logos/brewery-name.png\`)\n`;
   content += `5. Or add the logo URL directly to the \`logo\` column in Supabase\n\n`;
   content += `## Tips\n\n`;
@@ -374,10 +352,6 @@ async function fetchBreweryLogos() {
   
   try {
     // Create logos directory if it doesn't exist
-    if (!existsSync(LOGOS_DIR)) {
-      await mkdir(LOGOS_DIR, { recursive: true });
-      console.log(`✓ Created directory: ${LOGOS_DIR}\n`);
-    }
     
     // Step 1: Fetch breweries from Supabase
     console.log('📥 Step 1: Fetching breweries from Supabase...');
@@ -392,8 +366,8 @@ async function fetchBreweryLogos() {
         return true; // No logo
       }
       const logo = b.logo.trim();
-      // Check if it's an external URL
-      if (logo.startsWith('http://') || logo.startsWith('https://')) {
+      // External URL (not already in our Storage bucket)
+      if ((logo.startsWith('http://') || logo.startsWith('https://')) && !logo.includes(`/${MEDIA_BUCKET}/`)) {
         return true; // External URL, needs to be downloaded
       }
       return false; // Already has local path
@@ -403,7 +377,7 @@ async function fetchBreweryLogos() {
     const breweriesWithoutLogos = breweries.filter(b => !b.logo || b.logo.trim() === '');
     const breweriesWithExternalLogos = breweries.filter(b => {
       const logo = b.logo?.trim() || '';
-      return logo.startsWith('http://') || logo.startsWith('https://');
+      return (logo.startsWith('http://') || logo.startsWith('https://')) && !logo.includes(`/${MEDIA_BUCKET}/`);
     });
     
     console.log(`   ℹ️  ${breweriesWithoutLogos.length} breweries need logos`);
@@ -438,7 +412,7 @@ async function fetchBreweryLogos() {
       
       try {
         // Download logo
-        const logoPath = await downloadLogo(logoUrl, brewery.name);
+        const logoPath = await downloadLogo(logoUrl, brewery.slug);
         downloaded++;
         
         // Update Supabase
@@ -543,7 +517,7 @@ async function fetchBreweryLogos() {
       
       try {
         // Download logo
-        const logoPath = await downloadLogo(logoUrl, brewery.name);
+        const logoPath = await downloadLogo(logoUrl, brewery.slug);
         downloaded++;
         
         // Update Supabase

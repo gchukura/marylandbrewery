@@ -19,6 +19,7 @@ import { buildMetadata } from '@/lib/seo/metadata';
 import { bestBreweriesMeta } from '@/lib/seo/page-meta';
 import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
 import JsonLd from '@/components/seo/JsonLd';
+import { canOptimizeImage } from '@/lib/images';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 
 
@@ -178,7 +179,8 @@ export default async function BestBreweriesSlugPage({ params }: { params: Promis
           {/* City Hero Image Background */}
           {cityHeroImage && (
             <div className="absolute inset-0">
-              {cityHeroImage.startsWith('http') ? (
+              {!canOptimizeImage(cityHeroImage) ? (
+                // eslint-disable-next-line @next/next/no-img-element -- host outside next.config remotePatterns
                 <img 
                   src={cityHeroImage} 
                   alt={`Best breweries in ${cityName}`}

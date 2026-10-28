@@ -40,6 +40,7 @@ import { BreadcrumbItem, RelatedPage } from '@/types/seo';
 import GoogleMap from '../maps/GoogleMap';
 import BreweryReviews from '../brewery/BreweryReviews';
 import { formatDayHours, isOpenAt, openingHoursSpecification, zonedDayAndMinutes } from '@/lib/hours';
+import { amenityByDbValue, amenityPath } from '@/lib/amenities';
 import BreweryArticles from '../brewery/BreweryArticles';
 
 const SOCIAL_MEDIA_ICONS = {
@@ -330,10 +331,10 @@ export default function SimpleBreweryPageTemplate({
     
     return combined.map(amenity => {
       const hasIt = hasAmenity(amenity);
-      const slug = amenity.toLowerCase().replace(/\s+/g, '-');
+      const page = amenityByDbValue(amenity); // only amenities with their own page get a link
       return {
         name: amenity,
-        url: `/amenities/${slug}`,
+        url: page ? amenityPath(page) : null,
         hasIt
       };
     });
@@ -878,7 +879,7 @@ export default function SimpleBreweryPageTemplate({
                                 <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center mt-0.5">
                                   {getAmenityIcon(amenity.name)}
                                 </div>
-                                {amenity.hasIt ? (
+                                {amenity.hasIt && amenity.url ? (
                                   <Link 
                                     href={amenity.url}
                                     className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium text-body leading-normal"

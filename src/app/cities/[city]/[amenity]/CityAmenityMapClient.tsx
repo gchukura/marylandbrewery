@@ -7,6 +7,7 @@ import { MapPin, Phone, Search, X, ChevronLeft, ChevronRight, Star } from 'lucid
 import { slugify } from '@/lib/slug';
 import BreweryLogo from '@/components/brewery/BreweryLogo';
 
+import { amenityByDbValue } from '@/lib/amenities';
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
   ssr: false, 
   loading: () => (
@@ -266,7 +267,9 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                           <div className="flex flex-wrap gap-x-1.5 gap-y-1 mt-2">
                             {amenityList.map((amenity: string) => {
                               if (!amenity) return null;
-                              const amenitySlug = slugify(amenity);
+                              const amenityPage = amenityByDbValue(amenity);
+                            if (!amenityPage) return null; // no page for this value
+                            const amenitySlug = amenityPage.slug;
                               return (
                                 <Link
                                   key={amenity}

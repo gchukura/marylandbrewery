@@ -26,9 +26,11 @@ const sourceSans3 = Source_Sans_3({
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
+  // Pages set their title through buildMetadata (src/lib/seo/metadata.ts) without the brand;
+  // the template adds it. Keep TITLE_SUFFIX in sync with this template.
   title: {
-    default: "Maryland Brewery Directory | Craft Breweries Across Maryland",
-    template: "%s | Maryland Brewery Directory"
+    default: "Maryland Brewery: Every Craft Brewery in Maryland",
+    template: "%s | Maryland Brewery",
   },
   description: "Discover the best craft breweries across Maryland. Find local breweries, events, and more. Your complete guide to Maryland's thriving craft beer scene.",
   keywords: [
@@ -51,20 +53,15 @@ export const metadata: Metadata = {
   },
   // No canonical here: every page that inherits it would claim to be the homepage
   metadataBase: new URL("https://www.marylandbrewery.com"),
+  // No openGraph.url or title here either: pages without their own would all claim the homepage.
+  // buildMetadata sets them per page.
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://www.marylandbrewery.com",
-    siteName: "Maryland Brewery Directory",
-    title: "Maryland Brewery Directory | Craft Breweries Across Maryland",
-    description: "Discover the best craft breweries across Maryland. Find local breweries, events, and more.",
-    // OG image is auto-generated from opengraph-image.tsx
+    siteName: "Maryland Brewery",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Maryland Brewery Directory | Craft Breweries Across Maryland",
-    description: "Discover the best craft breweries across Maryland. Find local breweries, events, and more.",
-    // Twitter image is auto-generated from twitter-image.tsx
     creator: "@marylandbrewery",
   },
   robots: {
@@ -78,10 +75,10 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  // Note: Add Google Search Console verification code here after verifying the site
-  // verification: {
-  //   google: "YOUR_GOOGLE_VERIFICATION_CODE",
-  // },
+  // Search Console HTML-tag verification; set GOOGLE_SITE_VERIFICATION in Vercel
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 
 export const viewport = {
@@ -96,28 +93,21 @@ export const viewport = {
   ],
 };
 
-// WebSite schema for sitelinks search box in Google
+// WebSite schema. No SearchAction: Google retired the sitelinks search box (Nov 2024) and
+// /map does not read ?search=
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'Maryland Brewery Directory',
+  name: 'Maryland Brewery',
   url: 'https://www.marylandbrewery.com',
-  description: 'Your complete guide to craft breweries across Maryland',
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: {
-      '@type': 'EntryPoint',
-      urlTemplate: 'https://www.marylandbrewery.com/map?search={search_term_string}'
-    },
-    'query-input': 'required name=search_term_string',
-  },
+  description: 'Every craft brewery in Maryland',
 };
 
 // Organization schema for brand recognition
 const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'Maryland Brewery Directory',
+  name: 'Maryland Brewery',
   url: 'https://www.marylandbrewery.com',
   logo: 'https://www.marylandbrewery.com/logo.png',
   sameAs: [

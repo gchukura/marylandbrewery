@@ -1,49 +1,17 @@
 import { Metadata } from 'next';
 import { getProcessedBreweryData } from '@/lib/db';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
+import { amenityByDbValue, amenityPath } from '@/lib/amenities';
+import { breweryScore } from '@/lib/best-breweries';
+import { buildMetadata } from '@/lib/seo/metadata';
 import { slugify } from '@/lib/slug';
 
-export const metadata: Metadata = {
-  title: 'Best Breweries in Maryland | Top-Rated Craft Breweries 2025',
-  description: 'Find the best breweries in Maryland ranked by ratings and reviews. Our curated list features the top craft breweries across the state, from Baltimore to Frederick and beyond.',
-  alternates: {
-    canonical: '/best-breweries',
-  },
-  openGraph: {
-    title: 'Best Breweries in Maryland | Top-Rated Craft Breweries',
-    description: 'Discover the best breweries in Maryland ranked by ratings and reviews. Find top craft breweries across the state.',
-    url: 'https://www.marylandbrewery.com/best-breweries',
-    siteName: 'Maryland Brewery Directory',
-    type: 'website',
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: 'Best Breweries in Maryland',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Best Breweries in Maryland | Top-Rated Craft Breweries',
-    description: 'Discover the best breweries in Maryland ranked by ratings and reviews.',
-    images: ['/opengraph-image'],
-  },
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Best Breweries in Maryland",
+  description: "Maryland's top-rated craft breweries, ranked by Google rating and review volume, with best-of lists for the biggest beer towns.",
+  path: '/best-breweries',
+});
 
-// Calculate weighted score for ranking
-// Score = (google_rating × 20) + log10(review_count) × 10
-function calculateBreweryScore(brewery: any): number {
-  const rating = brewery.googleRating || 0;
-  const reviewCount = brewery.googleRatingCount || 0;
-  
-  // Weighted score: rating is more important, but review count adds credibility
-  const ratingScore = rating * 20;
-  const reviewScore = reviewCount > 0 ? Math.log10(reviewCount) * 10 : 0;
-  
-  return ratingScore + reviewScore;
-}
 
 function computeBestBreweriesStats(breweries: any[]) {
   const total = breweries.length;
@@ -68,7 +36,7 @@ export default async function BestBreweriesPage() {
   const breweriesWithScores = processed.breweries
     .map((brewery: any) => ({
       ...brewery,
-      score: calculateBreweryScore(brewery),
+      score: breweryScore(brewery),
     }))
     .sort((a: any, b: any) => b.score - a.score)
     .slice(0, 50); // Top 50 breweries
@@ -120,18 +88,20 @@ export default async function BestBreweriesPage() {
   breweriesWithScores.forEach((brewery: any) => {
     const amenities = brewery.amenities ?? [];
     amenities.forEach((a: string) => {
-      const key = a.trim().toLowerCase();
+      const key = a.trim(); // stored value, matched exactly by amenityByDbValue
       amenityCounts.set(key, (amenityCounts.get(key) || 0) + 1);
     });
   });
 
   const topAmenities = Array.from(amenityCounts.entries())
-    .sort((a, b) => b[1] - a[1])
+    .map(([amenity, count]) => ({ page: amenityByDbValue(amenity), count }))
+    .filter((x): x is { page: NonNullable<typeof x.page>; count: number } => x.page !== undefined)
+    .sort((a, b) => b.count - a.count)
     .slice(0, 3)
-    .map(([amenity]) => ({
-      title: `Best ${amenity.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} Breweries`,
-      url: `/amenities/${slugify(amenity)}`,
-      count: amenityCounts.get(amenity),
+    .map(({ page, count }) => ({
+      title: `Best ${page.label} Breweries`,
+      url: amenityPath(page),
+      count,
     }));
 
   const relatedPages = [

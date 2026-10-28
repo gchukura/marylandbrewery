@@ -6,6 +6,8 @@ import PageHero from './PageHero';
 import DirectoryStatsBar from './DirectoryStatsBar';
 import ContentBlock from './ContentBlock';
 import RelatedLinksGrid from './RelatedLinksGrid';
+import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import BreweryTable from '@/components/home/BreweryTable';
 
 // Dynamically import GoogleMap to avoid SSR issues
@@ -71,33 +73,16 @@ export default function DirectoryPageTemplate({
   mapZoom = 10,
   heroImage = null,
 }: DirectoryPageTemplateProps) {
-  // Structured Data - only include if we have breweries
-  const structuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: h1 || 'Breweries',
-    description: introText || 'Maryland breweries directory',
-    mainEntity: {
-      '@type': 'ItemList',
-      numberOfItems: breweries.length,
-      itemListElement: breweries.slice(0, 50).map((brewery, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        item: {
-          '@type': 'Brewery',
-          name: brewery.name || 'Brewery',
-          url: `https://www.marylandbrewery.com/breweries/${brewery.slug || brewery.id}`,
-        },
-      })),
-    },
-  };
+  // Structured data: CollectionPage + BreadcrumbList (src/lib/seo/jsonld.ts)
+  const path = breadcrumbs[breadcrumbs.length - 1]?.url ?? '/';
+  const structuredData = [
+    collectionPage({ name: h1 || 'Breweries', description: introText, path, breweries }),
+    breadcrumbList(breadcrumbs.map((crumb) => ({ name: crumb.name, path: crumb.url }))),
+  ];
 
   return (
     <>
-      <script 
-        type="application/ld+json" 
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} 
-      />
+      <JsonLd data={structuredData} />
 
       <div className="min-h-screen bg-gray-50">
         {/* 1. Hero Section */}

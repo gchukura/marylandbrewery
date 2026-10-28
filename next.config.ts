@@ -73,12 +73,6 @@ const nextConfig: NextConfig = {
         destination: '/',
         permanent: false,
       },
-      // Redirect double-slash city amenity URLs to amenity pages
-      {
-        source: '/cities//:amenity',
-        destination: '/amenities/:amenity',
-        permanent: true,
-      },
     ];
   },
   // Security headers live only here (not in vercel.json)

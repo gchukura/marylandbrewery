@@ -1,41 +1,21 @@
 import { Metadata } from 'next';
 import { getProcessedBreweryData } from '@/lib/db';
-import { slugify } from '@/lib/slug';
+import { AMENITIES, amenityPath, hasAmenity } from '@/lib/amenities';
 import Link from 'next/link';
 import { ChevronRight, Dog, Music, Utensils, TreePine, Gamepad2, Wifi, Car, Calendar, MapPin, Wine, ShoppingBag, Beer, Tv, Flame, Users, Heart, LucideIcon } from 'lucide-react';
 import Image from 'next/image';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { breadcrumbList } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import '@/components/home-v2/styles.css';
 
-export const metadata: Metadata = {
-  title: 'Brewery Amenities & Features - Maryland Brewery Directory',
-  description: 'Browse Maryland breweries by amenities and features. Find dog-friendly breweries, outdoor seating, live music, food options, tours, and more across the state.',
-  alternates: {
-    canonical: '/amenities',
-  },
-  openGraph: {
-    title: 'Brewery Amenities & Features - Maryland Brewery Directory',
-    description: 'Browse Maryland breweries by amenities and features. Find dog-friendly breweries, outdoor seating, live music, and more.',
-    url: 'https://www.marylandbrewery.com/amenities',
-    siteName: 'Maryland Brewery Directory',
-    type: 'website',
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: 'Maryland Brewery Directory - Amenities',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Brewery Amenities & Features - Maryland Brewery Directory',
-    description: 'Browse Maryland breweries by amenities and features.',
-    images: ['/opengraph-image'],
-  },
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Maryland Breweries by Amenity",
+  description: "Find Maryland breweries with a full kitchen, outdoor seating, beer to go, parking, tours and more, with how many offer each.",
+  path: '/amenities',
+});
 
 // Amenity definitions with descriptions - keyed by lowercase amenity name
 const AMENITY_DEFINITIONS: Record<string, {
@@ -270,40 +250,19 @@ export const revalidate = 3600;
 export default async function AmenitiesIndexPage() {
   const processed = await getProcessedBreweryData();
 
-  // Get actual amenities from database and calculate counts
-  const amenityCounts = new Map<string, number>();
-  processed.breweries.forEach((brewery: any) => {
-    const amenities = (brewery.amenities ?? []) as string[];
-    amenities.forEach((amenity: string) => {
-      const key = amenity.toLowerCase().trim();
-      amenityCounts.set(key, (amenityCounts.get(key) || 0) + 1);
-    });
-  });
-
-  // Convert to array and sort by count
-  const items = Array.from(amenityCounts.entries())
-    .filter(([_, count]) => count > 0)
-    .sort((a, b) => b[1] - a[1])
-    .map(([amenityKey, count]) => {
-      // Find the original casing from a brewery
-      let displayName = amenityKey;
-      for (const brewery of processed.breweries) {
-        const amenities = (brewery.amenities ?? []) as string[];
-        const match = amenities.find((a: string) => a.toLowerCase().trim() === amenityKey);
-        if (match) {
-          displayName = match;
-          break;
-        }
-      }
-      
-      return {
-        name: displayName,
-        slug: slugify(displayName),
-        count,
-        url: `/amenities/${slugify(displayName)}`,
-        definition: AMENITY_DEFINITIONS[amenityKey],
-      };
-    });
+  // One card per amenity page; icons and bullet points come from the local card extras
+  const items = AMENITIES.map((def) => {
+    const extras = AMENITY_DEFINITIONS[def.slug === 'full-kitchen' ? 'food' : def.dbValue.toLowerCase()];
+    return {
+      name: def.label,
+      slug: def.slug,
+      count: processed.breweries.filter((b) => hasAmenity(b, def)).length,
+      url: amenityPath(def),
+      definition: { definition: def.description, characteristics: extras?.characteristics ?? [], icon: extras?.icon ?? Beer },
+    };
+  })
+    .filter((item) => item.count > 0)
+    .sort((a, b) => b.count - a.count);
 
   // Stats
   const totalBreweries = processed.breweries.length;
@@ -316,6 +275,7 @@ export default async function AmenitiesIndexPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
+      <JsonLd data={breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Amenities', path: '/amenities' }])} />
       {/* Hero Section */}
       <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
         {/* Hero Image Background */}

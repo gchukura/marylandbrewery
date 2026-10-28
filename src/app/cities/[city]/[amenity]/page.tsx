@@ -11,6 +11,8 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import '@/components/home-v2/styles.css';
 import CityAmenityMapClient from './CityAmenityMapClient';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { cityAmenityMeta } from '@/lib/seo/page-meta';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 function cityAmenityBreweries(breweries: Brewery[], cityName: string, amenityDef: AmenityDefinition): Brewery[] {
@@ -37,40 +39,13 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   const amenityLabel = amenityDef.label;
   const breweries = cityAmenityBreweries(processed.breweries, cityName, amenityDef);
 
-  const title = `${amenityLabel} Breweries in ${cityName}, MD | ${breweries.length} Options`;
-  
-  const description = breweries.length > 0
-    ? `Find ${breweries.length} breweries with ${amenityLabel.toLowerCase()} in ${cityName}, Maryland. Explore local taprooms and brewpubs offering ${amenityLabel.toLowerCase()} with detailed hours, locations, and visitor information.`
-    : `Discover ${cityName}'s craft beer scene. While no breweries currently list ${amenityLabel.toLowerCase()}, check nearby cities for similar options or explore other amenities in ${cityName}, Maryland.`;
-
-  return {
-    title,
-    description,
-    alternates: { canonical: `/cities/${city}/${amenity}` },
+  const displayCity = breweries[0]?.city ?? cityName;
+  return buildMetadata({
+    ...cityAmenityMeta(amenityLabel, displayCity, breweries.length),
+    path: `/cities/${city}/${amenity}`,
     // Thin pages: only index combinations with 3+ breweries
-    robots: isIndexableCityAmenity(breweries.length) ? undefined : { index: false, follow: true },
-    openGraph: {
-      title,
-      description,
-      url: `https://www.marylandbrewery.com/cities/${city}/${amenity}`,
-      siteName: 'Maryland Brewery Directory',
-      type: 'website',
-      images: [
-        {
-          url: '/opengraph-image',
-          width: 1200,
-          height: 630,
-          alt: `${amenityLabel} Breweries in ${cityName}`,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/opengraph-image'],
-    },
-  };
+    noindex: !isIndexableCityAmenity(breweries.length),
+  });
 }
 
 export default async function CityAmenityPage({ params }: { params: Promise<{ city: string; amenity: string }> }) {

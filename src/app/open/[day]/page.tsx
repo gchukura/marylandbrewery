@@ -3,6 +3,8 @@ import { getProcessedBreweryData } from '@/lib/db';
 import PageHero from '@/components/directory/PageHero';
 import Link from 'next/link';
 import { isOpenOnDay } from '@/lib/hours';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { openOnDayMeta } from '@/lib/seo/page-meta';
 import { slugify } from '@/lib/slug';
 
 export const revalidate = 3600; // ISR hourly
@@ -13,42 +15,8 @@ export async function generateMetadata({ params }: { params: Promise<{ day: stri
   const { day: dayParam } = await params;
   const day = dayParam.charAt(0).toUpperCase() + dayParam.slice(1);
   const processed = await getProcessedBreweryData();
-  const list = processed.breweries.filter((b) => {
-    const hours = b.hours;
-    if (!hours) return false;
-    const h = hours[dayParam.toLowerCase() as keyof typeof hours];
-    if (!h || /closed/i.test(h)) return false;
-    return true;
-  });
-
-  return {
-    title: `Breweries Open on ${day} - Maryland Brewery Directory`,
-    description: `Find ${list.length} Maryland breweries open on ${day}s. Complete list of craft breweries, taprooms, and brewpubs with hours for ${day}. Plan your ${day} brewery tour across Baltimore, Annapolis, Frederick, and more cities.`,
-    alternates: {
-      canonical: `/open/${dayParam}`,
-    },
-    openGraph: {
-      title: `Breweries Open on ${day} - Maryland Brewery Directory`,
-      description: `Find ${list.length} Maryland breweries open on ${day}. Complete list of breweries with hours for ${day}.`,
-      url: `https://www.marylandbrewery.com/open/${dayParam}`,
-      siteName: 'Maryland Brewery Directory',
-      type: 'website',
-      images: [
-        {
-          url: '/opengraph-image',
-          width: 1200,
-          height: 630,
-          alt: `Maryland Brewery Directory - Open on ${day}`,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `Breweries Open on ${day} - Maryland Brewery Directory`,
-      description: `Find ${list.length} Maryland breweries open on ${day}. Complete list of breweries with hours for ${day}.`,
-      images: ['/opengraph-image'],
-    },
-  };
+  const list = processed.breweries.filter((b) => isOpenOnDay(b.hours, dayParam.toLowerCase()));
+  return buildMetadata({ ...openOnDayMeta(day, list.length), path: `/open/${dayParam.toLowerCase()}` });
 }
 
 export async function generateStaticParams() {

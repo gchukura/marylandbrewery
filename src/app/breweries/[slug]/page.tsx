@@ -4,9 +4,11 @@ import { deslugify } from '@/lib/slug';
 import { DAYS, isOpenAt, nextOpening, zonedDayAndMinutes } from '@/lib/hours';
 import { slugify } from '@/lib/slug';
 import SimpleBreweryPageTemplate from '@/components/templates/SimpleBreweryPageTemplate';
-import { generateBreweryTitle, generateEnhancedBreweryDescription } from '@/lib/seo-utils';
+import { generateEnhancedBreweryDescription } from '@/lib/seo-utils';
 import { getBreweryReviews, getBreweryArticles } from '@/lib/db';
 import { generateAboutBreweryContent } from '@/lib/brewery-content-utils';
+import { buildMetadata, pickDescription } from '@/lib/seo/metadata';
+import { breweryMeta } from '@/lib/seo/page-meta';
 import { BreweryArticle } from '@/types/brewery';
 
 interface BreweryPageProps {
@@ -60,8 +62,8 @@ export async function generateMetadata({ params }: BreweryPageProps) {
     };
   }
 
-  const title = generateBreweryTitle(brewery.name, brewery.city);
-  const description = generateEnhancedBreweryDescription({
+  const meta = breweryMeta(brewery);
+  const enhanced = generateEnhancedBreweryDescription({
     name: brewery.name,
     city: brewery.city,
     county: brewery.county,
@@ -74,35 +76,12 @@ export async function generateMetadata({ params }: BreweryPageProps) {
     food: brewery.food,
     outdoorSeating: brewery.outdoorSeating,
   });
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: `/breweries/${slug}`,
-    },
-    openGraph: {
-      title,
-      description,
-      type: 'website',
-      url: `https://www.marylandbrewery.com/breweries/${slug}`,
-      siteName: 'Maryland Brewery Directory',
-      images: [
-        {
-          url: `https://www.marylandbrewery.com/api/og?title=${encodeURIComponent(brewery.name)}&location=${encodeURIComponent(brewery.city)}`,
-          width: 1200,
-          height: 630,
-          alt: `${brewery.name} - Maryland Brewery`,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: [`https://www.marylandbrewery.com/api/og?title=${encodeURIComponent(brewery.name)}&location=${encodeURIComponent(brewery.city)}`],
-    },
-  };
+  return buildMetadata({
+    title: meta.title,
+    // The per-brewery description when it fits, otherwise the standard one
+    description: pickDescription([enhanced, meta.description]),
+    path: `/breweries/${brewery.slug}`,
+  });
 }
 
 export default async function BreweryPage({ params }: BreweryPageProps) {

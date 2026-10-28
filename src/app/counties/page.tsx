@@ -6,36 +6,14 @@ import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import { buildMetadata } from '@/lib/seo/metadata';
 import '@/components/home-v2/styles.css';
 
-export const metadata: Metadata = {
-  title: 'Maryland Counties with Breweries - Browse by County',
-  description: 'Browse all 24 Maryland counties with breweries. Find breweries by county across Maryland. Explore Baltimore City, Anne Arundel, Montgomery, and more.',
-  alternates: {
-    canonical: '/counties',
-  },
-  openGraph: {
-    title: 'Maryland Counties with Breweries - Browse by County',
-    description: 'Browse all 24 Maryland counties with breweries. Find breweries by county across Maryland.',
-      url: 'https://www.marylandbrewery.com/counties',
-    siteName: 'Maryland Brewery Directory',
-    type: 'website',
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: 'Maryland Brewery Directory - Counties',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Maryland Counties with Breweries - Browse by County',
-    description: 'Browse all 24 Maryland counties with breweries. Find breweries by county across Maryland.',
-    images: ['/opengraph-image'],
-  },
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Maryland Breweries by County",
+  description: "Browse Maryland craft breweries county by county, with brewery counts, maps and the towns in each county.",
+  path: '/counties',
+});
 
 export const revalidate = 3600;
 

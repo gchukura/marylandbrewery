@@ -3,36 +3,14 @@ import { getProcessedBreweryData } from '@/lib/db';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 import { amenityByDbValue, amenityPath } from '@/lib/amenities';
 import { breweryScore } from '@/lib/best-breweries';
+import { buildMetadata } from '@/lib/seo/metadata';
 import { slugify } from '@/lib/slug';
 
-export const metadata: Metadata = {
-  title: 'Best Breweries in Maryland | Top-Rated Craft Breweries 2025',
-  description: 'Find the best breweries in Maryland ranked by ratings and reviews. Our curated list features the top craft breweries across the state, from Baltimore to Frederick and beyond.',
-  alternates: {
-    canonical: '/best-breweries',
-  },
-  openGraph: {
-    title: 'Best Breweries in Maryland | Top-Rated Craft Breweries',
-    description: 'Discover the best breweries in Maryland ranked by ratings and reviews. Find top craft breweries across the state.',
-    url: 'https://www.marylandbrewery.com/best-breweries',
-    siteName: 'Maryland Brewery Directory',
-    type: 'website',
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: 'Best Breweries in Maryland',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Best Breweries in Maryland | Top-Rated Craft Breweries',
-    description: 'Discover the best breweries in Maryland ranked by ratings and reviews.',
-    images: ['/opengraph-image'],
-  },
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Best Breweries in Maryland",
+  description: "Maryland's top-rated craft breweries, ranked by Google rating and review volume, with best-of lists for the biggest beer towns.",
+  path: '/best-breweries',
+});
 
 
 function computeBestBreweriesStats(breweries: any[]) {

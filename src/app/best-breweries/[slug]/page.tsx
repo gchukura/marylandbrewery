@@ -15,6 +15,8 @@ import { join } from 'path';
 import '@/components/home-v2/styles.css';
 import CityBreweriesMapClient from '../../cities/[city]/breweries/CityBreweriesMapClient';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { bestBreweriesMeta } from '@/lib/seo/page-meta';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 
 
@@ -49,43 +51,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const cityName = deslugify(slugWithoutMd);
   const cityBreweries = await getBreweriesByCity(cityName);
   if (cityBreweries.length > 0) {
-    const bestBreweries = cityBreweries
-      .map((brewery: any) => ({
-        ...brewery,
-        score: breweryScore(brewery),
-      }))
-      .sort((a: any, b: any) => b.score - a.score);
-
-    const title = `Best Breweries in ${cityName}, MD | Top-Rated Craft Breweries`;
-    const description = `Find the best breweries in ${cityName}, Maryland ranked by ratings and reviews. Discover ${bestBreweries.length} top-rated craft breweries in ${cityName}.`;
-
-    return {
-      title,
-      description,
-      alternates: { canonical: `/best-breweries/${slug}` },
-      openGraph: {
-        title,
-        description,
-        url: `https://www.marylandbrewery.com/best-breweries/${slug}`,
-        siteName: 'Maryland Brewery Directory',
-        type: 'website',
-        images: [
-          {
-            url: '/opengraph-image',
-            width: 1200,
-            height: 630,
-            alt: `Best Breweries in ${cityName}, MD`,
-          },
-        ],
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title,
-        description,
-        images: ['/opengraph-image'],
-      },
-    };
+    const displayName = cityBreweries[0].city;
+    return buildMetadata({ ...bestBreweriesMeta(displayName, cityBreweries.length), path: `/best-breweries/${slugWithoutMd}` });
   }
+
 
   return {
     title: 'Location Not Found',

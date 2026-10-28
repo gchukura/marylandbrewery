@@ -3,38 +3,16 @@ import { getProcessedBreweryData } from '@/lib/db';
 import PageHero from '@/components/directory/PageHero';
 import Link from 'next/link';
 import { isOpenAt } from '@/lib/hours';
+import { buildMetadata } from '@/lib/seo/metadata';
 import { slugify } from '@/lib/slug';
 
 export const revalidate = 3600; // ISR hourly
 
-export const metadata: Metadata = {
-  title: 'Breweries Open Now - Maryland Brewery Directory',
-  description: 'Find Maryland breweries currently open right now. Real-time list of breweries open across the state with current hours and closing times. Updated hourly. Plan your visit to open taprooms, brewpubs, and craft breweries near you.',
-  alternates: {
-    canonical: '/open-now',
-  },
-  openGraph: {
-    title: 'Breweries Open Now - Maryland Brewery Directory',
-    description: 'Find Maryland breweries currently open. Real-time list of breweries open now across the state.',
-    url: 'https://www.marylandbrewery.com/open-now',
-    siteName: 'Maryland Brewery Directory',
-    type: 'website',
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: 'Maryland Brewery Directory - Open Now',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Breweries Open Now - Maryland Brewery Directory',
-    description: 'Find Maryland breweries currently open. Real-time list of breweries open now across the state.',
-    images: ['/opengraph-image'],
-  },
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Breweries Open Now in Maryland",
+  description: "Maryland breweries open right now, grouped by city, with today's closing times.",
+  path: '/open-now',
+});
 
 export default async function OpenNowPage() {
   const processed = await getProcessedBreweryData();

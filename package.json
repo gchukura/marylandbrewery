@@ -35,7 +35,8 @@
     "data:attractions": "tsx scripts/fetch-maryland-attractions.ts",
     "seo:count-urls": "tsx scripts/count-sitemap-urls.ts",
     "test:e2e": "playwright test",
-    "db:types": "supabase gen types typescript --linked --schema public > src/lib/db/database.types.ts"
+    "db:types": "supabase gen types typescript --linked --schema public > src/lib/db/database.types.ts",
+    "seo:fixture": "tsx scripts/dump-seo-fixture.ts"
   },
   "dependencies": {
     "@googleapis/sheets": "^18.1.1",

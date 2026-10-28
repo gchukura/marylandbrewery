@@ -103,7 +103,7 @@ const organizationSchema = {
   '@type': 'Organization',
   name: 'Maryland Brewery',
   url: 'https://www.marylandbrewery.com',
-  logo: 'https://www.marylandbrewery.com/logo.png',
+  logo: 'https://www.marylandbrewery.com/icon-512.png',
   sameAs: [
     'https://twitter.com/marylandbrewery'
   ]

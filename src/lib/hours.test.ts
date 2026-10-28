@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDayHours, isOpenAt, isOpenOnDay, nextOpening, openingHoursSpecification, parseDayHours, type WeeklyHours } from './hours';
+import { formatDayHours, isOpenAt, isOpenOnDay, nextOpening, openingHoursSpecification, openStatusLabel, parseDayHours, type WeeklyHours } from './hours';
 
 const h = (hh: number, mm = 0) => hh * 60 + mm;
 
@@ -100,5 +100,20 @@ describe('openingHoursSpecification', () => {
       { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Tuesday', opens: '11:00', closes: '21:00' },
       { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Friday', opens: '12:00', closes: '02:00' },
     ]);
+  });
+});
+
+describe('openStatusLabel (the status badge)', () => {
+  const hours: WeeklyHours = { monday: 'Closed', tuesday: '11:00 – 9:00 PM', thursday: '4:30 – 10:00 PM' };
+
+  it('reads like the design: "Open until 9 PM", "Closed · opens Thu 4:30 PM"', () => {
+    expect(openStatusLabel(hours, new Date('2026-10-27T16:00:00Z'))).toEqual({ open: true, label: 'Open until 9 PM' });
+    expect(openStatusLabel(hours, new Date('2026-10-28T02:30:00Z'))).toEqual({ open: false, label: 'Closed · opens Thu 4:30 PM' });
+    expect(openStatusLabel(hours, new Date('2026-10-27T12:00:00Z'))).toEqual({ open: false, label: 'Closed · opens 11 AM' });
+  });
+
+  it('is null without usable hours', () => {
+    expect(openStatusLabel({}, new Date('2026-10-27T16:00:00Z'))).toBeNull();
+    expect(openStatusLabel(undefined)).toBeNull();
   });
 });

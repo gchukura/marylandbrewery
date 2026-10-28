@@ -166,7 +166,7 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
             Breweries <span className="text-brand-red">({filteredBreweries.length})</span>
           </CardTitle>
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
             className="flex items-center gap-2 border-line-strong text-brand-red hover:bg-cream hover:border-line-strong"
@@ -191,7 +191,7 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
                 className="w-full pl-10"
               />
             </div>
-            <Button variant="outline" onClick={clearFilters}>
+            <Button variant="secondary" onClick={clearFilters}>
               Clear
             </Button>
           </div>
@@ -310,7 +310,7 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
                     </div>
                   </td>
                   <td className="p-4">
-                    <Badge className="capitalize bg-cream text-brand-red border border-line-strong">
+                    <Badge className="capitalize">
                       {brewery.type}
                     </Badge>
                   </td>
@@ -328,7 +328,7 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
             </div>
             <div className="flex gap-2">
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
@@ -339,7 +339,7 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
                 Page {currentPage} of {totalPages}
               </span>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}

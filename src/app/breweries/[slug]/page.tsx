@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { getBreweryBySlug, getProcessedBreweryData, getNearbyBreweries, throwDuringBuild } from '@/lib/db';
 import { deslugify } from '@/lib/slug';
 import { DAYS, isOpenAt, nextOpening, zonedDayAndMinutes } from '@/lib/hours';
@@ -125,6 +125,10 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
   const listed = processed.breweries.find((b) => b.slug === slug || b.id === slug);
   if (!listed) {
     notFound();
+  }
+  // /breweries/{id} is a duplicate of the slug URL
+  if (listed.slug && slug !== listed.slug) {
+    permanentRedirect(`/breweries/${listed.slug}`);
   }
 
   // The cached list leaves out review themes and beers; load this brewery's full record

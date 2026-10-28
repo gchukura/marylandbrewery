@@ -80,9 +80,14 @@ export default function NewsletterSignup() {
               
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1 relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-ink" />
+                  <label htmlFor="newsletter-email" className="sr-only">
+                    Email address
+                  </label>
+                  <Mail aria-hidden="true" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-ink" />
                   <input
+                    id="newsletter-email"
                     type="email"
+                    autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email address"

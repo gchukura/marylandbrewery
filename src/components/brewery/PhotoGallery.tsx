@@ -100,7 +100,7 @@ export default function PhotoGallery({ photos, name }: { photos: string[]; name:
         aria-label={`${name} photos`}
         onKeyDown={onKeyDown}
         onClick={(e) => e.target === dialogRef.current && close()}
-        className="m-0 h-dvh max-h-none w-full max-w-none bg-ink/95 p-0 text-paper backdrop:bg-ink/80"
+        className="on-dark m-0 h-dvh max-h-none w-full max-w-none bg-ink/95 p-0 text-paper backdrop:bg-ink/80"
       >
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between px-4 py-3">

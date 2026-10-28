@@ -1,110 +1,23 @@
-/**
- * Neighborhood Utility Functions
- * 
- * Functions for parsing and validating neighborhood slugs
- * Leverages enriched neighborhood data (city field) for accurate matching
- */
-
-import { deslugify } from '@/lib/slug';
-import { getNeighborhoodsByCity, getNeighborhoodBySlug } from '@/lib/db';
-import type { Tables } from '@/lib/db';
+import { cache } from 'react';
+import { getAllNeighborhoods } from '@/lib/db';
+import { legacyNeighborhoodSlug } from '@/lib/neighborhoods';
 
 /**
- * Parse a neighborhood slug and return neighborhood data
- * 
- * Pattern: [neighborhood-slug]-[city-slug]-md
- * Example: "edgemoor-bethesda-md"
- * 
- * Uses enriched city field to verify the match
- * 
- * @param slug - The slug to parse (e.g., "edgemoor-bethesda-md")
- * @returns Neighborhood data with city info, or null if not found
+ * Old URL slug -> /neighborhoods slug, built from every row: each neighborhood answers to its
+ * own slug and to the "{neighborhood}-{city}-md" slug the old sitemap generated. Exact matches
+ * only; anything else is not a neighborhood. Built once per request (a Map can't go in unstable_cache).
  */
-export async function parseNeighborhoodSlug(
-  slug: string
-): Promise<{ neighborhood: Tables<'maryland_neighborhoods'>; cityName: string; citySlug: string } | null> {
-  // Validation: must match neighborhood pattern
-  if (!isNeighborhoodSlug(slug)) {
-    return null;
+const legacyNeighborhoodIndex = cache(async (): Promise<Map<string, string>> => {
+  const index = new Map<string, string>();
+  for (const n of await getAllNeighborhoods()) {
+    index.set(n.slug, n.slug);
+    const legacy = legacyNeighborhoodSlug(n);
+    if (legacy) index.set(legacy, n.slug);
   }
+  return index;
+});
 
-  const parts = slug.split('-');
-  
-  // Remove 'md' from the end
-  const slugWithoutMd = parts.slice(0, -1).join('-');
-  
-  // Strategy 1: Try simple split (assumes neighborhood-slug is different from city-slug)
-  // Last part before 'md' is city slug
-  const simpleCitySlug = parts[parts.length - 2];
-  const simpleNeighborhoodSlug = parts.slice(0, -2).join('-');
-  
-  if (simpleNeighborhoodSlug && simpleCitySlug) {
-    const cityName = deslugify(simpleCitySlug);
-    
-    // Get neighborhoods for this city
-    const cityNeighborhoods = await getNeighborhoodsByCity(cityName);
-    
-    // Find neighborhood by slug
-    const neighborhood = cityNeighborhoods.find(
-      n => n.slug === simpleNeighborhoodSlug &&
-           n.city?.toLowerCase() === cityName.toLowerCase()
-    );
-    
-    if (neighborhood) {
-      return { neighborhood, cityName, citySlug: simpleCitySlug };
-    }
-  }
-  
-  // Strategy 2: Try different splits - assume city slug could be 1-3 words
-  // This handles cases where city name has multiple words (e.g., "silver-spring")
-  for (let cityWords = 1; cityWords <= Math.min(3, parts.length - 2); cityWords++) {
-    const potentialCitySlug = parts.slice(-cityWords - 1, -1).join('-');
-    const potentialNeighborhoodSlug = parts.slice(0, -cityWords - 1).join('-');
-    
-    if (potentialNeighborhoodSlug && potentialCitySlug) {
-      const potentialCityName = deslugify(potentialCitySlug);
-      const cityNeighborhoods = await getNeighborhoodsByCity(potentialCityName);
-      
-      const foundNeighborhood = cityNeighborhoods.find(
-        n => n.slug === potentialNeighborhoodSlug &&
-             n.city?.toLowerCase() === potentialCityName.toLowerCase()
-      );
-      
-      if (foundNeighborhood) {
-        return { 
-          neighborhood: foundNeighborhood, 
-          cityName: potentialCityName, 
-          citySlug: potentialCitySlug 
-        };
-      }
-    }
-  }
-  
-  // Strategy 3: Fallback - try matching the entire slug (minus 'md') as neighborhood slug
-  // Then use the neighborhood's city field
-  const fallbackNeighborhood = await getNeighborhoodBySlug(slugWithoutMd);
-  if (fallbackNeighborhood && fallbackNeighborhood.city) {
-    const cityName = fallbackNeighborhood.city;
-    const citySlug = cityName.toLowerCase().replace(/\s+/g, '-');
-    
-    // Verify the slug structure matches
-    if (slug.endsWith(`-${citySlug}-md`)) {
-      return { 
-        neighborhood: fallbackNeighborhood, 
-        cityName, 
-        citySlug 
-      };
-    }
-  }
-  
-  return null;
-}
-
-/** Whether a slug has the old {neighborhood}-{city}-md shape. */
-function isNeighborhoodSlug(slug: string): boolean {
-  const parts = slug.split('-');
-  // {neighborhood}-{city}-md has at least 3 parts (e.g. "canton-baltimore-md").
-  // City slugs like "havre-de-grace-md" also pass; parseNeighborhoodSlug returns null for
-  // them because no neighborhood matches, and callers fall through to city handling.
-  return parts.length >= 3 && slug.endsWith('-md');
+/** The neighborhood an old URL slug ("canton-baltimore-md" or "canton") refers to, or null. */
+export async function resolveLegacyNeighborhoodSlug(slug: string): Promise<string | null> {
+  return (await legacyNeighborhoodIndex()).get(slug) ?? null;
 }

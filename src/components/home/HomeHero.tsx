@@ -35,7 +35,7 @@ export default function HomeHero({
   return (
     <section className="grid grid-cols-[minmax(0,1fr)] md:min-h-[560px] md:grid-rows-[1fr_auto]">
       {/* Photo: row 1 on phones (a card), rows 1-2 from md (full bleed) */}
-      <div className="relative col-start-1 row-start-1 mx-3 mt-3 h-[300px] overflow-hidden rounded-hero md:row-end-3 md:mx-0 md:mt-0 md:h-auto md:rounded-none">
+      <div className="on-dark relative col-start-1 row-start-1 mx-3 mt-3 h-[300px] overflow-hidden rounded-hero md:row-end-3 md:mx-0 md:mt-0 md:h-auto md:rounded-none">
         <Image
           src={photo.src}
           alt={photo.alt}

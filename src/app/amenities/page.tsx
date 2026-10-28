@@ -7,6 +7,8 @@ import Image from 'next/image';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { buildMetadata } from '@/lib/seo/metadata';
+import { breadcrumbList } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import '@/components/home-v2/styles.css';
 
 export const metadata: Metadata = buildMetadata({
@@ -273,6 +275,7 @@ export default async function AmenitiesIndexPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
+      <JsonLd data={breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Amenities', path: '/amenities' }])} />
       {/* Hero Section */}
       <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
         {/* Hero Image Background */}

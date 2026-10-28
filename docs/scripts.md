@@ -33,7 +33,7 @@ The maintenance scripts live in `scripts/*.ts` and run with `tsx` through the np
 | `data:enrich:amenities` | Infer missing amenity flags from review text | yes |
 | `data:attractions` | Fetch Maryland attractions from Google Places into `maryland_attractions` | yes |
 | `seo:count-urls` | Estimate the number of sitemap URLs (currently broken, see below) | no |
-| `indexnow` | Submit every URL in the live sitemap to IndexNow | no |
+| `indexnow` | Submit live sitemap URLs to IndexNow (all, or only new ones; runs after each production deploy) | no |
 | `lint:links` | Statically check internal `href`s against `src/app` routes (runs in CI) | no |
 | `seo:check` | Crawl every sitemap URL of a running build: status, redirects, canonical, noindex, title/description length | no |
 | `seo:fixture` | Refresh the real-name snapshot the page-title test uses | no |
@@ -239,8 +239,8 @@ What it does: Checks that the IndexNow key file `https://www.marylandbrewery.com
 
 - Env: none.
 - Writes to Supabase: **no**. It makes an external POST to IndexNow.
-- Flags: none.
-- How often: after a production deploy that adds or changes many pages. Do not run it on every small change, because IndexNow can rate-limit (HTTP 429).
+- Flags: `--previous <file>` submits only sitemap URLs missing from that JSON list (every URL if the file does not exist). `--save <file>` writes the current sitemap URLs there after a successful submission. It exits with code 1 if any batch fails.
+- How often: automatically. `.github/workflows/indexnow.yml` runs it with both flags after every successful production deploy, so each deploy submits only new pages (it keeps the URL list as an Actions artifact). Pages whose content changed are not resubmitted; the sitemap's `lastmod` is the build time, so it cannot tell them apart. Run it by hand, with no flags, only to resubmit everything after a large content change. Do not do that often, because IndexNow can rate-limit (HTTP 429).
 
 ### `npm run lint:links`
 

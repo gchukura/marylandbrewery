@@ -66,3 +66,11 @@ describe('buildMetadata', () => {
     expect(String(m.description).length).toBeLessThanOrEqual(MAX_DESCRIPTION_LENGTH);
   });
 });
+
+describe('neighborhoodMeta', () => {
+  it("doesn't repeat a city a neighborhood is named after", () => {
+    expect(neighborhoodMeta('Gaithersburg', 'Gaithersburg', 12).title).toBe('Breweries near Gaithersburg');
+    expect(neighborhoodMeta('Gaithersburg', 'Gaithersburg', 12).description).not.toMatch(/Gaithersburg.*Gaithersburg/);
+    expect(neighborhoodMeta('Canton', 'Baltimore', 12).title).toBe('Breweries near Canton, Baltimore');
+  });
+});

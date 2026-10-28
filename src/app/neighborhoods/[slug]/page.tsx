@@ -16,6 +16,7 @@ import {
   isIndexableNeighborhood,
   isListedAttraction,
   neighborhoodPath,
+  neighborhoodPlace,
 } from '@/lib/neighborhoods';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { neighborhoodMeta } from '@/lib/seo/page-meta';
@@ -128,14 +129,14 @@ export default async function NeighborhoodPage({
     <>
       <JsonLd
         data={collectionPage({
-          name: `Breweries near ${neighborhood.name}, ${city}`,
+          name: `Breweries near ${neighborhoodPlace(neighborhood.name, city)}`,
           path: pagePath,
           breweries,
         })}
       />
       <ListingPage
         scope="neighborhood"
-        title={`Breweries near ${neighborhood.name}, ${city}`}
+        title={`Breweries near ${neighborhoodPlace(neighborhood.name, city)}`}
         breadcrumbs={[
           { name: 'Home', path: '/' },
           { name: 'Cities', path: '/cities' },

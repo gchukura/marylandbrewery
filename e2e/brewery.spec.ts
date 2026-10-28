@@ -66,7 +66,7 @@ test('a full page shows every section', async ({ page }) => {
   await page.goto(FULL);
   for (const name of [
     'About 7 Locks Brewing',
-    'On tap',
+    'Beers',
     'What people mention',
     'In the news',
     'Nearby breweries',
@@ -89,7 +89,7 @@ test('a sparse page hides empty sections instead of printing placeholders', asyn
 }) => {
   await page.goto(SPARSE);
   await expect(page.locator('h1')).toHaveText('Brothers Ridge Cider');
-  for (const name of ['On tap', 'Hours'])
+  for (const name of ['Beers', 'On tap', 'Hours'])
     await expect(page.getByRole('heading', { name, exact: true })).toHaveCount(
       0
     );
@@ -132,4 +132,21 @@ test.describe('phone', () => {
       expect(scroll, `${url} overflows sideways`).toBeLessThanOrEqual(viewport);
     }
   });
+});
+
+test('beers are dated, and breweries without them link to their Untappd tap list', async ({
+  page,
+}) => {
+  await page.goto(FULL);
+  await expect(
+    page.getByText(/^Lineup as of \w+ \d{4}; it may have changed\./)
+  ).toBeVisible();
+
+  await page.goto('/breweries/wet-city-brewing');
+  await expect(
+    page.getByRole('heading', { name: 'On tap', exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: /See what's on tap/ })
+  ).toHaveAttribute('href', /untappd\.com/);
 });

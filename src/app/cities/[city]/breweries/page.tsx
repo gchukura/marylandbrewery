@@ -13,6 +13,7 @@ import { buildMetadata } from '@/lib/seo/metadata';
 import { cityMeta } from '@/lib/seo/page-meta';
 import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
 import JsonLd from '@/components/seo/JsonLd';
+import { canOptimizeImage } from '@/lib/images';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 // Build all city pages (no limit)
@@ -165,7 +166,8 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
         {/* City Hero Image Background */}
         {cityHeroImage && (
           <div className="absolute inset-0">
-            {cityHeroImage.startsWith('http') ? (
+            {!canOptimizeImage(cityHeroImage) ? (
+              // eslint-disable-next-line @next/next/no-img-element -- host outside next.config remotePatterns
               <img 
                 src={cityHeroImage} 
                 alt={`${cityName} breweries`}

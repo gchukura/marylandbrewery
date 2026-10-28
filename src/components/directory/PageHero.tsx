@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
+import { canOptimizeImage } from '@/lib/images';
 import '@/components/home-v2/styles.css';
 
 interface BreadcrumbItem {
@@ -26,7 +27,8 @@ export default function PageHero({ h1, introText, breadcrumbs, heroImage, heroIm
       {/* Hero Image Background */}
       {heroImage && (
         <div className="absolute inset-0">
-          {heroImage.startsWith('http') ? (
+          {!canOptimizeImage(heroImage) ? (
+            // eslint-disable-next-line @next/next/no-img-element -- host outside next.config remotePatterns
             <img 
               src={heroImage} 
               alt={altText}

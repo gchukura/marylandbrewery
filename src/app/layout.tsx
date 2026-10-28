@@ -4,7 +4,6 @@ import { Fraunces, Inter } from "next/font/google";
 import SiteHeader from "@/components/layout/SiteHeader";
 import SiteFooter from "@/components/layout/SiteFooter";
 import NewsletterSignup from "@/components/ui/NewsletterSignup";
-import AdSenseScript from "@/components/ads/AdSenseScript";
 import "./globals.css";
 
 // Fonts are exposed only as CSS variables; globals.css maps them to font-display and font-sans
@@ -145,6 +144,13 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* Google AdSense: the snippet exactly as AdSense gives it, in the server HTML <head> so the
+            AdSense crawler finds it (next/script's lazyOnload injected it only after load) */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4357894821158922"
+          crossOrigin="anonymous"
+        ></script>
         {/* Ahrefs Analytics */}
         <script src="https://analytics.ahrefs.com/analytics.js" data-key="feHAts9QQBm4W+I9itRXzg" async></script>
         {/* Favicons handled by Next.js from /src/app/icon.png, favicon.ico, apple-icon.png */}
@@ -152,7 +158,6 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#141414" />
       </head>
       <body className="flex min-h-screen flex-col bg-paper font-sans text-ink antialiased">
-        <AdSenseScript />
         <SiteHeader />
         <main id="main" className="flex min-h-0 flex-1 flex-col">
           {children}

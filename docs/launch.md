@@ -54,7 +54,14 @@ Local build of this branch (new pages):
 
 Local scores for pages with a map are not comparable to production. The browser Maps key rejects `localhost` (`RefererNotAllowedMapError`), and `/_vercel/insights` 404s, so best practices drops. Google Maps' `webgl.js` also costs 2.4 s of main-thread time on the brewery page locally (TBT 1.5 s, against 29 ms in production).
 
-Open: LCP on the homepage and brewery pages is the hero photo at around 5 s simulated mobile, over the 2.5 s budget. CLS is 0 everywhere. The likely levers are the Fraunces font weight and the hero image size. That is a design call left for a follow-up. Lighthouse CI (`.github/workflows/lighthouse.yml`) reports these as warnings on each PR.
+Rerun on 2026-10-29 against production, three runs each (Lighthouse 12, mobile):
+
+| Page | Performance | LCP | TBT |
+| --- | --- | --- | --- |
+| `/` | 97, 97, 97 | 2.6 s, 2.6 s, 2.6 s | 10–20 ms |
+| `/breweries/7-locks-brewing` | 90, 97, 98 | 2.8 s, 2.1 s, 2.3 s | 40–210 ms |
+
+The ~5 s LCP in the table above was a first run against a cold cache. Warm, the homepage is 0.1 s over the 2.5 s LCP budget. Its LCP element is the hero photo. TTFB is about 40% of LCP, and Lighthouse estimates 119 KiB of savings because a landscape photo is cropped into a 300 px-tall card on phones. A tighter crop of the hero photos in `src/config/home.ts` (then `npm run home:blur`) is the remaining lever. CLS is 0 everywhere. Lighthouse CI (`.github/workflows/lighthouse.yml`) reports these as warnings on each PR.
 
 ## Accessibility (axe)
 

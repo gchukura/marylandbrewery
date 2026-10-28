@@ -27,6 +27,7 @@ Every variable is listed with a comment in `.env.example`. In short:
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Everything. The build prerenders pages from Supabase. | `.env.local`, Vercel (Production + Preview), GitHub Actions secrets (CI) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Scripts that write data | `.env.local` only |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Maps on the site | `.env.local`, Vercel |
+| `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` | Map ID for the site's maps (advanced markers need one; without it maps show a placeholder). Google Cloud > Google Maps Platform > Map Management > Create Map ID, type JavaScript, Vector | `.env.local`, Vercel |
 | `GOOGLE_MAPS_API_KEY` | Scripts that call Places/Geocoding: a separate server key ([below](#google-server-key)) | `.env.local` only |
 | `ADMIN_SYNC_TOKEN` | `/api/sync`, `/api/revalidate` | `.env.local`, Vercel, GitHub Actions secret |
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_SERVICE_ACCOUNT_KEY`, `GOOGLE_SHEET_ID` | Contact form | Vercel |

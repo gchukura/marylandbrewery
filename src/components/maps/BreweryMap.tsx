@@ -12,6 +12,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from 'react';
 import Link from 'next/link';
@@ -299,13 +300,58 @@ function MapCard({
   );
 }
 
-function Unavailable({ className }: { className?: string }) {
+// Google calls window.gm_authFailure when it rejects the key (wrong API restrictions, a site that
+// isn't allowed, billing). It then draws its own error screen and leaves a half-initialized map
+// that throws on every marker update; we swap in the placeholder instead.
+// Installed when this module loads (browser only), before any map requests the Maps script.
+let authFailed = false;
+const authListeners = new Set<() => void>();
+
+if (typeof window !== 'undefined') {
+  const w = window as Window & { gm_authFailure?: () => void };
+  const previous = w.gm_authFailure;
+  w.gm_authFailure = () => {
+    authFailed = true;
+    authListeners.forEach((listener) => listener());
+    previous?.();
+  };
+}
+
+function subscribeAuthFailure(listener: () => void) {
+  authListeners.add(listener);
+  return () => {
+    authListeners.delete(listener);
+  };
+}
+
+/** True once Google has rejected the API key on this page. */
+function useMapAuthFailed(): boolean {
+  return useSyncExternalStore(
+    subscribeAuthFailure,
+    () => authFailed,
+    () => false
+  );
+}
+
+function Unavailable({
+  className,
+  reason,
+}: {
+  className?: string;
+  reason?: 'auth';
+}) {
   const missing = [
     !API_KEY && 'NEXT_PUBLIC_GOOGLE_MAPS_API_KEY',
     !MAP_ID && 'NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID',
   ]
     .filter(Boolean)
     .join(' and ');
+  const hint =
+    reason === 'auth'
+      ? 'Google rejected the API key: check its API restrictions (Maps JavaScript API) and allowed websites. See the console for the error code.'
+      : missing
+        ? `Set ${missing} in .env.local.`
+        : null;
   return (
     <div
       className={cn(
@@ -315,10 +361,8 @@ function Unavailable({ className }: { className?: string }) {
     >
       <p className="m-0 max-w-xs">
         The map isn&apos;t available right now; the list has every brewery.
-        {process.env.NODE_ENV === 'development' && (
-          <span className="mt-2 block font-mono text-xs">
-            Set {missing} in .env.local.
-          </span>
+        {process.env.NODE_ENV === 'development' && hint && (
+          <span className="mt-2 block font-mono text-xs">{hint}</span>
         )}
       </p>
     </div>
@@ -355,35 +399,42 @@ export default function BreweryMap({
   single = false,
   className,
 }: BreweryMapProps) {
+  const authFailed = useMapAuthFailed();
   if (!API_KEY || !MAP_ID) return <Unavailable className={className} />;
   const first = points.find(hasCoords);
+  // The boundary stays mounted when the map is swapped out: unmounting a map whose key Google
+  // rejected can throw, and that must land here, not on the app's error page
   return (
     <MapErrorBoundary className={className}>
-      <div className={cn('h-full w-full bg-map', className)}>
-        <APIProvider apiKey={API_KEY}>
-          <Map
-            mapId={MAP_ID}
-            defaultCenter={
-              single && first ? position(first.brewery) : MARYLAND_CENTER
-            }
-            defaultZoom={single ? 14 : 8}
-            gestureHandling={single ? 'cooperative' : 'greedy'}
-            disableDefaultUI
-            zoomControl
-            fullscreenControl={!single}
-            clickableIcons={false}
-            className="h-full w-full"
-          >
-            <Markers
-              points={points}
-              visible={visible}
-              highlighted={highlighted}
-              onHighlight={onHighlight}
-              single={single}
-            />
-          </Map>
-        </APIProvider>
-      </div>
+      {authFailed ? (
+        <Unavailable className={className} reason="auth" />
+      ) : (
+        <div className={cn('h-full w-full bg-map', className)}>
+          <APIProvider apiKey={API_KEY}>
+            <Map
+              mapId={MAP_ID}
+              defaultCenter={
+                single && first ? position(first.brewery) : MARYLAND_CENTER
+              }
+              defaultZoom={single ? 14 : 8}
+              gestureHandling={single ? 'cooperative' : 'greedy'}
+              disableDefaultUI
+              zoomControl
+              fullscreenControl={!single}
+              clickableIcons={false}
+              className="h-full w-full"
+            >
+              <Markers
+                points={points}
+                visible={visible}
+                highlighted={highlighted}
+                onHighlight={onHighlight}
+                single={single}
+              />
+            </Map>
+          </APIProvider>
+        </div>
+      )}
     </MapErrorBoundary>
   );
 }

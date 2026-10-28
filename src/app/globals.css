@@ -84,19 +84,6 @@
 }
 
 @layer components {
-  /* Faint checkered texture behind page heroes */
-  .md-pattern-bg {
-    background-color: var(--color-cream);
-    background-image:
-      linear-gradient(45deg, var(--color-line) 25%, transparent 25%),
-      linear-gradient(-45deg, var(--color-line) 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, var(--color-line) 75%),
-      linear-gradient(-45deg, transparent 75%, var(--color-line) 75%);
-    background-size: 20px 20px;
-    background-position: 0 0, 0 10px, 10px -10px, -10px 0;
-    opacity: 0.3;
-  }
-
   /* Text pages (src/components/layout/ContentPage.tsx). Utilities on an element still win. */
   .prose-page {
     font-size: 17px;
@@ -158,14 +145,6 @@
   }
   .prose-page a:not(.tap):hover {
     color: var(--color-brand-red-dark);
-  }
-
-  /* Short red/gold rule under section headings */
-  .section-divider {
-    height: 4px;
-    max-width: 120px;
-    margin: 0 auto 2rem;
-    background: linear-gradient(90deg, var(--color-brand-red) 0 50%, var(--color-gold) 50% 100%);
   }
 }
 

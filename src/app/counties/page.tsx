@@ -1,182 +1,65 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { getProcessedBreweryData } from '@/lib/db';
 import { slugify } from '@/lib/slug';
-import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
-import Image from 'next/image';
-import { existsSync } from 'fs';
-import { join } from 'path';
 import { buildMetadata } from '@/lib/seo/metadata';
-import { breadcrumbList } from '@/lib/seo/jsonld';
-import JsonLd from '@/components/seo/JsonLd';
+import { countyLabel } from '@/lib/seo/page-meta';
+import PageHeader from '@/components/ui/PageHeader';
+import IndexCard, { IndexGrid } from '@/components/ui/IndexCard';
 
 export const metadata: Metadata = buildMetadata({
-  title: "Maryland Breweries by County",
-  description: "Browse Maryland craft breweries county by county, with brewery counts, maps and the towns in each county.",
+  title: 'Maryland Breweries by County',
+  description:
+    'Browse Maryland craft breweries county by county, with brewery counts, maps and the towns in each county.',
   path: '/counties',
 });
 
 export const revalidate = 3600;
 
 export default async function CountiesIndexPage() {
-  const processed = await getProcessedBreweryData();
+  const { breweries } = await getProcessedBreweryData();
 
-  // Process counties the same way as homepage - directly from breweries array
-  const countyCounts = new Map<string, { name: string; slug: string; count: number }>();
-  processed.breweries.forEach((brewery: any) => {
-    if (brewery.county) {
-      const slug = slugify(brewery.county);
-      const existing = countyCounts.get(slug);
-      if (existing) {
-        existing.count++;
-      } else {
-        countyCounts.set(slug, { name: `${brewery.county} County`, slug, count: 1 });
-      }
-    }
-  });
-  
-  const items = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name)).map(item => ({
-    ...item,
-    url: `/counties/${item.slug}/breweries`,
-  }));
-
-  // Check for counties index hero image
-  const countiesHeroImagePath = '/counties-hero.jpg';
-  const countiesHeroImageFile = join(process.cwd(), 'public', 'counties-hero.jpg');
-  const hasCountiesHeroImage = existsSync(countiesHeroImageFile);
+  const counties = new Map<string, Map<string, number>>();
+  for (const b of breweries) {
+    if (!b.county) continue;
+    const cities = counties.get(b.county) ?? new Map<string, number>();
+    if (b.city) cities.set(b.city, (cities.get(b.city) ?? 0) + 1);
+    counties.set(b.county, cities);
+  }
+  const items = [...counties.entries()]
+    .map(([county, cities]) => ({
+      county,
+      count: [...cities.values()].reduce((sum, n) => sum + n, 0),
+      // Its towns, most breweries first
+      towns: [...cities.entries()]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .map(([city]) => city),
+    }))
+    .sort((a, b) => a.county.localeCompare(b.county));
 
   return (
-    <div className="min-h-screen bg-paper">
-      <JsonLd data={breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Counties', path: '/counties' }])} />
-      {/* Hero Section */}
-      <section className="bg-white border-b-4 border-brand-red relative overflow-hidden">
-        {/* Counties Hero Image Background */}
-        {hasCountiesHeroImage && (
-          <div className="absolute inset-0">
-            <Image
-              src={countiesHeroImagePath}
-              alt="Craft breweries"
-              fill
-              className="object-cover"
-              sizes="100vw"
-              priority
-              unoptimized={false}
-            />
-            {/* Dark overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-          </div>
-        )}
-        
-        {/* Pattern overlay (only if no hero image) */}
-        {!hasCountiesHeroImage && (
-          <div className="absolute inset-0 md-pattern-bg pointer-events-none" />
-        )}
-        
-        <div className="container mx-auto px-4 py-10 md:py-14 relative z-10">
-          {/* Breadcrumbs */}
-          <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className={`flex items-center flex-wrap gap-2 text-sm font-sans ${hasCountiesHeroImage ? 'text-white/90' : 'text-muted'}`}>
-              <li>
-                <Link 
-                  href="/" 
-                  className={`transition-colors ${hasCountiesHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-brand-red'}`}
-                >
-                  Maryland Breweries
-                </Link>
-              </li>
-              <li><ChevronRight className={`h-4 w-4 mx-2 ${hasCountiesHeroImage ? 'text-white/70' : 'text-muted'}`} /></li>
-              <li>
-                <Link 
-                  href="/counties" 
-                  className={`font-medium transition-colors ${hasCountiesHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-ink hover:text-brand-red'}`}
-                >
-                  Counties
-                </Link>
-              </li>
-            </ol>
-          </nav>
-
-          {/* H1 Title */}
-          <h1 
-            className={`text-h1 md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6 leading-snug font-display ${
-              hasCountiesHeroImage 
-                ? 'text-white drop-shadow-lg' 
-                : 'text-ink'
-            }`}
-            style={hasCountiesHeroImage ? { textShadow: '2px 2px 4px rgba(0,0,0,0.5)' } : undefined}
-          >
-            Maryland Counties with Breweries
-          </h1>
-
-          {/* Intro Paragraph */}
-          <p 
-            className={`text-body-large md:text-xl max-w-3xl leading-snug font-sans ${
-              hasCountiesHeroImage 
-                ? 'text-white/95 drop-shadow-md' 
-                : 'text-muted'
-            }`}
-          >
-            Browse all counties in Maryland with craft breweries. From urban centers like Baltimore City and Montgomery County to rural areas across the state, discover breweries organized by county.
-          </p>
-        </div>
-      </section>
-
-      {/* All Counties Listing - 5 columns like BimmerShops */}
-      <section className="bg-white py-10 md:py-14 border-b border-line">
-        <div className="container mx-auto px-4">
-          <div className="mb-8">
-            <div className="section-divider mb-4" />
-            <h2 
-              className="text-h2 md:text-3xl lg:text-4xl font-bold text-ink mb-3 font-display"
-            >
-              Find Maryland Breweries in Your County
-            </h2>
-          </div>
-
-          {/* All Counties Grid - 5 columns like BimmerShops */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-1">
-            {items.map((county) => (
-              <Link
-                key={county.slug}
-                href={county.url}
-                className="group relative py-3 px-0 text-ink hover:text-brand-red transition-colors duration-300 text-base border-b border-line last:border-b-0 hover:bg-paper/50 rounded-sm font-sans font-medium"
-              >
-                <span className="relative inline-block">
-                  {county.name.replace(/\s+County$/i, '')}
-                  <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gradient-to-r from-brand-red to-gold group-hover:w-full transition-all duration-300" />
-                </span>
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0 h-4 bg-gold/20 group-hover:w-1 transition-all duration-300 rounded-r" />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section className="bg-white py-10 md:py-14 border-t border-line">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h2 
-            className="text-h2 md:text-3xl lg:text-4xl font-bold text-ink mb-6 font-display"
-          >
-            About Maryland Brewery Directory
-          </h2>
-          <div 
-            className="prose prose-lg text-muted space-y-4 font-sans"
-          >
-            <p className="text-body leading-loose">
-              Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 
-              We connect beer enthusiasts with local breweries, providing detailed information about locations, 
-              hours, amenities, and beer selections.
-            </p>
-            <p className="text-body leading-loose">
-              <strong className="text-ink">Brewery Owners:</strong> Want to list your brewery or update 
-              your information? <Link href="/contact" className="text-brand-red hover:text-brand-red-dark transition-colors underline">
-                Contact us
-              </Link> to get started.
-            </p>
-          </div>
-        </div>
-      </section>
+    <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-6 px-4 pb-16 pt-6 sm:px-6">
+      <PageHeader
+        breadcrumbs={[
+          { name: 'Home', path: '/' },
+          { name: 'Counties', path: '/counties' },
+        ]}
+        title="Breweries by county"
+        intro={`${items.reduce((sum, c) => sum + c.count, 0)} breweries in ${items.length} Maryland counties, with the towns in each.`}
+      />
+      <IndexGrid>
+        {items.map((c) => (
+          <IndexCard
+            key={c.county}
+            href={`/counties/${slugify(c.county)}/breweries`}
+            title={countyLabel(c.county)}
+            count={c.count}
+            meta={
+              c.towns.slice(0, 4).join(', ') +
+              (c.towns.length > 4 ? `, and ${c.towns.length - 4} more` : '')
+            }
+          />
+        ))}
+      </IndexGrid>
     </div>
   );
 }

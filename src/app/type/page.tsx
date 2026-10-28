@@ -1,319 +1,67 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { getProcessedBreweryData } from '@/lib/db';
-import { slugify, deslugify } from '@/lib/slug';
-import Link from 'next/link';
-import { ChevronRight, Beer, Store, Warehouse, Leaf, FlaskConical } from 'lucide-react';
-import Image from 'next/image';
-import { existsSync } from 'fs';
-import { join } from 'path';
+import { slugify } from '@/lib/slug';
 import { buildMetadata } from '@/lib/seo/metadata';
-import { breadcrumbList } from '@/lib/seo/jsonld';
-import JsonLd from '@/components/seo/JsonLd';
+import { typePlural } from '@/lib/seo/page-meta';
+import PageHeader from '@/components/ui/PageHeader';
+import IndexCard, { IndexGrid } from '@/components/ui/IndexCard';
 
 export const metadata: Metadata = buildMetadata({
-  title: "Maryland Breweries by Type",
-  description: "Browse Maryland breweries by type: microbreweries, brewpubs, taprooms, regional and contract breweries.",
+  title: 'Maryland Breweries by Type',
+  description:
+    'Browse Maryland breweries by type: microbreweries, brewpubs, taprooms, regional and contract breweries.',
   path: '/type',
 });
 
-// Brewery type definitions in our own voice
-const BREWERY_TYPE_DEFINITIONS: Record<string, {
-  name: string;
-  definition: string;
-  characteristics: string[];
-  icon: React.ElementType;
-}> = {
-  'microbrewery': {
-    name: 'Microbrewery',
-    definition: 'These are the heart of Maryland\'s craft beer movement. Microbreweries focus on quality over quantity, brewing smaller batches with care and creativity. Most of their beer heads out to local bars, restaurants, and bottle shops—though many have cozy tasting rooms where you can sample the latest creations straight from the source.',
-    characteristics: [
-      'Small-batch, artisanal brewing',
-      'Beer sold at local bars & shops',
-      'Often have on-site tasting rooms',
-      'Known for creative, unique recipes',
-    ],
-    icon: FlaskConical,
-  },
-  'brewpub': {
-    name: 'Brewpub',
-    definition: 'The best of both worlds—a restaurant and brewery under one roof. Brewpubs serve their house-brewed beers alongside a full food menu, making them perfect for a complete night out. The kitchen often creates dishes designed to pair perfectly with the beers being poured just feet away.',
-    characteristics: [
-      'Full restaurant and bar service',
-      'Fresh beer brewed on-site',
-      'Food menu crafted for beer pairing',
-      'Great for dinner and drinks',
-    ],
-    icon: Store,
-  },
-  'taproom': {
-    name: 'Taproom',
-    definition: 'Taprooms put the beer front and center. These spaces are all about the drinking experience—think rotating taps, knowledgeable staff, and a relaxed atmosphere. Food is usually minimal (think snacks or food trucks), so you can focus on what matters: exploring great craft beer with friends.',
-    characteristics: [
-      'Beer-focused experience',
-      'Relaxed, social atmosphere',
-      'Limited food, often food trucks',
-      'Perfect for casual hangouts',
-    ],
-    icon: Beer,
-  },
-  'production': {
-    name: 'Production Brewery',
-    definition: 'These are Maryland\'s brewing powerhouses. Production breweries have the capacity to brew large quantities and distribute their beer across the region—and sometimes beyond. Many still welcome visitors to their facilities, offering tours and taprooms where you can see brewing in action.',
-    characteristics: [
-      'Large-scale brewing operations',
-      'Wide distribution network',
-      'Often offer facility tours',
-      'May have on-site taproom',
-    ],
-    icon: Warehouse,
-  },
-  'nano': {
-    name: 'Nano Brewery',
-    definition: 'The smallest of the small, nano breweries are often passion projects run by dedicated brewers. With tiny batch sizes, they can experiment freely and create beers you won\'t find anywhere else. If you love discovering something truly unique, nano breweries are where the magic happens.',
-    characteristics: [
-      'Ultra-small batch brewing',
-      'Highly experimental recipes',
-      'Intimate, personal experience',
-      'True hidden gems',
-    ],
-    icon: FlaskConical,
-  },
-  'farm-brewery': {
-    name: 'Farm Brewery',
-    definition: 'Farm breweries bring the farm-to-glass movement to Maryland\'s craft beer scene. Located on working farms, these breweries often grow their own hops, barley, or other ingredients. The result? Beer with a true sense of place, plus the chance to enjoy a beautiful rural setting while you sip.',
-    characteristics: [
-      'Located on agricultural land',
-      'Locally grown ingredients',
-      'Beautiful rural settings',
-      'Farm-to-glass experience',
-    ],
-    icon: Leaf,
-  },
+/** What each type means, in our own voice, keyed by type slug. Types without one show just the count. */
+const TYPE_DESCRIPTIONS: Record<string, string> = {
+  microbrewery:
+    "These are the heart of Maryland's craft beer movement. Microbreweries focus on quality over quantity, brewing smaller batches with care and creativity. Most of their beer heads out to local bars, restaurants, and bottle shops—though many have cozy tasting rooms where you can sample the latest creations straight from the source.",
+  brewpub:
+    'The best of both worlds—a restaurant and brewery under one roof. Brewpubs serve their house-brewed beers alongside a full food menu, making them perfect for a complete night out. The kitchen often creates dishes designed to pair perfectly with the beers being poured just feet away.',
+  taproom:
+    'Taprooms put the beer front and center. These spaces are all about the drinking experience—think rotating taps, knowledgeable staff, and a relaxed atmosphere. Food is usually minimal (think snacks or food trucks), so you can focus on what matters: exploring great craft beer with friends.',
+  production:
+    "These are Maryland's brewing powerhouses. Production breweries have the capacity to brew large quantities and distribute their beer across the region—and sometimes beyond. Many still welcome visitors to their facilities, offering tours and taprooms where you can see brewing in action.",
+  nano: "The smallest of the small, nano breweries are often passion projects run by dedicated brewers. With tiny batch sizes, they can experiment freely and create beers you won't find anywhere else. If you love discovering something truly unique, nano breweries are where the magic happens.",
+  'farm-brewery':
+    "Farm breweries bring the farm-to-glass movement to Maryland's craft beer scene. Located on working farms, these breweries often grow their own hops, barley, or other ingredients. The result? Beer with a true sense of place, plus the chance to enjoy a beautiful rural setting while you sip.",
 };
-
-const TYPES = ['microbrewery', 'brewpub', 'taproom', 'production', 'nano', 'farm-brewery'] as const;
 
 export const revalidate = 3600;
 
 export default async function TypesIndexPage() {
-  const processed = await getProcessedBreweryData();
-
-  // Calculate counts for each type
-  const items = TYPES.map((type) => {
-    const breweries = processed.breweries.filter((b) => {
-      return b.type.some((t) => t.toLowerCase() === type);
-    });
-    
-    return {
-      name: deslugify(type),
-      slug: type,
-      count: breweries.length,
-      url: `/type/${type}`,
-      definition: BREWERY_TYPE_DEFINITIONS[type],
-    };
-  }).filter(item => item.count > 0).sort((a, b) => b.count - a.count);
-
-  // Stats
-  const totalBreweries = processed.breweries.length;
-  const totalTypes = items.length;
-  const mostCommon = items[0];
-
-  // Check for hero image
-  const typesHeroImagePath = '/cities-hero.jpg';
-  const typesHeroImageFile = join(process.cwd(), 'public', 'cities-hero.jpg');
-  const hasTypesHeroImage = existsSync(typesHeroImageFile);
+  const { breweries, types } = await getProcessedBreweryData();
+  // Every type in the data, as in the footer and /type/[type]
+  const items = types
+    .map((type) => ({
+      type,
+      count: breweries.filter((b) => b.type.includes(type)).length,
+    }))
+    .filter((item) => item.count > 0)
+    .sort((a, b) => b.count - a.count);
 
   return (
-    <div className="min-h-screen bg-paper">
-      <JsonLd data={breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Brewery Types', path: '/type' }])} />
-      {/* Hero Section */}
-      <section className="bg-white border-b-4 border-brand-red relative overflow-hidden">
-        {/* Hero Image Background */}
-        {hasTypesHeroImage && (
-          <div className="absolute inset-0">
-            <Image
-              src={typesHeroImagePath}
-              alt="Craft breweries"
-              fill
-              className="object-cover"
-              sizes="100vw"
-              priority
-              unoptimized={false}
-            />
-            {/* Dark overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-          </div>
-        )}
-        
-        {/* Pattern overlay (only if no hero image) */}
-        {!hasTypesHeroImage && (
-          <div className="absolute inset-0 md-pattern-bg pointer-events-none" />
-        )}
-        
-        <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
-          {/* Breadcrumbs */}
-          <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className={`flex items-center flex-wrap gap-2 text-sm ${hasTypesHeroImage ? 'text-white/90' : ''}`} style={{ color: hasTypesHeroImage ? undefined : 'var(--color-muted)' }}>
-              <li>
-                <Link 
-                  href="/" 
-                  className={`transition-colors ${hasTypesHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-brand-red'}`}
-                >
-                  Maryland Breweries
-                </Link>
-              </li>
-              <li><ChevronRight className={`h-4 w-4 mx-2 ${hasTypesHeroImage ? 'text-white/70' : ''}`} /></li>
-              <li>
-                <Link 
-                  href="/type" 
-                  className={`font-medium transition-colors ${hasTypesHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-ink hover:text-brand-red'}`}
-                >
-                  Brewery Types
-                </Link>
-              </li>
-            </ol>
-          </nav>
-
-          {/* H1 Title */}
-          <h1 
-            className={`font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${
-              hasTypesHeroImage 
-                ? 'text-white drop-shadow-lg' 
-                : 'text-ink'
-            }`} style={{ textShadow: hasTypesHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
-          >
-            Maryland Brewery Types
-          </h1>
-
-          {/* Intro Paragraph */}
-          <p 
-            className={`text-lg md:text-xl max-w-3xl leading-relaxed ${
-              hasTypesHeroImage 
-                ? 'text-white/95 drop-shadow-md' 
-                : 'text-muted'
-            }`}
-          >
-            From intimate nano breweries to full-service brewpubs, Maryland's craft beer scene offers something for everyone. Explore {totalBreweries} breweries across {totalTypes} different types and find your perfect spot.
-          </p>
-        </div>
-      </section>
-
-      {/* Brewery Types with Definitions */}
-      <section className="bg-white py-12 md:py-16 border-b border-line">
-        <div className="container mx-auto px-4">
-          <div className="mb-10">
-            <div className="section-divider mb-4" />
-            <h2 
-              className="font-display text-3xl md:text-4xl font-bold text-ink mb-3"
-            >
-              Explore Breweries by Type
-            </h2>
-            <p 
-              className="text-lg text-muted"
-            >
-              Each brewery type offers a unique experience. Whether you're looking for a casual hangout, a dinner destination, or a hidden gem, we've got you covered.
-            </p>
-          </div>
-
-          {/* Brewery Type Cards */}
-          <div className="flex flex-col gap-6 md:gap-8">
-            {items.map((item) => {
-              const typeDef = BREWERY_TYPE_DEFINITIONS[item.slug];
-              const IconComponent = typeDef?.icon || Beer;
-              
-              return (
-                <Link
-                  key={item.slug}
-                  href={item.url}
-                  className="group bg-paper border border-line rounded-lg p-6 md:p-8 hover:border-brand-red hover:shadow-lg transition-all duration-300"
-                >
-                  {/* Header with Icon and Count */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-brand-red/10 flex items-center justify-center group-hover:bg-brand-red transition-colors">
-                        <IconComponent className="w-6 h-6 text-brand-red group-hover:text-white transition-colors" />
-                      </div>
-                      <div>
-                        <h3 
-                          className="font-display text-xl md:text-2xl font-bold text-ink group-hover:text-brand-red transition-colors"
-                        >
-                          {item.name}
-                        </h3>
-                        <span 
-                          className="text-sm font-medium text-brand-red"
-                        >
-                          {item.count} {item.count === 1 ? 'brewery' : 'breweries'} in Maryland
-                        </span>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-brand-red opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-
-                  {/* Definition */}
-                  {typeDef && (
-                    <>
-                      <p 
-                        className="text-muted mb-4 leading-relaxed"
-                      >
-                        {typeDef.definition}
-                      </p>
-
-                      {/* Characteristics */}
-                      <ul className="space-y-1.5">
-                        {typeDef.characteristics.map((char, idx) => (
-                          <li 
-                            key={idx}
-                            className="text-sm text-muted flex items-center gap-2"
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0" />
-                            {char}
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-
-                  {/* CTA */}
-                  <div className="mt-6 pt-4 border-t border-line">
-                    <span 
-                      className="text-brand-red font-semibold group-hover:text-brand-red-dark transition-colors inline-flex items-center gap-2"
-                    >
-                      View All {item.name} Breweries
-                      <ChevronRight className="w-4 h-4" />
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section className="bg-white py-12 md:py-16 border-t border-line">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h2 
-            className="font-display text-3xl md:text-4xl font-bold text-ink mb-6"
-          >
-            About Maryland Brewery Directory
-          </h2>
-          <div 
-            className="prose prose-lg text-muted space-y-4"
-          >
-            <p>
-              Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 
-              We connect beer enthusiasts with local breweries, providing detailed information about locations, 
-              hours, amenities, and beer selections.
-            </p>
-            <p>
-              <strong className="text-ink">Brewery Owners:</strong> Want to list your brewery or update 
-              your information? <Link href="/contact" className="text-brand-red hover:text-brand-red-dark transition-colors underline">
-                Contact us
-              </Link> to get started.
-            </p>
-          </div>
-        </div>
-      </section>
+    <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-6 px-4 pb-16 pt-6 sm:px-6">
+      <PageHeader
+        breadcrumbs={[
+          { name: 'Home', path: '/' },
+          { name: 'Types', path: '/type' },
+        ]}
+        title="Breweries by type"
+        intro="Microbreweries, brewpubs, taprooms and the rest: what each kind of brewery is, and how many Maryland has."
+      />
+      <IndexGrid>
+        {items.map(({ type, count }) => (
+          <IndexCard
+            key={type}
+            href={`/type/${slugify(type)}`}
+            title={typePlural(type)}
+            count={count}
+            description={TYPE_DESCRIPTIONS[slugify(type)]}
+          />
+        ))}
+      </IndexGrid>
     </div>
   );
 }

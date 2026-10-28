@@ -1,220 +1,54 @@
-import { Metadata } from 'next';
-import { getAllCities, getProcessedBreweryData } from '@/lib/db';
-import { slugify } from '@/lib/slug';
-import Link from 'next/link';
-import { ChevronRight, MapPin } from 'lucide-react';
-import Image from 'next/image';
-import { existsSync } from 'fs';
-import { join } from 'path';
+import type { Metadata } from 'next';
+import { getProcessedBreweryData } from '@/lib/db';
 import { buildMetadata } from '@/lib/seo/metadata';
-import { breadcrumbList } from '@/lib/seo/jsonld';
-import JsonLd from '@/components/seo/JsonLd';
+import { countyLabel } from '@/lib/seo/page-meta';
+import { slugify } from '@/lib/slug';
+import PageHeader from '@/components/ui/PageHeader';
+import GroupedLinks, { groupLinks } from '@/components/listing/GroupedLinks';
 
 export const metadata: Metadata = buildMetadata({
-  title: "Maryland Breweries by City",
-  description: "Browse Maryland craft breweries by city, from Baltimore and Frederick to Ocean City, with brewery counts and maps for each town.",
+  title: 'Maryland Breweries by City',
+  description:
+    'Browse Maryland craft breweries by city, from Baltimore and Frederick to Ocean City, with brewery counts and maps for each town.',
   path: '/cities',
 });
-
-const REGIONS: Record<string, { name: string; cities: string[]; description: string }> = {
-  'Central Maryland': {
-    name: 'Central Maryland',
-    cities: ['Baltimore', 'Columbia', 'Annapolis', 'Towson', 'Ellicott City', 'Catonsville'],
-    description: 'The heart of Maryland\'s craft beer scene',
-  },
-  'Western Maryland': {
-    name: 'Western Maryland',
-    cities: ['Cumberland', 'Hagerstown', 'Frederick', 'Westminster'],
-    description: 'Mountain views and historic charm',
-  },
-  'Eastern Shore': {
-    name: 'Eastern Shore',
-    cities: ['Salisbury', 'Easton', 'Ocean City', 'Chestertown', 'Berlin'],
-    description: 'Waterfront locations and rural brewery experiences',
-  },
-};
 
 export const revalidate = 3600; // refresh hourly
 
 export default async function CitiesIndexPage() {
-  const processed = await getProcessedBreweryData();
-  
-  // Process cities the same way as homepage - directly from breweries array
-  const cityCounts = new Map<string, { name: string; slug: string; count: number }>();
-  processed.breweries.forEach((brewery: any) => {
-    if (brewery.city) {
-      const slug = slugify(brewery.city);
-      const existing = cityCounts.get(slug);
-      if (existing) {
-        existing.count++;
-      } else {
-        cityCounts.set(slug, { name: brewery.city, slug, count: 1 });
-      }
-    }
+  const { byCity } = await getProcessedBreweryData();
+
+  // One entry per city listing, filed under the county most of its breweries are in
+  const cities = [...byCity.values()].map((breweries) => {
+    const name = breweries[0].city;
+    const counties = new Map<string, number>();
+    for (const b of breweries)
+      if (b.county) counties.set(b.county, (counties.get(b.county) ?? 0) + 1);
+    const county = [...counties.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+    return {
+      name,
+      href: `/cities/${slugify(name)}/breweries`,
+      count: breweries.length,
+      county: county ? countyLabel(county) : null,
+    };
   });
-  
-  const items = Array.from(cityCounts.values()).sort((a, b) => a.name.localeCompare(b.name)).map(item => ({
-    ...item,
-    url: `/cities/${item.slug}/breweries`,
-  }));
-
-  // Group by regions
-  const grouped: Record<string, typeof items> = {};
-  
-  for (const [regionKey, regionData] of Object.entries(REGIONS)) {
-    grouped[regionKey] = items.filter(item => 
-      regionData.cities.some(c => c.toLowerCase() === item.name.toLowerCase())
-    );
-  }
-  
-  // Add "Other" for cities not in defined regions
-  const otherCities = items.filter(item => 
-    !Object.values(REGIONS).some(region => 
-      region.cities.some(c => c.toLowerCase() === item.name.toLowerCase())
-    )
+  const groups = groupLinks(
+    cities,
+    (c) => c.county,
+    (c) => ({ label: c.name, href: c.href, count: c.count })
   );
-  
-  if (otherCities.length > 0) {
-    grouped['Other Cities'] = otherCities;
-  }
-
-  // Check for cities index hero image
-  const citiesHeroImagePath = '/cities-hero.jpg';
-  const citiesHeroImageFile = join(process.cwd(), 'public', 'cities-hero.jpg');
-  const hasCitiesHeroImage = existsSync(citiesHeroImageFile);
 
   return (
-    <div className="min-h-screen bg-paper">
-      <JsonLd data={breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Cities', path: '/cities' }])} />
-      {/* Hero Section */}
-      <section className="bg-white border-b-4 border-brand-red relative overflow-hidden">
-        {/* Cities Hero Image Background */}
-        {hasCitiesHeroImage && (
-          <div className="absolute inset-0">
-            <Image
-              src={citiesHeroImagePath}
-              alt="Craft breweries"
-              fill
-              className="object-cover"
-              sizes="100vw"
-              priority
-              unoptimized={false}
-            />
-            {/* Dark overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-          </div>
-        )}
-        
-        {/* Pattern overlay (only if no hero image) */}
-        {!hasCitiesHeroImage && (
-          <div className="absolute inset-0 md-pattern-bg pointer-events-none" />
-        )}
-        
-        <div className="container mx-auto px-4 py-10 md:py-14 relative z-10">
-          {/* Breadcrumbs */}
-          <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className={`flex items-center flex-wrap gap-2 text-sm font-sans ${hasCitiesHeroImage ? 'text-white/90' : 'text-muted'}`}>
-              <li>
-                <Link 
-                  href="/" 
-                  className={`transition-colors ${hasCitiesHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-brand-red'}`}
-                >
-                  Maryland Breweries
-                </Link>
-              </li>
-              <li><ChevronRight className={`h-4 w-4 mx-2 ${hasCitiesHeroImage ? 'text-white/70' : 'text-muted'}`} /></li>
-              <li>
-                <Link 
-                  href="/cities" 
-                  className={`font-medium transition-colors ${hasCitiesHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-ink hover:text-brand-red'}`}
-                >
-                  Cities
-                </Link>
-              </li>
-            </ol>
-          </nav>
-
-          {/* H1 Title */}
-          <h1 
-            className={`text-h1 md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6 leading-snug font-display ${
-              hasCitiesHeroImage 
-                ? 'text-white drop-shadow-lg' 
-                : 'text-ink'
-            }`}
-            style={hasCitiesHeroImage ? { textShadow: '2px 2px 4px rgba(0,0,0,0.5)' } : undefined}
-          >
-            Maryland Cities with Breweries
-          </h1>
-
-          {/* Intro Paragraph */}
-          <p 
-            className={`text-body-large md:text-xl max-w-3xl leading-snug font-sans ${
-              hasCitiesHeroImage 
-                ? 'text-white/95 drop-shadow-md' 
-                : 'text-muted'
-            }`}
-          >
-            Browse all cities in Maryland with craft breweries. From Baltimore's historic neighborhoods to Annapolis' waterfront locations, discover breweries across the state organized by city.
-          </p>
-        </div>
-      </section>
-
-      {/* All Cities Listing - 5 columns like BimmerShops */}
-      <section className="bg-white py-10 md:py-14 border-b border-line">
-        <div className="container mx-auto px-4">
-          <div className="mb-8">
-            <div className="section-divider mb-4" />
-            <h2 
-              className="text-h2 md:text-3xl lg:text-4xl font-bold text-ink mb-3 font-display"
-            >
-              Find Maryland Breweries in Your City
-            </h2>
-          </div>
-
-          {/* All Cities Grid - 5 columns like BimmerShops */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-1">
-            {items.map((city) => (
-              <Link
-                key={city.slug}
-                href={city.url}
-                className="group relative py-3 px-0 text-ink hover:text-brand-red transition-colors duration-300 text-base border-b border-line last:border-b-0 hover:bg-paper/50 rounded-sm font-sans font-medium"
-              >
-                <span className="relative inline-block">
-                  {city.name}
-                  <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gradient-to-r from-brand-red to-gold group-hover:w-full transition-all duration-300" />
-                </span>
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0 h-4 bg-gold/20 group-hover:w-1 transition-all duration-300 rounded-r" />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section className="bg-white py-10 md:py-14 border-t border-line">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h2 
-            className="text-h2 md:text-3xl lg:text-4xl font-bold text-ink mb-6 font-display"
-          >
-            About Maryland Brewery Directory
-          </h2>
-          <div 
-            className="prose prose-lg text-muted space-y-4 font-sans"
-          >
-            <p className="text-body leading-loose">
-              Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 
-              We connect beer enthusiasts with local breweries, providing detailed information about locations, 
-              hours, amenities, and beer selections.
-            </p>
-            <p className="text-body leading-loose">
-              <strong className="text-ink">Brewery Owners:</strong> Want to list your brewery or update 
-              your information? <Link href="/contact" className="text-brand-red hover:text-brand-red-dark transition-colors underline">
-                Contact us
-              </Link> to get started.
-            </p>
-          </div>
-        </div>
-      </section>
+    <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-6 px-4 pb-16 pt-6 sm:px-6">
+      <PageHeader
+        breadcrumbs={[
+          { name: 'Home', path: '/' },
+          { name: 'Cities', path: '/cities' },
+        ]}
+        title="Breweries by city"
+        intro={`${cities.length} Maryland cities and towns with breweries, by county. The number is how many breweries each has.`}
+      />
+      <GroupedLinks groups={groups} jumpLabel="Jump to a county" />
     </div>
   );
 }

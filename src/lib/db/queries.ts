@@ -161,7 +161,6 @@ export async function getBreweryDataFromSupabase({ detail = true }: { detail?: b
           style: beer.style || '',
           abv: beer.abv || '',
           availability: beer.availability || '',
-          updatedAt: beer.updated_at ?? beer.created_at ?? undefined,
         });
       });
     }
@@ -286,7 +285,6 @@ export async function fetchBreweryBySlug(slug: string): Promise<Brewery | null> 
       style: beer.style || '',
       abv: beer.abv || '',
       availability: beer.availability || '',
-      updatedAt: beer.updated_at ?? beer.created_at ?? undefined,
     }));
 
     return dbBreweryToBrewery(breweryData, beers);

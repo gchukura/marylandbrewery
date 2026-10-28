@@ -50,7 +50,6 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
 - Images are still in `public/` (`logos/`, `photos/`, `cities/`, `counties/`, `regions/`).
 - `geo.ts`, `hours.ts`, `slug.ts`, `format.ts` exist; `amenities.ts` and `seo/` do not yet.
 - No `as any` in `src`; about 100 `: any` parameter annotations remain.
-- The regions table puts Frederick and Anne Arundel in no region (24 breweries on no region page).
 
 ## Conventions
 - Server components by default. `"use client"` only for interactive islands, kept small.

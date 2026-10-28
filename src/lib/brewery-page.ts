@@ -209,19 +209,14 @@ export function pickExcerpts(
     }));
 }
 
-/** "Microbrewery · Frederick, Frederick County · Opened 2016" (parts without data are left out). */
-export function headlineMeta(
-  b: Pick<Brewery, 'type' | 'city' | 'county' | 'openedDate'>,
-  countyLabel: (c: string) => string
-): string {
-  const type = b.type?.filter((t) => t && t !== 'Planned').join(' and ');
-  const place = [b.city, b.county ? countyLabel(b.county) : null]
-    .filter(Boolean)
-    .join(', ');
+/**
+ * The parts of the headline line "Microbrewery · Frederick, Frederick County · Opened 2016" that
+ * aren't links (the page links the city and county). Missing parts are undefined.
+ */
+export function headlineParts(b: Pick<Brewery, 'type' | 'openedDate'>): { type?: string; opened?: string } {
+  const type = b.type?.filter((t) => t && t !== 'Planned').join(' and ') || undefined;
   const year = b.openedDate?.match(/\b(19|20)\d{2}\b/)?.[0];
-  return [type, place, year ? `Opened ${year}` : null]
-    .filter(Boolean)
-    .join(' · ');
+  return { type, opened: year ? `Opened ${year}` : undefined };
 }
 
 /** Google Maps directions to the brewery (by place ID when we have one). */

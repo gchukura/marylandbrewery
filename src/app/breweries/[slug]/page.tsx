@@ -7,14 +7,17 @@ import {
   getBreweryArticles,
   getBreweryBySlug,
   getBreweryReviews,
+  getIndexableAttractions,
+  getIndexableNeighborhoods,
   getProcessedBreweryData,
   throwDuringBuild,
 } from '@/lib/db';
+import { NEIGHBORHOOD_INDEX_RADIUS_MILES, neighborhoodPath } from '@/lib/neighborhoods';
 import type { Brewery } from '@/types/brewery';
 import { amenityForValue, amenityPath } from '@/lib/amenities';
 import {
   directionsUrl,
-  headlineMeta,
+  headlineParts,
   monthYear,
   pickExcerpts,
   themeChips,
@@ -156,10 +159,12 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
   const brewery = await getBreweryBySlug(listed.slug);
   if (!brewery?.name || !brewery.city) notFound();
 
-  const [processed, reviewData, articles] = await Promise.all([
+  const [processed, reviewData, articles, indexableNeighborhoods, indexableAttractions] = await Promise.all([
     getProcessedBreweryData(),
     getBreweryReviews(brewery.id, 20, 0),
     getBreweryArticles(brewery.id, 5),
+    getIndexableNeighborhoods(),
+    getIndexableAttractions(),
   ]);
 
   const now = new Date();
@@ -195,6 +200,17 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     0,
     6
   );
+
+  // The nearest indexed neighborhood and attraction pages within 3 miles. /neighborhoods and /near
+  // link every one of them; these are the ones worth a visit from here
+  const AROUND = 6;
+  const aroundNeighborhoods = sortByDistance(brewery, indexableNeighborhoods)
+    .filter((n) => n.distance <= NEIGHBORHOOD_INDEX_RADIUS_MILES)
+    .slice(0, AROUND);
+  const aroundAttractions = sortByDistance(brewery, indexableAttractions)
+    .filter((a) => a.distance <= NEIGHBORHOOD_INDEX_RADIUS_MILES)
+    .slice(0, AROUND);
+  const headline = headlineParts(brewery);
 
   const citySlug = slugify(brewery.city);
   const pagePath = `/breweries/${brewery.slug}`;
@@ -243,7 +259,30 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
               <StatusBadge hours={brewery.hours} size="md" />
             </div>
             <p className="m-0 text-base text-muted">
-              {headlineMeta(brewery, countyLabel)}
+              {[
+                headline.type,
+                <span key="place">
+                  <Link href={`/cities/${citySlug}/breweries`} className="text-muted underline decoration-line-strong underline-offset-2 hover:text-brand-red">
+                    {brewery.city}
+                  </Link>
+                  {brewery.county && (
+                    <>
+                      ,{' '}
+                      <Link href={`/counties/${slugify(brewery.county)}/breweries`} className="text-muted underline decoration-line-strong underline-offset-2 hover:text-brand-red">
+                        {countyLabel(brewery.county)}
+                      </Link>
+                    </>
+                  )}
+                </span>,
+                headline.opened,
+              ]
+                .filter(Boolean)
+                .map((part, i) => (
+                  <span key={i}>
+                    {i > 0 && ' · '}
+                    {part}
+                  </span>
+                ))}
             </p>
           </div>
         </div>
@@ -554,6 +593,36 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
             >
               All {brewery.city} breweries →
             </Link>
+          </Section>
+        )}
+
+        {(aroundNeighborhoods.length > 0 || aroundAttractions.length > 0) && (
+          <Section id="around" title={`Around ${brewery.name}`}>
+            <div className="grid gap-6 sm:grid-cols-2">
+              {[
+                { title: 'Neighborhoods nearby', items: aroundNeighborhoods.map((n) => ({ label: n.name, href: neighborhoodPath(n.slug), distance: n.distance })), more: { label: 'All neighborhoods', href: '/neighborhoods' } },
+                { title: 'Things to do nearby', items: aroundAttractions.map((a) => ({ label: a.name, href: `/near/${a.slug}`, distance: a.distance })), more: { label: 'All things to do', href: '/near' } },
+              ]
+                .filter((g) => g.items.length > 0)
+                .map((g) => (
+                  <div key={g.title} className="flex flex-col gap-2">
+                    <h3 className="m-0 text-[13px] font-semibold uppercase tracking-[0.12em] text-muted">{g.title}</h3>
+                    <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-[15px]">
+                      {g.items.map((item) => (
+                        <li key={item.href} className="flex justify-between gap-3">
+                          <Link href={item.href} className="text-ink hover:text-brand-red">
+                            {item.label}
+                          </Link>
+                          <span className="shrink-0 text-muted">{item.distance.toFixed(1)} mi</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link href={g.more.href} className="text-[13px] font-semibold text-brand-red hover:text-brand-red-dark">
+                      {g.more.label} →
+                    </Link>
+                  </div>
+                ))}
+            </div>
           </Section>
         )}
       </div>

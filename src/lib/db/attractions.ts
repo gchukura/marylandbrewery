@@ -195,97 +195,6 @@ export async function getAttractionsNearBrewery(
 }
 
 /**
- * Get attractions by city
- */
-export async function getAttractionsByCity(city: string, limit: number = 50): Promise<Attraction[]> {
-  try {
-    const { data, error } = await getSupabase()
-      .from('maryland_attractions')
-      .select('*')
-      .eq('city', city)
-      .limit(limit);
-
-    if (error) throw error;
-
-    if (!data) {
-      return [];
-    }
-
-    return data.map((dbAttraction: Tables<'maryland_attractions'>) => dbAttractionToAttraction(dbAttraction));
-  } catch (error) {
-    throwDuringBuild(error);
-    console.error('Error fetching attractions by city:', error);
-    return [];
-  }
-}
-
-/**
- * Get attractions by type
- */
-export async function getAttractionsByType(type: string, limit: number = 50): Promise<Attraction[]> {
-  try {
-    const { data, error } = await getSupabase()
-      .from('maryland_attractions')
-      .select('*')
-      .eq('type', type)
-      .limit(limit);
-
-    if (error) throw error;
-
-    if (!data) {
-      return [];
-    }
-
-    return data.map((dbAttraction: Tables<'maryland_attractions'>) => dbAttractionToAttraction(dbAttraction));
-  } catch (error) {
-    throwDuringBuild(error);
-    console.error('Error fetching attractions by type:', error);
-    return [];
-  }
-}
-
-/**
- * Upsert attraction (insert or update) for syncing from Google Places
- */
-export async function upsertAttraction(attraction: Attraction): Promise<Attraction | null> {
-  try {
-
-    const dbAttraction = attractionToDbAttraction(attraction);
-    
-    // Set updated_at timestamp
-    dbAttraction.updated_at = new Date().toISOString();
-
-    // If no id, set created_at
-    if (!dbAttraction.id) {
-      dbAttraction.created_at = new Date().toISOString();
-    }
-
-    const { data, error } = await getAdminClient()
-      .from('maryland_attractions')
-      .upsert(dbAttraction, {
-        onConflict: 'place_id',
-        ignoreDuplicates: false,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error upserting attraction:', error);
-      throw error;
-    }
-
-    if (!data) {
-      return null;
-    }
-
-    return dbAttractionToAttraction(data);
-  } catch (error) {
-    console.error('Error upserting attraction:', error);
-    throw error;
-  }
-}
-
-/**
  * Get attraction by slug
  */
 export async function getAttractionBySlug(slug: string): Promise<Attraction | null> {
@@ -307,31 +216,11 @@ export async function getAttractionBySlug(slug: string): Promise<Attraction | nu
   }
 }
 
-/**
- * Get attraction by place_id
- */
-export async function getAttractionByPlaceId(placeId: string): Promise<Attraction | null> {
-  try {
-    const { data, error } = await getSupabase()
-      .from('maryland_attractions')
-      .select('*')
-      .eq('place_id', placeId)
-      .maybeSingle();
-
-    if (error) throw error;
-    if (!data) return null;
-
-    return dbAttractionToAttraction(data);
-  } catch (error) {
-    throwDuringBuild(error);
-    console.error('Error fetching attraction by place_id:', error);
-    return null;
-  }
-}
-
 export interface AttractionSummary {
   slug: string;
   name: string;
+  /** For grouping the /near index; null when the attraction has none */
+  city: string | null;
   type: string;
   googleTypes: string[];
   latitude: number;
@@ -349,7 +238,7 @@ export async function fetchAttractionSummaries(): Promise<AttractionSummary[]> {
     for (let from = 0; ; from += 1000) {
       const { data, error } = await getSupabase()
         .from('maryland_attractions')
-        .select('slug, name, type, google_types, latitude, longitude, updated_at')
+        .select('slug, name, city, type, google_types, latitude, longitude, updated_at')
         .order('slug')
         .range(from, from + 999);
       if (error) throw error;
@@ -357,6 +246,7 @@ export async function fetchAttractionSummaries(): Promise<AttractionSummary[]> {
         ...data.map((a) => ({
           slug: a.slug,
           name: a.name,
+          city: a.city ?? null,
           type: a.type,
           googleTypes: jsonStringArray(a.google_types),
           latitude: a.latitude,

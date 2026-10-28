@@ -7,7 +7,7 @@ import { typeMeta, typePlural } from '@/lib/seo/page-meta';
 import { collectionPage } from '@/lib/seo/jsonld';
 import JsonLd from '@/components/seo/JsonLd';
 import ListingPage, { byRating } from '@/components/listing/ListingPage';
-import { typeLinks } from '@/lib/listing-links';
+import { cityLinks, typeLinks } from '@/lib/listing-links';
 
 const BREWERY_TYPE_DEFINITIONS: Record<string, string> = {
   microbrewery:
@@ -124,10 +124,8 @@ export default async function TypePage({
         intro={definition ? <p className="m-0">{definition}</p> : undefined}
         locked={{ type: slugify(data.type) }}
         related={[
-          {
-            title: 'Other brewery types',
-            links: typeLinks(all, slugify(data.type)),
-          },
+          { title: `Cities with ${plural.toLowerCase()}`, links: cityLinks(breweries) },
+          { title: 'Other brewery types', links: typeLinks(all, slugify(data.type)) },
         ]}
       />
     </>

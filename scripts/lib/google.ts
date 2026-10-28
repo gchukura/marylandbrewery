@@ -5,7 +5,7 @@
  * Setup: docs/setup.md#google-server-key. Check it with `npm run google:check`.
  */
 
-export const SERVER_KEY_ENV = 'GOOGLE_MAPS_API_KEY';
+const SERVER_KEY_ENV = 'GOOGLE_MAPS_API_KEY';
 
 const SETUP = `Create a server key (docs/setup.md#google-server-key), put it in .env.local as ${SERVER_KEY_ENV}, then run npm run google:check.`;
 

@@ -3,39 +3,6 @@
  */
 
 /**
- * Ensures meta description is within SEO-optimal length (120-160 characters)
- * @param description The description to optimize
- * @param minLength Minimum length (default: 120)
- * @param maxLength Maximum length (default: 160)
- * @returns Optimized description
- */
-export function optimizeDescription(description: string, minLength: number = 120, maxLength: number = 160): string {
-  // Remove extra whitespace
-  const cleaned = description.replace(/\s+/g, ' ').trim();
-
-  // If too short, pad with Maryland brewery context
-  if (cleaned.length < minLength) {
-    const padding = ' Explore Maryland\'s craft beer scene with brewery hours, amenities, and visitor information.';
-    const result = cleaned + padding;
-    return result.substring(0, maxLength);
-  }
-
-  // If too long, truncate at word boundary
-  if (cleaned.length > maxLength) {
-    const truncated = cleaned.substring(0, maxLength);
-    const lastSpace = truncated.lastIndexOf(' ');
-
-    if (lastSpace > maxLength * 0.8) {
-      return truncated.substring(0, lastSpace).trim() + '...';
-    }
-
-    return truncated.substring(0, maxLength - 3).trim() + '...';
-  }
-
-  return cleaned;
-}
-
-/**
  * Generates enhanced, dynamic meta descriptions based on brewery data
  * @param brewery Brewery data object
  * @returns Enhanced meta description (max 160 chars)

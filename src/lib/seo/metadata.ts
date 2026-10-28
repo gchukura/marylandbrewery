@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 
 export const SITE_URL = 'https://www.marylandbrewery.com';
-export const SITE_NAME = 'Maryland Brewery';
+const SITE_NAME = 'Maryland Brewery';
 /** The root layout's title template appends this to every page title. */
 export const TITLE_SUFFIX = ' | Maryland Brewery';
-export const MAX_TITLE_LENGTH = 60; // including TITLE_SUFFIX
+const MAX_TITLE_LENGTH = 60; // including TITLE_SUFFIX
 export const MAX_DESCRIPTION_LENGTH = 155;
 /** Longest page title that still fits once the suffix is added. */
 export const MAX_PAGE_TITLE_LENGTH = MAX_TITLE_LENGTH - TITLE_SUFFIX.length;

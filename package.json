@@ -34,7 +34,8 @@
     "data:enrich:amenities": "tsx scripts/enrich-amenities-from-reviews.ts",
     "data:attractions": "tsx scripts/fetch-maryland-attractions.ts",
     "seo:count-urls": "tsx scripts/count-sitemap-urls.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "db:types": "supabase gen types typescript --linked --schema public > src/lib/db/database.types.ts"
   },
   "dependencies": {
     "@googleapis/sheets": "^18.1.1",
@@ -48,6 +49,7 @@
     "next": "^15.5.9",
     "react": "^19.1.2",
     "react-dom": "^19.1.2",
+    "server-only": "^0.0.1",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {

@@ -27,9 +27,8 @@
 // Load environment variables
 import { config } from 'dotenv';
 import { resolve as resolvePath } from 'path';
+import { getAdminClient } from '@/lib/db/client';
 config({ path: resolvePath(process.cwd(), '.env.local') });
-
-import { supabaseAdmin } from '../src/lib/db/client';
 
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error(
@@ -37,7 +36,7 @@ if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   );
 }
 
-const adminClient = supabaseAdmin;
+const adminClient = getAdminClient();
 if (!adminClient) {
   throw new Error(
     'Failed to initialize Supabase admin client. Check your SUPABASE_SERVICE_ROLE_KEY.'
@@ -403,5 +402,4 @@ enrichAmenitiesFromReviews().catch((error) => {
   console.error('Fatal error:', error);
   process.exit(1);
 });
-
 

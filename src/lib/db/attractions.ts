@@ -3,8 +3,12 @@
  * Provides functions for querying and managing Maryland attractions
  */
 
-import { supabase, supabaseAdmin, DatabaseAttraction } from './client';
+import { getAdminClient, getSupabase } from './client';
+import type { Tables, TablesInsert } from './client';
+import { jsonObject, jsonStringArray } from './json';
 
+import { throwDuringBuild } from './build';
+import { calculateDistance } from '@/lib/geo';
 /**
  * Application-level Attraction type (camelCase)
  */
@@ -38,81 +42,63 @@ export interface Attraction {
 /**
  * Convert database attraction to application attraction type
  */
-function dbAttractionToAttraction(dbAttraction: DatabaseAttraction): Attraction {
+function dbAttractionToAttraction(dbAttraction: Tables<'maryland_attractions'>): Attraction {
   return {
     id: dbAttraction.id,
     placeId: dbAttraction.place_id,
     name: dbAttraction.name,
     slug: dbAttraction.slug,
     type: dbAttraction.type,
-    googleTypes: dbAttraction.google_types || [],
-    street: dbAttraction.street,
+    googleTypes: jsonStringArray(dbAttraction.google_types),
+    street: dbAttraction.street ?? undefined,
     city: dbAttraction.city,
     state: dbAttraction.state,
-    zip: dbAttraction.zip,
-    county: dbAttraction.county,
+    zip: dbAttraction.zip ?? undefined,
+    county: dbAttraction.county ?? undefined,
     latitude: dbAttraction.latitude,
     longitude: dbAttraction.longitude,
-    description: dbAttraction.description,
-    phone: dbAttraction.phone,
-    website: dbAttraction.website,
-    rating: dbAttraction.rating,
-    ratingCount: dbAttraction.rating_count,
-    priceLevel: dbAttraction.price_level,
-    hours: dbAttraction.hours || {},
-    photos: dbAttraction.photos || [],
-    lastUpdated: dbAttraction.last_updated,
-    createdAt: dbAttraction.created_at,
-    updatedAt: dbAttraction.updated_at,
+    description: dbAttraction.description ?? undefined,
+    phone: dbAttraction.phone ?? undefined,
+    website: dbAttraction.website ?? undefined,
+    rating: dbAttraction.rating ?? undefined,
+    ratingCount: dbAttraction.rating_count ?? undefined,
+    priceLevel: dbAttraction.price_level ?? undefined,
+    hours: jsonObject<Record<string, string>>(dbAttraction.hours) ?? {},
+    photos: jsonStringArray(dbAttraction.photos),
+    lastUpdated: dbAttraction.last_updated ?? undefined,
+    createdAt: dbAttraction.created_at ?? undefined,
+    updatedAt: dbAttraction.updated_at ?? undefined,
   };
 }
 
 /**
- * Convert application attraction to database attraction type
+ * Convert application attraction to a database insert/upsert row
  */
-function attractionToDbAttraction(attraction: Attraction): DatabaseAttraction {
+function attractionToDbAttraction(attraction: Attraction): TablesInsert<'maryland_attractions'> {
   return {
     id: attraction.id,
     place_id: attraction.placeId,
     name: attraction.name,
     slug: attraction.slug,
     type: attraction.type,
-    google_types: attraction.googleTypes || [],
-    street: attraction.street,
+    google_types: attraction.googleTypes ?? [],
+    street: attraction.street ?? null,
     city: attraction.city,
     state: attraction.state,
-    zip: attraction.zip,
-    county: attraction.county,
+    zip: attraction.zip ?? null,
+    county: attraction.county ?? null,
     latitude: attraction.latitude,
     longitude: attraction.longitude,
-    description: attraction.description,
-    phone: attraction.phone,
-    website: attraction.website,
-    rating: attraction.rating,
-    rating_count: attraction.ratingCount,
-    price_level: attraction.priceLevel,
-    hours: attraction.hours || {},
-    photos: attraction.photos || [],
-    last_updated: attraction.lastUpdated,
-    created_at: attraction.createdAt,
-    updated_at: attraction.updatedAt,
+    description: attraction.description ?? null,
+    phone: attraction.phone ?? null,
+    website: attraction.website ?? null,
+    rating: attraction.rating ?? null,
+    rating_count: attraction.ratingCount ?? null,
+    price_level: attraction.priceLevel ?? null,
+    hours: attraction.hours ?? {},
+    photos: attraction.photos ?? [],
+    last_updated: attraction.lastUpdated ?? null,
   };
-}
-
-/**
- * Calculate distance between two coordinates (Haversine formula)
- * Returns distance in miles
- */
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 3959; // Earth's radius in miles
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
 }
 
 /**
@@ -131,15 +117,15 @@ export async function getAttractionsNearBrewery(
     const radiusMeters = radiusKm * 1000;
 
     // Use PostGIS if available, otherwise fetch all and filter client-side
-    let data: (DatabaseAttraction & { distance_meters?: number })[] | null = null;
+    let data: (Tables<'maryland_attractions'> & { distance_meters?: number })[] | null = null;
     let error: any = null;
     
     try {
-      const result = await supabase.rpc('get_nearby_attractions', {
+      const result = await getSupabase().rpc('get_nearby_attractions', {
         lat: latitude,
         lng: longitude,
         radius_meters: radiusMeters,
-        attraction_type: type || null,
+        attraction_type: type || undefined,
       });
       data = result.data;
       error = result.error;
@@ -150,14 +136,15 @@ export async function getAttractionsNearBrewery(
 
     if (error) {
       // If RPC doesn't exist, fetch all and filter client-side
-      let query = supabase.from('maryland_attractions').select('*');
+      let query = getSupabase().from('maryland_attractions').select('*');
       
       // Apply type filter if specified
       if (type) {
         query = query.eq('type', type);
       }
       
-      const { data: allAttractions } = await query;
+      const { data: allAttractions, error: fallbackError } = await query;
+      if (fallbackError) throw fallbackError;
       if (!allAttractions) return [];
 
       // Convert km to miles for client-side calculation
@@ -165,7 +152,7 @@ export async function getAttractionsNearBrewery(
 
       // Filter by distance
       const filtered = allAttractions
-        .map((attraction: DatabaseAttraction) => {
+        .map((attraction: Tables<'maryland_attractions'>) => {
           const distance = calculateDistance(
             latitude,
             longitude,
@@ -201,6 +188,7 @@ export async function getAttractionsNearBrewery(
 
     return attractions;
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Error fetching nearby attractions:', error);
     return [];
   }
@@ -211,23 +199,21 @@ export async function getAttractionsNearBrewery(
  */
 export async function getAttractionsByCity(city: string, limit: number = 50): Promise<Attraction[]> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('maryland_attractions')
       .select('*')
       .eq('city', city)
       .limit(limit);
 
-    if (error) {
-      console.error('Error fetching attractions by city:', error);
-      return [];
-    }
+    if (error) throw error;
 
     if (!data) {
       return [];
     }
 
-    return data.map((dbAttraction: DatabaseAttraction) => dbAttractionToAttraction(dbAttraction));
+    return data.map((dbAttraction: Tables<'maryland_attractions'>) => dbAttractionToAttraction(dbAttraction));
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Error fetching attractions by city:', error);
     return [];
   }
@@ -238,23 +224,21 @@ export async function getAttractionsByCity(city: string, limit: number = 50): Pr
  */
 export async function getAttractionsByType(type: string, limit: number = 50): Promise<Attraction[]> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('maryland_attractions')
       .select('*')
       .eq('type', type)
       .limit(limit);
 
-    if (error) {
-      console.error('Error fetching attractions by type:', error);
-      return [];
-    }
+    if (error) throw error;
 
     if (!data) {
       return [];
     }
 
-    return data.map((dbAttraction: DatabaseAttraction) => dbAttractionToAttraction(dbAttraction));
+    return data.map((dbAttraction: Tables<'maryland_attractions'>) => dbAttractionToAttraction(dbAttraction));
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Error fetching attractions by type:', error);
     return [];
   }
@@ -265,9 +249,6 @@ export async function getAttractionsByType(type: string, limit: number = 50): Pr
  */
 export async function upsertAttraction(attraction: Attraction): Promise<Attraction | null> {
   try {
-    if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not available');
-    }
 
     const dbAttraction = attractionToDbAttraction(attraction);
     
@@ -279,7 +260,7 @@ export async function upsertAttraction(attraction: Attraction): Promise<Attracti
       dbAttraction.created_at = new Date().toISOString();
     }
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getAdminClient()
       .from('maryland_attractions')
       .upsert(dbAttraction, {
         onConflict: 'place_id',
@@ -309,18 +290,18 @@ export async function upsertAttraction(attraction: Attraction): Promise<Attracti
  */
 export async function getAttractionBySlug(slug: string): Promise<Attraction | null> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('maryland_attractions')
       .select('*')
       .eq('slug', slug)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
-      return null;
-    }
+    if (error) throw error;
+    if (!data) return null;
 
     return dbAttractionToAttraction(data);
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Error fetching attraction by slug:', error);
     return null;
   }
@@ -331,18 +312,18 @@ export async function getAttractionBySlug(slug: string): Promise<Attraction | nu
  */
 export async function getAttractionByPlaceId(placeId: string): Promise<Attraction | null> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('maryland_attractions')
       .select('*')
       .eq('place_id', placeId)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
-      return null;
-    }
+    if (error) throw error;
+    if (!data) return null;
 
     return dbAttractionToAttraction(data);
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Error fetching attraction by place_id:', error);
     return null;
   }

@@ -29,7 +29,7 @@ export default function CityBreweriesMapSection({
   return (
     <div className="h-[500px] rounded-lg overflow-hidden border border-[#E8E6E1]">
       <GoogleMap 
-        breweries={breweries as any} 
+        breweries={breweries} 
         height="100%" 
         showClusters={true}
         zoom={zoom}

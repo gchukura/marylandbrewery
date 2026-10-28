@@ -1,3 +1,14 @@
+-- Baseline: the schema that existed before the dated migrations below.
+-- Assembled on 2026-10-27 from lib/supabase-schema.sql, lib/add-photos-field.sql and
+-- lib/supabase-postgis-function.sql (lib/add-photo-url-column.sql and
+-- lib/add-yelp-reviews-support.sql duplicated the schema and 20250101000000).
+--
+-- Production already has all of this. Every statement is idempotent (IF NOT EXISTS,
+-- CREATE OR REPLACE, guarded policies), so applying it changes nothing; still, mark it as
+-- applied instead of running it:
+--   npx supabase migration repair --status applied 20240101000000
+
+-- ===== Tables, trigger function, RLS and policies (lib/supabase-schema.sql) =====
 -- Supabase Database Schema for Maryland Brewery Directory
 -- Run this in your Supabase SQL editor to create the tables
 
@@ -130,9 +141,11 @@ END;
 $$ language 'plpgsql';
 
 -- Triggers to automatically update updated_at
+DROP TRIGGER IF EXISTS update_breweries_updated_at ON breweries;
 CREATE TRIGGER update_breweries_updated_at BEFORE UPDATE ON breweries
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_beers_updated_at ON beers;
 CREATE TRIGGER update_beers_updated_at BEFORE UPDATE ON beers
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -143,26 +156,56 @@ ALTER TABLE beers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE newsletter_subscribers ENABLE ROW LEVEL SECURITY;
 
 -- Policies: Allow public read access to breweries and beers
-CREATE POLICY "Public can read breweries" ON breweries
-  FOR SELECT USING (true);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'breweries' AND policyname = 'Public can read breweries') THEN
+    CREATE POLICY "Public can read breweries" ON breweries
+      FOR SELECT USING (true);
+  END IF;
+END $$;
 
-CREATE POLICY "Public can read beers" ON beers
-  FOR SELECT USING (true);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'beers' AND policyname = 'Public can read beers') THEN
+    CREATE POLICY "Public can read beers" ON beers
+      FOR SELECT USING (true);
+  END IF;
+END $$;
 
 -- Policies: Only authenticated users can insert/update/delete
 -- Adjust these based on your authentication needs
-CREATE POLICY "Service role can manage breweries" ON breweries
-  FOR ALL USING (auth.role() = 'service_role');
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'breweries' AND policyname = 'Service role can manage breweries') THEN
+    CREATE POLICY "Service role can manage breweries" ON breweries
+      FOR ALL USING (auth.role() = 'service_role');
+  END IF;
+END $$;
 
-CREATE POLICY "Service role can manage beers" ON beers
-  FOR ALL USING (auth.role() = 'service_role');
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'beers' AND policyname = 'Service role can manage beers') THEN
+    CREATE POLICY "Service role can manage beers" ON beers
+      FOR ALL USING (auth.role() = 'service_role');
+  END IF;
+END $$;
 
 -- Newsletter: Allow public to insert (for signups), but only service role can read
-CREATE POLICY "Public can insert newsletter subscribers" ON newsletter_subscribers
-  FOR INSERT WITH CHECK (true);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'newsletter_subscribers' AND policyname = 'Public can insert newsletter subscribers') THEN
+    CREATE POLICY "Public can insert newsletter subscribers" ON newsletter_subscribers
+      FOR INSERT WITH CHECK (true);
+  END IF;
+END $$;
 
-CREATE POLICY "Service role can read newsletter subscribers" ON newsletter_subscribers
-  FOR SELECT USING (auth.role() = 'service_role');
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'newsletter_subscribers' AND policyname = 'Service role can read newsletter subscribers') THEN
+    CREATE POLICY "Service role can read newsletter subscribers" ON newsletter_subscribers
+      FOR SELECT USING (auth.role() = 'service_role');
+  END IF;
+END $$;
 
 -- Reviews table (for Google Reviews and Yelp Reviews)
 CREATE TABLE IF NOT EXISTS reviews (
@@ -194,10 +237,103 @@ CREATE INDEX IF NOT EXISTS idx_reviews_fetched_at ON reviews(fetched_at DESC);
 ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
 
 -- Policies: Allow public read access to reviews
-CREATE POLICY "Public can read reviews" ON reviews
-  FOR SELECT USING (true);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'reviews' AND policyname = 'Public can read reviews') THEN
+    CREATE POLICY "Public can read reviews" ON reviews
+      FOR SELECT USING (true);
+  END IF;
+END $$;
 
 -- Policies: Only service role can insert/update/delete
-CREATE POLICY "Service role can manage reviews" ON reviews
-  FOR ALL USING (auth.role() = 'service_role');
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'reviews' AND policyname = 'Service role can manage reviews') THEN
+    CREATE POLICY "Service role can manage reviews" ON reviews
+      FOR ALL USING (auth.role() = 'service_role');
+  END IF;
+END $$;
 
+-- ===== breweries.photos (lib/add-photos-field.sql) =====
+-- Add photos array field to breweries table
+-- Run this in your Supabase SQL editor to add the photos field
+
+ALTER TABLE breweries ADD COLUMN IF NOT EXISTS photos JSONB DEFAULT '[]';
+
+-- Add comment to document the field
+COMMENT ON COLUMN breweries.photos IS 'Array of photo paths stored locally (e.g., ["/photos/brewery-1.jpg", "/photos/brewery-2.jpg"])';
+
+-- Add GIN index for efficient querying of photos array
+CREATE INDEX IF NOT EXISTS idx_breweries_photos ON breweries USING GIN(photos);
+
+-- ===== get_nearby_breweries RPC (lib/supabase-postgis-function.sql) =====
+-- Optional PostGIS Function for Nearby Breweries
+-- This function provides better performance for location-based queries
+-- Run this in your Supabase SQL Editor after setting up PostGIS
+
+-- Function to get nearby breweries using PostGIS
+CREATE OR REPLACE FUNCTION get_nearby_breweries(
+  lat DOUBLE PRECISION,
+  lng DOUBLE PRECISION,
+  radius_meters DOUBLE PRECISION
+)
+RETURNS TABLE (
+  id TEXT,
+  name TEXT,
+  slug TEXT,
+  description TEXT,
+  type JSONB,
+  street TEXT,
+  city TEXT,
+  state TEXT,
+  zip TEXT,
+  county TEXT,
+  latitude DOUBLE PRECISION,
+  longitude DOUBLE PRECISION,
+  phone TEXT,
+  website TEXT,
+  social_media JSONB,
+  hours JSONB,
+  amenities JSONB,
+  allows_visitors BOOLEAN,
+  offers_tours BOOLEAN,
+  beer_to_go BOOLEAN,
+  has_merch BOOLEAN,
+  memberships JSONB,
+  food TEXT,
+  other_drinks TEXT,
+  parking TEXT,
+  dog_friendly BOOLEAN,
+  outdoor_seating BOOLEAN,
+  logo TEXT,
+  featured BOOLEAN,
+  special_events JSONB,
+  awards JSONB,
+  certifications JSONB,
+  opened_date TEXT,
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ,
+  distance_meters DOUBLE PRECISION
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    b.*,
+    ST_Distance(
+      ST_MakePoint(b.longitude, b.latitude)::geography,
+      ST_MakePoint(lng, lat)::geography
+    ) AS distance_meters
+  FROM breweries b
+  WHERE ST_DWithin(
+    ST_MakePoint(b.longitude, b.latitude)::geography,
+    ST_MakePoint(lng, lat)::geography,
+    radius_meters
+  )
+  ORDER BY distance_meters;
+END;
+$$;
+
+-- Grant execute permission to authenticated users
+GRANT EXECUTE ON FUNCTION get_nearby_breweries TO anon, authenticated;

@@ -39,67 +39,9 @@ import { Brewery, Beer as BeerType, Article, Membership, BreweryArticle, COMMON_
 import { BreadcrumbItem, RelatedPage } from '@/types/seo';
 import GoogleMap from '../maps/GoogleMap';
 import BreweryReviews from '../brewery/BreweryReviews';
+import { formatDayHours, isOpenAt, openingHoursSpecification, zonedDayAndMinutes } from '@/lib/hours';
 import BreweryArticles from '../brewery/BreweryArticles';
 
-/**
- * Format hours string to ensure consistent AM/PM and HH:MM format
- * Example: "2:00 – 9:00 PM" -> "02:00 PM – 09:00 PM"
- */
-function formatHoursString(hoursString: string): string {
-  if (!hoursString || hoursString.toLowerCase() === 'closed') {
-    return 'Closed';
-  }
-
-  // Match time ranges with various separators (hyphen, en dash, em dash)
-  const match = hoursString.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?\s*[–—-]\s*(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-  
-  if (!match) {
-    return hoursString; // Return as-is if we can't parse it
-  }
-
-  const [, openHour, openMin, openAmPm, closeHour, closeMin, closeAmPm] = match;
-
-  // Parse hours as numbers
-  const openHourNum = parseInt(openHour, 10);
-  const closeHourNum = parseInt(closeHour, 10);
-  
-  // Determine AM/PM for open time
-  let openAmPmFinal = openAmPm?.toUpperCase() || '';
-  if (!openAmPmFinal && closeAmPm) {
-    // If open doesn't have AM/PM but close does, infer it
-    const closeAmPmUpper = closeAmPm.toUpperCase();
-    if (openHourNum < closeHourNum || (closeAmPmUpper === 'PM' && openHourNum >= 12)) {
-      openAmPmFinal = closeAmPmUpper;
-    } else {
-      openAmPmFinal = 'AM';
-    }
-  } else if (!openAmPmFinal) {
-    // If neither has AM/PM, infer from hour value
-    openAmPmFinal = openHourNum < 12 ? 'AM' : 'PM';
-  }
-  
-  // Determine AM/PM for close time
-  let closeAmPmFinal = closeAmPm?.toUpperCase() || '';
-  if (!closeAmPmFinal && openAmPmFinal) {
-    // If close doesn't have AM/PM but open does, infer it
-    if (closeHourNum < openHourNum || (openAmPmFinal === 'AM' && closeHourNum >= 12)) {
-      closeAmPmFinal = 'PM';
-    } else {
-      closeAmPmFinal = openAmPmFinal;
-    }
-  } else if (!closeAmPmFinal) {
-    // If neither has AM/PM, infer from hour value
-    closeAmPmFinal = closeHourNum < 12 ? 'AM' : 'PM';
-  }
-
-  // Format to HH:MM with 2-digit hours
-  const formattedOpen = `${openHourNum.toString().padStart(2, '0')}:${openMin} ${openAmPmFinal}`;
-  const formattedClose = `${closeHourNum.toString().padStart(2, '0')}:${closeMin} ${closeAmPmFinal}`;
-
-  return `${formattedOpen} – ${formattedClose}`;
-}
-
-// Social Media Icons - SVG data URLs for platform logos
 const SOCIAL_MEDIA_ICONS = {
   facebook: "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjwhLS0gQ3JlYXRlZCB3aXRoIElua3NjYXBlIChodHRwOi8vd3d3Lmlua3NjYXBlLm9yZy8pIC0tPgoKPHN2ZwogICB2ZXJzaW9uPSIxLjEiCiAgIGlkPSJzdmc5IgogICB3aWR0aD0iNjY2LjY2NjY5IgogICBoZWlnaHQ9IjY2Ni42NjcxOCIKICAgdmlld0JveD0iMCAwIDY2Ni42NjY2OCA2NjYuNjY3MTciCiAgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGRlZnMKICAgICBpZD0iZGVmczEzIj4KICAgIDxjbGlwUGF0aAogICAgICAgY2xpcFBhdGhVbml0cz0idXNlclNwYWNlT25Vc2UiCiAgICAgICBpZD0iY2xpcFBhdGgyNSI+CiAgICAgIDxwYXRoCiAgICAgICAgIGQ9Ik0gMCw3MDAgSCA3MDAgViAwIEggMCBaIgogICAgICAgICBpZD0icGF0aDIzIiAvPgogICAgPC9jbGlwUGF0aD4KICA8L2RlZnM+CiAgPGcKICAgICBpZD0iZzE3IgogICAgIHRyYW5zZm9ybT0ibWF0cml4KDEuMzMzMzMzMywwLDAsLTEuMzMzMzMzMywtMTMzLjMzMzMzLDc5OS45OTk5OSkiPgogICAgPGcKICAgICAgIGlkPSJnMTkiPgogICAgICA8ZwogICAgICAgICBpZD0iZzIxIgogICAgICAgICBjbGlwLXBhdGg9InVybCgjY2xpcFBhdGgyNSkiPgogICAgICAgIDxnCiAgICAgICAgICAgaWQ9ImcyNyIKICAgICAgICAgICB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2MDAsMzUwKSI+CiAgICAgICAgICA8cGF0aAogICAgICAgICAgICAgZD0ibSAwLDAgYyAwLDEzOC4wNzEgLTExMS45MjksMjUwIC0yNTAsMjUwIC0xMzguMDcxLDAgLTI1MCwtMTExLjkyOSAtMjUwLC0yNTAgMCwtMTE3LjI0NSA4MC43MTUsLTIxNS42MjIgMTg5LjYwNiwtMjQyLjYzOCB2IDE2Ni4yNDIgaCAtNTEuNTUyIFYgMCBoIDUxLjU1MiB2IDMyLjkxOSBjIDAsODUuMDkyIDM4LjUwOCwxMjQuNTMyIDEyMi4wNDgsMTI0LjUzMiAxNS44MzgsMCA0My4xNjcsLTMuMTA1IDU0LjM0NywtNi4yMTEgViA4MS45ODYgYyAtNS45MDEsMC42MjEgLTE2LjE0OSwwLjkzMiAtMjguODgyLDAuOTMyIC00MC45OTMsMCAtNTYuODMyLC0xNS41MjggLTU2LjgzMiwtNTUuOSBWIDAgaCA4MS42NTkgbCAtMTQuMDI4LC03Ni4zOTYgaCAtNjcuNjMxIFYgLTI0OC4xNjkgQyAtOTUuOTI3LC0yMzMuMjE4IDAsLTEyNy44MTggMCwwIgogICAgICAgICAgICAgc3R5bGU9ImZpbGw6IzA4NjZmZjtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6bm9uZSIKICAgICAgICAgICAgIGlkPSJwYXRoMjkiIC8+CiAgICAgICAgPC9nPgogICAgICAgIDxnCiAgICAgICAgICAgaWQ9ImczMSIKICAgICAgICAgICB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0NDcuOTE3NSwyNzMuNjAzNikiPgogICAgICAgICAgPHBhdGgKICAgICAgICAgICAgIGQ9Ik0gMCwwIDE0LjAyOSw3Ni4zOTYgSCAtNjcuNjMgdiAyNy4wMTkgYyAwLDQwLjM3MiAxNS44MzgsNTUuODk5IDU2LjgzMSw1NS44OTkgMTIuNzMzLDAgMjIuOTgxLC0wLjMxIDI4Ljg4MiwtMC45MzEgdiA2OS4yNTMgYyAtMTEuMTgsMy4xMDYgLTM4LjUwOSw2LjIxMiAtNTQuMzQ3LDYuMjEyIC04My41MzksMCAtMTIyLjA0OCwtMzkuNDQxIC0xMjIuMDQ4LC0xMjQuNTMzIFYgNzYuMzk2IGggLTUxLjU1MiBWIDAgaCA1MS41NTIgdiAtMTY2LjI0MiBjIDE5LjM0MywtNC43OTggMzkuNTY4LC03LjM2MiA2MC4zOTQsLTcuMzYyIDEwLjI1NCwwIDIwLjM1OCwwLjYzMiAzMC4yODgsMS44MzEgTCAtNjcuNjMsMCBaIgogICAgICAgICAgICAgc3R5bGU9ImZpbGw6I2ZmZmZmZjtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6bm9uZSIKICAgICAgICAgICAgIGlkPSJwYXRoMzMiIC8+CiAgICAgICAgPC9nPgogICAgICA8L2c+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4K",
   twitter: "data:image/png;base64,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",
@@ -130,7 +72,7 @@ const getMembershipIcon = (membershipName: string): string => {
 
 interface SimpleBreweryPageTemplateProps {
   // Brewery data
-  brewery: Brewery;
+  brewery: Brewery & { actualReviewCount?: number };
   nearbyBreweries: Brewery[];
   
   // SEO
@@ -185,33 +127,6 @@ const formatABV = (abv: string): string => {
   return cleanABV;
 };
 
-const isOpenNow = (brewery: Brewery): boolean => {
-  if (!brewery.hours) return false;
-  
-  const now = new Date();
-  const day = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const currentTime = now.toTimeString().slice(0, 5);
-  
-  const hours = brewery.hours[day as keyof typeof brewery.hours];
-  if (!hours || hours === 'Closed') return false;
-  
-  // Simple time comparison (this is basic - you'd want more robust parsing)
-  return true; // Simplified for now
-};
-
-const getBreweryStatus = (brewery: Brewery): { status: string; color: string } => {
-  const isOpen = isOpenNow(brewery);
-  return {
-    status: isOpen ? 'Open Now' : 'Closed',
-    color: isOpen ? 'text-green-600' : 'text-red-600'
-  };
-};
-
-const getCurrentDay = (): string => {
-  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  return days[new Date().getDay()];
-};
-
 export default function SimpleBreweryPageTemplate({
   brewery,
   nearbyBreweries,
@@ -227,8 +142,8 @@ export default function SimpleBreweryPageTemplate({
 }: SimpleBreweryPageTemplateProps) {
   
   // Use computed values if available, otherwise fall back to utility functions
-  const isOpen = computed?.isOpenNow ?? isOpenNow(brewery);
-  const currentDay = computed?.currentDay ?? getCurrentDay();
+  const isOpen = computed?.isOpenNow ?? isOpenAt(brewery.hours).open;
+  const currentDay = computed?.currentDay ?? zonedDayAndMinutes(new Date()).day;
   const breweryStatus = {
     status: isOpen ? 'Open Now' : 'Closed',
     color: isOpen ? 'text-green-600' : 'text-red-600'
@@ -277,7 +192,7 @@ export default function SimpleBreweryPageTemplate({
     if (brewery.website && brewery.website.trim()) {
       structuredData.url = brewery.website;
     } else {
-      structuredData.url = `https://www.marylandbrewery.com/breweries/${(brewery as any).slug || brewery.id}`;
+      structuredData.url = `https://www.marylandbrewery.com/breweries/${brewery.slug || brewery.id}`;
     }
 
     if (brewery.socialMedia) {
@@ -309,45 +224,7 @@ export default function SimpleBreweryPageTemplate({
 
     // Add opening hours specification for "Open Now" rich snippets
     if (brewery.hours) {
-      const dayMapping: Record<string, string> = {
-        sunday: 'Sunday',
-        monday: 'Monday',
-        tuesday: 'Tuesday',
-        wednesday: 'Wednesday',
-        thursday: 'Thursday',
-        friday: 'Friday',
-        saturday: 'Saturday',
-      };
-
-      const openingHoursSpec = Object.entries(brewery.hours)
-        .filter(([_, hours]) => hours && hours.toLowerCase() !== 'closed' && hours.trim())
-        .map(([day, hours]) => {
-          // Parse hours like "11:00 AM – 9:00 PM" or "2:00 – 9:00 PM"
-          const match = hours.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?\s*[–—-]\s*(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-          if (!match) return null;
-
-          const [, openHour, openMin, openAmPm, closeHour, closeMin, closeAmPm] = match;
-          
-          // Convert to 24-hour format for schema
-          let openHour24 = parseInt(openHour, 10);
-          let closeHour24 = parseInt(closeHour, 10);
-          
-          const openPeriod = (openAmPm || closeAmPm || 'PM').toUpperCase();
-          const closePeriod = (closeAmPm || 'PM').toUpperCase();
-          
-          if (openPeriod === 'PM' && openHour24 !== 12) openHour24 += 12;
-          if (openPeriod === 'AM' && openHour24 === 12) openHour24 = 0;
-          if (closePeriod === 'PM' && closeHour24 !== 12) closeHour24 += 12;
-          if (closePeriod === 'AM' && closeHour24 === 12) closeHour24 = 0;
-
-          return {
-            '@type': 'OpeningHoursSpecification',
-            dayOfWeek: dayMapping[day] || day,
-            opens: `${openHour24.toString().padStart(2, '0')}:${openMin}`,
-            closes: `${closeHour24.toString().padStart(2, '0')}:${closeMin}`,
-          };
-        })
-        .filter(Boolean);
+      const openingHoursSpec = openingHoursSpecification(brewery.hours);
 
       if (openingHoursSpec.length > 0) {
         structuredData.openingHoursSpecification = openingHoursSpec;
@@ -591,22 +468,22 @@ export default function SimpleBreweryPageTemplate({
                 {(() => {
                   // Calculate the rating to display - use combined average if both Google and Yelp exist
                   const hasGoogle = brewery.googleRating && brewery.googleRating > 0 && brewery.googleRatingCount && brewery.googleRatingCount > 0;
-                  const hasYelp = (brewery as any).yelpRating && (brewery as any).yelpRating > 0 && (brewery as any).yelpRatingCount && (brewery as any).yelpRatingCount > 0;
+                  const hasYelp = brewery.yelpRating && brewery.yelpRating > 0 && brewery.yelpRatingCount && brewery.yelpRatingCount > 0;
                   
                   let displayRating: number | null = null;
                   let totalReviewCount = 0;
                   
                   if (hasGoogle && hasYelp) {
                     // Calculate combined weighted average to match about content
-                    const totalReviews = brewery.googleRatingCount! + (brewery as any).yelpRatingCount!;
-                    displayRating = (brewery.googleRating! * brewery.googleRatingCount! + (brewery as any).yelpRating! * (brewery as any).yelpRatingCount!) / totalReviews;
+                    const totalReviews = brewery.googleRatingCount! + brewery.yelpRatingCount!;
+                    displayRating = (brewery.googleRating! * brewery.googleRatingCount! + brewery.yelpRating! * brewery.yelpRatingCount!) / totalReviews;
                     totalReviewCount = totalReviews;
                   } else if (hasGoogle) {
                     displayRating = brewery.googleRating!;
-                    totalReviewCount = (brewery as any).actualReviewCount || brewery.googleRatingCount || 0;
+                    totalReviewCount = brewery.actualReviewCount || brewery.googleRatingCount || 0;
                   } else if (hasYelp) {
-                    displayRating = (brewery as any).yelpRating!;
-                    totalReviewCount = (brewery as any).yelpRatingCount || 0;
+                    displayRating = brewery.yelpRating!;
+                    totalReviewCount = brewery.yelpRatingCount || 0;
                   }
                   
                   if (!displayRating) return null;
@@ -675,7 +552,7 @@ export default function SimpleBreweryPageTemplate({
                   <p className="text-[#1C1C1C] mb-4 leading-relaxed text-lg sm:text-xl font-body">{brewery.description}</p>
                 ) : (
                   <p className="text-[#1C1C1C] mb-4 leading-relaxed text-lg sm:text-xl font-body">
-                    {brewery.name} is a {Array.isArray(brewery.type) ? brewery.type.join(' and ').toLowerCase() : (brewery.type || 'brewery').toLowerCase()} located in {brewery.city}, {brewery.county} County, Maryland.
+                    {brewery.name} is a {brewery.type.join(' and ').toLowerCase()} located in {brewery.city}, {brewery.county} County, Maryland.
                     {brewery.amenities && brewery.amenities.length > 0 && (
                       <> Featuring {brewery.amenities.slice(0, 3).join(', ').toLowerCase()}, this local brewery welcomes craft beer enthusiasts.</>
                     )}
@@ -860,7 +737,7 @@ export default function SimpleBreweryPageTemplate({
                             <li key="weekdays" className="flex items-center">
                               <span className="font-medium text-[#1C1C1C] w-32 font-body">Monday - Friday</span>
                               <span className="text-[#1C1C1C] ml-2 font-body">
-                                {mondayHours && mondayHours !== 'Closed' ? formatHoursString(mondayHours) : 'Closed'}
+                                {mondayHours && mondayHours !== 'Closed' ? formatDayHours(mondayHours) : 'Closed'}
                               </span>
                             </li>
                           );
@@ -874,7 +751,7 @@ export default function SimpleBreweryPageTemplate({
                                 <li key={day} className="flex items-center">
                                   <span className="font-medium text-[#1C1C1C] w-32 font-body">{dayName}</span>
                                   <span className="text-[#1C1C1C] ml-2 font-body">
-                                    {hours !== 'Closed' ? formatHoursString(hours) : 'Closed'}
+                                    {hours !== 'Closed' ? formatDayHours(hours) : 'Closed'}
                                   </span>
                                 </li>
                               );
@@ -888,7 +765,7 @@ export default function SimpleBreweryPageTemplate({
                             <li key="saturday" className="flex items-center">
                               <span className="font-medium text-[#1C1C1C] w-32 font-body">Saturday</span>
                               <span className="text-[#1C1C1C] ml-2 font-body">
-                                {brewery.hours.saturday !== 'Closed' ? formatHoursString(brewery.hours.saturday) : 'Closed'}
+                                {brewery.hours.saturday !== 'Closed' ? formatDayHours(brewery.hours.saturday) : 'Closed'}
                               </span>
                             </li>
                           );
@@ -900,7 +777,7 @@ export default function SimpleBreweryPageTemplate({
                             <li key="sunday" className="flex items-center">
                               <span className="font-medium text-[#1C1C1C] w-32 font-body">Sunday</span>
                               <span className="text-[#1C1C1C] ml-2 font-body">
-                                {brewery.hours.sunday !== 'Closed' ? formatHoursString(brewery.hours.sunday) : 'Closed'}
+                                {brewery.hours.sunday !== 'Closed' ? formatDayHours(brewery.hours.sunday) : 'Closed'}
                               </span>
                             </li>
                           );
@@ -924,8 +801,7 @@ export default function SimpleBreweryPageTemplate({
                     Brewery Type
                   </h3>
                   <div className="text-[#1C1C1C] font-body">
-                    {Array.isArray(brewery.type) 
-                      ? brewery.type.map((type: string, index: number) => (
+                    {brewery.type.map((type: string, index: number) => (
                           <span key={index}>
                             <Link 
                               href={`/type/${type.toLowerCase().replace(/\s+/g, '-')}`}
@@ -935,33 +811,7 @@ export default function SimpleBreweryPageTemplate({
                             </Link>
                             {index < brewery.type.length - 1 && ', '}
                           </span>
-                        ))
-                      : (
-                          <Link 
-                            href={`/type/${brewery.type.toLowerCase().replace(/\s+/g, '-')}`}
-                            className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium"
-                          >
-                            {brewery.type}
-                          </Link>
-                        )}
-                  </div>
-                </div>
-              )}
-
-              {/* Links to Articles */}
-              {brewery.articles && brewery.articles.length > 0 && (
-                <div>
-                  <h3 
-                    className="text-xl sm:text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-3 sm:mb-4 font-display"
-                  >
-                    Articles
-                  </h3>
-                  <div className="space-y-3 font-body">
-                    {brewery.articles.map((article: Article, index: number) => (
-                      <a key={index} href={article.url} target="_blank" rel="noopener noreferrer" className="block text-[#9B2335] hover:text-[#7A1C2A] text-body-large font-medium">
-                        {article.title}
-                      </a>
-                    ))}
+                        ))}
                   </div>
                 </div>
               )}
@@ -1080,16 +930,15 @@ export default function SimpleBreweryPageTemplate({
                     </div>
                   )}
 
-
               {/* Opening Date */}
-              {(brewery.openingDate || brewery.openedDate) && (
+              {brewery.openedDate && (
                 <div>
                   <h3 
                     className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display"
                   >
                     Opening Date
                   </h3>
-                  <div className="text-[#1C1C1C] text-body font-body">{brewery.openingDate || brewery.openedDate}</div>
+                  <div className="text-[#1C1C1C] text-body font-body">{brewery.openedDate}</div>
                 </div>
               )}
 
@@ -1269,7 +1118,7 @@ export default function SimpleBreweryPageTemplate({
                             <li key="weekdays" className="flex items-center">
                               <span className="font-medium text-[#1C1C1C] w-32 font-body">Monday - Friday</span>
                               <span className="text-[#1C1C1C] ml-2 font-body">
-                                {mondayHours && mondayHours !== 'Closed' ? formatHoursString(mondayHours) : 'Closed'}
+                                {mondayHours && mondayHours !== 'Closed' ? formatDayHours(mondayHours) : 'Closed'}
                               </span>
                             </li>
                           );
@@ -1282,7 +1131,7 @@ export default function SimpleBreweryPageTemplate({
                               <li key={day} className="flex items-center">
                                 <span className="font-medium text-[#1C1C1C] w-32 font-body">{dayName}</span>
                                 <span className="text-[#1C1C1C] ml-2 font-body">
-                                  {hours && hours !== 'Closed' ? formatHoursString(hours) : 'Closed'}
+                                  {hours && hours !== 'Closed' ? formatDayHours(hours) : 'Closed'}
                                 </span>
                               </li>
                             );
@@ -1296,7 +1145,7 @@ export default function SimpleBreweryPageTemplate({
                             <li key="saturday" className="flex items-center">
                               <span className="font-medium text-[#1C1C1C] w-32 font-body">Saturday</span>
                               <span className="text-[#1C1C1C] ml-2 font-body">
-                                {satHours && satHours !== 'Closed' ? formatHoursString(satHours) : 'Closed'}
+                                {satHours && satHours !== 'Closed' ? formatDayHours(satHours) : 'Closed'}
                               </span>
                             </li>
                           );
@@ -1309,7 +1158,7 @@ export default function SimpleBreweryPageTemplate({
                             <li key="sunday" className="flex items-center">
                               <span className="font-medium text-[#1C1C1C] w-32 font-body">Sunday</span>
                               <span className="text-[#1C1C1C] ml-2 font-body">
-                                {sunHours && sunHours !== 'Closed' ? formatHoursString(sunHours) : 'Closed'}
+                                {sunHours && sunHours !== 'Closed' ? formatDayHours(sunHours) : 'Closed'}
                               </span>
                             </li>
                           );

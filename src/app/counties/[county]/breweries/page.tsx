@@ -1,7 +1,9 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getProcessedBreweryData } from '@/lib/db';
-import { slugify, normalizeCountyName, isValidCountySlug, ALL_MD_COUNTIES } from '@/lib/data-utils';
+import { normalizeCountyName, isValidCountySlug } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
+import { MARYLAND_COUNTIES } from '@/types/brewery';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
@@ -12,7 +14,7 @@ import CountyBreweriesMapClient from './CountyBreweriesMapClient';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 export async function generateStaticParams() {
-  return ALL_MD_COUNTIES.map(c => ({ county: slugify(c) }));
+  return MARYLAND_COUNTIES.map(c => ({ county: slugify(c) }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ county: string }> }): Promise<Metadata> {
@@ -45,7 +47,7 @@ export async function generateMetadata({ params }: { params: Promise<{ county: s
   const processed = await getProcessedBreweryData();
   const countyKey = countyName.toLowerCase();
   const list = processed.breweries.filter(b => {
-    const breweryCounty = (b as any).county;
+    const breweryCounty = b.county;
     return breweryCounty && breweryCounty.toLowerCase() === countyKey;
   });
   const total = list.length;
@@ -109,7 +111,7 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
   
   // Optimize filtering - use pre-indexed data if available
   const breweries = processed.breweries.filter(b => {
-    const breweryCounty = (b as any).county;
+    const breweryCounty = b.county;
     return breweryCounty && breweryCounty.toLowerCase() === countyKey;
   });
   

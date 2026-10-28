@@ -212,7 +212,7 @@ function MapContent({
             )}
             <div className="mt-2">
               <a
-                href={`/breweries/${(selectedBrewery as any).slug || selectedBrewery.id}`}
+                href={`/breweries/${selectedBrewery.slug || selectedBrewery.id}`}
                 className="inline-block bg-red-600 text-white text-sm px-3 py-1.5 rounded hover:bg-red-700 transition-colors font-medium"
               >
                 View Details

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 
 interface CityData {
   name: string;

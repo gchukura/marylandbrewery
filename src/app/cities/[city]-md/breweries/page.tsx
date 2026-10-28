@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { getAllCities, getBreweriesByCity, getProcessedBreweryData } from '@/lib/db';
-import { slugify, deslugify } from '@/lib/data-utils';
+import { slugify, deslugify } from '@/lib/slug';
 import { generateCityTitle, generateCityDescription } from '@/lib/seo-utils';
 import { getNeighborhoodsByCity } from '@/lib/db';
 import Link from 'next/link';

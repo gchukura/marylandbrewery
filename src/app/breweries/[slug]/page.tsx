@@ -1,10 +1,11 @@
 import { notFound } from 'next/navigation';
-import { getProcessedBreweryData, getNearbyBreweries } from '@/lib/db';
-import { deslugify } from '../../../../lib/utils';
-import { slugify } from '@/lib/data-utils';
+import { getBreweryBySlug, getProcessedBreweryData, getNearbyBreweries, throwDuringBuild } from '@/lib/db';
+import { deslugify } from '@/lib/slug';
+import { DAYS, isOpenAt, nextOpening, zonedDayAndMinutes } from '@/lib/hours';
+import { slugify } from '@/lib/slug';
 import SimpleBreweryPageTemplate from '@/components/templates/SimpleBreweryPageTemplate';
 import { generateBreweryTitle, generateEnhancedBreweryDescription } from '@/lib/seo-utils';
-import { getBreweryReviews, getBreweryArticles, getBeersForBrewery } from '@/lib/db';
+import { getBreweryReviews, getBreweryArticles } from '@/lib/db';
 import { generateAboutBreweryContent } from '@/lib/brewery-content-utils';
 import { BreweryArticle } from '@/types/brewery';
 
@@ -13,32 +14,17 @@ interface BreweryPageProps {
 }
 
 export async function generateStaticParams() {
-  try {
-    const processed = await getProcessedBreweryData();
-    
-    return processed.breweries
-      .map((brewery) => ({
-        slug: (brewery as any).slug || brewery.id,
-      }))
-      .filter(({ slug }) => {
-        // Filter out invalid slugs (URLs, empty strings, etc.)
-        if (!slug || typeof slug !== 'string') return false;
-        // Reject slugs that look like URLs
-        if (slug.includes('www.') || slug.includes('http://') || slug.includes('https://')) return false;
-        // Reject slugs with invalid characters
-        if (slug.includes('//') || slug.startsWith('/') || slug.endsWith('/')) return false;
-        return true;
-      });
-  } catch (error) {
-    const errorMessage = error instanceof Error 
-      ? error.message 
-      : typeof error === 'string' 
-        ? error 
-        : 'Failed to fetch brewery data';
-    console.error('Error in generateStaticParams:', errorMessage);
-    // Return empty array to prevent build failure, pages will be generated on-demand
-    return [];
-  }
+  // No try/catch: a data error here should fail the build, not ship zero brewery pages
+  const processed = await getProcessedBreweryData();
+  return processed.breweries
+    .map((brewery) => ({ slug: brewery.slug || brewery.id }))
+    .filter(({ slug }) => {
+      // Filter out invalid slugs (URLs, empty strings, etc.)
+      if (!slug || typeof slug !== 'string') return false;
+      if (slug.includes('www.') || slug.includes('http://') || slug.includes('https://')) return false;
+      if (slug.includes('//') || slug.startsWith('/') || slug.endsWith('/')) return false;
+      return true;
+    });
 }
 
 export async function generateMetadata({ params }: BreweryPageProps) {
@@ -54,6 +40,7 @@ export async function generateMetadata({ params }: BreweryPageProps) {
         ? error 
         : 'Failed to fetch brewery data';
     console.error(`Error fetching brewery data for metadata (${slug}):`, errorMessage);
+    throwDuringBuild(error);
     return {
       title: 'Brewery Not Found',
       robots: { index: false, follow: false },
@@ -62,7 +49,7 @@ export async function generateMetadata({ params }: BreweryPageProps) {
   }
   
   const brewery = processed.breweries.find(
-    (b) => (b as any).slug === slug || b.id === slug
+    (b) => b.slug === slug || b.id === slug
   );
 
   if (!brewery) {
@@ -77,15 +64,15 @@ export async function generateMetadata({ params }: BreweryPageProps) {
   const description = generateEnhancedBreweryDescription({
     name: brewery.name,
     city: brewery.city,
-    county: (brewery as any).county,
-    type: (brewery as any).type,
+    county: brewery.county,
+    type: brewery.type,
     description: brewery.description,
-    googleRating: (brewery as any).googleRating,
-    amenities: (brewery as any).amenities || (brewery as any).features,
-    offersTours: (brewery as any).offersTours,
-    dogFriendly: (brewery as any).dogFriendly,
-    food: (brewery as any).food,
-    outdoorSeating: (brewery as any).outdoorSeating,
+    googleRating: brewery.googleRating,
+    amenities: brewery.amenities,
+    offersTours: brewery.offersTours,
+    dogFriendly: brewery.dogFriendly,
+    food: brewery.food,
+    outdoorSeating: brewery.outdoorSeating,
   });
 
   return {
@@ -131,14 +118,17 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
         ? error 
         : 'Failed to fetch brewery data';
     console.error(`Error fetching brewery data for ${slug}:`, errorMessage);
-    // During build, if we can't fetch data, return 404
+    throwDuringBuild(error); // never bake a 404 into the build because Supabase failed
     notFound();
   }
   
-  const brewery = processed.breweries.find(
-    (b) => (b as any).slug === slug || b.id === slug
-  );
+  const listed = processed.breweries.find((b) => b.slug === slug || b.id === slug);
+  if (!listed) {
+    notFound();
+  }
 
+  // The cached list leaves out review themes and beers; load this brewery's full record
+  const brewery = await getBreweryBySlug(listed.slug);
   if (!brewery) {
     notFound();
   }
@@ -155,163 +145,66 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     notFound();
   }
 
-  // Get nearby breweries (within 10 miles)
-  const nearbyBreweries = await getNearbyBreweries(brewery.latitude, brewery.longitude, 10);
+  // Independent fetches run together: nearby breweries (10 miles), reviews, articles, About copy
+  const [nearbyBreweries, reviewData, dbArticles, aboutContent] = await Promise.all([
+    getNearbyBreweries(brewery.latitude, brewery.longitude, 10),
+    getBreweryReviews(brewery.id, 100, 0), // Google returns ~5 and Yelp ~3 per brewery
+    getBreweryArticles(brewery.id, 5),
+    generateAboutBreweryContent({
+      brewery: {
+        name: brewery.name,
+        city: brewery.city,
+        county: brewery.county,
+        type: brewery.type,
+        latitude: brewery.latitude,
+        longitude: brewery.longitude,
+        googleRating: brewery.googleRating,
+        googleRatingCount: brewery.googleRatingCount,
+        description: brewery.description,
+        reviewThemes: brewery.reviewThemes, // Pre-computed themes from DB
+      },
+      beers: brewery.beers ?? [],
+      yelpRating: brewery.yelpRating,
+      yelpRatingCount: brewery.yelpRatingCount,
+    }),
+  ]);
 
   // Calculate city average rating
   const sameCityBreweries = processed.breweries.filter(
     (b) => b.city.toLowerCase() === brewery.city.toLowerCase()
   );
   const cityRatings = sameCityBreweries
-    .filter((b) => (b as any).googleRating)
-    .map((b) => (b as any).googleRating!);
+    .filter((b) => b.googleRating)
+    .map((b) => b.googleRating!);
   const cityAverageRating = cityRatings.length > 0 
     ? cityRatings.reduce((a, b) => a + b, 0) / cityRatings.length 
     : 0;
 
   // Calculate state average rating
   const stateRatings = processed.breweries
-    .filter((b) => (b as any).googleRating)
-    .map((b) => (b as any).googleRating!);
+    .filter((b) => b.googleRating)
+    .map((b) => b.googleRating!);
   const stateAverageRating = stateRatings.length > 0
     ? stateRatings.reduce((a, b) => a + b, 0) / stateRatings.length
     : 0;
 
   // Calculate same county count
   const sameCountyCount = processed.breweries.filter(
-    (b) => (b as any).county?.toLowerCase() === (brewery as any).county?.toLowerCase()
+    (b) => b.county?.toLowerCase() === brewery.county?.toLowerCase()
   ).length;
 
-  // Get current day info
+  // Open/closed status and next opening, in Maryland time (src/lib/hours.ts)
   const now = new Date();
-  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const currentDay = days[now.getDay()];
-  const currentDayIndex = now.getDay() === 0 ? 7 : now.getDay(); // 1-7 Mon-Sun
-
-  // Helper function to parse time from hours string (e.g., "11:00 AM - 10:00 PM" or "2:00 – 9:00 PM")
-  const parseTimeRange = (hoursString: string): { open: string; close: string } | null => {
-    if (!hoursString || hoursString.toLowerCase() === 'closed') return null;
-    
-    // Match formats like "11:00 AM - 10:00 PM", "2:00 – 9:00 PM", or "11:00-21:00"
-    // Handle both regular hyphens (-) and en dashes (–)
-    const match = hoursString.match(/(\d{1,2}:\d{2}\s*(?:AM|PM)?)\s*[–-]\s*(\d{1,2}:\d{2}\s*(?:AM|PM)?)/i);
-    if (match) {
-      let openTime = match[1].trim();
-      const closeTime = match[2].trim();
-      
-      // If open time doesn't have AM/PM but close time does, infer it
-      const openHasAmPm = /AM|PM/i.test(openTime);
-      const closeHasAmPm = /AM|PM/i.test(closeTime);
-      
-      if (!openHasAmPm && closeHasAmPm) {
-        // Extract hour from open time
-        const openHourMatch = openTime.match(/(\d{1,2}):(\d{2})/);
-        if (openHourMatch) {
-          const openHour = parseInt(openHourMatch[1], 10);
-          const closeHourMatch = closeTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-          if (closeHourMatch) {
-            const closeHour = parseInt(closeHourMatch[1], 10);
-            const closeAmPm = closeHourMatch[3].toUpperCase();
-            
-            // If open hour is less than close hour, assume same AM/PM
-            // If open hour is greater, assume it's PM (afternoon/evening)
-            if (openHour < closeHour || (closeAmPm === 'PM' && openHour >= 12)) {
-              openTime = openTime + ' ' + closeAmPm;
-            } else {
-              // If open is later in the day, it's likely PM
-              openTime = openTime + ' PM';
-            }
-          }
-        }
-      }
-      
-      return {
-        open: openTime,
-        close: closeTime,
-      };
-    }
-    return null;
-  };
-
-  // Helper function to convert time string to minutes since midnight for comparison
-  const timeToMinutes = (timeStr: string): number => {
-    const isPM = timeStr.toUpperCase().includes('PM');
-    const isAM = timeStr.toUpperCase().includes('AM');
-    const timeMatch = timeStr.match(/(\d{1,2}):(\d{2})/);
-    if (!timeMatch) return 0;
-    
-    let hours = parseInt(timeMatch[1], 10);
-    const minutes = parseInt(timeMatch[2], 10);
-    
-    if (isPM && hours !== 12) hours += 12;
-    if (isAM && hours === 12) hours = 0;
-    
-    return hours * 60 + minutes;
-  };
-
-  // Check if open now and get closing time
-  const breweryHours = (brewery as any).hours;
-  const todayHours = breweryHours?.[currentDay];
-  const timeRange = todayHours ? parseTimeRange(todayHours) : null;
-  
-  // Determine if actually open now (not just if hours exist)
-  let isOpenNow = false;
-  let closingTime: string | null = null;
-  
-  if (timeRange) {
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    const openMinutes = timeToMinutes(timeRange.open);
-    const closeMinutes = timeToMinutes(timeRange.close);
-    
-    // Check if current time is within open hours
-    if (openMinutes <= closeMinutes) {
-      // Normal case: open time is before close time (e.g., 11 AM - 10 PM)
-      isOpenNow = currentMinutes >= openMinutes && currentMinutes < closeMinutes;
-    } else {
-      // Overnight case: open time is after close time (e.g., 10 PM - 2 AM)
-      isOpenNow = currentMinutes >= openMinutes || currentMinutes < closeMinutes;
-    }
-    
-    closingTime = timeRange.close;
-  }
-
-  // Calculate next open day and time (always calculate, even if open now)
-  let nextOpenDay: string | null = null;
-  let nextOpenTime: string | null = null;
-  
-  if (breweryHours) {
-    // Use the same day order as the days array for consistency
-    const dayOrder = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const currentDayIndexInOrder = dayOrder.indexOf(currentDay);
-    
-    // If closed today but has hours today, check if it opens later today
-    if (!isOpenNow && timeRange) {
-      // Closed now but has hours - will open later today
-      nextOpenDay = currentDay;
-      nextOpenTime = timeRange.open;
-    } else {
-      // Check next 7 days starting from tomorrow (if open now) or tomorrow (if closed)
-      const startDay = 1; // Always start from tomorrow
-      
-      for (let i = startDay; i <= 7; i++) {
-        const checkDayIndex = (currentDayIndexInOrder + i) % 7;
-        const checkDay = dayOrder[checkDayIndex];
-        const checkDayHours = breweryHours[checkDay];
-        
-        if (checkDayHours && checkDayHours.toLowerCase() !== 'closed') {
-          const checkTimeRange = parseTimeRange(checkDayHours);
-          if (checkTimeRange) {
-            nextOpenDay = checkDay;
-            nextOpenTime = checkTimeRange.open;
-            break;
-          }
-        }
-      }
-    }
-  }
+  const { day: currentDay } = zonedDayAndMinutes(now);
+  const currentDayIndex = DAYS.indexOf(currentDay) === 0 ? 7 : DAYS.indexOf(currentDay); // 1-7 Mon-Sun
+  const { open: isOpenNow, closesAt } = isOpenAt(brewery.hours, now);
+  const closingTime = closesAt ?? null;
+  const next = nextOpening(brewery.hours, now);
+  const nextOpenDay = next?.day ?? null;
+  const nextOpenTime = next?.time ?? null;
 
   // Generate breadcrumbs
-  const citySlug = (brewery as any).citySlug || slugify(brewery.city);
+  const citySlug = slugify(brewery.city);
   const breadcrumbs = [
     { name: 'Maryland Brewery', url: '/', position: 1, isActive: false },
     { name: brewery.city, url: `/cities/${citySlug}/breweries`, position: 2, isActive: false },
@@ -325,22 +218,22 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     .slice(0, 4)
     .map((b: any) => ({
       title: b.name,
-      url: `/breweries/${(b as any).slug || b.id}`,
+      url: `/breweries/${b.slug || b.id}`,
       type: 'brewery' as const,
     }));
 
   // Get breweries with similar amenities
-  const breweryAmenities = ((brewery as any).amenities || (brewery as any).features || []).map((a: string) => a.toLowerCase());
+  const breweryAmenities = (brewery.amenities ?? []).map((a: string) => a.toLowerCase());
   const similarAmenityBreweries = processed.breweries
     .filter(b => {
       if (b.id === brewery.id) return false;
-      const bAmenities = ((b as any).amenities || (b as any).features || []).map((a: string) => a.toLowerCase());
+      const bAmenities = (b.amenities ?? []).map((a: string) => a.toLowerCase());
       return breweryAmenities.some((a: string) => bAmenities.includes(a));
     })
     .slice(0, 3)
     .map(b => ({
       title: b.name,
-      url: `/breweries/${(b as any).slug || b.id}`,
+      url: `/breweries/${b.slug || b.id}`,
       type: 'brewery' as const,
     }));
 
@@ -357,43 +250,19 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
   const metaDescription = generateEnhancedBreweryDescription({
     name: brewery.name,
     city: brewery.city,
-    county: (brewery as any).county,
-    type: (brewery as any).type,
+    county: brewery.county,
+    type: brewery.type,
     description: brewery.description,
-    googleRating: (brewery as any).googleRating,
-    amenities: (brewery as any).amenities || (brewery as any).features,
-    offersTours: (brewery as any).offersTours,
-    dogFriendly: (brewery as any).dogFriendly,
-    food: (brewery as any).food,
-    outdoorSeating: (brewery as any).outdoorSeating,
+    googleRating: brewery.googleRating,
+    amenities: brewery.amenities,
+    offersTours: brewery.offersTours,
+    dogFriendly: brewery.dogFriendly,
+    food: brewery.food,
+    outdoorSeating: brewery.outdoorSeating,
   });
 
-  // Fetch all reviews from database (Google Places API only returns max 5 reviews per place)
-  const reviewData = await getBreweryReviews(brewery.id, 100, 0); // Get up to 100 reviews (though Google only provides ~5)
   const actualReviewCount = reviewData.total;
   const allReviews = reviewData.reviews;
-
-  // Fetch beers for this brewery
-  const beersData = await getBeersForBrewery(brewery.id);
-
-  // Generate dynamic About content using stored review themes
-  const aboutContent = await generateAboutBreweryContent({
-    brewery: {
-      name: brewery.name,
-      city: brewery.city,
-      county: (brewery as any).county,
-      type: (brewery as any).type,
-      latitude: brewery.latitude,
-      longitude: brewery.longitude,
-      googleRating: brewery.googleRating,
-      googleRatingCount: brewery.googleRatingCount,
-      description: brewery.description,
-      reviewThemes: brewery.reviewThemes, // Pre-computed themes from DB
-    },
-    beers: beersData || [],
-    yelpRating: brewery.yelpRating,
-    yelpRatingCount: brewery.yelpRatingCount,
-  });
 
   // Computed values for enhanced template
   const computed = {
@@ -416,32 +285,30 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     actualReviewCount,
   };
 
-  // Fetch articles for this brewery
-  const dbArticles = await getBreweryArticles(brewery.id, 5);
   
   // Convert database articles to BreweryArticle type (snake_case to camelCase)
   const articles: BreweryArticle[] = dbArticles.map((dbArticle) => ({
     id: dbArticle.id || '',
     breweryId: dbArticle.brewery_id,
     title: dbArticle.title,
-    description: dbArticle.description,
+    description: dbArticle.description ?? undefined,
     url: dbArticle.url,
-    source: dbArticle.source,
-    author: dbArticle.author,
-    imageUrl: dbArticle.image_url,
-    publishedAt: dbArticle.published_at,
+    source: dbArticle.source ?? undefined,
+    author: dbArticle.author ?? undefined,
+    imageUrl: dbArticle.image_url ?? undefined,
+    publishedAt: dbArticle.published_at ?? undefined,
     fetchedAt: dbArticle.fetched_at || new Date().toISOString(),
-    relevanceScore: dbArticle.relevance_score,
+    relevanceScore: dbArticle.relevance_score ?? undefined,
   }));
 
   return (
     <SimpleBreweryPageTemplate
-      brewery={breweryWithReviewCount as any}
-      nearbyBreweries={nearbyBreweries as any}
+      brewery={breweryWithReviewCount}
+      nearbyBreweries={nearbyBreweries}
       title={title}
       metaDescription={metaDescription}
-      breadcrumbs={breadcrumbs as any}
-      relatedPages={relatedPages as any}
+      breadcrumbs={breadcrumbs}
+      relatedPages={relatedPages}
       computed={computed}
       aboutContent={aboutContent}
       articles={articles}

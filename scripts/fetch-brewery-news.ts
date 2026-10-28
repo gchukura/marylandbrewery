@@ -14,8 +14,9 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 import Parser from 'rss-parser';
-import { supabaseAdmin, DatabaseBreweryArticle } from '../src/lib/db/client';
-import { getBreweryDataFromSupabase } from '../src/lib/db/queries';
+import { getAdminClient } from '@/lib/db/client';
+import type { TablesInsert } from '@/lib/db/client';
+import { getBreweryDataFromSupabase } from '@/lib/db/queries';
 
 const parser = new Parser();
 
@@ -160,7 +161,7 @@ async function processBreweryArticles(
   }
 
   // Process and score articles
-  const processedArticles: DatabaseBreweryArticle[] = [];
+  const processedArticles: TablesInsert<'brewery_articles'>[] = [];
   const seenUrls = new Set<string>();
 
   for (const article of articles) {
@@ -202,7 +203,7 @@ async function processBreweryArticles(
       }
     }
 
-    const processedArticle: DatabaseBreweryArticle = {
+    const processedArticle: TablesInsert<'brewery_articles'> = {
       brewery_id: breweryId,
       title: article.title,
       description: article.contentSnippet || article.content?.substring(0, 500) || undefined,
@@ -237,7 +238,7 @@ async function processBreweryArticles(
 
   // Upsert articles to Supabase
   if (topArticles.length > 0) {
-    const { error } = await supabaseAdmin!
+    const { error } = await getAdminClient()
       .from('brewery_articles')
       .upsert(topArticles, {
         onConflict: 'brewery_id,url',
@@ -250,7 +251,7 @@ async function processBreweryArticles(
     }
 
     // Update brewery's articles_last_updated timestamp
-    await supabaseAdmin!
+    await getAdminClient()
       .from('breweries')
       .update({ articles_last_updated: new Date().toISOString() })
       .eq('id', breweryId);
@@ -310,7 +311,7 @@ async function main() {
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
       // articles_last_updated isn't on the Brewery type, so read it from the table directly
-      const { data: updatedRows, error: updatedError } = await supabaseAdmin!
+      const { data: updatedRows, error: updatedError } = await getAdminClient()
         .from('breweries')
         .select('id, articles_last_updated');
       if (updatedError) throw updatedError;

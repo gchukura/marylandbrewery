@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useMemo } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 // Lazy import a minimal tooltip to avoid heavy deps
@@ -30,14 +31,12 @@ const AMENITY_ICON_MAP: Record<string, string> = {
 
 // Dynamic icon loader
 function getLucide(iconName: string) {
-  const DynamicIcon = dynamic(async () => {
+  const DynamicIcon = dynamic<{ className?: string }>(async () => {
     const icons = await import('lucide-react');
-    const Comp = (icons as Record<string, any>)[iconName] || (icons as Record<string, any>)['Sparkles'];
-    const Wrapped = (props: any) => (Comp ? <Comp {...props} /> : null);
-    (Wrapped as any).displayName = `Lucide${iconName}`;
-    return Wrapped as any;
+    const byName = icons as unknown as Record<string, LucideIcon | undefined>;
+    return byName[iconName] ?? icons.Sparkles;
   });
-  return DynamicIcon as React.ComponentType<{ className?: string }>;
+  return DynamicIcon;
 }
 
 interface AmenityIconsProps {

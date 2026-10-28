@@ -21,6 +21,7 @@ The maintenance scripts live in `scripts/*.ts` and run with `tsx` through the np
 | `data:reviews:dedupe` | Delete duplicate rows from `reviews` | yes (deletes) |
 | `data:reviews:counts` | Report review counts per brewery | no |
 | `data:news` | Fetch Google News RSS articles into `brewery_articles` | yes |
+| `data:check-websites` | Check every brewery `website` still loads and belongs to that brewery, and list junk social links (read-only) | no |
 | `data:logos` | Fetch logos, upload them to Storage (`brewery-media/logos/`) and set `breweries.logo` | yes |
 | `data:photos` | Download Google Places photos, upload them to Storage (`brewery-media/photos/`) and set `breweries.photos` | yes |
 | `media:migrate` | Move existing `public/photos` and `public/logos` into Storage and repoint the rows (dry run unless `--apply`) | with `--apply` |
@@ -286,4 +287,12 @@ File: `scripts/migrate-media-to-storage.ts`. One-time move of `public/photos` an
 - `--apply`: uploads and updates rows. Needs `SUPABASE_SERVICE_ROLE_KEY` and the bucket (migration `20261028010000_brewery_media_bucket.sql`).
 - Files in `public/` that no row references (the three deleted breweries) are listed, not migrated.
 - Run once. Then delete `public/photos` and `public/logos` and follow `docs/runbooks/rewrite-history.md`.
+
+### `npm run data:check-websites`
+
+File: `scripts/check-brewery-websites.ts`. Read-only. Fetches every brewery's `website` (8 at a time, 15 s timeout, following redirects) and flags it when it fails to load, redirects to another domain, looks parked or spammy, or neither its domain nor its page title contains a distinctive word of the brewery's name (`scripts/lib/brewery-site.ts`). It also lists `social_media` links that aren't profiles (share buttons, tracking pixels such as `facebook.com/2008` and `facebook.com/tr`, single posts). `--all` prints every row; `--json` writes `scripts/output/brewery-websites.json` (gitignored).
+
+Flags are leads, not verdicts. Expect noise from sites behind bot protection (`403 Just a moment...`), Facebook pages (`HTTP 400`) and breweries whose domain doesn't spell their name. Check the rest by hand, ideally against Google Places, and fix `breweries.website` directly. Run it every few months: brewery domains expire and get picked up by spam sites.
+
+`data:logos` uses the same name check and skips a brewery's website when the page doesn't mention the brewery.
 

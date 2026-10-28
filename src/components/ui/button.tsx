@@ -9,12 +9,15 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-brand-red text-paper hover:bg-brand-red-dark hover:text-paper',
-        secondary: 'border-[1.5px] border-ink bg-transparent text-ink hover:bg-ink hover:text-paper',
+        primary:
+          'bg-brand-red text-paper hover:bg-brand-red-dark hover:text-paper',
+        secondary:
+          'border-[1.5px] border-ink bg-transparent text-ink hover:bg-ink hover:text-paper',
         ghost: 'bg-transparent text-ink hover:bg-cream hover:text-brand-red',
+        ink: 'bg-ink text-paper hover:bg-ink/90 hover:text-paper', // a toggle that's on (Saved)
       },
       size: {
-        sm: 'h-9 px-3 text-sm',
+        sm: 'h-10 px-4 text-sm', // the header's Add a brewery
         md: 'h-11 px-[18px] text-sm',
         lg: 'h-14 px-[26px] text-base',
         icon: 'h-11 w-11 p-0',
@@ -26,11 +29,19 @@ export const buttonVariants = cva(
 
 export type ButtonVariantProps = VariantProps<typeof buttonVariants>;
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, ButtonVariantProps {}
+export interface ButtonProps
+  extends ButtonHTMLAttributes<HTMLButtonElement>, ButtonVariantProps {}
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({ className, variant, size, type = 'button', ...props }, ref) => (
-  <button ref={ref} type={type} className={cn(buttonVariants({ variant, size }), className)} {...props} />
-));
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, type = 'button', ...props }, ref) => (
+    <button
+      ref={ref}
+      type={type}
+      className={cn(buttonVariants({ variant, size }), className)}
+      {...props}
+    />
+  )
+);
 Button.displayName = 'Button';
 
 export interface ButtonLinkProps extends ButtonVariantProps {
@@ -42,11 +53,23 @@ export interface ButtonLinkProps extends ButtonVariantProps {
 }
 
 /** A link that looks like a button (Get directions, Add a brewery). */
-export function ButtonLink({ href, className, variant, size, external, children }: ButtonLinkProps) {
+export function ButtonLink({
+  href,
+  className,
+  variant,
+  size,
+  external,
+  children,
+}: ButtonLinkProps) {
   const classes = cn(buttonVariants({ variant, size }), className);
   if (external) {
     return (
-      <a href={href} className={classes} target="_blank" rel="noopener noreferrer">
+      <a
+        href={href}
+        className={classes}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         {children}
       </a>
     );

@@ -271,7 +271,7 @@ function MapCard({
           src={brewery.photo}
           name={brewery.name}
           sizes="56px"
-          className="text-base"
+          small
         />
       </div>
       <div className="flex min-w-0 flex-col gap-0.5">

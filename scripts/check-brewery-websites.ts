@@ -15,6 +15,7 @@ config({ path: '.env.local' });
 import { mkdir, writeFile } from 'fs/promises';
 import { getAdminClient } from '@/lib/db/client';
 import { isJunkSocialUrl, pageMatchesBrewery, pageTitle } from './lib/brewery-site';
+import { explainGoogleStatus, optionalGoogleServerKey } from './lib/google';
 
 const CONCURRENCY = 8;
 const TIMEOUT_MS = 15000;
@@ -64,7 +65,7 @@ async function check(b: { slug: string; name: string; website: string }): Promis
 async function main() {
   const showAll = process.argv.includes('--all');
   const writeJson = process.argv.includes('--json');
-  const { data, error } = await getAdminClient().from('breweries').select('slug, name, website, social_media').order('slug');
+  const { data, error } = await getAdminClient().from('breweries').select('slug, name, website, social_media, place_id').order('slug');
   if (error) throw error;
 
   const breweries = data.flatMap((b) => (b.website?.trim() && b.name ? [{ slug: b.slug, name: b.name, website: b.website }] : []));
@@ -100,7 +101,40 @@ async function main() {
   );
   if (junkSocial.length > 0) console.log(`\nSocial links that aren't profiles:\n  ${junkSocial.join('\n  ')}`);
 
-  console.log(`\n${results.length} checked, ${flagged.length} flagged, ${junkSocial.length} junk social links`);
+  // With a server key, ask Google Places whether each brewery is still open and which site it lists
+  const googleKey = optionalGoogleServerKey();
+  const googleNotes: string[] = [];
+  if (googleKey) {
+    const withPlace = data.filter((b): b is typeof b & { place_id: string } => Boolean(b.place_id));
+    let i = 0;
+    await Promise.all(
+      Array.from({ length: CONCURRENCY }, async () => {
+        while (i < withPlace.length) {
+          const b = withPlace[i++];
+          const body = (await (
+            await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${b.place_id}&fields=business_status,website&key=${googleKey}`)
+          ).json()) as { status: string; error_message?: string; result?: { business_status?: string; website?: string } };
+          if (body.status !== 'OK') {
+            googleNotes.push(`${b.slug}: Google ${explainGoogleStatus(body.status, body.error_message)}`);
+            continue;
+          }
+          const status = body.result?.business_status;
+          if (status && status !== 'OPERATIONAL') googleNotes.push(`${b.slug}: Google says ${status}`);
+          const listed = body.result?.website;
+          const host = (u: string) => new URL(/^https?:\/\//i.test(u) ? u : `https://${u}`).hostname.replace(/^www\./, '');
+          if (listed && (!b.website || host(listed) !== host(b.website))) {
+            googleNotes.push(`${b.slug}: Google lists ${listed} (we have ${b.website ?? 'none'})`);
+          }
+        }
+      })
+    );
+    googleNotes.sort();
+    console.log(`\nGoogle Places (${withPlace.length} breweries):${googleNotes.length ? `\n  ${googleNotes.join('\n  ')}` : ' all operational, websites agree'}`);
+  } else {
+    console.log('\nGoogle Places skipped: set GOOGLE_MAPS_API_KEY to also check open/closed status (docs/setup.md#google-server-key).');
+  }
+
+  console.log(`\n${results.length} checked, ${flagged.length} flagged, ${junkSocial.length} junk social links, ${googleNotes.length} Google notes`);
 }
 
 main().catch((error) => {

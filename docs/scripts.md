@@ -8,7 +8,7 @@ The maintenance scripts live in `scripts/*.ts` and run with `tsx` through the np
 - **Writes go to the production database.** There is no separate staging Supabase project. Any script marked "Writes DB: yes" changes live data the moment it runs. Use `--dry-run` where a script offers it.
 - **Writes need `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.** Writes go through `supabaseAdmin` in `src/lib/db/client.ts`, which is only created when `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are both set. Some scripts check for the key at startup. The others fail later with an unclear error (for example `supabaseAdmin.from is not a function`), because `supabaseAdmin` is a Proxy, so the `if (!supabaseAdmin)` guards in the code never fire.
 - **Reads through `getBreweryDataFromSupabase()` use the anon client.** Any script that loads breweries through `src/lib/db/queries.ts` also needs `NEXT_PUBLIC_SUPABASE_ANON_KEY`. The per-script sections below say which scripts do.
-- **Google key precedence.** Scripts that call Google APIs use `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY`. If both are set, the public key wins. A browser key with HTTP referer restrictions gets `REQUEST_DENIED` from the server-side Places and Geocoding APIs. Adding `GOOGLE_MAPS_API_KEY` alone does not fix this. You also have to unset `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` for the run, for example `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY= npm run data:geocode`. That works because dotenv does not override variables that are already set in the shell.
+- **Google key.** Scripts that call Google APIs use only `GOOGLE_MAPS_API_KEY`, a server key (`scripts/lib/google.ts`, setup in [setup.md](setup.md#google-server-key)). They never fall back to the site's browser key, which Google refuses from scripts. Check it with `npm run google:check`.
 - `NODE_ENV` is read in `src/lib/db/queries.ts`, but only to turn on extra logging.
 
 ## Summary
@@ -21,6 +21,7 @@ The maintenance scripts live in `scripts/*.ts` and run with `tsx` through the np
 | `data:reviews:dedupe` | Delete duplicate rows from `reviews` | yes (deletes) |
 | `data:reviews:counts` | Report review counts per brewery | no |
 | `data:news` | Fetch Google News RSS articles into `brewery_articles` | yes |
+| `google:check` | Check `GOOGLE_MAPS_API_KEY` against every Google API the scripts use | no |
 | `data:check-websites` | Check every brewery `website` still loads and belongs to that brewery, and list junk social links (read-only) | no |
 | `data:logos` | Fetch logos, upload them to Storage (`brewery-media/logos/`) and set `breweries.logo` | yes |
 | `data:photos` | Download Google Places photos, upload them to Storage (`brewery-media/photos/`) and set `breweries.photos` | yes |
@@ -46,7 +47,7 @@ File: `scripts/fetch-google-reviews.ts`
 
 What it does: Loads all breweries. For each one it uses the stored `place_id`, or finds it with Places Text Search and saves it. Text Search tries name + city + "brewery" first, then the query without "brewery", then the street address. It then calls Place Details for `reviews,rating,user_ratings_total`. New reviews are inserted into `reviews` with `source='google'`, skipping any that match an existing review on timestamp, reviewer name and the first 100 characters of text. It also updates `google_rating`, `google_rating_count` and `google_reviews_last_updated` on `breweries`. Breweries whose `google_reviews_last_updated` is less than 7 days old are skipped. The Places API returns at most 5 reviews per place, so the reviews table grows slowly over repeated runs.
 
-- Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (brewery read), `SUPABASE_SERVICE_ROLE_KEY` (writes), `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY` (required; it throws without one). Google Cloud needs Places API Text Search and Place Details enabled.
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (brewery read), `SUPABASE_SERVICE_ROLE_KEY` (writes), `GOOGLE_MAPS_API_KEY` (server key; required, it throws without one). Google Cloud needs Places API Text Search and Place Details enabled.
 - Writes to Supabase: **yes**. Inserts into `reviews` and updates `place_id`, `google_rating`, `google_rating_count` and `google_reviews_last_updated` on `breweries`.
 - Flags: none. The 7-day skip cannot be overridden.
 - How often: weekly. Running it more often only re-skips breweries.
@@ -134,7 +135,7 @@ File: `scripts/download-google-photos.ts`
 
 What it does: For every brewery it uses `place_id`, or finds it with Text Search and saves it. It then gets the photo references from Place Details and downloads up to 11 photos per brewery, converts them to WebP (max 1600px, quality 80) and uploads them to `brewery-media/photos/<slug>/<n>.webp`. Photos already in Storage are not downloaded again. The new URLs are merged into `breweries.photos` without removing the old ones. It calls Place Details for every brewery on every run, even if all its photos are already in Storage.
 
-- Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (all reads and writes use the admin client), `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY` (required).
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (all reads and writes use the admin client), `GOOGLE_MAPS_API_KEY` (server key, required).
 - Writes to Supabase: **yes**. Updates `breweries.place_id` and `breweries.photos`. It also uploads to Supabase Storage. Needs `SUPABASE_SERVICE_ROLE_KEY` and the `brewery-media` bucket.
 - Flags: none.
 - How often: after adding breweries. Each run costs Google Places calls for every brewery.
@@ -145,7 +146,7 @@ File: `scripts/enrich-supabase-breweries.ts`
 
 What it does: For breweries with no social links, it fetches the brewery website and extracts the first Facebook, Instagram, Twitter/X and Untappd links. For breweries with no hours, it runs a Places Text Search and a Place Details (`opening_hours`) lookup. It only updates `social_media` and `hours` when something changed, and never overwrites existing values. The Google lookup does not save the `place_id` it finds.
 
-- Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (brewery read), `SUPABASE_SERVICE_ROLE_KEY` (writes), and optionally `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY`. Without a Google key, the hours step is skipped.
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (brewery read), `SUPABASE_SERVICE_ROLE_KEY` (writes), and optionally `GOOGLE_MAPS_API_KEY` (server key). Without it, the hours step is skipped.
 - Writes to Supabase: **yes**. Updates `breweries.social_media` and `breweries.hours`.
 - Flags: none.
 - How often: after adding breweries.
@@ -171,7 +172,7 @@ File: `scripts/geocode-breweries.ts`
 
 What it does: For every brewery it gets coordinates from Places Text Search (name, city, state), and falls back to the Geocoding API with the full address, retrying twice. If the result differs from the stored latitude or longitude by more than 0.01 degrees (about 0.6 miles), it overwrites the stored coordinates. Breweries with no stored coordinates always count as changed. There is no review step: it updates every brewery that moved.
 
-- Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (checked at startup), `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY` (required).
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (checked at startup), `GOOGLE_MAPS_API_KEY` (server key, required).
 - Writes to Supabase: **yes**. Updates `breweries.latitude` and `breweries.longitude`.
 - Flags: none.
 - How often: after adding breweries or changing addresses. Run `data:verify-coordinates` first to see what would change.
@@ -182,7 +183,7 @@ File: `scripts/verify-brewery-coordinates.ts`
 
 What it does: Geocodes each brewery's name and address with the Geocoding API and prints the distance from the stored coordinates. It counts more than 0.1 mile as a warning and more than 1 mile as an error. Breweries with no stored coordinates are reported and skipped. It geocodes each brewery twice (once for the detail output, once for the summary), so it costs twice as many API calls as needed.
 
-- Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (checked at startup, even though it only reads), `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY` (required).
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (checked at startup, even though it only reads), `GOOGLE_MAPS_API_KEY` (server key, required).
 - Writes to Supabase: **no** (read only).
 - Flags: one optional positional argument, a brewery name substring (`ilike '%name%'`), for example `npm run data:verify-coordinates -- "Silly Yak"`. With no argument it checks all breweries.
 - How often: as needed. Run it before `data:geocode`, or when a map pin looks wrong.
@@ -193,7 +194,7 @@ File: `scripts/fetch-maryland-attractions.ts`
 
 What it does: Builds a list of brewery cities, using the first brewery's coordinates for each city (not an average, despite the old README). For each city it runs Places Nearby Search (10 km radius) for about 20 Google place types. It then runs a coarse grid search across Maryland (0.5 degree spacing, 25 km radius, 5 key types, capped at 500 requests). Each new place gets a Place Details call. Places outside Maryland are dropped. The rest are mapped to a category (landmark, museum, park, entertainment, shopping, restaurant) and upserted into `maryland_attractions` on `place_id`. It waits 200 ms between requests.
 
-- Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (brewery read), `SUPABASE_SERVICE_ROLE_KEY` (writes), `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY` (required). Google Cloud needs Places API Nearby Search and Place Details enabled.
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (brewery read), `SUPABASE_SERVICE_ROLE_KEY` (writes), `GOOGLE_MAPS_API_KEY` (server key, required). Google Cloud needs Places API Nearby Search and Place Details enabled.
 - Writes to Supabase: **yes**. Upserts into `maryland_attractions`. Nothing is written with `--dry-run`.
 - Flags:
   - `--dry-run` skips the upsert. It still makes all the Google API calls, including Place Details, so it is not free.
@@ -293,6 +294,8 @@ File: `scripts/migrate-media-to-storage.ts`. One-time move of `public/photos` an
 File: `scripts/check-brewery-websites.ts`. Read-only. Fetches every brewery's `website` (8 at a time, 15 s timeout, following redirects) and flags it when it fails to load, redirects to another domain, looks parked or spammy, or neither its domain nor its page title contains a distinctive word of the brewery's name (`scripts/lib/brewery-site.ts`). It also lists `social_media` links that aren't profiles (share buttons, tracking pixels such as `facebook.com/2008` and `facebook.com/tr`, single posts). `--all` prints every row; `--json` writes `scripts/output/brewery-websites.json` (gitignored).
 
 Flags are leads, not verdicts. Expect noise from sites behind bot protection (`403 Just a moment...`), Facebook pages (`HTTP 400`) and breweries whose domain doesn't spell their name. Check the rest by hand, ideally against Google Places, and fix `breweries.website` directly. Run it every few months: brewery domains expire and get picked up by spam sites.
+
+With `GOOGLE_MAPS_API_KEY` set, it also asks Google Places for each brewery's `business_status` (flags anything not `OPERATIONAL`, such as `CLOSED_PERMANENTLY`) and the website Google lists, when that differs from ours. Without the key it skips that and says so.
 
 `data:logos` uses the same name check and skips a brewery's website when the page doesn't mention the brewery.
 

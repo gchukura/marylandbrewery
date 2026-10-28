@@ -27,12 +27,26 @@ Every variable is listed with a comment in `.env.example`. In short:
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Everything. The build prerenders pages from Supabase. | `.env.local`, Vercel (Production + Preview), GitHub Actions secrets (CI) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Scripts that write data | `.env.local` only |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Maps on the site | `.env.local`, Vercel |
-| `GOOGLE_MAPS_API_KEY` | Scripts that call Places/Geocoding | `.env.local` |
+| `GOOGLE_MAPS_API_KEY` | Scripts that call Places/Geocoding: a separate server key ([below](#google-server-key)) | `.env.local` only |
 | `ADMIN_SYNC_TOKEN` | `/api/sync`, `/api/revalidate` | `.env.local`, Vercel, GitHub Actions secret |
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_SERVICE_ACCOUNT_KEY`, `GOOGLE_SHEET_ID` | Contact form | Vercel |
 | `YELP_API_KEY` | `npm run data:reviews:yelp` | `.env.local` |
 
 The GitHub Actions sync workflow also needs a repository **variable** `SITE_URL` (e.g. `https://marylandbrewery-rdni.vercel.app`, no trailing slash).
+
+## Google server key
+
+The site's `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is a **browser key**: it ships in the page, so it's restricted to the site's domains and Google refuses it from scripts. The data scripts use a second, **server key** in `GOOGLE_MAPS_API_KEY`. It never leaves `.env.local` (not Vercel, not GitHub).
+
+In [Google Cloud Console](https://console.cloud.google.com/), in the **same project** as the browser key (the one with billing and the Places API already enabled):
+
+1. **APIs & Services > Library:** make sure **Places API** and **Geocoding API** are enabled. The scripts use the classic Places web service (`maps.googleapis.com/maps/api/place/...`). Google no longer lets new projects enable it, which is why it has to be the existing project.
+2. **APIs & Services > Credentials > Create credentials > API key.** Rename it "marylandbrewery scripts".
+3. **Application restrictions: None.** Website restrictions are what break scripts; IP restrictions break whenever your home IP changes.
+4. **API restrictions: Restrict key** to **Places API** and **Geocoding API** only. That limits the damage if the key ever leaks.
+5. Add it to `.env.local` as `GOOGLE_MAPS_API_KEY=...` and run `npm run google:check`. Every line should be ✓.
+
+Optionally set a daily quota cap (APIs & Services > Places API > Quotas). A full `data:check-websites` run with Google is about 150 Place Details calls.
 
 ## Supabase
 

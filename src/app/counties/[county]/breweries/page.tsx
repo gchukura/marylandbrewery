@@ -13,6 +13,9 @@ import '@/components/home-v2/styles.css';
 import CountyBreweriesMapClient from './CountyBreweriesMapClient';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { countyMeta } from '@/lib/seo/page-meta';
+import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
+import { countyLabel } from '@/lib/seo/page-meta';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 export async function generateStaticParams() {
@@ -145,8 +148,15 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
   });
   const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
 
+  const pagePath = `/counties/${slugify(countyName)}/breweries`;
+  const jsonLd = [
+    collectionPage({ name: `Breweries in ${countyLabel(countyName)}, MD`, path: pagePath, breweries: sortedBreweries }),
+    breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Counties', path: '/counties' }, { name: countyLabel(countyName), path: pagePath }]),
+  ];
+
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
+      <JsonLd data={jsonLd} />
       {/* Hero Section */}
       <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
         {/* County Hero Image Background */}

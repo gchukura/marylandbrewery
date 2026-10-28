@@ -15,6 +15,8 @@ import {
 } from '@/lib/neighborhoods';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { neighborhoodMeta } from '@/lib/seo/page-meta';
+import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import CityBreweriesMapClient from '../../cities/[city]/breweries/CityBreweriesMapClient';
 
 const ATTRACTION_LIMIT = 6;
@@ -76,8 +78,20 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ s
   );
   const attractions = sortByDistance(neighborhood, nearbyAttractions.filter(isListedAttraction)).slice(0, ATTRACTION_LIMIT);
 
+  const pagePath = neighborhoodPath(neighborhood.slug);
+  const jsonLd = [
+    collectionPage({ name: `Breweries near ${neighborhood.name}, ${city}`, path: pagePath, breweries }),
+    breadcrumbList([
+      { name: 'Home', path: '/' },
+      { name: 'Cities', path: '/cities' },
+      { name: `${city}, MD`, path: `/cities/${citySlug}/breweries` },
+      { name: neighborhood.name, path: pagePath },
+    ]),
+  ];
+
   return (
     <div className="min-h-screen">
+      <JsonLd data={jsonLd} />
       <section className="border-b bg-white">
         <div className="container mx-auto px-4 py-10 md:py-14">
           <nav className="mb-6" aria-label="Breadcrumb">

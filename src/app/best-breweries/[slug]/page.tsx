@@ -17,6 +17,8 @@ import CityBreweriesMapClient from '../../cities/[city]/breweries/CityBreweriesM
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { bestBreweriesMeta } from '@/lib/seo/page-meta';
+import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 
 
@@ -162,8 +164,15 @@ export default async function BestBreweriesSlugPage({ params }: { params: Promis
     });
     const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
 
+    const pagePath = `/best-breweries/${slugWithoutMd}`;
+    const jsonLd = [
+      collectionPage({ name: `Best Breweries in ${cityName}, MD`, path: pagePath, breweries: sortedBreweries }),
+      breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Best Breweries', path: '/best-breweries' }, { name: `${cityName}, MD`, path: pagePath }]),
+    ];
+
     return (
       <div className="min-h-screen bg-[#FAF9F6]">
+        <JsonLd data={jsonLd} />
         {/* Hero Section */}
         <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
           {/* City Hero Image Background */}

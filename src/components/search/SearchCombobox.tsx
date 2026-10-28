@@ -125,7 +125,7 @@ export default function SearchCombobox({
       onSubmit={submit}
       className={cn('relative flex flex-wrap gap-2.5', className)}
     >
-      <div className="relative flex h-14 min-w-0 flex-[1_1_320px] items-center gap-3 rounded-[12px] border-[1.5px] border-line-strong bg-white px-4 focus-within:border-ink">
+      <div className="relative flex h-14 min-w-0 flex-[1_1_200px] items-center gap-3 rounded-[12px] border-[1.5px] border-line-strong bg-white px-4 focus-within:border-ink">
         <Search className="h-5 w-5 shrink-0 text-ink" aria-hidden="true" />
         <label htmlFor={`${id}-input`} className="sr-only">
           Search breweries, cities, counties or amenities

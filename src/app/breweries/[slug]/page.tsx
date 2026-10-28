@@ -291,7 +291,7 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
         {/* Rail */}
         <aside
           aria-label="Location and hours"
-          className="flex flex-col gap-6 lg:sticky lg:top-6 lg:col-start-2 lg:row-span-6 lg:row-start-1 lg:self-start"
+          className="flex flex-col gap-6 lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1 lg:row-end-7 lg:self-start"
         >
           <RailMap
             point={{

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { canOptimizeImage } from '@/lib/images';
 
 interface BreweryPhotoGalleryProps {
   photos: string[];
@@ -22,7 +23,6 @@ export default function BreweryPhotoGallery({
   }
 
   // Check if photo is external URL or local path
-  const isExternalUrl = (path: string) => path.startsWith('http://') || path.startsWith('https://');
 
   const openLightbox = (photo: string, index: number) => {
     setSelectedPhoto(photo);
@@ -51,7 +51,8 @@ export default function BreweryPhotoGallery({
               className="relative cursor-pointer group overflow-hidden shadow-sm hover:shadow-md transition-shadow aspect-square"
               onClick={() => openLightbox(photo, index)}
             >
-              {isExternalUrl(photo) ? (
+              {!canOptimizeImage(photo) ? (
+                // eslint-disable-next-line @next/next/no-img-element -- host outside next.config remotePatterns
                 <img
                   src={photo}
                   alt={`${breweryName} photo ${index + 1}`}
@@ -124,7 +125,8 @@ export default function BreweryPhotoGallery({
 
           {/* Photo */}
           <div className="max-w-7xl max-h-full" onClick={(e) => e.stopPropagation()}>
-            {isExternalUrl(selectedPhoto) ? (
+            {!canOptimizeImage(selectedPhoto) ? (
+              // eslint-disable-next-line @next/next/no-img-element -- host outside next.config remotePatterns
               <img
                 src={selectedPhoto}
                 alt={`${breweryName} photo ${selectedIndex + 1}`}
@@ -137,7 +139,7 @@ export default function BreweryPhotoGallery({
                 width={1200}
                 height={800}
                 className="max-w-full max-h-[90vh] object-contain"
-                unoptimized
+                sizes="(max-width: 1280px) 100vw, 1200px"
               />
             )}
           </div>

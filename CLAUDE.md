@@ -47,8 +47,7 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
   (`font-display`, `font-sans`), shared UI in `src/components/ui/` (Button, Chip/FilterChip, StatusBadge,
   BreweryCard, BreweryListRow, Breadcrumbs, CheckerBand, SectionHeading, Logo), header/footer in
   `src/components/layout/`. Listings, the brewery page and the homepage use them; text pages (faq, terms, contact...) use
-  `src/components/layout/ContentPage.tsx` (`.prose-page` styles). The browse indexes (/cities, /counties, /amenities, /type,
-  /region) still have pre-redesign markup.
+  `src/components/layout/ContentPage.tsx` (`.prose-page` styles); browse indexes use `PageHeader` + `IndexCard`/`GroupedLinks`.
 - Every brewery listing (cities, counties, regions, amenities, types, city x amenity, best-of, open now,
   neighborhoods, /near, /map) is `src/components/listing/ListingPage.tsx` (server) + `BreweryListMap.tsx`
   (client island). Filters live in the URL and run in the browser on the static list (`src/lib/listing.ts`);

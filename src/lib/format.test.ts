@@ -10,3 +10,13 @@ describe('formatPhone', () => {
     expect(formatPhone('ext. 12')).toBe('ext. 12');
   });
 });
+
+describe('externalUrl', () => {
+  it('adds https to bare domains and rejects non-URLs', async () => {
+    const { externalUrl } = await import('./format');
+    expect(externalUrl('www.libcobeer.com/')).toBe('https://www.libcobeer.com/');
+    expect(externalUrl('https://x.com')).toBe('https://x.com');
+    expect(externalUrl('@handle')).toBeUndefined();
+    expect(externalUrl('')).toBeUndefined();
+  });
+});

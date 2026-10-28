@@ -3,36 +3,15 @@ import { getProcessedBreweryData } from '@/lib/db';
 import HeroV2 from '@/components/home-v2/HeroV2';
 import ValuePropsV2 from '@/components/home-v2/ValuePropsV2';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
+import { buildMetadata } from '@/lib/seo/metadata';
 import { slugify } from '@/lib/slug';
 
-export const metadata: Metadata = {
-  title: 'Maryland Brewery Directory | Craft Breweries Across Maryland',
-  description: 'Discover the best craft breweries across Maryland. Find breweries by city, county, type, and amenities. Interactive map, brewery hours, and complete guide to Maryland\'s craft beer scene.',
-  alternates: {
-    canonical: '/',
-  },
-  openGraph: {
-    title: 'Maryland Brewery Directory | Craft Breweries Across Maryland',
-    description: 'Discover the best craft breweries across Maryland. Find breweries by city, county, type, and amenities. Interactive map and complete guide.',
-    url: 'https://www.marylandbrewery.com',
-    siteName: 'Maryland Brewery Directory',
-    type: 'website',
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: 'Maryland Brewery Directory - Craft Breweries Across Maryland',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Maryland Brewery Directory | Craft Breweries Across Maryland',
-    description: 'Discover the best craft breweries across Maryland. Find breweries by city, county, type, and amenities.',
-    images: ['/opengraph-image'],
-  },
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Maryland Brewery: Every Craft Brewery in Maryland",
+  description: "Every craft brewery in Maryland on one map, with hours, what's open now, and guides by city, county, region and amenity.",
+  path: '/',
+  absoluteTitle: true,
+});
 
 export default async function HomePage() {
   const data = await getProcessedBreweryData();

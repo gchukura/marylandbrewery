@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getProcessedBreweryData } from '@/lib/db';
+import { AMENITIES, getAmenity, hasAmenity, isIndexableCityAmenity, type AmenityDefinition } from '@/lib/amenities';
+import type { Brewery } from '@/types/brewery';
 import { slugify, deslugify } from '@/lib/slug';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
@@ -9,108 +11,53 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import '@/components/home-v2/styles.css';
 import CityAmenityMapClient from './CityAmenityMapClient';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { cityAmenityMeta } from '@/lib/seo/page-meta';
+import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
-const AMENITY_SLUGS = [
-  'dog-friendly', 'outdoor-seating', 'live-music', 'food-trucks', 'full-kitchen', 'beer-garden',
-  'games', 'wifi', 'parking', 'private-events', 'tours', 'tastings', 'merchandise', 'growlers', 'crowlers'
-] as const;
-
-function normalizeAmenityLabel(slug: string): string {
-  return deslugify(slug).replace(/\bWifi\b/i, 'WiFi');
+function cityAmenityBreweries(breweries: Brewery[], cityName: string, amenityDef: AmenityDefinition): Brewery[] {
+  const cityKey = cityName.toLowerCase();
+  return breweries.filter((b) => b.city.toLowerCase() === cityKey && hasAmenity(b, amenityDef));
 }
 
+// Prerender the indexable combinations (3+ breweries); smaller ones render on demand as noindex
 export async function generateStaticParams() {
   const processed = await getProcessedBreweryData();
-  
-  // Only generate pages for city+amenity combinations that have at least one brewery
-  const combinations: { city: string; amenity: string }[] = [];
-  
-  for (const amenitySlug of AMENITY_SLUGS) {
-    const amenityLabel = normalizeAmenityLabel(amenitySlug).toLowerCase();
-    
-    // Group breweries by city that have this amenity
-    const citiesWithAmenity = new Set<string>();
-    
-    for (const brewery of processed.breweries) {
-      const amenities = brewery.amenities ?? [];
-      const hasAmenity = amenities.some((a: string) => 
-        a.toLowerCase().includes(amenityLabel)
-      );
-      
-      if (hasAmenity && brewery.city) {
-        citiesWithAmenity.add(brewery.city);
-      }
-    }
-    
-    // Add combinations for cities that have this amenity
-    for (const city of citiesWithAmenity) {
-      combinations.push({ city: slugify(city), amenity: amenitySlug });
-    }
-  }
-  
-  return combinations;
+  return AMENITIES.flatMap((amenityDef) =>
+    processed.cities
+      .filter((city) => isIndexableCityAmenity(cityAmenityBreweries(processed.breweries, city, amenityDef).length))
+      .map((city) => ({ city: slugify(city), amenity: amenityDef.slug }))
+  );
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ city: string; amenity: string }> }): Promise<Metadata> {
   const { city, amenity } = await params;
+  const amenityDef = getAmenity(amenity);
+  if (!amenityDef) return { title: 'Not Found', robots: { index: false, follow: false } };
   const processed = await getProcessedBreweryData();
   const cityName = deslugify(city);
-  const cityKey = cityName.toLowerCase();
-  const amenityLabel = normalizeAmenityLabel(amenity);
-  const amenityKey = amenityLabel.toLowerCase();
+  const amenityLabel = amenityDef.label;
+  const breweries = cityAmenityBreweries(processed.breweries, cityName, amenityDef);
 
-  const cityBreweries = processed.byCity.get(cityKey) || [];
-  const breweries = cityBreweries.filter(
-    (b: any) => (b.amenities ?? []).some((a: string) => a.toLowerCase().includes(amenityKey))
-  );
-
-  const title = `${amenityLabel} Breweries in ${cityName}, MD | ${breweries.length} Options`;
-  
-  const description = breweries.length > 0
-    ? `Find ${breweries.length} breweries with ${amenityLabel.toLowerCase()} in ${cityName}, Maryland. Explore local taprooms and brewpubs offering ${amenityLabel.toLowerCase()} with detailed hours, locations, and visitor information.`
-    : `Discover ${cityName}'s craft beer scene. While no breweries currently list ${amenityLabel.toLowerCase()}, check nearby cities for similar options or explore other amenities in ${cityName}, Maryland.`;
-
-  return {
-    title,
-    description,
-    alternates: { canonical: `/cities/${city}/${amenity}` },
-    openGraph: {
-      title,
-      description,
-      url: `https://www.marylandbrewery.com/cities/${city}/${amenity}`,
-      siteName: 'Maryland Brewery Directory',
-      type: 'website',
-      images: [
-        {
-          url: '/opengraph-image',
-          width: 1200,
-          height: 630,
-          alt: `${amenityLabel} Breweries in ${cityName}`,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/opengraph-image'],
-    },
-  };
+  const displayCity = breweries[0]?.city ?? cityName;
+  return buildMetadata({
+    ...cityAmenityMeta(amenityLabel, displayCity, breweries.length),
+    path: `/cities/${city}/${amenity}`,
+    // Thin pages: only index combinations with 3+ breweries
+    noindex: !isIndexableCityAmenity(breweries.length),
+  });
 }
 
 export default async function CityAmenityPage({ params }: { params: Promise<{ city: string; amenity: string }> }) {
   const { city, amenity } = await params;
+  const amenityDef = getAmenity(amenity);
+  if (!amenityDef) notFound();
   const processed = await getProcessedBreweryData();
   const cityName = deslugify(city);
-  const amenityLabel = normalizeAmenityLabel(amenity);
-  const amenityKey = amenityLabel.toLowerCase();
-
-  // Filter breweries by city and amenity
-  const breweries = processed.breweries.filter(
-    (b: any) => b.city.toLowerCase() === cityName.toLowerCase() &&
-      ((b.amenities ?? []).some((a: string) => a.toLowerCase().includes(amenityKey)))
-  );
+  const amenityLabel = amenityDef.label;
+  const breweries = cityAmenityBreweries(processed.breweries, cityName, amenityDef);
 
   // Return 404 if no breweries match this city+amenity combination
   if (breweries.length === 0) {
@@ -171,8 +118,21 @@ export default async function CityAmenityPage({ params }: { params: Promise<{ ci
   });
   const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
 
+  const displayCity = sortedBreweries[0]?.city ?? cityName;
+  const pagePath = `/cities/${city}/${amenity}`;
+  const jsonLd = [
+    collectionPage({ name: `${amenityLabel} Breweries in ${displayCity}, MD`, path: pagePath, breweries: sortedBreweries }),
+    breadcrumbList([
+      { name: 'Home', path: '/' },
+      { name: 'Cities', path: '/cities' },
+      { name: `${displayCity}, MD`, path: `/cities/${city}/breweries` },
+      { name: amenityLabel, path: pagePath },
+    ]),
+  ];
+
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
+      <JsonLd data={jsonLd} />
       {/* Hero Section */}
       <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
         {/* City Hero Image Background */}

@@ -9,6 +9,7 @@ import { slugify } from '@/lib/slug';
 import BreweryLogo from '@/components/brewery/BreweryLogo';
 
 import { calculateDistance } from '@/lib/geo';
+import { amenityByDbValue } from '@/lib/amenities';
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
   ssr: false, 
   loading: () => (
@@ -279,7 +280,9 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                         <div className="flex flex-wrap gap-x-1.5 gap-y-1 mt-6">
                           {sortedAmenities.map((a: string) => {
                             if (!a || !a.trim()) return null;
-                            const amenitySlug = slugify(a.trim());
+                            const amenityPage = amenityByDbValue(a.trim());
+                            if (!amenityPage) return null; // no page for this value
+                            const amenitySlug = amenityPage.slug;
                             return (
                               <Link
                                 key={a}

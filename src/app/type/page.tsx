@@ -6,36 +6,16 @@ import { ChevronRight, Beer, Store, Warehouse, Leaf, FlaskConical } from 'lucide
 import Image from 'next/image';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { breadcrumbList } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import '@/components/home-v2/styles.css';
 
-export const metadata: Metadata = {
-  title: 'Brewery Types - Maryland Brewery Directory',
-  description: 'Browse Maryland breweries by type. Explore microbreweries, brewpubs, taprooms, production facilities, nano breweries, and farm breweries across the state.',
-  alternates: {
-    canonical: '/type',
-  },
-  openGraph: {
-    title: 'Brewery Types - Maryland Brewery Directory',
-    description: 'Browse Maryland breweries by type. Explore microbreweries, brewpubs, taprooms, and more across the state.',
-    url: 'https://www.marylandbrewery.com/type',
-    siteName: 'Maryland Brewery Directory',
-    type: 'website',
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: 'Maryland Brewery Directory - Brewery Types',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Brewery Types - Maryland Brewery Directory',
-    description: 'Browse Maryland breweries by type.',
-    images: ['/opengraph-image'],
-  },
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Maryland Breweries by Type",
+  description: "Browse Maryland breweries by type: microbreweries, brewpubs, taprooms, regional and contract breweries.",
+  path: '/type',
+});
 
 // Brewery type definitions in our own voice
 const BREWERY_TYPE_DEFINITIONS: Record<string, {
@@ -146,6 +126,7 @@ export default async function TypesIndexPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
+      <JsonLd data={breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Brewery Types', path: '/type' }])} />
       {/* Hero Section */}
       <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
         {/* Hero Image Background */}

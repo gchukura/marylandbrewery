@@ -41,14 +41,17 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
   best-of rule lives in `src/lib/best-breweries.ts`. Old `{neighborhood}-{city}-md` URLs under
   `/best-breweries`, `/best-breweries/near` and `/cities/near` redirect to `/neighborhoods/[slug]`.
 - `/near/[slug]` is attraction pages, not neighborhoods.
-- Redirects use `permanentRedirect()`, which sends 308 (Next.js's permanent redirect), not a literal 301.
+- Redirects: pattern-only ones (-md, amenity aliases) are 301s in `src/middleware.ts`; ones that need data
+  (city size, neighborhoods, brewery ids) use `permanentRedirect()` in the page, which sends 308.
 - `/blog` temporarily redirects to `/`.
 - Fonts are Playfair Display + Source Sans 3 via `next/font/google` in `src/app/layout.tsx`;
   `globals.css` also names `'Source Sans 3'` directly. Design tokens from `docs/design/tokens.css`
   are not yet in `globals.css`.
 - `tailwind.config.ts` exists but is not loaded (no `@config`).
 - Images are still in `public/` (`logos/`, `photos/`, `cities/`, `counties/`, `regions/`).
-- `geo.ts`, `hours.ts`, `slug.ts`, `format.ts` exist; `amenities.ts` and `seo/` do not yet.
+- All shared helpers exist. Metadata: `buildMetadata` + `src/lib/seo/page-meta.ts` (titles ≤ 60 with the
+  ' | Maryland Brewery' suffix, tested over real names); JSON-LD: `src/lib/seo/jsonld.ts`.
+  `npm run seo:check` crawls the sitemap of a running build and must report 0 problems.
 - No `as any` in `src`; about 100 `: any` parameter annotations remain.
 
 ## Conventions

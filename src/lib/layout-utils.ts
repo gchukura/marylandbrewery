@@ -4,6 +4,7 @@
  */
 
 import { openingHoursSpecification } from '@/lib/hours';
+import { buildMetadata } from '@/lib/seo/metadata';
 import { Metadata } from 'next';
 
 // Maryland flag colors for consistent theming
@@ -27,244 +28,24 @@ export const MARYLAND_COLORS = {
 } as const;
 
 // Base metadata template for consistent SEO
+/**
+ * Metadata for static pages (FAQ, terms, ...). A thin wrapper over buildMetadata; the title
+ * must not include the brand, which the layout template adds.
+ */
 export function createPageMetadata({
   title,
   description,
   path,
   keywords = [],
-  image = '/opengraph-image',
-  type = 'website'
+  image,
 }: {
   title: string;
   description: string;
   path: string;
   keywords?: string[];
   image?: string;
-  type?: 'website' | 'article';
 }): Metadata {
-  const fullTitle = title.includes('Maryland Brewery Directory') 
-    ? title 
-    : `${title} | Maryland Brewery Directory`;
-
-  return {
-    title: fullTitle,
-    description,
-    keywords: [
-      'Maryland breweries',
-      'craft beer Maryland',
-      'Maryland brewery directory',
-      'breweries near me',
-      ...keywords
-    ],
-    authors: [{ name: 'Maryland Brewery Directory' }],
-    creator: 'Maryland Brewery Directory',
-    publisher: 'Maryland Brewery Directory',
-    formatDetection: {
-      email: false,
-      address: false,
-      telephone: false,
-    },
-    metadataBase: new URL('https://www.marylandbrewery.com'),
-    alternates: {
-      canonical: path,
-    },
-    openGraph: {
-      type,
-      locale: 'en_US',
-      url: `https://www.marylandbrewery.com${path}`,
-      siteName: 'Maryland Brewery Directory',
-      title: fullTitle,
-      description,
-      images: [
-        {
-          url: image,
-          width: 1200,
-          height: 630,
-          alt: `${title} - Maryland Brewery Directory`,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: fullTitle,
-      description,
-      images: [image],
-      creator: '@marylandbrewery',
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
-}
-
-// Generate breadcrumb structured data
-export function generateBreadcrumbStructuredData(breadcrumbs: Array<{
-  name: string;
-  url: string;
-  position: number;
-}>) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: breadcrumbs.map(breadcrumb => ({
-      '@type': 'ListItem',
-      position: breadcrumb.position,
-      name: breadcrumb.name,
-      item: `https://www.marylandbrewery.com${breadcrumb.url}`
-    }))
-  };
-}
-
-// Generate organization structured data
-export function generateOrganizationStructuredData() {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'Maryland Brewery Directory',
-    url: 'https://www.marylandbrewery.com',
-    logo: 'https://www.marylandbrewery.com/logo.png',
-    description: 'Complete directory of craft breweries across Maryland',
-    address: {
-      '@type': 'PostalAddress',
-      addressCountry: 'US',
-      addressRegion: 'MD'
-    },
-    sameAs: [
-      'https://facebook.com/marylandbrewery',
-      'https://instagram.com/marylandbrewery',
-      'https://twitter.com/marylandbrewery'
-    ]
-  };
-}
-
-// Generate local business structured data for breweries
-export function generateBreweryStructuredData(brewery: {
-  name: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  phone?: string;
-  website?: string;
-  latitude: number;
-  longitude: number;
-  hours?: Record<string, string>;
-  description?: string;
-  googleRating?: number;
-  googleRatingCount?: number;
-}) {
-  const structuredData: any = {
-    '@context': 'https://schema.org',
-    '@type': 'Brewery',
-    name: brewery.name || 'Brewery',
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: brewery.city || '',
-      addressRegion: brewery.state || 'MD',
-      postalCode: brewery.zipCode || '',
-      addressCountry: 'US'
-    }
-  };
-
-  // Only add fields if they have valid values
-  if (brewery.address && brewery.address.trim()) {
-    structuredData.address.streetAddress = brewery.address;
-  }
-  
-  if (brewery.description && brewery.description.trim()) {
-    structuredData.description = brewery.description;
-  }
-  
-  if (brewery.website && brewery.website.trim()) {
-    structuredData.url = brewery.website;
-  }
-  
-  if (brewery.phone && brewery.phone.trim()) {
-    structuredData.telephone = brewery.phone;
-  }
-  
-  if (brewery.latitude && brewery.longitude) {
-    structuredData.geo = {
-      '@type': 'GeoCoordinates',
-      latitude: brewery.latitude,
-      longitude: brewery.longitude
-    };
-  }
-  
-  // Add aggregate rating if available (for rich snippets with star ratings)
-  if (brewery.googleRating && brewery.googleRating > 0) {
-    structuredData.aggregateRating = {
-      '@type': 'AggregateRating',
-      ratingValue: brewery.googleRating,
-      reviewCount: brewery.googleRatingCount || 1,
-      bestRating: 5,
-      worstRating: 1,
-    };
-  }
-  
-  // Add opening hours specification for "Open Now" rich snippets
-  if (brewery.hours) {
-    const openingHoursSpec = openingHoursSpecification(brewery.hours);
-
-    if (openingHoursSpec.length > 0) {
-      structuredData.openingHoursSpecification = openingHoursSpec;
-    }
-  }
-  
-  if (brewery.website && brewery.website.trim()) {
-    structuredData.sameAs = [brewery.website];
-  }
-
-  return structuredData;
-}
-
-// Generate collection page structured data
-export function generateCollectionStructuredData({
-  name,
-  description,
-  url,
-  itemCount,
-  items
-}: {
-  name: string;
-  description: string;
-  url: string;
-  itemCount: number;
-  items: Array<{
-    name: string;
-    url: string;
-    type: string;
-  }>;
-}) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name,
-    description,
-    url: `https://www.marylandbrewery.com${url}`,
-    numberOfItems: itemCount,
-    mainEntity: {
-      '@type': 'ItemList',
-      numberOfItems: itemCount,
-      itemListElement: items.map((item, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        item: {
-          '@type': 'Brewery',
-          name: item.name,
-          url: `https://www.marylandbrewery.com${item.url}`
-        }
-      }))
-    }
-  };
+  return { ...buildMetadata({ title, description, path, image }), keywords };
 }
 
 // Utility for consistent page titles (optimized for <60 chars)

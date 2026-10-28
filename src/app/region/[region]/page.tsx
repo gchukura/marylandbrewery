@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 import { breweriesInRegion, getProcessedBreweryData, getRegions } from '@/lib/db';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { regionMeta } from '@/lib/seo/page-meta';
 import { slugify, deslugify } from '@/lib/slug';
 
 // Region definitions (fallback if database not available)
@@ -23,35 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ region: s
   const processed = await getProcessedBreweryData();
   const breweries = breweriesInRegion(regionData, processed.breweries);
 
-  const title = `${regionData.name} Breweries | ${breweries.length} Craft Breweries in ${regionData.name}`;
-  const description = `Explore ${breweries.length} breweries across ${regionData.name}. Plan your brewery tour through ${regionData.counties.join(', ')} with our complete guide.`;
-
-  return {
-    title,
-    description,
-    alternates: { canonical: `/region/${region}` },
-    openGraph: {
-      title,
-      description,
-      url: `https://www.marylandbrewery.com/region/${region}`,
-      siteName: 'Maryland Brewery Directory',
-      type: 'website',
-      images: [
-        {
-          url: '/opengraph-image',
-          width: 1200,
-          height: 630,
-          alt: `${regionData.name} Breweries`,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/opengraph-image'],
-    },
-  };
+  return buildMetadata({ ...regionMeta(regionData.name, breweries.length, regionData.counties), path: `/region/${region}` });
 }
 
 function computeRegionStats(breweries: any[]) {

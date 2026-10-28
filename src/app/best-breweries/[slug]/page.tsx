@@ -3,7 +3,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import { getProcessedBreweryData, getBreweriesByCity, getRegions } from '@/lib/db';
 import { normalizeCountyName, isValidCountySlug } from '@/lib/data-utils';
 import { slugify, deslugify } from '@/lib/slug';
-import { bestBreweriesCityPath, hasBestBreweriesPage } from '@/lib/best-breweries';
+import { SCORE_EXPLANATION, bestBreweriesCityPath, breweryScore, hasBestBreweriesPage, rankingReason } from '@/lib/best-breweries';
 import { parseNeighborhoodSlug } from '@/lib/neighborhood-utils';
 import { neighborhoodPath } from '@/lib/neighborhoods';
 import { getNeighborhoodsByCity } from '@/lib/db';
@@ -15,15 +15,12 @@ import { join } from 'path';
 import '@/components/home-v2/styles.css';
 import CityBreweriesMapClient from '../../cities/[city]/breweries/CityBreweriesMapClient';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { bestBreweriesMeta } from '@/lib/seo/page-meta';
+import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 
-function calculateBreweryScore(brewery: any): number {
-  const rating = brewery.googleRating || 0;
-  const reviewCount = brewery.googleRatingCount || 0;
-  const ratingScore = rating * 20;
-  const reviewScore = reviewCount > 0 ? Math.log10(reviewCount) * 10 : 0;
-  return ratingScore + reviewScore;
-}
 
 export async function generateStaticParams() {
   // No try/catch: a data error here should fail the build
@@ -56,43 +53,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const cityName = deslugify(slugWithoutMd);
   const cityBreweries = await getBreweriesByCity(cityName);
   if (cityBreweries.length > 0) {
-    const bestBreweries = cityBreweries
-      .map((brewery: any) => ({
-        ...brewery,
-        score: calculateBreweryScore(brewery),
-      }))
-      .sort((a: any, b: any) => b.score - a.score);
-
-    const title = `Best Breweries in ${cityName}, MD | Top-Rated Craft Breweries`;
-    const description = `Find the best breweries in ${cityName}, Maryland ranked by ratings and reviews. Discover ${bestBreweries.length} top-rated craft breweries in ${cityName}.`;
-
-    return {
-      title,
-      description,
-      alternates: { canonical: `/best-breweries/${slug}` },
-      openGraph: {
-        title,
-        description,
-        url: `https://www.marylandbrewery.com/best-breweries/${slug}`,
-        siteName: 'Maryland Brewery Directory',
-        type: 'website',
-        images: [
-          {
-            url: '/opengraph-image',
-            width: 1200,
-            height: 630,
-            alt: `Best Breweries in ${cityName}, MD`,
-          },
-        ],
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title,
-        description,
-        images: ['/opengraph-image'],
-      },
-    };
+    const displayName = cityBreweries[0].city;
+    return buildMetadata({ ...bestBreweriesMeta(displayName, cityBreweries.length), path: `/best-breweries/${slugWithoutMd}` });
   }
+
 
   return {
     title: 'Location Not Found',
@@ -138,7 +102,7 @@ export default async function BestBreweriesSlugPage({ params }: { params: Promis
     const breweriesWithScores = cityBreweries
       .map((brewery: any) => ({
         ...brewery,
-        score: calculateBreweryScore(brewery),
+        score: breweryScore(brewery),
       }))
       .sort((a: any, b: any) => b.score - a.score);
 
@@ -200,8 +164,15 @@ export default async function BestBreweriesSlugPage({ params }: { params: Promis
     });
     const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
 
+    const pagePath = `/best-breweries/${slugWithoutMd}`;
+    const jsonLd = [
+      collectionPage({ name: `Best Breweries in ${cityName}, MD`, path: pagePath, breweries: sortedBreweries }),
+      breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Best Breweries', path: '/best-breweries' }, { name: `${cityName}, MD`, path: pagePath }]),
+    ];
+
     return (
       <div className="min-h-screen bg-[#FAF9F6]">
+        <JsonLd data={jsonLd} />
         {/* Hero Section */}
         <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
           {/* City Hero Image Background */}
@@ -273,6 +244,29 @@ export default async function BestBreweriesSlugPage({ params }: { params: Promis
             >
               <strong className="text-white font-semibold">{sortedBreweries.length}</strong> {sortedBreweries.length === 1 ? 'brewery' : 'breweries'} found.
             </p>
+          </div>
+        </section>
+
+        {/* The ranking: what makes this page different from the city listing */}
+        <section className="border-b bg-white py-8 md:py-12">
+          <div className="container mx-auto px-4">
+            <h2 className="mb-2 font-[family-name:var(--font-playfair-display)] text-2xl font-bold text-gray-900 md:text-3xl">
+              The {sortedBreweries.length} best breweries in {cityName}, ranked
+            </h2>
+            <p className="mb-6 max-w-3xl text-sm text-gray-600">{SCORE_EXPLANATION}</p>
+            <ol className="grid gap-3 md:grid-cols-2">
+              {sortedBreweries.map((brewery, index) => (
+                <li key={brewery.id} className="flex gap-3 rounded-lg border p-3">
+                  <span className="w-8 shrink-0 text-right text-lg font-bold text-gray-500">{index + 1}</span>
+                  <div>
+                    <Link href={`/breweries/${brewery.slug}`} className="font-semibold text-gray-900 hover:underline">
+                      {brewery.name}
+                    </Link>
+                    <p className="text-sm text-gray-600">{rankingReason(brewery)}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
 

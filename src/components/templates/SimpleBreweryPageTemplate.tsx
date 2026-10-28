@@ -39,7 +39,11 @@ import { Brewery, Beer as BeerType, Article, Membership, BreweryArticle, COMMON_
 import { BreadcrumbItem, RelatedPage } from '@/types/seo';
 import GoogleMap from '../maps/GoogleMap';
 import BreweryReviews from '../brewery/BreweryReviews';
-import { formatDayHours, isOpenAt, openingHoursSpecification, zonedDayAndMinutes } from '@/lib/hours';
+import { formatDayHours, isOpenAt, zonedDayAndMinutes } from '@/lib/hours';
+import { amenityByDbValue, amenityPath } from '@/lib/amenities';
+import { externalUrl } from '@/lib/format';
+import { brewerySchema, breadcrumbList } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import BreweryArticles from '../brewery/BreweryArticles';
 
 const SOCIAL_MEDIA_ICONS = {
@@ -149,90 +153,7 @@ export default function SimpleBreweryPageTemplate({
     color: isOpen ? 'text-green-600' : 'text-red-600'
   };
 
-  // Generate structured data for individual brewery
-  const generateStructuredData = () => {
-    const structuredData: any = {
-      '@context': 'https://schema.org',
-      '@type': 'Brewery',
-      name: brewery.name || 'Brewery',
-      address: {
-        '@type': 'PostalAddress',
-        addressLocality: brewery.city || '',
-        addressRegion: brewery.state || 'MD',
-        addressCountry: 'US',
-      },
-    };
 
-    // Only add fields if they have valid values
-    if (brewery.description && brewery.description.trim()) {
-      structuredData.description = brewery.description;
-    }
-    
-    if (brewery.street && brewery.street.trim()) {
-      structuredData.address.streetAddress = brewery.street;
-    }
-    
-    if (brewery.zip && brewery.zip.trim()) {
-      structuredData.address.postalCode = brewery.zip;
-    }
-    
-    if (brewery.phone && brewery.phone.trim()) {
-      structuredData.telephone = brewery.phone;
-    }
-    
-    if (brewery.latitude && brewery.longitude) {
-      structuredData.geo = {
-        '@type': 'GeoCoordinates',
-        latitude: brewery.latitude,
-        longitude: brewery.longitude,
-      };
-    }
-
-    // URL should point to brewery website if available, otherwise our page
-    if (brewery.website && brewery.website.trim()) {
-      structuredData.url = brewery.website;
-    } else {
-      structuredData.url = `https://www.marylandbrewery.com/breweries/${brewery.slug || brewery.id}`;
-    }
-
-    if (brewery.socialMedia) {
-      const sameAs = [];
-      if (brewery.socialMedia.facebook && brewery.socialMedia.facebook.trim()) {
-        sameAs.push(brewery.socialMedia.facebook);
-      }
-      if (brewery.socialMedia.instagram && brewery.socialMedia.instagram.trim()) {
-        sameAs.push(brewery.socialMedia.instagram);
-      }
-      if (brewery.socialMedia.twitter && brewery.socialMedia.twitter.trim()) {
-        sameAs.push(brewery.socialMedia.twitter);
-      }
-      if (sameAs.length > 0) {
-        structuredData.sameAs = sameAs;
-      }
-    }
-
-    // Add aggregate rating if available (for rich snippets with star ratings)
-    if (brewery.googleRating && brewery.googleRating > 0) {
-      structuredData.aggregateRating = {
-        '@type': 'AggregateRating',
-        ratingValue: brewery.googleRating,
-        reviewCount: brewery.googleRatingCount || 1,
-        bestRating: 5,
-        worstRating: 1,
-      };
-    }
-
-    // Add opening hours specification for "Open Now" rich snippets
-    if (brewery.hours) {
-      const openingHoursSpec = openingHoursSpecification(brewery.hours);
-
-      if (openingHoursSpec.length > 0) {
-        structuredData.openingHoursSpecification = openingHoursSpec;
-      }
-    }
-
-    return structuredData;
-  };
 
   // Helper function to get amenity icon
   const getAmenityIcon = (amenity: string) => {
@@ -330,10 +251,10 @@ export default function SimpleBreweryPageTemplate({
     
     return combined.map(amenity => {
       const hasIt = hasAmenity(amenity);
-      const slug = amenity.toLowerCase().replace(/\s+/g, '-');
+      const page = amenityByDbValue(amenity); // only amenities with their own page get a link
       return {
         name: amenity,
-        url: `/amenities/${slug}`,
+        url: page ? amenityPath(page) : null,
         hasIt
       };
     });
@@ -343,12 +264,12 @@ export default function SimpleBreweryPageTemplate({
     <>
       {/* SEO is handled by Next.js app router metadata */}
 
-      {/* Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(generateStructuredData()),
-        }}
+      {/* Structured data: Brewery + BreadcrumbList (src/lib/seo/jsonld.ts) */}
+      <JsonLd
+        data={[
+          brewerySchema(brewery),
+          breadcrumbList(breadcrumbs.map((crumb) => ({ name: crumb.name, path: crumb.url }))),
+        ]}
       />
 
       <div className="min-h-screen bg-white">
@@ -519,11 +440,11 @@ export default function SimpleBreweryPageTemplate({
                     </div>
                   );
                 })()}
-                {brewery.website && (
+                {externalUrl(brewery.website) && (
                   <div className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A]">
                     <Globe className="h-5 w-5" />
                     <a
-                      href={brewery.website}
+                      href={externalUrl(brewery.website)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-body-large font-medium hover:underline font-body"
@@ -825,25 +746,25 @@ export default function SimpleBreweryPageTemplate({
                 </h3>
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4 font-body">
                   {brewery.socialMedia?.facebook && (
-                    <a href={brewery.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A] min-h-[44px] py-2">
+                    <a href={externalUrl(brewery.socialMedia.facebook)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A] min-h-[44px] py-2">
                       <img src={getSocialMediaIcon('facebook')} alt={`${brewery.name} on Facebook`} className="h-5 w-5" />
                       <span className="text-body">Facebook</span>
                     </a>
                   )}
                   {brewery.socialMedia?.twitter && (
-                    <a href={brewery.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A] min-h-[44px] py-2">
+                    <a href={externalUrl(brewery.socialMedia.twitter)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A] min-h-[44px] py-2">
                       <img src={getSocialMediaIcon('twitter')} alt={`${brewery.name} on Twitter`} className="h-5 w-5" />
                       <span className="text-body">Twitter</span>
                     </a>
                   )}
                   {brewery.socialMedia?.instagram && (
-                    <a href={brewery.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A] min-h-[44px] py-2">
+                    <a href={externalUrl(brewery.socialMedia.instagram)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A] min-h-[44px] py-2">
                       <img src={getSocialMediaIcon('instagram')} alt={`${brewery.name} on Instagram`} className="h-5 w-5" />
                       <span className="text-body">Instagram</span>
                     </a>
                   )}
                   {brewery.socialMedia?.untappd && (
-                    <a href={brewery.socialMedia.untappd} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A] min-h-[44px] py-2">
+                    <a href={externalUrl(brewery.socialMedia.untappd)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#9B2335] hover:text-[#7A1C2A] min-h-[44px] py-2">
                       <img src={getSocialMediaIcon('untappd')} alt={`${brewery.name} on Untappd`} className="h-5 w-5" />
                       <span className="text-body">Untappd</span>
                     </a>
@@ -878,7 +799,7 @@ export default function SimpleBreweryPageTemplate({
                                 <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center mt-0.5">
                                   {getAmenityIcon(amenity.name)}
                                 </div>
-                                {amenity.hasIt ? (
+                                {amenity.hasIt && amenity.url ? (
                                   <Link 
                                     href={amenity.url}
                                     className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline font-medium text-body leading-normal"

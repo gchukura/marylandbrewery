@@ -6,36 +6,16 @@ import { ChevronRight, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { breadcrumbList } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import '@/components/home-v2/styles.css';
 
-export const metadata: Metadata = {
-  title: 'Maryland Cities with Breweries - Browse by City',
-  description: 'Browse all Maryland cities with breweries. Find breweries by city across the state. Explore Baltimore, Annapolis, Frederick, and more.',
-  alternates: {
-    canonical: '/cities',
-  },
-  openGraph: {
-    title: 'Maryland Cities with Breweries - Browse by City',
-    description: 'Browse all Maryland cities with breweries. Find breweries by city across the state.',
-    url: 'https://www.marylandbrewery.com/cities',
-    siteName: 'Maryland Brewery Directory',
-    type: 'website',
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: 'Maryland Brewery Directory - Cities',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Maryland Cities with Breweries - Browse by City',
-    description: 'Browse all Maryland cities with breweries. Find breweries by city across the state.',
-    images: ['/opengraph-image'],
-  },
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Maryland Breweries by City",
+  description: "Browse Maryland craft breweries by city, from Baltimore and Frederick to Ocean City, with brewery counts and maps for each town.",
+  path: '/cities',
+});
 
 const REGIONS: Record<string, { name: string; cities: string[]; description: string }> = {
   'Central Maryland': {
@@ -106,6 +86,7 @@ export default async function CitiesIndexPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
+      <JsonLd data={breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Cities', path: '/cities' }])} />
       {/* Hero Section */}
       <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
         {/* Cities Hero Image Background */}

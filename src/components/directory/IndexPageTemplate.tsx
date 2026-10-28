@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import PageHero from './PageHero';
 import DirectoryStatsBar from './DirectoryStatsBar';
+import { breadcrumbList } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import dynamic from 'next/dynamic';
 
 // Dynamically import GoogleMap to avoid SSR issues
@@ -61,6 +63,7 @@ export default function IndexPageTemplate({
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <JsonLd data={breadcrumbList(breadcrumbs.map((crumb) => ({ name: crumb.name, path: crumb.url })))} />
       {/* 1. Hero Section */}
       <PageHero h1={h1} introText={introText} breadcrumbs={breadcrumbs} heroImage={heroImage} />
 

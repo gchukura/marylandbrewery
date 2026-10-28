@@ -1,16 +1,17 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
-import { getProcessedBreweryData } from '@/lib/db';
+import { getIndexableAttractions, getProcessedBreweryData } from '@/lib/db';
 import { slugify } from '@/lib/slug';
 import { getAttractionBySlug } from '@/lib/db';
 
+import { buildMetadata } from '@/lib/seo/metadata';
+import { attractionMeta } from '@/lib/seo/page-meta';
+import { isIndexableAttraction } from '@/lib/attractions';
 import { calculateDistance } from '@/lib/geo';
+// Prerender the indexed attraction pages (the same list as the sitemap); others render on demand
 export async function generateStaticParams() {
-  // For now, return empty array - pages will be generated on-demand
-  // In production, you could pre-generate for high-value attractions
-  // This avoids expensive distance calculations during build
-  return [];
+  return (await getIndexableAttractions()).map((a) => ({ slug: a.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -48,35 +49,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     }))
     .sort((a: any, b: any) => a.distance - b.distance);
 
-  const title = `Breweries Near ${attraction.name} | ${nearbyBreweries.length} Craft Breweries Within 10 Miles`;
-  const description = `Find ${nearbyBreweries.length} breweries near ${attraction.name} in ${attraction.city || 'Maryland'}. Plan your visit to ${attraction.name} and discover nearby craft breweries.`;
-
-  return {
-    title,
-    description,
-    alternates: { canonical: `/near/${slug}` },
-    openGraph: {
-      title,
-      description,
-      url: `https://www.marylandbrewery.com/near/${slug}`,
-      siteName: 'Maryland Brewery Directory',
-      type: 'website',
-      images: [
-        {
-          url: '/opengraph-image',
-          width: 1200,
-          height: 630,
-          alt: `Breweries Near ${attraction.name}`,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/opengraph-image'],
-    },
-  };
+  return buildMetadata({
+    ...attractionMeta(attraction.name, attraction.city, nearbyBreweries.length),
+    path: `/near/${attraction.slug}`,
+    // Index real sights with a brewery within 3 miles (src/lib/attractions.ts)
+    noindex: !isIndexableAttraction(attraction, nearbyBreweries[0]?.distance),
+  });
 }
 
 function computeNearStats(breweries: any[]) {

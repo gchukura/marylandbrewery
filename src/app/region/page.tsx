@@ -3,27 +3,14 @@ import IndexPageTemplate from '@/components/directory/IndexPageTemplate';
 import { slugify } from '@/lib/slug';
 import { breweriesInRegion, getProcessedBreweryData, getRegions } from '@/lib/db';
 import { existsSync } from 'fs';
+import { buildMetadata } from '@/lib/seo/metadata';
 import { join } from 'path';
 
-export const metadata: Metadata = {
-  title: 'Maryland Brewery Regions | Explore Breweries by Region',
-  description: 'Discover Maryland breweries organized by region: Eastern Shore, Western Maryland, Central Maryland, Southern Maryland, and the Capital Region. Plan your regional brewery tour.',
-  alternates: {
-    canonical: '/region',
-  },
-  openGraph: {
-    title: 'Maryland Brewery Regions | Explore Breweries by Region',
-    description: 'Discover Maryland breweries organized by region: Eastern Shore, Western Maryland, Central Maryland, Southern Maryland, and the Capital Region. Plan your regional brewery tour.',
-    url: 'https://www.marylandbrewery.com/region',
-    siteName: 'Maryland Brewery Directory',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Maryland Brewery Regions | Explore Breweries by Region',
-    description: 'Discover Maryland breweries organized by region: Eastern Shore, Western Maryland, Central Maryland, Southern Maryland, and the Capital Region. Plan your regional brewery tour.',
-  },
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Maryland Breweries by Region",
+  description: "Explore Maryland breweries by region: the Eastern Shore, Western Maryland, Central Maryland, Southern Maryland and the Capital Region.",
+  path: '/region',
+});
 
 export default async function RegionsIndexPage() {
   const processed = await getProcessedBreweryData();

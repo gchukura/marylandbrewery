@@ -73,7 +73,7 @@ function dbBreweryToBrewery(dbBrewery: Tables<'breweries'>, beers: Beer[] = []):
 
     // Metadata
     openedDate: dbBrewery.opened_date ?? undefined,
-    lastUpdated: dbBrewery.updated_at || new Date().toISOString(),
+    lastUpdated: dbBrewery.updated_at || dbBrewery.created_at || '',
 
     // Google Reviews summary
     googleRating: dbBrewery.google_rating ?? undefined,

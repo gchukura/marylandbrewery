@@ -13,6 +13,10 @@ import {
   isListedAttraction,
   neighborhoodPath,
 } from '@/lib/neighborhoods';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { neighborhoodMeta } from '@/lib/seo/page-meta';
+import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import CityBreweriesMapClient from '../../cities/[city]/breweries/CityBreweriesMapClient';
 
 const ATTRACTION_LIMIT = 6;
@@ -50,25 +54,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!data) return { title: 'Neighborhood Not Found', robots: { index: false, follow: false } };
 
   const { neighborhood, city, breweries, nearestMiles } = data;
-  const title = `Breweries near ${neighborhood.name}, ${city}, MD`;
-  const description = `${breweries.length} craft ${breweries.length === 1 ? 'brewery' : 'breweries'} near ${neighborhood.name} in ${city}, Maryland, sorted by distance, plus things to do nearby.`;
-  const path = neighborhoodPath(neighborhood.slug);
-
-  return {
-    title,
-    description,
-    alternates: { canonical: path },
+  return buildMetadata({
+    ...neighborhoodMeta(neighborhood.name, city, breweries.length),
+    path: neighborhoodPath(neighborhood.slug),
     // Thin pages: only index neighborhoods with a brewery within 3 miles
-    robots: isIndexableNeighborhood(nearestMiles) ? undefined : { index: false, follow: true },
-    openGraph: {
-      title,
-      description,
-      url: `https://www.marylandbrewery.com${path}`,
-      siteName: 'Maryland Brewery Directory',
-      type: 'website',
-      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: title }],
-    },
-  };
+    noindex: !isIndexableNeighborhood(nearestMiles),
+  });
 }
 
 export default async function NeighborhoodPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -87,8 +78,20 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ s
   );
   const attractions = sortByDistance(neighborhood, nearbyAttractions.filter(isListedAttraction)).slice(0, ATTRACTION_LIMIT);
 
+  const pagePath = neighborhoodPath(neighborhood.slug);
+  const jsonLd = [
+    collectionPage({ name: `Breweries near ${neighborhood.name}, ${city}`, path: pagePath, breweries }),
+    breadcrumbList([
+      { name: 'Home', path: '/' },
+      { name: 'Cities', path: '/cities' },
+      { name: `${city}, MD`, path: `/cities/${citySlug}/breweries` },
+      { name: neighborhood.name, path: pagePath },
+    ]),
+  ];
+
   return (
     <div className="min-h-screen">
+      <JsonLd data={jsonLd} />
       <section className="border-b bg-white">
         <div className="container mx-auto px-4 py-10 md:py-14">
           <nav className="mb-6" aria-label="Breadcrumb">

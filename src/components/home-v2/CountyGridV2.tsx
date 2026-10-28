@@ -17,8 +17,7 @@ export default function CountyGridV2({ counties }: CountyGridV2Props) {
         {/* Section Header */}
         <div className="text-center mb-12">
           <h2 
-            className="text-3xl md:text-4xl font-semibold text-[#1C1C1C] mb-4"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-display text-3xl md:text-4xl font-semibold text-[#1C1C1C] mb-4"
           >
             Explore by County
           </h2>
@@ -30,7 +29,6 @@ export default function CountyGridV2({ counties }: CountyGridV2Props) {
           </div>
           <p 
             className="text-[#6B6B6B] mt-4 max-w-xl mx-auto"
-            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
             All 22 Maryland counties represented. From the Eastern Shore to Western Maryland.
           </p>
@@ -47,14 +45,12 @@ export default function CountyGridV2({ counties }: CountyGridV2Props) {
               {/* County Name */}
               <div 
                 className="font-medium text-[#1C1C1C] group-hover:text-[#9B2335] transition-colors"
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
               >
                 {county.name}
               </div>
               {/* Count */}
               <div 
                 className="text-sm text-[#6B6B6B]"
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
               >
                 {county.count} {county.count === 1 ? 'brewery' : 'breweries'}
               </div>

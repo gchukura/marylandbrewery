@@ -44,7 +44,7 @@ export default function ValuePropsV2() {
               
               {/* Description */}
               <p 
-                className="text-body text-[#6B6B6B] leading-loose font-body"
+                className="text-body text-[#6B6B6B] leading-loose font-sans"
               >
                 {prop.description}
               </p>

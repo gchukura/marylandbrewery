@@ -1,25 +1,22 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
-import { Playfair_Display, Source_Sans_3 } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 import ConditionalLayoutClient from "@/components/layout/ConditionalLayoutClient";
 import AdSenseScript from "@/components/ads/AdSenseScript";
 import "./globals.css";
-import "@/styles/design-system.css";
-import "@/styles/style-guide.css";
 
-// Optimize font loading with next/font/google
-const playfairDisplay = Playfair_Display({
+// Fonts are exposed only as CSS variables; globals.css maps them to font-display and font-sans
+const fraunces = Fraunces({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  axes: ["opsz"],
   display: "swap",
-  variable: "--font-playfair-display",
+  variable: "--font-fraunces",
 });
 
-const sourceSans3 = Source_Sans_3({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
   display: "swap",
-  variable: "--font-source-sans-3",
+  variable: "--font-inter",
 });
 
 // Revalidate every hour for ISR
@@ -87,10 +84,7 @@ export const viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover", // Support for notched devices (iPhone X and later)
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
-  ],
+  themeColor: "#FFFDF7", // paper
 };
 
 // WebSite schema. No SearchAction: Google retired the sitelinks search box (Nov 2024) and
@@ -121,7 +115,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`scroll-smooth ${playfairDisplay.variable} ${sourceSans3.variable}`}>
+    <html lang="en" className={`scroll-smooth ${fraunces.variable} ${inter.variable}`}>
       <head>
         {/* WebSite Schema for Sitelinks Search Box */}
         <script
@@ -153,10 +147,9 @@ export default function RootLayout({
         <script src="https://analytics.ahrefs.com/analytics.js" data-key="feHAts9QQBm4W+I9itRXzg" async></script>
         {/* Favicons handled by Next.js from /src/app/icon.png, favicon.ico, apple-icon.png */}
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#9B2335" />
-        <meta name="msapplication-TileColor" content="#9B2335" />
+        <meta name="msapplication-TileColor" content="#141414" />
       </head>
-      <body className="min-h-screen bg-gray-50 antialiased">
+      <body className="min-h-screen bg-paper font-sans text-ink antialiased">
         <AdSenseScript />
         <ConditionalLayoutClient>
           {children}

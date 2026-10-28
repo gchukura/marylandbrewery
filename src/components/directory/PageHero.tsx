@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { canOptimizeImage } from '@/lib/images';
-import '@/components/home-v2/styles.css';
 
 interface BreadcrumbItem {
   name: string;
@@ -58,7 +57,7 @@ export default function PageHero({ h1, introText, breadcrumbs, heroImage, heroIm
       <div className="container mx-auto px-4 py-10 md:py-14 relative z-10">
         {/* Breadcrumbs */}
         <nav className="mb-6" aria-label="Breadcrumb">
-          <ol className={`flex items-center flex-wrap gap-2 text-sm font-body ${heroImage ? 'text-white/90' : 'text-[#6B6B6B]'}`}>
+          <ol className={`flex items-center flex-wrap gap-2 text-sm font-sans ${heroImage ? 'text-white/90' : 'text-[#6B6B6B]'}`}>
             {breadcrumbs.map((crumb, index) => (
               <li key={index} className="flex items-center">
                 {index > 0 && (
@@ -66,7 +65,7 @@ export default function PageHero({ h1, introText, breadcrumbs, heroImage, heroIm
                 )}
                 <Link 
                   href={crumb.url} 
-                  className={`transition-colors font-medium font-body ${
+                  className={`transition-colors font-medium font-sans ${
                     crumb.isActive 
                       ? heroImage 
                         ? 'text-white drop-shadow-md' 
@@ -97,7 +96,7 @@ export default function PageHero({ h1, introText, breadcrumbs, heroImage, heroIm
 
         {/* Intro Paragraph */}
         <p 
-          className={`text-body-large md:text-xl max-w-3xl leading-snug font-body ${
+          className={`text-body-large md:text-xl max-w-3xl leading-snug font-sans ${
             heroImage 
               ? 'text-white/95 drop-shadow-md' 
               : 'text-[#6B6B6B]'

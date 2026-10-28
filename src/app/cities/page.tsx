@@ -9,7 +9,6 @@ import { join } from 'path';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { breadcrumbList } from '@/lib/seo/jsonld';
 import JsonLd from '@/components/seo/JsonLd';
-import '@/components/home-v2/styles.css';
 
 export const metadata: Metadata = buildMetadata({
   title: "Maryland Breweries by City",
@@ -114,7 +113,7 @@ export default async function CitiesIndexPage() {
         <div className="container mx-auto px-4 py-10 md:py-14 relative z-10">
           {/* Breadcrumbs */}
           <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className={`flex items-center flex-wrap gap-2 text-sm font-body ${hasCitiesHeroImage ? 'text-white/90' : 'text-[#6B6B6B]'}`}>
+            <ol className={`flex items-center flex-wrap gap-2 text-sm font-sans ${hasCitiesHeroImage ? 'text-white/90' : 'text-[#6B6B6B]'}`}>
               <li>
                 <Link 
                   href="/" 
@@ -149,7 +148,7 @@ export default async function CitiesIndexPage() {
 
           {/* Intro Paragraph */}
           <p 
-            className={`text-body-large md:text-xl max-w-3xl leading-snug font-body ${
+            className={`text-body-large md:text-xl max-w-3xl leading-snug font-sans ${
               hasCitiesHeroImage 
                 ? 'text-white/95 drop-shadow-md' 
                 : 'text-[#6B6B6B]'
@@ -178,7 +177,7 @@ export default async function CitiesIndexPage() {
               <Link
                 key={city.slug}
                 href={city.url}
-                className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-base border-b border-gray-200 last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm font-body font-medium"
+                className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-base border-b border-gray-200 last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm font-sans font-medium"
               >
                 <span className="relative inline-block">
                   {city.name}
@@ -200,7 +199,7 @@ export default async function CitiesIndexPage() {
             About Maryland Brewery Directory
           </h2>
           <div 
-            className="prose prose-lg text-[#6B6B6B] space-y-4 font-body"
+            className="prose prose-lg text-[#6B6B6B] space-y-4 font-sans"
           >
             <p className="text-body leading-loose">
               Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 

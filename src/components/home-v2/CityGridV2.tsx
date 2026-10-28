@@ -17,8 +17,7 @@ export default function CityGridV2({ cities }: CityGridV2Props) {
         {/* Section Header */}
         <div className="text-center mb-12">
           <h2 
-            className="text-3xl md:text-4xl font-semibold text-[#1C1C1C] mb-4"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-display text-3xl md:text-4xl font-semibold text-[#1C1C1C] mb-4"
           >
             Browse by City
           </h2>
@@ -37,7 +36,6 @@ export default function CityGridV2({ cities }: CityGridV2Props) {
               key={city.slug}
               href={`/cities/${city.slug}/breweries`}
               className="group py-2 flex items-center text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-200"
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
             >
               <span className="w-0 group-hover:w-2 h-0.5 bg-[#D4A017] mr-0 group-hover:mr-2 transition-all duration-200" />
               <span className="truncate">{city.name}</span>

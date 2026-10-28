@@ -71,7 +71,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
             
             <button
               onClick={() => setActiveTab('city')}
-              className={`relative z-10 py-4 sm:py-5 px-6 sm:px-12 text-center font-semibold transition-all duration-300 flex-1 sm:flex-none min-h-[48px] sm:min-h-0 text-xs sm:text-sm uppercase tracking-wide font-body whitespace-nowrap ${
+              className={`relative z-10 py-4 sm:py-5 px-6 sm:px-12 text-center font-semibold transition-all duration-300 flex-1 sm:flex-none min-h-[48px] sm:min-h-0 text-xs sm:text-sm uppercase tracking-wide font-sans whitespace-nowrap ${
                 activeTab === 'city'
                   ? 'text-white'
                   : 'text-[#6B6B6B] hover:text-[#1C1C1C]'
@@ -90,7 +90,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
             
             <button
               onClick={() => setActiveTab('county')}
-              className={`relative z-10 py-4 sm:py-5 px-6 sm:px-12 text-center font-semibold transition-all duration-300 flex-1 sm:flex-none min-h-[48px] sm:min-h-0 text-xs sm:text-sm uppercase tracking-wide font-body whitespace-nowrap ${
+              className={`relative z-10 py-4 sm:py-5 px-6 sm:px-12 text-center font-semibold transition-all duration-300 flex-1 sm:flex-none min-h-[48px] sm:min-h-0 text-xs sm:text-sm uppercase tracking-wide font-sans whitespace-nowrap ${
                 activeTab === 'county'
                   ? 'text-white'
                   : 'text-[#6B6B6B] hover:text-[#1C1C1C]'
@@ -123,7 +123,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
                     <Link
                       key={city.slug}
                       href={`/cities/${city.slug}/breweries`}
-                      className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-base border-b border-gray-200 last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm font-body font-medium"
+                      className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-base border-b border-gray-200 last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm font-sans font-medium"
                     >
                       <span className="relative inline-block">
                         {city.name}
@@ -150,7 +150,7 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
                     <Link
                       key={county.slug}
                       href={`/counties/${county.slug}/breweries`}
-                      className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-base border-b border-gray-200 last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm font-body font-medium"
+                      className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-base border-b border-gray-200 last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm font-sans font-medium"
                     >
                       <span className="relative inline-block">
                         {county.name.replace(/\s+County$/i, '')}

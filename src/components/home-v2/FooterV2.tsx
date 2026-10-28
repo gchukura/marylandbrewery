@@ -46,7 +46,7 @@ export default function FooterV2() {
           {/* Brewery Enthusiasts Column */}
           <div>
             <h3 
-              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider font-body"
+              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider font-sans"
             >
               Brewery Enthusiasts
             </h3>
@@ -55,7 +55,7 @@ export default function FooterV2() {
                 <li key={link.href}>
                   <Link 
                     href={link.href} 
-                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm font-body"
+                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm font-sans"
                   >
                     {link.name}
                   </Link>
@@ -67,7 +67,7 @@ export default function FooterV2() {
           {/* Brewery Owners Column */}
           <div>
             <h3 
-              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider font-body"
+              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider font-sans"
             >
               Brewery Owners
             </h3>
@@ -76,7 +76,7 @@ export default function FooterV2() {
                 <li key={link.href}>
                   <Link 
                     href={link.href} 
-                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm font-body"
+                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm font-sans"
                   >
                     {link.name}
                   </Link>
@@ -88,7 +88,7 @@ export default function FooterV2() {
           {/* About Column */}
           <div>
             <h3 
-              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider font-body"
+              className="text-sm font-semibold text-white mb-3 uppercase tracking-wider font-sans"
             >
               About
             </h3>
@@ -97,7 +97,7 @@ export default function FooterV2() {
                 <li key={link.href}>
                   <Link 
                     href={link.href} 
-                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm font-body"
+                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm font-sans"
                   >
                     {link.name}
                   </Link>
@@ -110,7 +110,7 @@ export default function FooterV2() {
         {/* Bottom Bar */}
         <div className="border-t border-[#2A2A2A] pt-4">
           <div 
-            className="text-xs text-[#9CA3AF] text-center font-body"
+            className="text-xs text-[#9CA3AF] text-center font-sans"
           >
               <div className="mb-1">
                 MarylandBrewery.com is a copyright © {currentYear} of <Link href="https://bluestonebrands.com" className="text-white underline hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">BluestoneBrands.com</Link>

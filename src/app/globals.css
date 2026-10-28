@@ -1,119 +1,113 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Design tokens: docs/design/tokens.css is the source; keep the two in sync. */
+@theme {
+  /* Flag colors */
+  --color-ink: #141414;          /* text, nav, dark surfaces */
+  --color-gold: #EAAA00;         /* flag gold: fills and "open now" only; always black text on it */
+  --color-flag-red: #E03A3E;     /* flag red: checker bands and motifs only, never text under 24px */
+  --color-brand-red: #B3121B;    /* buttons, links, active states (6.8:1 on paper) */
+  --color-brand-red-dark: #8E0E15; /* hover and pressed state of brand-red (docs/design/artboards/Main.html) */
+  --color-cream: #F5EFE0;        /* section bands, chips */
+  --color-paper: #FFFDF7;        /* page background */
+  --color-line: #E8E2D4;         /* borders, dividers */
+  --color-line-strong: #D9D3C5;  /* input and chip borders */
+  --color-muted: #5B5853;        /* secondary text (7:1 on paper) */
+  --color-map: #ECE6D6;          /* map placeholder ground */
+
+  /* Type: next/font variables from src/app/layout.tsx */
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  /* Radii */
+  --radius-chip: 999px;
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --radius-panel: 16px;
+  --radius-hero: 18px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    overflow-x: hidden;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* 44px touch targets on phones, for controls only. Inline links in text keep their line height. */
+  @media (max-width: 768px) {
+    button,
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    .tap {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* 16px stops iOS zooming into a focused field */
+    input,
+    select,
+    textarea {
+      font-size: 16px;
+    }
+
+    button,
+    a,
+    [role="button"] {
+      touch-action: manipulation;
+    }
+
+    /* Wide tables scroll sideways instead of widening the page */
+    table {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 16px; /* Base font size for accessibility (WCAG AA) */
-  line-height: 1.6;
-  /* Prevent horizontal scroll on mobile */
-  overflow-x: hidden;
-  /* Better touch scrolling on iOS */
-  -webkit-overflow-scrolling: touch;
+@layer components {
+  /* Faint checkered texture behind page heroes */
+  .md-pattern-bg {
+    background-color: var(--color-cream);
+    background-image:
+      linear-gradient(45deg, var(--color-line) 25%, transparent 25%),
+      linear-gradient(-45deg, var(--color-line) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, var(--color-line) 75%),
+      linear-gradient(-45deg, transparent 75%, var(--color-line) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+    opacity: 0.3;
+  }
+
+  /* Short red/gold rule under section headings */
+  .section-divider {
+    height: 4px;
+    max-width: 120px;
+    margin: 0 auto 2rem;
+    background: linear-gradient(90deg, var(--color-brand-red) 0 50%, var(--color-gold) 50% 100%);
+  }
 }
 
-/* Prevent horizontal scroll */
-html {
-  overflow-x: hidden;
-}
-
-/* Safe area support for notched devices */
+/* Safe areas on notched phones */
 @supports (padding: max(0px)) {
   body {
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
-  
-  /* Safe area utility classes */
+
   .safe-top {
     padding-top: max(0px, env(safe-area-inset-top));
   }
-  
+
   .safe-bottom {
     padding-bottom: max(0px, env(safe-area-inset-bottom));
-  }
-  
-  .safe-left {
-    padding-left: max(0px, env(safe-area-inset-left));
-  }
-  
-  .safe-right {
-    padding-right: max(0px, env(safe-area-inset-right));
-  }
-  
-  /* Safe area for fixed/sticky elements */
-  header.safe-top {
-    padding-top: max(1rem, env(safe-area-inset-top));
-  }
-}
-
-/* Better touch targets on mobile */
-@media (max-width: 768px) {
-  a, button, input, select, textarea {
-    /* Ensure minimum 44x44px touch target */
-    min-height: 44px;
-    min-width: 44px;
-  }
-  
-  /* Larger tap targets for links in navigation */
-  nav a {
-    min-height: 48px;
-    display: inline-flex;
-    align-items: center;
-  }
-  
-  /* Improve form input sizes on mobile */
-  input, select, textarea {
-    font-size: 16px; /* Prevents iOS zoom on focus */
-  }
-  
-  /* Better touch scrolling */
-  * {
-    -webkit-tap-highlight-color: rgba(155, 35, 53, 0.1); /* Using red-primary with opacity */
-  }
-  
-  /* Optimize touch interactions */
-  button, a, [role="button"] {
-    touch-action: manipulation;
-    -webkit-touch-callout: none;
-  }
-  
-  /* Prevent text selection on buttons */
-  button {
-    -webkit-user-select: none;
-    user-select: none;
-  }
-  
-  /* Ensure readable font sizes */
-  body {
-    font-size: 16px; /* Base font size for readability */
-    line-height: 1.6; /* Better line spacing on mobile */
-  }
-  
-  /* Better table handling on mobile */
-  table {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    white-space: nowrap;
   }
 }

@@ -128,11 +128,11 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
             );
           })}
         </div>
-        <span className="text-sm font-semibold text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+        <span className="text-sm font-semibold text-gray-700">
           {rating.toFixed(1)}
         </span>
         {reviewCount !== undefined && reviewCount > 0 && (
-          <span className="text-sm text-gray-500" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+          <span className="text-sm text-gray-500">
             ({reviewCount})
           </span>
         )}
@@ -158,7 +158,6 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                 setCurrentPage(1);
               }}
               className="w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9B2335] focus:border-transparent transition-all"
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
             />
             {search && (
               <button
@@ -174,7 +173,7 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
           </div>
 
           {/* Results count */}
-          <div className="text-sm text-gray-600" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+          <div className="text-sm text-gray-600">
             Showing {filtered.length} {filtered.length === 1 ? 'brewery' : 'breweries'}
             {search && ` matching "${search}"`}
           </div>
@@ -224,8 +223,7 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                     <div className="flex-1 min-w-0">
                       <Link 
                         href={`/breweries/${brewerySlug}`}
-                        className="text-lg font-semibold text-[#1a1a1a] hover:text-[#9B2335] transition-colors line-clamp-1"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="font-display text-lg font-semibold text-[#1a1a1a] hover:text-[#9B2335] transition-colors line-clamp-1"
                       >
                         {brewery.name}
                       </Link>
@@ -276,7 +274,6 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                                   href={`/amenities/${amenitySlug}`}
                                   onClick={(e) => e.stopPropagation()}
                                   className="inline-flex items-center justify-center text-xs text-[#9B2335] bg-white border border-[#9B2335] hover:bg-[#9B2335] hover:text-white px-2 py-1 rounded transition-colors font-medium whitespace-nowrap"
-                                  style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                                 >
                                   {amenity}
                                 </Link>
@@ -293,7 +290,7 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
 
             {filtered.length === 0 && (
               <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-                <p className="text-gray-500" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                <p className="text-gray-500">
                   No breweries found matching your search.
                 </p>
               </div>
@@ -392,12 +389,11 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
       {/* About Section */}
       <div className="bg-[#FAF9F6] rounded-xl p-6 md:p-8 border border-gray-200">
         <h2 
-          className="text-2xl font-bold text-[#1a1a1a] mb-4"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          className="font-display text-2xl font-bold text-[#1a1a1a] mb-4"
         >
           About {amenityLabel} Breweries in {cityName}
         </h2>
-        <div className="prose prose-gray max-w-none" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+        <div className="prose prose-gray max-w-none">
           <p className="text-gray-700 leading-relaxed">
             {cityName} offers {breweries.length} {breweries.length === 1 ? 'brewery' : 'breweries'} with {amenityLabel.toLowerCase()}, 
             providing excellent options for craft beer enthusiasts seeking this specific amenity. 
@@ -414,12 +410,11 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
       {/* About Maryland Brewery Directory */}
       <div className="bg-white rounded-xl p-6 md:p-8 border border-gray-200">
         <h2 
-          className="text-2xl font-bold text-[#1a1a1a] mb-4"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          className="font-display text-2xl font-bold text-[#1a1a1a] mb-4"
         >
           About Maryland Brewery Directory
         </h2>
-        <div className="prose prose-gray max-w-none" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+        <div className="prose prose-gray max-w-none">
           <p className="text-gray-700 leading-relaxed">
             Maryland Brewery Directory is your comprehensive guide to the craft beer scene across Maryland. 
             We feature detailed information about breweries, taprooms, and brewpubs throughout the state, 

@@ -9,7 +9,6 @@ import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { existsSync } from 'fs';
 import { join } from 'path';
-import '@/components/home-v2/styles.css';
 import CountyBreweriesMapClient from './CountyBreweriesMapClient';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { countyMeta } from '@/lib/seo/page-meta';
@@ -184,7 +183,7 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
         <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
           {/* Breadcrumbs */}
           <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className={`flex items-center flex-wrap gap-2 text-sm ${countyHeroImage ? 'text-white/90' : ''}`} style={{ fontFamily: "'Source Sans 3', sans-serif", color: countyHeroImage ? undefined : '#6B6B6B' }}>
+            <ol className={`flex items-center flex-wrap gap-2 text-sm ${countyHeroImage ? 'text-white/90' : ''}`} style={{ color: countyHeroImage ? undefined : '#6B6B6B' }}>
               <li>
                 <Link 
                   href="/" 
@@ -216,12 +215,11 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
 
           {/* H1 Title */}
           <h1 
-            className={`text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight ${
+            className={`font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight ${
               countyHeroImage 
                 ? 'text-white drop-shadow-lg' 
                 : 'text-[#1C1C1C]'
-            }`}
-            style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: countyHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
+            }`} style={{ textShadow: countyHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
           >
             {isMdRoute ? `Breweries in ${countyName} County, Maryland` : `Breweries in ${countyName} County`}
           </h1>
@@ -233,7 +231,6 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
                 ? 'text-white/95 drop-shadow-md' 
                 : 'text-[#6B6B6B]'
             }`}
-            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
             <strong className={countyHeroImage ? 'text-white font-semibold' : 'text-[#1C1C1C] font-semibold'}>{totalBreweries}</strong> {totalBreweries === 1 ? 'brewery' : 'breweries'} found.
           </p>

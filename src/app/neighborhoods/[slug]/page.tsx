@@ -106,7 +106,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ s
             </ol>
           </nav>
 
-          <h1 className="mb-4 font-[family-name:var(--font-playfair-display)] text-4xl font-bold leading-tight text-gray-900 md:text-5xl">
+          <h1 className="mb-4 font-display text-4xl font-bold leading-tight text-gray-900 md:text-5xl">
             Breweries near {neighborhood.name}, {city}, MD
           </h1>
           <p className="text-lg text-gray-700">
@@ -135,7 +135,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ s
       {attractions.length > 0 && (
         <section className="border-t py-8 md:py-12">
           <div className="container mx-auto px-4">
-            <h2 className="mb-6 font-[family-name:var(--font-playfair-display)] text-2xl font-bold text-gray-900 md:text-3xl">
+            <h2 className="mb-6 font-display text-2xl font-bold text-gray-900 md:text-3xl">
               Things to do near {neighborhood.name}
             </h2>
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

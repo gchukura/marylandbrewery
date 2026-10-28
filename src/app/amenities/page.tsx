@@ -9,7 +9,6 @@ import { join } from 'path';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { breadcrumbList } from '@/lib/seo/jsonld';
 import JsonLd from '@/components/seo/JsonLd';
-import '@/components/home-v2/styles.css';
 
 export const metadata: Metadata = buildMetadata({
   title: "Maryland Breweries by Amenity",
@@ -303,7 +302,7 @@ export default async function AmenitiesIndexPage() {
         <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
           {/* Breadcrumbs */}
           <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className={`flex items-center flex-wrap gap-2 text-sm ${hasAmenitiesHeroImage ? 'text-white/90' : ''}`} style={{ fontFamily: "'Source Sans 3', sans-serif", color: hasAmenitiesHeroImage ? undefined : '#6B6B6B' }}>
+            <ol className={`flex items-center flex-wrap gap-2 text-sm ${hasAmenitiesHeroImage ? 'text-white/90' : ''}`} style={{ color: hasAmenitiesHeroImage ? undefined : '#6B6B6B' }}>
               <li>
                 <Link 
                   href="/" 
@@ -326,12 +325,11 @@ export default async function AmenitiesIndexPage() {
 
           {/* H1 Title */}
           <h1 
-            className={`text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${
+            className={`font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${
               hasAmenitiesHeroImage 
                 ? 'text-white drop-shadow-lg' 
                 : 'text-[#1C1C1C]'
-            }`}
-            style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: hasAmenitiesHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
+            }`} style={{ textShadow: hasAmenitiesHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
           >
             Brewery Amenities & Features
           </h1>
@@ -343,7 +341,6 @@ export default async function AmenitiesIndexPage() {
                 ? 'text-white/95 drop-shadow-md' 
                 : 'text-[#6B6B6B]'
             }`}
-            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
             Find the perfect brewery for your next visit. Browse {totalBreweries} Maryland breweries by {totalAmenities} different amenities—from outdoor seating to live music venues.
           </p>
@@ -356,14 +353,12 @@ export default async function AmenitiesIndexPage() {
           <div className="mb-10">
             <div className="section-divider mb-4" />
             <h2 
-              className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-3"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-display text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-3"
             >
               Explore Breweries by Amenity
             </h2>
             <p 
               className="text-lg text-[#6B6B6B]"
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
             >
               Whether you're looking for a casual hangout with your dog, a dinner destination, or a place with games and live music—we've got you covered.
             </p>
@@ -389,14 +384,12 @@ export default async function AmenitiesIndexPage() {
                       </div>
                       <div>
                         <h3 
-                          className="text-xl md:text-2xl font-bold text-[#1C1C1C] group-hover:text-[#9B2335] transition-colors"
-                          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                          className="font-display text-xl md:text-2xl font-bold text-[#1C1C1C] group-hover:text-[#9B2335] transition-colors"
                         >
                           {item.name}
                         </h3>
                         <span 
                           className="text-sm font-medium text-[#9B2335]"
-                          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                         >
                           {item.count} {item.count === 1 ? 'brewery' : 'breweries'} in Maryland
                         </span>
@@ -410,7 +403,6 @@ export default async function AmenitiesIndexPage() {
                     <>
                       <p 
                         className="text-[#6B6B6B] mb-4 leading-relaxed"
-                        style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                       >
                         {amenityDef.definition}
                       </p>
@@ -421,7 +413,6 @@ export default async function AmenitiesIndexPage() {
                           <li 
                             key={idx}
                             className="text-sm text-[#6B6B6B] flex items-center gap-2"
-                            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                           >
                             <span className="w-1.5 h-1.5 rounded-full bg-[#D4A017] flex-shrink-0" />
                             {char}
@@ -435,7 +426,6 @@ export default async function AmenitiesIndexPage() {
                   <div className="mt-6 pt-4 border-t border-[#E8E6E1]">
                     <span 
                       className="text-[#9B2335] font-semibold group-hover:text-[#D4A017] transition-colors inline-flex items-center gap-2"
-                      style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                     >
                       View All {item.name} Breweries
                       <ChevronRight className="w-4 h-4" />
@@ -452,14 +442,12 @@ export default async function AmenitiesIndexPage() {
       <section className="bg-white py-12 md:py-16 border-t border-[#E8E6E1]">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 
-            className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-6"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-display text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-6"
           >
             About Maryland Brewery Directory
           </h2>
           <div 
             className="prose prose-lg text-[#6B6B6B] space-y-4"
-            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
             <p>
               Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 

@@ -27,8 +27,7 @@ export default function TypeRowV2({ types }: TypeRowV2Props) {
         {/* Section Header */}
         <div className="text-center mb-12">
           <h2 
-            className="text-3xl md:text-4xl font-semibold mb-4"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-display text-3xl md:text-4xl font-semibold mb-4"
           >
             Find by Brewery Type
           </h2>
@@ -52,13 +51,11 @@ export default function TypeRowV2({ types }: TypeRowV2Props) {
                 <Icon className="h-8 w-8 text-[#D4A017] mb-3 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
                 <div 
                   className="font-medium text-white mb-1"
-                  style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                 >
                   {type.name}
                 </div>
                 <div 
                   className="text-sm text-[#9CA3AF]"
-                  style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                 >
                   {type.count} locations
                 </div>

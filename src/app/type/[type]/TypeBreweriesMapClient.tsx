@@ -73,7 +73,7 @@ export default function TypeBreweriesMapClient({ breweries, typeName, typeDefini
         {/* Left Side - Filterable List */}
         <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[600px] lg:h-[700px]">
         {/* Filter Header */}
-        <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+        <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900">{typeName} Directory</h2>
             {hasActiveFilters && (
@@ -128,7 +128,6 @@ export default function TypeBreweriesMapClient({ breweries, typeName, typeDefini
                   <div
                     key={brewery.id}
                     className="p-4"
-                    style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                   >
                     <Link
                       href={`/breweries/${slug}`}
@@ -223,11 +222,11 @@ export default function TypeBreweriesMapClient({ breweries, typeName, typeDefini
                                     );
                                   })}
                                 </div>
-                                <span className="text-xs font-semibold text-gray-700" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                                <span className="text-xs font-semibold text-gray-700">
                                   {displayRating.toFixed(1)}
                                 </span>
                                 {totalReviewCount > 0 && (
-                                  <span className="text-xs text-gray-500" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                                  <span className="text-xs text-gray-500">
                                     ({totalReviewCount})
                                   </span>
                                 )}
@@ -285,7 +284,6 @@ export default function TypeBreweriesMapClient({ breweries, typeName, typeDefini
                                 key={a}
                                 href={`/amenities/${amenitySlug}`}
                                 className="inline-flex items-center justify-center text-xs text-[#9B2335] bg-white border border-[#9B2335] hover:bg-[#9B2335] hover:text-white px-2 py-1 rounded transition-colors font-medium whitespace-nowrap"
-                                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                               >
                                 {a}
                               </Link>
@@ -406,7 +404,6 @@ export default function TypeBreweriesMapClient({ breweries, typeName, typeDefini
               <h2 className="text-xl font-bold text-gray-900 mb-4">What is a {typeName}?</h2>
               <div 
                 className="prose prose-lg text-[#6B6B6B]"
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
               >
                 <p>{typeDefinition}</p>
               </div>
@@ -420,7 +417,6 @@ export default function TypeBreweriesMapClient({ breweries, typeName, typeDefini
             </h2>
             <div 
               className="prose prose-lg text-[#6B6B6B] space-y-4"
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
             >
               <p>
                 Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 

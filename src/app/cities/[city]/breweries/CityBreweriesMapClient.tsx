@@ -96,7 +96,7 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
         {/* Left Side - Filterable List */}
         <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[600px] lg:h-[700px]">
         {/* Filter Header */}
-        <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+        <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900">Brewery Directory</h2>
             {hasActiveFilters && (
@@ -159,7 +159,6 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                   <div
                     key={brewery.id}
                     className="p-4"
-                    style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                   >
                     <Link
                       href={`/breweries/${slug}`}
@@ -288,7 +287,6 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                                 key={a}
                                 href={`/amenities/${amenitySlug}`}
                                 className="inline-flex items-center justify-center text-xs text-[#9B2335] bg-white border border-[#9B2335] hover:bg-[#9B2335] hover:text-white px-2 py-1 rounded transition-colors font-medium whitespace-nowrap"
-                                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                               >
                                 {a.trim()}
                               </Link>
@@ -446,7 +444,6 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
               </h2>
               <div 
                 className="prose prose-lg text-[#6B6B6B]"
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
               >
                 <p>{neighborhood.description}</p>
               </div>
@@ -460,7 +457,6 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
             </h2>
             <div 
               className="prose prose-lg text-[#6B6B6B] space-y-4"
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
             >
               <p>
                 Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 

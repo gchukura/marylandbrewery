@@ -12,7 +12,6 @@ import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { existsSync } from 'fs';
 import { join } from 'path';
-import '@/components/home-v2/styles.css';
 import CityBreweriesMapClient from '../../cities/[city]/breweries/CityBreweriesMapClient';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 import { buildMetadata } from '@/lib/seo/metadata';
@@ -210,7 +209,7 @@ export default async function BestBreweriesSlugPage({ params }: { params: Promis
           <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
             {/* Breadcrumbs */}
             <nav className="mb-6" aria-label="Breadcrumb">
-              <ol className="flex items-center flex-wrap gap-2 text-sm text-white/90" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+              <ol className="flex items-center flex-wrap gap-2 text-sm text-white/90">
                 <li>
                   <Link href="/" className="hover:text-white transition-colors drop-shadow-md">
                     Maryland Breweries
@@ -233,8 +232,7 @@ export default async function BestBreweriesSlugPage({ params }: { params: Promis
 
             {/* H1 Title */}
             <h1 
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-lg"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
+              className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
             >
               Best Breweries in {cityName}, MD
             </h1>
@@ -242,7 +240,6 @@ export default async function BestBreweriesSlugPage({ params }: { params: Promis
             {/* Count Display */}
             <p 
               className="text-lg md:text-xl text-white/95 mb-6 drop-shadow-md"
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
             >
               <strong className="text-white font-semibold">{sortedBreweries.length}</strong> {sortedBreweries.length === 1 ? 'brewery' : 'breweries'} found.
             </p>
@@ -252,7 +249,7 @@ export default async function BestBreweriesSlugPage({ params }: { params: Promis
         {/* The ranking: what makes this page different from the city listing */}
         <section className="border-b bg-white py-8 md:py-12">
           <div className="container mx-auto px-4">
-            <h2 className="mb-2 font-[family-name:var(--font-playfair-display)] text-2xl font-bold text-gray-900 md:text-3xl">
+            <h2 className="mb-2 font-display text-2xl font-bold text-gray-900 md:text-3xl">
               The {sortedBreweries.length} best breweries in {cityName}, ranked
             </h2>
             <p className="mb-6 max-w-3xl text-sm text-gray-600">{SCORE_EXPLANATION}</p>

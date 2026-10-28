@@ -86,23 +86,13 @@ Then rerun `npm run test:e2e`.
 
 To tell restrictions apart from a bad key, temporarily set Application restrictions to "None". If the map then loads, the referrer list is the problem. Restore the restriction afterwards. APIs & Services > Dashboard shows per-API errors and quota usage for the key.
 
-## Data scripts fail with "API keys with referer restrictions cannot be used with this API"
+## Data scripts fail with REQUEST_DENIED or "GOOGLE_MAPS_API_KEY is not set"
 
-**Cause.** The Google data scripts (`npm run data:reviews:google`, `data:photos`, `data:geocode`, `data:verify-coordinates`, and others that call Google) run in Node and send no HTTP referrer, so a key restricted to HTTP referrers is refused. These scripts use the legacy Places API web service (Text Search, Nearby Search, Place Details, Place Photo) and the Geocoding API.
+**Cause.** The Google data scripts (`data:photos`, `data:reviews:google`, `data:attractions`, `data:geocode`, `data:verify-coordinates`, and the optional Google pass of `data:enrich` and `data:check-websites`) run in Node and need their own **server key** in `GOOGLE_MAPS_API_KEY` (`scripts/lib/google.ts`). They never use `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`: that key ships to every browser and is restricted to the site's domains, so Google refuses it from a script ("API keys with referer restrictions cannot be used with this API", or "This API key is not authorized to use this service or API").
 
-The scripts read `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` first and fall back to `GOOGLE_MAPS_API_KEY` only when the public key is unset. Because `.env.local` normally contains the referrer-restricted public key, adding `GOOGLE_MAPS_API_KEY` to `.env.local` alone does not change which key the scripts use.
+**Fix.** Create the server key as described in [setup.md](setup.md#google-server-key), then run `npm run google:check`, which names each API the key can't reach.
 
-**Fix.** Use a separate server-side key rather than loosening the browser key:
-
-1. Google Cloud Console > APIs & Services > Credentials > Create credentials > API key. Name it, for example, "Server-side scripts".
-2. Application restrictions: **None** (or IP addresses, if you run the scripts from a fixed IP).
-3. API restrictions: restrict to **Places API** and **Geocoding API**. Enable both under APIs & Services > Library if they are not already.
-4. Pass the key to the script so it takes precedence over `.env.local` (dotenv does not override variables already set in the shell):
-   ```bash
-   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=<server key> npm run data:reviews:google
-   ```
-
-Do not remove the referrer restriction from the browser key to make scripts work; that key is public in the client bundle.
+Don't remove the website restriction from the browser key to make scripts work; that key is public in the client bundle.
 
 ## Locally, a page loads without styles or the console shows a stylesheet 404 after `npm start`
 

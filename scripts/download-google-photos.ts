@@ -15,7 +15,7 @@
  * Make sure to set environment variables in .env.local:
  *   - NEXT_PUBLIC_SUPABASE_URL
  *   - SUPABASE_SERVICE_ROLE_KEY
- *   - NEXT_PUBLIC_GOOGLE_MAPS_API_KEY (or GOOGLE_MAPS_API_KEY)
+ *   - GOOGLE_MAPS_API_KEY: a server key, not the site's browser key (docs/setup.md#google-server-key)
  * 
  * Required APIs in Google Cloud Console:
  *   - Places API (Text Search) - for finding Place IDs
@@ -27,16 +27,14 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 
 import { existingObjectSizes, photoPath as mediaPhotoPath, processPhoto, publicMediaUrl, uploadIfChanged } from './lib/media';
+import { googleServerKey } from './lib/google';
 import { getAdminClient } from '@/lib/db/client';
 // Load .env.local file
 config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
 
-const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
-if (!apiKey) {
-  throw new Error('Google Maps API key is required. Please set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY or GOOGLE_MAPS_API_KEY in .env.local');
-}
+const apiKey = googleServerKey();
 
 // Get admin client
 const adminClient = getAdminClient();

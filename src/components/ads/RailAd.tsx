@@ -33,7 +33,7 @@ export default function RailAd() {
   return (
     <aside
       aria-label="Advertisement"
-      className="hidden flex-col items-center gap-1 lg:flex"
+      className="hidden min-h-[268px] flex-col items-center gap-1 lg:flex"
     >
       <span className="text-[11px] uppercase tracking-[0.12em] text-muted">
         Advertisement

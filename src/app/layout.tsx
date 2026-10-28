@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { Fraunces, Inter } from "next/font/google";
 import SiteHeader from "@/components/layout/SiteHeader";
 import SiteFooter from "@/components/layout/SiteFooter";
+import BottomNav from "@/components/layout/BottomNav";
 import NewsletterSignup from "@/components/ui/NewsletterSignup";
 import "./globals.css";
 
@@ -164,6 +165,9 @@ export default function RootLayout({
         </main>
         <NewsletterSignup />
         <SiteFooter />
+        {/* Room for the phone tab bar so it never covers the footer */}
+        <div aria-hidden="true" className="h-[calc(64px+env(safe-area-inset-bottom))] bg-ink md:hidden" />
+        <BottomNav />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

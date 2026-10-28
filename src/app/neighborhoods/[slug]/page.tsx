@@ -2,13 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
-import {
-  getAllNeighborhoods,
-  getAttractionsNearBrewery,
-  getNeighborhoodBySlug,
-  getProcessedBreweryData,
-} from '@/lib/db';
-import type { DatabaseNeighborhood } from '@/lib/db';
+import { getAllNeighborhoods, getAttractionsNearBrewery, getNeighborhoodBySlug, getProcessedBreweryData } from '@/lib/db';
+import type { Tables } from '@/lib/db';
 import { slugify } from '@/lib/slug';
 import { milesToKm, sortByDistance } from '@/lib/geo';
 import {
@@ -24,9 +19,9 @@ const ATTRACTION_LIMIT = 6;
 // Fetch extra so filtering out shops and offices still leaves enough to show
 const ATTRACTION_CANDIDATES = 60;
 
-type NeighborhoodWithCoords = DatabaseNeighborhood & { latitude: number; longitude: number };
+type NeighborhoodWithCoords = Tables<'maryland_neighborhoods'> & { latitude: number; longitude: number };
 
-function hasCoords(n: DatabaseNeighborhood): n is NeighborhoodWithCoords {
+function hasCoords(n: Tables<'maryland_neighborhoods'>): n is NeighborhoodWithCoords {
   return typeof n.latitude === 'number' && typeof n.longitude === 'number';
 }
 

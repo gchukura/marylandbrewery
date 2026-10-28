@@ -291,14 +291,14 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     id: dbArticle.id || '',
     breweryId: dbArticle.brewery_id,
     title: dbArticle.title,
-    description: dbArticle.description,
+    description: dbArticle.description ?? undefined,
     url: dbArticle.url,
-    source: dbArticle.source,
-    author: dbArticle.author,
-    imageUrl: dbArticle.image_url,
-    publishedAt: dbArticle.published_at,
+    source: dbArticle.source ?? undefined,
+    author: dbArticle.author ?? undefined,
+    imageUrl: dbArticle.image_url ?? undefined,
+    publishedAt: dbArticle.published_at ?? undefined,
     fetchedAt: dbArticle.fetched_at || new Date().toISOString(),
-    relevanceScore: dbArticle.relevance_score,
+    relevanceScore: dbArticle.relevance_score ?? undefined,
   }));
 
   return (

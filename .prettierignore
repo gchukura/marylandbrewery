@@ -5,3 +5,5 @@ dist
 build
 *.log
 .env*
+
+src/lib/db/database.types.ts

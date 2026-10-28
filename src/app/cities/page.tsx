@@ -99,7 +99,6 @@ export default async function CitiesIndexPage() {
     grouped['Other Cities'] = otherCities;
   }
 
-
   // Check for cities index hero image
   const citiesHeroImagePath = '/cities-hero.jpg';
   const citiesHeroImageFile = join(process.cwd(), 'public', 'cities-hero.jpg');

@@ -48,5 +48,3 @@ export default function CityStatsBar({ totalBreweries, activeBreweries, microbre
   );
 }
 
-
-

@@ -6,15 +6,8 @@
  */
 import 'server-only';
 
-// The raw clients stay private to this folder; only the row types are public.
-export type {
-  DatabaseBrewery,
-  DatabaseBeer,
-  DatabaseNewsletterSubscriber,
-  DatabaseAttraction,
-  DatabaseNeighborhood,
-  DatabaseBreweryArticle,
-} from './client';
+// The clients stay private to this folder; the generated row types are public: Tables<'breweries'> etc.
+export type { Database, Json, Tables } from './client';
 export * from './queries';
 export * from './attractions';
 export * from './brewery-data';

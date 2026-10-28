@@ -16,9 +16,10 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
-import { supabaseAdmin } from '@/lib/db/client';
+import { getSupabase } from '@/lib/db/client';
 import { getBreweryDataFromSupabase } from '@/lib/db/queries';
 
+import { getAdminClient } from '@/lib/db/client';
 const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
 
 interface SocialMediaData {
@@ -213,7 +214,7 @@ async function enrichSupabaseBreweries() {
   console.log('📋 Using Supabase as PRIMARY data source\n');
 
   try {
-    const supabase = supabaseAdmin;
+    const supabase = getAdminClient();
     if (!supabase) {
       throw new Error('Supabase admin client not available');
     }
@@ -300,7 +301,7 @@ async function enrichSupabaseBreweries() {
           updateData.hours = finalHours;
         }
 
-        const { error: updateError } = await supabase
+        const { error: updateError } = await getSupabase()
           .from('breweries')
           .update(updateData)
           .eq('id', brewery.id);

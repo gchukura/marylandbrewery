@@ -61,6 +61,11 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
   The phone tab bar (`src/components/layout/BottomNav.tsx`) is site-wide below 768px.
 - Tailwind v4: `row-span-*`/`col-span-*` set the whole `grid-row`/`grid-column` shorthand and can override a
   `row-start-*` from another breakpoint; use `row-end-*` with `row-start-*` instead.
+- Ads: rules in `src/lib/ads.ts` (no ads on /contact, /add-brewery, /saved; error and 404 pages call
+  `suppressAds()`). `AdSenseLoader` adds the script after load + 3 s idle or first interaction; verification is the
+  `google-adsense-account` meta tag. Ad units must be fixed-size (no `data-ad-format`): AdSense collapses the
+  parents of unfilled responsive units with inline `!important` styles.
+- Accessibility: `e2e/a11y.spec.ts` (axe) must stay at zero serious/critical violations.
 - `cn()` is plain clsx (no tailwind-merge): never pass a class that conflicts with a component's base class;
   add a variant instead.
 - Brewery photos and logos are in Storage; `public/photos` and `public/logos` are deleted but still in git

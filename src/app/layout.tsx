@@ -4,6 +4,8 @@ import { Fraunces, Inter } from "next/font/google";
 import SiteHeader from "@/components/layout/SiteHeader";
 import SiteFooter from "@/components/layout/SiteFooter";
 import BottomNav from "@/components/layout/BottomNav";
+import AdSenseLoader from "@/components/ads/AdSenseLoader";
+import { ADSENSE_CLIENT } from "@/lib/ads";
 import NewsletterSignup from "@/components/ui/NewsletterSignup";
 import "./globals.css";
 
@@ -78,6 +80,8 @@ export const metadata: Metadata = {
   verification: process.env.GOOGLE_SITE_VERIFICATION
     ? { google: process.env.GOOGLE_SITE_VERIFICATION }
     : undefined,
+  // AdSense site verification by meta tag (the ad script itself loads late: AdSenseLoader)
+  other: { "google-adsense-account": ADSENSE_CLIENT },
 };
 
 export const viewport = {
@@ -117,7 +121,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`scroll-smooth ${fraunces.variable} ${inter.variable}`}>
+    <html lang="en" className={`motion-safe:scroll-smooth ${fraunces.variable} ${inter.variable}`}>
       <head>
         {/* WebSite Schema for Sitelinks Search Box */}
         <script
@@ -145,13 +149,6 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Google AdSense: the snippet exactly as AdSense gives it, in the server HTML <head> so the
-            AdSense crawler finds it (next/script's lazyOnload injected it only after load) */}
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4357894821158922"
-          crossOrigin="anonymous"
-        ></script>
         {/* Ahrefs Analytics */}
         <script src="https://analytics.ahrefs.com/analytics.js" data-key="feHAts9QQBm4W+I9itRXzg" async></script>
         {/* Favicons handled by Next.js from /src/app/icon.png, favicon.ico, apple-icon.png */}
@@ -168,6 +165,7 @@ export default function RootLayout({
         {/* Room for the phone tab bar so it never covers the footer */}
         <div aria-hidden="true" className="h-[calc(64px+env(safe-area-inset-bottom))] bg-ink md:hidden" />
         <BottomNav />
+        <AdSenseLoader />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

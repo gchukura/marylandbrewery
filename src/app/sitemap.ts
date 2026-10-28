@@ -1,165 +1,131 @@
 import type { MetadataRoute } from 'next';
-import { getProcessedBreweryData, getAllCities, getAllTypes, getAllNeighborhoods, getAttractionBySlug, getRegions, breweriesInRegion } from '@/lib/db';
-import { normalizeCountyName } from '../lib/data-utils';
-import { slugify, deslugify } from '@/lib/slug';
-import { MARYLAND_COUNTIES } from '@/types/brewery';
-import { hasBestBreweriesPage } from '../lib/best-breweries';
-import { AMENITIES, hasAmenity, isIndexableCityAmenity } from '../lib/amenities';
-import { sortByDistance } from '../lib/geo';
-import { isIndexableNeighborhood, neighborhoodPath } from '../lib/neighborhoods';
+import { breweriesInRegion, getAllNeighborhoods, getIndexableAttractions, getProcessedBreweryData, getRegions } from '@/lib/db';
+import { slugify } from '@/lib/slug';
+import { DAYS, isOpenOnDay } from '@/lib/hours';
+import { hasBestBreweriesPage } from '@/lib/best-breweries';
+import { AMENITIES, hasAmenity, isIndexableCityAmenity } from '@/lib/amenities';
+import { sortByDistance } from '@/lib/geo';
+import { breweriesNearNeighborhood, isIndexableNeighborhood, neighborhoodPath } from '@/lib/neighborhoods';
+import { SITE_URL } from '@/lib/seo/metadata';
+import type { Brewery } from '@/types/brewery';
 
-const BASE_URL = 'https://www.marylandbrewery.com';
+/**
+ * Every indexable page, once. Pages that are noindex (thin city x amenity, neighborhood and
+ * attraction pages) or that redirect (-md, near/, small-city best-of, amenity aliases) are left out.
+ * lastModified comes from the data: a brewery's updated_at, or the newest among a listing's breweries.
+ */
+
+const STATIC_PAGES = [
+  'faq',
+  'our-story',
+  'add-brewery',
+  'become-featured',
+  'customer-reviews',
+  'marketing-tips',
+  'review-guidelines',
+  'photo-credits',
+  'privacy-policy',
+  'terms',
+];
+
+function latest(breweries: Brewery[]): Date | undefined {
+  const times = breweries.map((b) => Date.parse(b.lastUpdated)).filter((t) => !Number.isNaN(t));
+  return times.length > 0 ? new Date(Math.max(...times)) : undefined;
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const processed = await getProcessedBreweryData();
-  const cities = await getAllCities();
-  const allTypes = await getAllTypes();
-  const neighborhoods = await getAllNeighborhoods();
-  
-  // Get counties from breweries and filter to only valid Maryland counties
-  const rawCounties = Array.from(new Set(processed.breweries.map((b) => b.county).filter(Boolean))) as string[];
-  const counties = rawCounties.filter(county => {
-    const slug = slugify(county);
-    return normalizeCountyName(slug) !== null || MARYLAND_COUNTIES.some(c => c.toLowerCase() === county.toLowerCase());
-  });
-  
-  // Convert type names to slugs
-  const typeSlugs = allTypes.map(type => slugify(type));
+  const [processed, regions, neighborhoods, attractions] = await Promise.all([
+    getProcessedBreweryData(),
+    getRegions(),
+    getAllNeighborhoods(),
+    getIndexableAttractions(),
+  ]);
+  const { breweries } = processed;
+  const siteUpdated = latest(breweries);
 
-  const lastMod = new Date();
+  const entries = new Map<string, MetadataRoute.Sitemap[number]>();
+  const add = (path: string, priority: number, lastModified?: Date) => {
+    const url = path === '/' ? SITE_URL : `${SITE_URL}${path}`;
+    if (!entries.has(url)) entries.set(url, { url, priority, ...(lastModified ? { lastModified } : {}) });
+  };
 
-  const urls: MetadataRoute.Sitemap = [];
+  // Home and indexes change whenever any brewery does
+  add('/', 1.0, siteUpdated);
+  for (const path of ['/map', '/cities', '/counties', '/region', '/type', '/amenities', '/best-breweries', '/open-now']) {
+    add(path, 0.8, siteUpdated);
+  }
+  add('/contact', 0.5);
+  for (const page of STATIC_PAGES) add(`/${page}`, 0.3);
 
-  // Homepage (no trailing slash - Next.js default)
-  urls.push({ url: BASE_URL, lastModified: lastMod, priority: 1.0 });
-
-  // Important static pages
-  urls.push({ url: `${BASE_URL}/map`, lastModified: lastMod, priority: 0.8 });
-  urls.push({ url: `${BASE_URL}/best-breweries`, lastModified: lastMod, priority: 0.8 });
-  urls.push({ url: `${BASE_URL}/open-now`, lastModified: lastMod, priority: 0.7 });
-  urls.push({ url: `${BASE_URL}/contact`, lastModified: lastMod, priority: 0.6 });
-  urls.push({ url: `${BASE_URL}/cities`, lastModified: lastMod, priority: 0.8 });
-  urls.push({ url: `${BASE_URL}/counties`, lastModified: lastMod, priority: 0.8 });
-  urls.push({ url: `${BASE_URL}/amenities`, lastModified: lastMod, priority: 0.8 });
-  urls.push({ url: `${BASE_URL}/type`, lastModified: lastMod, priority: 0.8 });
-  
-  // Region pages - only include regions that have breweries
-  for (const regionData of await getRegions()) {
-    const region = regionData.slug;
-    const regionBreweries = breweriesInRegion(regionData, processed.breweries);
-
-    // Only add to sitemap if there are breweries in this region
-    if (regionBreweries.length > 0) {
-      urls.push({ url: `${BASE_URL}/region/${region}`, lastModified: lastMod, priority: 0.7 });
-    }
+  // Breweries (the page 404s without a name and city)
+  for (const b of breweries) {
+    if (b.name && b.city && b.slug) add(`/breweries/${b.slug}`, 0.8, latest([b]));
   }
 
-  // Open by day pages - only include days that have open breweries
-  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  for (const day of days) {
-    const dayBreweries = processed.breweries.filter((b) => {
-      const hours = b.hours;
-      if (!hours) return false;
-      const h = hours[day.toLowerCase() as keyof typeof hours];
-      if (!h || /closed/i.test(h)) return false;
-      return true;
-    });
-    
-    // Only add to sitemap if there are breweries open on this day
-    if (dayBreweries.length > 0) {
-      urls.push({ url: `${BASE_URL}/open/${day}`, lastModified: lastMod, priority: 0.5 });
-    }
+  // Cities (keyed by slug, so "Havre de Grace" and "Havre De Grace" are one page) and best-of pages
+  const byCitySlug = new Map<string, Brewery[]>();
+  for (const b of breweries) {
+    if (!b.city) continue;
+    const slug = slugify(b.city);
+    byCitySlug.set(slug, [...(byCitySlug.get(slug) ?? []), b]);
+  }
+  for (const [citySlug, cityBreweries] of byCitySlug) {
+    add(`/cities/${citySlug}/breweries`, 0.9, latest(cityBreweries));
+    if (hasBestBreweriesPage(cityBreweries.length)) add(`/best-breweries/${citySlug}`, 0.8, latest(cityBreweries));
   }
 
-  // City pages (canonical versions only - -md versions excluded from sitemap)
-  // Only include cities that have breweries
-  for (const city of cities) {
-    const cityBreweries = processed.breweries.filter((b: any) => 
-      b.city && b.city.toLowerCase() === city.toLowerCase()
-    );
-    
-    // Only add to sitemap if city has breweries
-    if (cityBreweries.length > 0) {
-      const citySlug = slugify(city);
-      urls.push({ url: `${BASE_URL}/cities/${citySlug}/breweries`, lastModified: lastMod, priority: 0.9 });
-      // Best breweries pages exist only for cities with 5+ breweries
-      if (hasBestBreweriesPage(cityBreweries.length)) {
-        urls.push({ url: `${BASE_URL}/best-breweries/${citySlug}`, lastModified: lastMod, priority: 0.8 });
-      }
-    }
+  // Counties
+  const byCountySlug = new Map<string, Brewery[]>();
+  for (const b of breweries) {
+    if (!b.county) continue;
+    const slug = slugify(b.county);
+    byCountySlug.set(slug, [...(byCountySlug.get(slug) ?? []), b]);
+  }
+  for (const [countySlug, countyBreweries] of byCountySlug) {
+    add(`/counties/${countySlug}/breweries`, 0.7, latest(countyBreweries));
   }
 
-  // County pages (canonical versions only - -md versions excluded from sitemap)
-  // Only include counties that have breweries (already filtered, but double-check)
-  for (const county of counties) {
-    const countyBreweries = processed.breweries.filter((b: any) => 
-      b.county && b.county.toLowerCase() === county.toLowerCase()
-    );
-    
-    // Only add to sitemap if county has breweries
-    if (countyBreweries.length > 0) {
-      const countySlug = slugify(county);
-      urls.push({ url: `${BASE_URL}/counties/${countySlug}/breweries`, lastModified: lastMod, priority: 0.7 });
-    }
+  // Regions
+  for (const region of regions) {
+    const regionBreweries = breweriesInRegion(region, breweries);
+    if (regionBreweries.length > 0) add(`/region/${region.slug}`, 0.7, latest(regionBreweries));
   }
 
-  // Individual breweries
-  for (const b of processed.breweries) {
-    // The brewery page 404s without a name and city; don't list it until the data is fixed
-    if (!b.name || !b.city) continue;
-    const slug = b.slug || b.id;
-    const lm = b.lastUpdated ? new Date(b.lastUpdated) : lastMod;
-    urls.push({ url: `${BASE_URL}/breweries/${slug}`, lastModified: lm, priority: 0.8 });
+  // Types
+  for (const type of processed.types) {
+    const typeBreweries = breweries.filter((b) => b.type.includes(type));
+    if (typeBreweries.length > 0) add(`/type/${slugify(type)}`, 0.6, latest(typeBreweries));
   }
 
-  // Type pages - only include types that have breweries
-  for (const typeSlug of typeSlugs) {
-    const typeName = deslugify(typeSlug);
-    const typeKey = typeName.toLowerCase();
-    const typeBreweries = processed.breweries.filter((b) => {
-      return b.type.some((t) => t.toLowerCase() === typeKey);
-    });
-    
-    // Only add to sitemap if there are breweries of this type
-    if (typeBreweries.length > 0) {
-      urls.push({ url: `${BASE_URL}/type/${typeSlug}`, lastModified: lastMod, priority: 0.7 });
-    }
-  }
-
-  // Amenity pages, and city x amenity pages with 3+ breweries (smaller ones are noindex)
-  for (const amenityDef of AMENITIES) {
-    const withAmenity = processed.breweries.filter((b) => hasAmenity(b, amenityDef));
+  // Amenities, and city x amenity pages with 3+ breweries (smaller ones are noindex)
+  for (const amenity of AMENITIES) {
+    const withAmenity = breweries.filter((b) => hasAmenity(b, amenity));
     if (withAmenity.length === 0) continue;
-    urls.push({ url: `${BASE_URL}/amenities/${amenityDef.slug}`, lastModified: lastMod, priority: 0.6 });
-
-    const countByCity = new Map<string, number>();
-    for (const b of withAmenity) countByCity.set(slugify(b.city), (countByCity.get(slugify(b.city)) ?? 0) + 1);
-    for (const [citySlug, count] of countByCity) {
-      if (isIndexableCityAmenity(count)) {
-        urls.push({ url: `${BASE_URL}/cities/${citySlug}/${amenityDef.slug}`, lastModified: lastMod, priority: 0.5 });
-      }
+    add(`/amenities/${amenity.slug}`, 0.6, latest(withAmenity));
+    for (const [citySlug, cityBreweries] of byCitySlug) {
+      const matches = cityBreweries.filter((b) => hasAmenity(b, amenity));
+      if (isIndexableCityAmenity(matches.length)) add(`/cities/${citySlug}/${amenity.slug}`, 0.5, latest(matches));
     }
   }
 
-  // Neighborhood pages - only those with a brewery within 3 miles (the rest are noindex)
-  for (const neighborhood of neighborhoods) {
-    if (neighborhood.latitude == null || neighborhood.longitude == null) continue;
-    const origin = { latitude: neighborhood.latitude, longitude: neighborhood.longitude };
-    const nearest = sortByDistance(origin, processed.breweries)[0];
-    if (isIndexableNeighborhood(nearest?.distance)) {
-      urls.push({ url: `${BASE_URL}${neighborhoodPath(neighborhood.slug)}`, lastModified: lastMod, priority: 0.6 });
-    }
+  // Open on a given day
+  for (const day of DAYS) {
+    const open = breweries.filter((b) => isOpenOnDay(b.hours, day));
+    if (open.length > 0) add(`/open/${day}`, 0.4, latest(open));
   }
 
-  // Near attraction pages: a few known high-value ones, only if they exist in maryland_attractions
-  // (prompt 4 replaces this with the full list from the table)
-  const highValueAttractions = ['deep-creek-lake', 'inner-harbor', 'national-aquarium', 'ocean-city-boardwalk'];
-  const existingAttractions = await Promise.all(highValueAttractions.map((slug) => getAttractionBySlug(slug)));
-  for (const attraction of existingAttractions) {
-    if (attraction) {
-      urls.push({ url: `${BASE_URL}/near/${attraction.slug}`, lastModified: lastMod, priority: 0.6 });
-    }
+  // Neighborhoods with a brewery within 3 miles (the rest are noindex)
+  for (const n of neighborhoods) {
+    if (n.latitude == null || n.longitude == null) continue;
+    const origin = { latitude: n.latitude, longitude: n.longitude };
+    if (!isIndexableNeighborhood(sortByDistance(origin, breweries)[0]?.distance)) continue;
+    add(neighborhoodPath(n.slug), 0.5, latest(breweriesNearNeighborhood(origin, breweries)));
   }
 
-  return urls;
+  // Attractions: real sights with a brewery within 3 miles (the rest are noindex)
+  for (const a of attractions) {
+    add(`/near/${a.slug}`, 0.4, a.updatedAt ? new Date(a.updatedAt) : undefined);
+  }
+
+  return [...entries.values()];
 }

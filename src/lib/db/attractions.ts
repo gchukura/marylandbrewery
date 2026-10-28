@@ -329,3 +329,47 @@ export async function getAttractionByPlaceId(placeId: string): Promise<Attractio
   }
 }
 
+export interface AttractionSummary {
+  slug: string;
+  name: string;
+  type: string;
+  googleTypes: string[];
+  latitude: number;
+  longitude: number;
+  updatedAt?: string;
+}
+
+/**
+ * Every attraction, with just what the sitemap and static params need (paginated: the table
+ * has more rows than Supabase returns per request)
+ */
+export async function fetchAttractionSummaries(): Promise<AttractionSummary[]> {
+  try {
+    const rows: AttractionSummary[] = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await getSupabase()
+        .from('maryland_attractions')
+        .select('slug, name, type, google_types, latitude, longitude, updated_at')
+        .order('slug')
+        .range(from, from + 999);
+      if (error) throw error;
+      rows.push(
+        ...data.map((a) => ({
+          slug: a.slug,
+          name: a.name,
+          type: a.type,
+          googleTypes: jsonStringArray(a.google_types),
+          latitude: a.latitude,
+          longitude: a.longitude,
+          updatedAt: a.updated_at ?? undefined,
+        }))
+      );
+      if (data.length < 1000) break;
+    }
+    return rows;
+  } catch (error) {
+    throwDuringBuild(error);
+    console.error('Failed to fetch attractions:', error);
+    return [];
+  }
+}

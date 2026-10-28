@@ -87,8 +87,8 @@ export default function MarketingTipsPage() {
         <h3>Additional Resources</h3>
         <ul>
           <li>
-            <Link href="/become-featured">Become a Featured Listing</Link> —
-            Increase your visibility in our directory
+            <Link href="/become-featured">Featured listings</Link> — Not
+            available yet; tell us if you're interested
           </li>
           <li>
             <Link href="/customer-reviews">Customer Reviews</Link> — Learn how

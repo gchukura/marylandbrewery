@@ -23,7 +23,7 @@ export default function TermsPage() {
     >
       <section>
         <p>
-          <strong>Last updated:</strong> January 6, 2026
+          <strong>Last updated:</strong> October 28, 2026
         </p>
         <p>
           These Terms and Conditions ("Terms") govern your access to and use of
@@ -69,10 +69,10 @@ export default function TermsPage() {
       <section>
         <h2>User Content</h2>
         <p>
-          You may submit content to the Website, including reviews, comments,
-          and brewery information. By submitting content, you grant us a
-          non-exclusive, royalty-free, perpetual license to use, modify, and
-          display such content on the Website.
+          You may submit content to the Website, such as messages through our
+          contact form and brewery information. By submitting content, you grant
+          us a non-exclusive, royalty-free, perpetual license to use, modify,
+          and display such content on the Website.
         </p>
         <p>You agree that you will not submit content that:</p>
         <ul>

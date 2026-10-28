@@ -1,7 +1,14 @@
 import Link from 'next/link';
-import { breweriesInRegion, getProcessedBreweryData, getRegions } from '@/lib/db';
+import {
+  breweriesInRegion,
+  getProcessedBreweryData,
+  getRegions,
+} from '@/lib/db';
 import { AMENITIES, amenityPath } from '@/lib/amenities';
-import { bestBreweriesCityPath, hasBestBreweriesPage } from '@/lib/best-breweries';
+import {
+  bestBreweriesCityPath,
+  hasBestBreweriesPage,
+} from '@/lib/best-breweries';
 import { typePlural } from '@/lib/seo/page-meta';
 import { slugify } from '@/lib/slug';
 import FooterAd from '@/components/ads/FooterAd';
@@ -30,7 +37,7 @@ const FOR_BREWERIES: Column = {
   title: 'For breweries',
   links: [
     { label: 'Add a brewery', href: '/add-brewery' },
-    { label: 'Become featured', href: '/become-featured' },
+    { label: 'Featured listings', href: '/become-featured' },
     { label: 'Marketing tips', href: '/marketing-tips' },
     { label: 'Customer reviews', href: '/customer-reviews' },
     { label: 'Review guidelines', href: '/review-guidelines' },
@@ -58,15 +65,23 @@ const LEGAL = [
  * Server component; the ad slot above it is the only client part.
  */
 export default async function SiteFooter() {
-  const [{ breweries, byCity, types }, regions] = await Promise.all([getProcessedBreweryData(), getRegions()]);
+  const [{ breweries, byCity, types }, regions] = await Promise.all([
+    getProcessedBreweryData(),
+    getRegions(),
+  ]);
 
   const columns: Column[] = [
     BROWSE,
     {
       title: 'Regions',
-      links: regions.filter((r) => breweriesInRegion(r, breweries).length > 0).map((r) => ({ label: r.name, href: `/region/${r.slug}` })),
+      links: regions
+        .filter((r) => breweriesInRegion(r, breweries).length > 0)
+        .map((r) => ({ label: r.name, href: `/region/${r.slug}` })),
     },
-    { title: 'Amenities', links: AMENITIES.map((a) => ({ label: a.label, href: amenityPath(a) })) },
+    {
+      title: 'Amenities',
+      links: AMENITIES.map((a) => ({ label: a.label, href: amenityPath(a) })),
+    },
     {
       title: 'Brewery types',
       links: types
@@ -80,7 +95,10 @@ export default async function SiteFooter() {
         { label: 'Top 50 in Maryland', href: '/best-breweries' },
         ...[...byCity.values()]
           .filter((list) => hasBestBreweriesPage(list.length))
-          .map((list) => ({ label: list[0].city, href: bestBreweriesCityPath(slugify(list[0].city), list.length) }))
+          .map((list) => ({
+            label: list[0].city,
+            href: bestBreweriesCityPath(slugify(list[0].city), list.length),
+          }))
           .sort((a, b) => a.label.localeCompare(b.label)),
       ],
     },
@@ -97,15 +115,26 @@ export default async function SiteFooter() {
           <div className="flex flex-col gap-3">
             <Logo size="sm" tone="paper" />
             <p className="m-0 max-w-[420px] text-sm leading-[1.55] text-paper/70">
-              An independent directory of Maryland&apos;s breweries, taprooms, cideries and meaderies.
+              An independent directory of Maryland&apos;s breweries, taprooms,
+              cideries and meaderies.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 lg:grid-cols-7">
             {columns.map((column) => (
-              <nav key={column.title} aria-label={column.title} className="flex flex-col gap-2 text-sm">
-                <div className="mb-1 font-semibold text-gold">{column.title}</div>
+              <nav
+                key={column.title}
+                aria-label={column.title}
+                className="flex flex-col gap-2 text-sm"
+              >
+                <div className="mb-1 font-semibold text-gold">
+                  {column.title}
+                </div>
                 {column.links.map((link) => (
-                  <Link key={link.href} href={link.href} className="text-paper/80 hover:text-gold">
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="text-paper/80 hover:text-gold"
+                  >
                     {link.label}
                   </Link>
                 ))}
@@ -119,7 +148,10 @@ export default async function SiteFooter() {
             <ul className="m-0 flex list-none gap-5 p-0">
               {LEGAL.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="text-paper/70 hover:text-gold">
+                  <Link
+                    href={link.href}
+                    className="text-paper/70 hover:text-gold"
+                  >
                     {link.label}
                   </Link>
                 </li>

@@ -76,8 +76,8 @@ export default function AddBreweryPage() {
             and may contact you with questions.
           </li>
           <li>
-            <strong>You're live!</strong> Your brewery appears in our directory
-            and is discoverable by thousands of visitors.
+            <strong>You're live!</strong> Your brewery appears in our directory,
+            on the map and in search.
           </li>
         </ol>
       </section>

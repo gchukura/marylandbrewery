@@ -80,6 +80,7 @@ function dbBreweryToBrewery(dbBrewery: Tables<'breweries'>, beers: Beer[] = []):
     googleRatingCount: dbBrewery.google_rating_count ?? undefined,
     googleReviewsLastUpdated: dbBrewery.google_reviews_last_updated ?? undefined,
     placeId: dbBrewery.place_id ?? undefined,
+    hoursVerifiedAt: dbBrewery.hours_verified_at ?? undefined,
 
     // Yelp Reviews summary
     yelpBusinessId: dbBrewery.yelp_business_id ?? undefined,

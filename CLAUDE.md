@@ -55,6 +55,8 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
   `src/components/search/SearchCombobox.tsx`.
 - The brewery page (`src/app/breweries/[slug]/page.tsx`) is a server component; its derivations are in
   `src/lib/brewery-page.ts`, islands in `src/components/brewery/`. Saved breweries: `src/lib/saved.ts`, `/saved`.
+  "Hours checked against Google {month}" shows only when `hours_verified_at` is set (`npm run data:verify-hours`; a trigger
+  clears it when hours change).
 - Homepage: `src/app/page.tsx` (revalidate 300), hero photos in `src/config/home.ts` (`npm run home:blur` after
   editing), county map `src/components/home/CountyMap.tsx` from `maryland-counties.svg` (`npm run map:counties`).
   The phone tab bar (`src/components/layout/BottomNav.tsx`) is site-wide below 768px.

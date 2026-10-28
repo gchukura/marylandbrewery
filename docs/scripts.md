@@ -28,6 +28,7 @@ The maintenance scripts live in `scripts/*.ts` and run with `tsx` through the np
 | `media:migrate` | Move existing `public/photos` and `public/logos` into Storage and repoint the rows (dry run unless `--apply`) | with `--apply` |
 | `data:geocode` | Re-geocode every brewery and overwrite lat/lng that moved by more than 0.01 degrees | yes |
 | `data:verify-coordinates` | Compare stored coordinates with Google geocoding and report differences | no |
+| `data:verify-hours` | Compare stored hours with Google's; mark matches verified (`hours_verified_at`) | with `--apply` |
 | `data:enrich` | Fill missing social links (from brewery websites) and hours (from Google) | yes |
 | `data:enrich:amenities` | Infer missing amenity flags from review text | yes |
 | `data:attractions` | Fetch Maryland attractions from Google Places into `maryland_attractions` | yes |
@@ -187,6 +188,17 @@ What it does: Geocodes each brewery's name and address with the Geocoding API an
 - Writes to Supabase: **no** (read only).
 - Flags: one optional positional argument, a brewery name substring (`ilike '%name%'`), for example `npm run data:verify-coordinates -- "Silly Yak"`. With no argument it checks all breweries.
 - How often: as needed. Run it before `data:geocode`, or when a map pin looks wrong.
+
+### `npm run data:verify-hours`
+
+File: `scripts/verify-hours.ts`
+
+What it does: Fetches each brewery's opening hours from Place Details (`place_id`) and compares them with `breweries.hours` by parsed open times (`src/lib/hours.ts`), so spacing and AM/PM placement don't count as differences. It prints every brewery whose hours differ, day by day. It also lists those it couldn't check: Google lists no hours, the place isn't `OPERATIONAL`, or there's no `place_id`. With `--apply` it sets `hours_verified_at` on the matches. The brewery page then shows "Hours checked against Google {month}" under the hours. A database trigger clears `hours_verified_at` whenever `hours` changes any other way (sync, `data:enrich`, a manual edit).
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `GOOGLE_MAPS_API_KEY` (server key, required). It stops on the first `REQUEST_DENIED`.
+- Writes to Supabase: only with `--apply`.
+- Flags: `--apply`; `--take-google=slug-a,slug-b` (needs `--apply`) replaces those breweries' hours with Google's and marks them verified. A difference is a lead, not a verdict: Google can be the stale one, so pick the slugs after reading the report. It refuses a slug whose hours don't differ.
+- How often: monthly, and after adding breweries. The month on the page is only as fresh as the last run.
 
 ### `npm run data:attractions`
 

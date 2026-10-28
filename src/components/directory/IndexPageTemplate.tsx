@@ -1,21 +1,13 @@
-"use client";
+'use client';
 
 import Link from 'next/link';
 import PageHero from './PageHero';
 import DirectoryStatsBar from './DirectoryStatsBar';
 import { breadcrumbList } from '@/lib/seo/jsonld';
 import JsonLd from '@/components/seo/JsonLd';
-import dynamic from 'next/dynamic';
-
-// Dynamically import GoogleMap to avoid SSR issues
-const DynamicGoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), {
-  ssr: false,
-  loading: () => (
-    <div className="h-[500px] bg-line rounded-lg flex items-center justify-center">
-      <div className="text-muted">Loading map...</div>
-    </div>
-  ),
-});
+import BreweryMapLazy from '@/components/maps/BreweryMapLazy';
+import { toListingBrewery } from '@/lib/listing';
+import { isOpenAt } from '@/lib/hours';
 
 interface IndexItem {
   name: string;
@@ -30,13 +22,13 @@ interface IndexPageTemplateProps {
   introText: string;
   breadcrumbs: Array<{ name: string; url: string; isActive?: boolean }>;
   heroImage?: string | null;
-  
+
   // Data
   items: IndexItem[];
   stats: Array<{ label: string; value: string | number }>;
   groupedItems?: Record<string, IndexItem[]>;
   allBreweries?: any[]; // For map display
-  
+
   // Configuration
   pageType: 'city' | 'county' | 'amenity' | 'type' | 'region';
   showMap?: boolean;
@@ -59,18 +51,25 @@ export default function IndexPageTemplate({
   mapZoom = 9,
 }: IndexPageTemplateProps) {
   // If no grouped items, create a simple list
-  const displayGroups = groupedItems || { 'All': items };
+  const displayGroups = groupedItems || { All: items };
 
   return (
     <div className="min-h-screen bg-cream">
-      <JsonLd data={breadcrumbList(breadcrumbs.map((crumb) => ({ name: crumb.name, path: crumb.url })))} />
+      <JsonLd
+        data={breadcrumbList(
+          breadcrumbs.map((crumb) => ({ name: crumb.name, path: crumb.url }))
+        )}
+      />
       {/* 1. Hero Section */}
-      <PageHero h1={h1} introText={introText} breadcrumbs={breadcrumbs} heroImage={heroImage} />
+      <PageHero
+        h1={h1}
+        introText={introText}
+        breadcrumbs={breadcrumbs}
+        heroImage={heroImage}
+      />
 
       {/* 2. Stats Bar */}
-      {showStats && stats.length > 0 && (
-        <DirectoryStatsBar stats={stats} />
-      )}
+      {showStats && stats.length > 0 && <DirectoryStatsBar stats={stats} />}
 
       {/* 3. Interactive Map */}
       {showMap && allBreweries && allBreweries.length > 0 && (
@@ -80,11 +79,11 @@ export default function IndexPageTemplate({
               Interactive Map
             </h2>
             <div className="h-[400px] md:h-[500px] rounded-lg overflow-hidden border border-line shadow-sm">
-              <DynamicGoogleMap 
-                breweries={allBreweries} 
-                height="100%" 
-                showClusters={true}
-                zoom={mapZoom}
+              <BreweryMapLazy
+                points={allBreweries.map((b) => ({
+                  brewery: toListingBrewery(b),
+                  open: isOpenAt(b.hours).open,
+                }))}
               />
             </div>
           </div>
@@ -119,7 +118,9 @@ export default function IndexPageTemplate({
                           </span>
                         </div>
                         <p className="text-sm text-muted">
-                          {item.count === 1 ? '1 brewery' : `${item.count} breweries`}
+                          {item.count === 1
+                            ? '1 brewery'
+                            : `${item.count} breweries`}
                         </p>
                       </Link>
                     ))}
@@ -133,4 +134,3 @@ export default function IndexPageTemplate({
     </div>
   );
 }
-

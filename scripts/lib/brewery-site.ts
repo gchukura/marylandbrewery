@@ -12,7 +12,7 @@ const GENERIC = new Set([
 ]);
 
 /** Words from a brewery name that could identify it, e.g. "Flying Dog Brewery" -> ["flying", "dog"]. */
-export function distinctiveWords(name: string): string[] {
+function distinctiveWords(name: string): string[] {
   return name
     .toLowerCase()
     .normalize('NFKD')

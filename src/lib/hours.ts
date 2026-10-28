@@ -106,7 +106,7 @@ function previousDay(day: DayName): DayName {
 }
 
 /** "4:00 PM", "12:00 AM" (midnight). Minutes past 1440 wrap to the next day. */
-export function formatMinutes(minutes: number): string {
+function formatMinutes(minutes: number): string {
   const m = minutes % MINUTES_PER_DAY;
   const h24 = Math.floor(m / 60);
   const meridiem = h24 < 12 ? 'AM' : 'PM';
@@ -164,12 +164,6 @@ export function formatDayHours(text: string | null | undefined): string {
   if (ranges === null) return text?.trim() || 'Hours not available';
   if (ranges.length === 0) return 'Closed';
   return ranges.map((r) => `${formatMinutes(r.open)} – ${formatMinutes(r.close)}`).join(', ');
-}
-
-/** Today's hours (Maryland time) for display. */
-export function formatToday(hours: WeeklyHours | null | undefined, date = new Date(), timeZone = MARYLAND_TZ): string {
-  if (!hours) return 'Hours not available';
-  return formatDayHours(hours[zonedDayAndMinutes(date, timeZone).day]);
 }
 
 /** Whether the brewery has any opening hours on a given day. */

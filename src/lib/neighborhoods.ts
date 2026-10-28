@@ -3,9 +3,9 @@ import { sortByDistance, type LatLng } from '@/lib/geo';
 /** A neighborhood page is indexed only if a brewery is within this distance. */
 export const NEIGHBORHOOD_INDEX_RADIUS_MILES = 3;
 /** Breweries listed on a neighborhood page. */
-export const NEIGHBORHOOD_BREWERY_RADIUS_MILES = 10;
+const NEIGHBORHOOD_BREWERY_RADIUS_MILES = 10;
 /** If nothing is within the radius, still show this many of the nearest. */
-export const NEIGHBORHOOD_MIN_BREWERIES = 5;
+const NEIGHBORHOOD_MIN_BREWERIES = 5;
 
 export function neighborhoodPath(slug: string): string {
   return `/neighborhoods/${slug}`;

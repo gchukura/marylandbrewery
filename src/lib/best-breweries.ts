@@ -3,7 +3,7 @@
  * Everything else under /best-breweries (smaller cities, counties, regions, near/ and -md
  * variants) permanently redirects to its main page.
  */
-export const MIN_BREWERIES_FOR_BEST_PAGE = 5;
+const MIN_BREWERIES_FOR_BEST_PAGE = 5;
 
 export function hasBestBreweriesPage(breweryCount: number): boolean {
   return breweryCount >= MIN_BREWERIES_FOR_BEST_PAGE;

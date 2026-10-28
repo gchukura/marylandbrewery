@@ -1,8 +1,8 @@
 import { notFound, permanentRedirect } from 'next/navigation';
-import { getBreweriesByCity, getNeighborhoodBySlug } from '@/lib/db';
+import { getBreweriesByCity } from '@/lib/db';
 import { deslugify } from '@/lib/slug';
 import { bestBreweriesCityPath } from '@/lib/best-breweries';
-import { parseNeighborhoodSlug } from '@/lib/neighborhood-utils';
+import { resolveLegacyNeighborhoodSlug } from '@/lib/neighborhood-utils';
 import { neighborhoodPath } from '@/lib/neighborhoods';
 
 /**
@@ -18,9 +18,9 @@ export default async function CitiesNearBreweriesRedirect({ params }: { params: 
     permanentRedirect(bestBreweriesCityPath(citySlug, cityBreweries.length));
   }
 
-  const neighborhood = (await parseNeighborhoodSlug(slug))?.neighborhood ?? (await getNeighborhoodBySlug(slug));
-  if (neighborhood) {
-    permanentRedirect(neighborhoodPath(neighborhood.slug));
+  const neighborhoodSlug = await resolveLegacyNeighborhoodSlug(slug);
+  if (neighborhoodSlug) {
+    permanentRedirect(neighborhoodPath(neighborhoodSlug));
   }
 
   notFound();

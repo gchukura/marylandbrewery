@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getIndexableAttractions, getProcessedBreweryData } from '@/lib/db';
 import { slugify } from '@/lib/slug';
+import { cityListingPath } from '@/lib/listing-links';
 import { getAttractionBySlug } from '@/lib/db';
 
 import { buildMetadata } from '@/lib/seo/metadata';
@@ -83,6 +84,7 @@ export default async function NearAttractionPage({
     (b) => b.distance <= NEARBY_MILES
   );
 
+  const cityPath = cityListingPath(processed.byCity, attraction.city);
   const pagePath = `/near/${attraction.slug}`;
   const title = `Breweries near ${attraction.name}`;
   const nearest = nearby[0]?.distance;
@@ -100,13 +102,8 @@ export default async function NearAttractionPage({
         title={title}
         breadcrumbs={[
           { name: 'Home', path: '/' },
-          ...(attraction.city
-            ? [
-                {
-                  name: `${attraction.city}, MD`,
-                  path: `/cities/${slugify(attraction.city)}/breweries`,
-                },
-              ]
+          ...(cityPath
+            ? [{ name: `${attraction.city}, MD`, path: cityPath }]
             : []),
           { name: attraction.name, path: pagePath },
         ]}
@@ -126,13 +123,8 @@ export default async function NearAttractionPage({
           {
             title: 'More nearby',
             links: [
-              ...(attraction.city
-                ? [
-                    {
-                      label: `${attraction.city} breweries`,
-                      href: `/cities/${slugify(attraction.city)}/breweries`,
-                    },
-                  ]
+              ...(cityPath
+                ? [{ label: `${attraction.city} breweries`, href: cityPath }]
                 : []),
               ...(attraction.county
                 ? [

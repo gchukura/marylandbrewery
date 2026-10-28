@@ -102,6 +102,8 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
 - Two Google keys: `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is the domain-restricted browser key (maps only; a 403 from
   any server, including `/_next/image`). Scripts use only the server key `GOOGLE_MAPS_API_KEY` via `scripts/lib/google.ts`;
   `npm run google:check` tests it. Never put the server key in a stored URL.
+- No `loading.tsx` above a page that calls `notFound()` or `permanentRedirect()`: the loading boundary streams a
+  200 first, so 404s become soft 404s and redirects become meta refreshes. `seo:check` probes for this (`STATUS_PROBES`).
 - Data reads return []/null at runtime but must throw during `next build` (`throwDuringBuild`), or a
   Supabase outage ships empty pages. `server-only` is imported in `src/lib/db/index.ts`, not `client.ts`,
   because scripts import the db files directly.

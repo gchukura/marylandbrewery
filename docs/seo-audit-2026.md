@@ -65,7 +65,7 @@ Not listed because they are not SEO findings: #7 (`/api/sync` auth bypass) and #
 | 29 | Type and amenity meta descriptions too short | R | Done, overcorrected (Jan 2026 direct commit, no PR) | They are now about 200+ characters, which is too long. The fix is covered by row 28. |
 | 30 | Pages missing meta descriptions (home, map, open-now, open/[day], contact, index pages) | R | Done (Jan 2026 direct commits, no PR) | All of them now export metadata with a description. |
 | 31 | Incomplete Open Graph and Twitter card tags | R | Done (Jan 2026 direct commits, no PR) | Dynamic pages set OG and Twitter tags. `createPageMetadata` covers the static pages. |
-| 32 | Missing `og-image.jpg` | A | Done (commit 2282d8a, no PR) | Replaced by the generated `src/app/opengraph-image.tsx` and `twitter-image.tsx`. Brewery pages use `/api/og`. |
+| 32 | Missing `og-image.jpg` | A | Done (commit 2282d8a, no PR) | Replaced by the generated `src/app/opengraph-image.tsx` and `twitter-image.tsx`, used by every page (`buildMetadata`). |
 | 33 | Layout `openGraph.url` is the homepage, so pages without their own OG URL don't match their canonical | X | Planned (layout openGraph.url) | Still `url: "https://www.marylandbrewery.com"` in `src/app/layout.tsx`. |
 | 34 | PWA manifest only had small icon sizes | A | Done (commit 2989fba, no PR) | `public/manifest.json` has 192×192 and 512×512 icons marked `any maskable`. |
 

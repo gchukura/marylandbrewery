@@ -9,7 +9,9 @@
  * Errors (exit code 1): a status other than 200, a redirect, a canonical that isn't the URL
  * itself, a noindex page, a title over 60 or a description over 155 characters, an orphan (a
  * sitemap page with no internal link from another page), or an internal link to a redirect or
- * to a page that doesn't load (4xx/5xx).
+ * to a page that doesn't load (4xx/5xx). Also a status probe (STATUS_PROBES): unknown URLs on each
+ * dynamic route must return 404 and retired URLs must redirect, not answer 200 (a soft 404 or a
+ * meta-refresh redirect, which is what a loading.tsx above a notFound()/permanentRedirect() sends).
  * Sitemap <loc>s use the production origin; they're fetched from the given base.
  */
 
@@ -24,6 +26,40 @@ const baseOrigin = new URL(base).origin;
 // Vercel previews are behind Vercel Authentication
 const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
 const headers: Record<string, string> = bypass ? { 'x-vercel-protection-bypass': bypass } : {};
+
+/** Expected statuses for URLs outside the sitemap: [path, expected status, expected redirect target]. */
+const STATUS_PROBES: [string, number, string?][] = [
+  ['/breweries/no-such-brewery', 404],
+  ['/cities/no-such-city/breweries', 404],
+  ['/cities/frederick/no-such-amenity', 404],
+  ['/counties/no-such-county/breweries', 404],
+  ['/region/no-such-region', 404],
+  ['/amenities/no-such-amenity', 404],
+  ['/type/no-such-type', 404],
+  ['/neighborhoods/no-such-neighborhood', 404],
+  ['/near/no-such-attraction', 404],
+  ['/best-breweries/no-such-city', 404],
+  ['/best-breweries/frederick-md', 308, '/best-breweries/frederick'],
+  ['/best-breweries/near/frederick-md', 308, '/best-breweries/frederick'],
+  ['/best-breweries/canton-baltimore-md', 308, '/neighborhoods/canton'],
+  ['/cities/near/canton/breweries', 308, '/neighborhoods/canton'],
+  ['/cities/frederick-md/breweries', 301, '/cities/frederick/breweries'],
+];
+
+async function checkStatusProbes(): Promise<Problem[]> {
+  const problems: Problem[] = [];
+  await pool(STATUS_PROBES, async ([path, expected, target]) => {
+    const res = await fetchPage(path);
+    // A first (uncached) ISR render of a redirect sends Location twice, identically; fetch joins them
+    const locations = new Set((res.location ?? '').split(', ').filter(Boolean).map((l) => new URL(l, base).pathname));
+    const location = locations.size === 1 ? [...locations][0] : locations.size ? [...locations].join(' + ') : null;
+    if (res.status !== expected || (target && location !== target)) {
+      const got = location ? `${res.status} -> ${location}` : String(res.status);
+      problems.push({ path, issue: `status probe: expected ${expected}${target ? ` -> ${target}` : ''}, got ${got}` });
+    }
+  });
+  return problems;
+}
 
 const decode = (s: string) =>
   s.replace(/&amp;/g, '&').replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
@@ -169,6 +205,9 @@ async function main() {
       problems.push({ path, issue: `fetch failed: ${error instanceof Error ? error.message : String(error)}` });
     }
   });
+
+  console.log(`Probing ${STATUS_PROBES.length} URLs outside the sitemap for 404s and redirects`);
+  problems.push(...(await checkStatusProbes()));
 
   console.log('Crawling internal links from the homepage');
   const { inbound, toRedirects, broken, crawled } = await crawl();

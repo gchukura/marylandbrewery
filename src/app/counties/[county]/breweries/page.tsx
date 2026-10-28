@@ -4,248 +4,84 @@ import { getProcessedBreweryData } from '@/lib/db';
 import { normalizeCountyName, isValidCountySlug } from '@/lib/data-utils';
 import { slugify } from '@/lib/slug';
 import { MARYLAND_COUNTIES } from '@/types/brewery';
-import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
-import Image from 'next/image';
-import { existsSync } from 'fs';
-import { join } from 'path';
-import CountyBreweriesMapClient from './CountyBreweriesMapClient';
 import { buildMetadata } from '@/lib/seo/metadata';
-import { countyMeta } from '@/lib/seo/page-meta';
-import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import { countyLabel, countyMeta } from '@/lib/seo/page-meta';
+import { collectionPage } from '@/lib/seo/jsonld';
 import JsonLd from '@/components/seo/JsonLd';
-import { countyLabel } from '@/lib/seo/page-meta';
-import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
+import ListingPage, { byRating } from '@/components/listing/ListingPage';
+import { cityLinks } from '@/lib/listing-links';
 
 export async function generateStaticParams() {
-  return MARYLAND_COUNTIES.map(c => ({ county: slugify(c) }));
+  return MARYLAND_COUNTIES.map((c) => ({ county: slugify(c) }));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ county: string }> }): Promise<Metadata> {
-  const { county } = await params;
-  
-  // Handle both regular and -md suffixed routes
-  // Strip -md suffix if present
-  const isMdRoute = county.endsWith('-md');
-  let countySlug = county;
-  if (isMdRoute) {
-    countySlug = countySlug.substring(0, countySlug.length - 3);
-  }
-  
-  // Validate county slug
-  if (!isValidCountySlug(countySlug)) {
+/** The county's name and breweries, or null for an unknown slug. -md URLs are 301'd by the middleware. */
+async function loadCounty(param: string) {
+  const countySlug = param.endsWith('-md') ? param.slice(0, -3) : param;
+  if (!isValidCountySlug(countySlug)) return null;
+  const countyName = normalizeCountyName(countySlug);
+  if (!countyName) return null;
+  const processed = await getProcessedBreweryData();
+  const key = countyName.toLowerCase();
+  return {
+    countyName,
+    breweries: processed.breweries.filter(
+      (b) => b.county?.toLowerCase() === key
+    ),
+  };
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ county: string }>;
+}): Promise<Metadata> {
+  const data = await loadCounty((await params).county);
+  if (!data)
     return {
       title: 'County Not Found',
       robots: { index: false, follow: false },
     };
-  }
-  
-  const countyName = normalizeCountyName(countySlug);
-  if (!countyName) {
-    return {
-      title: 'County Not Found',
-      robots: { index: false, follow: false },
-    };
-  }
-  
-  const processed = await getProcessedBreweryData();
-  const countyKey = countyName.toLowerCase();
-  const list = processed.breweries.filter(b => {
-    const breweryCounty = b.county;
-    return breweryCounty && breweryCounty.toLowerCase() === countyKey;
+  return buildMetadata({
+    ...countyMeta(data.countyName, data.breweries.length),
+    path: `/counties/${slugify(data.countyName)}/breweries`,
   });
-  const total = list.length;
-
-  return buildMetadata({ ...countyMeta(countyName, total), path: `/counties/${slugify(countyName)}/breweries` });
 }
 
-export default async function CountyBreweriesPage({ params }: { params: Promise<{ county: string }> }) {
-  const { county } = await params;
-  
-  // Handle both regular and -md suffixed routes
-  // Strip -md suffix if present
-  const isMdRoute = county.endsWith('-md');
-  let countySlug = county;
-  if (isMdRoute) {
-    countySlug = countySlug.substring(0, countySlug.length - 3);
-  }
-  
-  // Validate county slug - return 404 if invalid
-  if (!isValidCountySlug(countySlug)) {
-    notFound();
-  }
-  
-  const countyName = normalizeCountyName(countySlug);
-  if (!countyName) {
-    notFound();
-  }
-  
-  const processed = await getProcessedBreweryData();
-  const countyKey = countyName.toLowerCase();
-  
-  // Optimize filtering - use pre-indexed data if available
-  const breweries = processed.breweries.filter(b => {
-    const breweryCounty = b.county;
-    return breweryCounty && breweryCounty.toLowerCase() === countyKey;
-  });
-  
-  // Return 404 if no breweries found (invalid county or county with no breweries)
-  if (breweries.length === 0) {
-    notFound();
-  }
-  
-  // Sort breweries by rating (highest first), then by name
-  const sortedBreweries = [...breweries].sort((a: any, b: any) => {
-    const aRating = a.googleRating || a.yelpRating || 0;
-    const bRating = b.googleRating || b.yelpRating || 0;
-    if (bRating !== aRating) return bRating - aRating;
-    return (a.name || '').localeCompare(b.name || '');
-  });
+export default async function CountyBreweriesPage({
+  params,
+}: {
+  params: Promise<{ county: string }>;
+}) {
+  const data = await loadCounty((await params).county);
+  if (!data || data.breweries.length === 0) notFound();
+  const { countyName, breweries } = data;
 
-  // Get county hero image - check for local county image from Pexels
-  const countySlugForImage = slugify(countyName);
-  const localCountyImagePath = `/counties/${countySlugForImage}.jpg`;
-  const localCountyImageFile = join(process.cwd(), 'public', 'counties', `${countySlugForImage}.jpg`);
-  
-  // Check if local county image exists
-  const hasLocalCountyImage = existsSync(localCountyImageFile);
-  
-  // Use local county image if available
-  const countyHeroImage = hasLocalCountyImage ? localCountyImagePath : null;
-
-  // Calculate stats
-  const totalBreweries = breweries.length;
-
-  // Prepare data for BreweriesByLocationTabs
-  // Process cities - get unique cities with counts
-  const cityCounts = new Map<string, { name: string; slug: string; count: number }>();
-  processed.breweries.forEach((brewery: any) => {
-    if (brewery.city) {
-      const slug = slugify(brewery.city);
-      const existing = cityCounts.get(slug);
-      if (existing) {
-        existing.count++;
-      } else {
-        cityCounts.set(slug, { name: brewery.city, slug, count: 1 });
-      }
-    }
-  });
-  const cities = Array.from(cityCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
-
-  // Process counties - get unique counties with counts
-  const countyCounts = new Map<string, { name: string; slug: string; count: number }>();
-  processed.breweries.forEach((brewery: any) => {
-    if (brewery.county) {
-      const slug = slugify(brewery.county);
-      const existing = countyCounts.get(slug);
-      if (existing) {
-        existing.count++;
-      } else {
-        countyCounts.set(slug, { name: `${brewery.county} County`, slug, count: 1 });
-      }
-    }
-  });
-  const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
-
+  const label = countyLabel(countyName);
   const pagePath = `/counties/${slugify(countyName)}/breweries`;
-  const jsonLd = [
-    collectionPage({ name: `Breweries in ${countyLabel(countyName)}, MD`, path: pagePath, breweries: sortedBreweries }),
-    breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Counties', path: '/counties' }, { name: countyLabel(countyName), path: pagePath }]),
-  ];
-
   return (
-    <div className="min-h-screen bg-paper">
-      <JsonLd data={jsonLd} />
-      {/* Hero Section */}
-      <section className="bg-white border-b-4 border-brand-red relative overflow-hidden">
-        {/* County Hero Image Background */}
-        {countyHeroImage && (
-          <div className="absolute inset-0">
-            <Image
-              src={countyHeroImage}
-              alt={`${countyName} County breweries`}
-              fill
-              className="object-cover"
-              sizes="100vw"
-              priority
-              unoptimized={false}
-            />
-            {/* Dark overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-          </div>
-        )}
-        
-        {/* Pattern overlay (only if no hero image) */}
-        {!countyHeroImage && (
-          <div className="absolute inset-0 md-pattern-bg pointer-events-none" />
-        )}
-        
-        <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
-          {/* Breadcrumbs */}
-          <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className={`flex items-center flex-wrap gap-2 text-sm ${countyHeroImage ? 'text-white/90' : ''}`} style={{ color: countyHeroImage ? undefined : 'var(--color-muted)' }}>
-              <li>
-                <Link 
-                  href="/" 
-                  className={`transition-colors ${countyHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-brand-red'}`}
-                >
-                  Maryland Breweries
-                </Link>
-              </li>
-              <li><ChevronRight className={`h-4 w-4 mx-2 ${countyHeroImage ? 'text-white/70' : ''}`} /></li>
-              <li>
-                <Link 
-                  href="/counties" 
-                  className={`transition-colors ${countyHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-brand-red'}`}
-                >
-                  Counties
-                </Link>
-              </li>
-              <li><ChevronRight className={`h-4 w-4 mx-2 ${countyHeroImage ? 'text-white/70' : ''}`} /></li>
-              <li>
-                <Link 
-                  href={`/counties/${county}/breweries`} 
-                  className={`font-medium transition-colors ${countyHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-ink hover:text-brand-red'}`}
-                >
-                  {isMdRoute ? `${countyName} County, Maryland` : `${countyName} County`}
-                </Link>
-              </li>
-            </ol>
-          </nav>
-
-          {/* H1 Title */}
-          <h1 
-            className={`font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight ${
-              countyHeroImage 
-                ? 'text-white drop-shadow-lg' 
-                : 'text-ink'
-            }`} style={{ textShadow: countyHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
-          >
-            {isMdRoute ? `Breweries in ${countyName} County, Maryland` : `Breweries in ${countyName} County`}
-          </h1>
-
-          {/* Count Display */}
-          <p 
-            className={`text-lg md:text-xl mb-6 ${
-              countyHeroImage 
-                ? 'text-white/95 drop-shadow-md' 
-                : 'text-muted'
-            }`}
-          >
-            <strong className={countyHeroImage ? 'text-white font-semibold' : 'text-ink font-semibold'}>{totalBreweries}</strong> {totalBreweries === 1 ? 'brewery' : 'breweries'} found.
-          </p>
-        </div>
-      </section>
-
-        {/* Map and List Layout */}
-        <section className="bg-white py-8 md:py-12">
-          <div className="container mx-auto px-4">
-            <CountyBreweriesMapClient breweries={sortedBreweries} countyName={countyName} isMdRoute={isMdRoute} />
-          </div>
-        </section>
-
-      {/* Breweries by Location Tabs */}
-      <BreweriesByLocationTabs cities={cities} counties={counties} />
-    </div>
+    <>
+      <JsonLd
+        data={collectionPage({
+          name: `Breweries in ${label}, MD`,
+          path: pagePath,
+          breweries: byRating(breweries),
+        })}
+      />
+      <ListingPage
+        scope="county"
+        title={`Breweries in ${label}`}
+        breadcrumbs={[
+          { name: 'Home', path: '/' },
+          { name: 'Counties', path: '/counties' },
+          { name: label, path: pagePath },
+        ]}
+        breweries={breweries}
+        context={`${new Set(breweries.map((b) => b.city)).size} cities`}
+        related={[
+          { title: `Cities in ${label}`, links: cityLinks(breweries, 40) },
+        ]}
+      />
+    </>
   );
 }

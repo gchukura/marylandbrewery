@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { getProcessedBreweryData } from '@/lib/db';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 import { amenityByDbValue, amenityPath } from '@/lib/amenities';
+import { breweryScore } from '@/lib/best-breweries';
 import { slugify } from '@/lib/slug';
 
 export const metadata: Metadata = {
@@ -33,18 +34,6 @@ export const metadata: Metadata = {
   },
 };
 
-// Calculate weighted score for ranking
-// Score = (google_rating × 20) + log10(review_count) × 10
-function calculateBreweryScore(brewery: any): number {
-  const rating = brewery.googleRating || 0;
-  const reviewCount = brewery.googleRatingCount || 0;
-  
-  // Weighted score: rating is more important, but review count adds credibility
-  const ratingScore = rating * 20;
-  const reviewScore = reviewCount > 0 ? Math.log10(reviewCount) * 10 : 0;
-  
-  return ratingScore + reviewScore;
-}
 
 function computeBestBreweriesStats(breweries: any[]) {
   const total = breweries.length;
@@ -69,7 +58,7 @@ export default async function BestBreweriesPage() {
   const breweriesWithScores = processed.breweries
     .map((brewery: any) => ({
       ...brewery,
-      score: calculateBreweryScore(brewery),
+      score: breweryScore(brewery),
     }))
     .sort((a: any, b: any) => b.score - a.score)
     .slice(0, 50); // Top 50 breweries

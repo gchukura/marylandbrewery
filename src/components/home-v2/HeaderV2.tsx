@@ -44,13 +44,13 @@ export default function HeaderV2() {
 
   return (
     <>
-      <header className="bg-[#9B2335] sticky top-0 z-50 safe-top">
+      <header className="bg-brand-red sticky top-0 z-50 safe-top">
         <div className="container mx-auto px-4 safe-left safe-right relative">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Mobile Menu Button - Left side on mobile */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-3 text-white hover:text-[#D4A017] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation -ml-2"
+              className="lg:hidden p-3 text-white hover:text-gold transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation -ml-2"
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileMenuOpen}
             >
@@ -108,16 +108,16 @@ export default function HeaderV2() {
               aria-hidden="true"
             />
             {/* Side Menu Panel */}
-            <div className={`lg:hidden fixed left-0 top-0 h-full w-64 sm:w-80 bg-[#9B2335] shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
+            <div className={`lg:hidden fixed left-0 top-0 h-full w-64 sm:w-80 bg-brand-red shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
               mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
             }`}>
                 <div className="flex flex-col h-full">
                   {/* Menu Header */}
-                  <div className="flex items-center justify-between p-4 border-b border-[#7A1C2A]">
+                  <div className="flex items-center justify-between p-4 border-b border-brand-red-dark">
                     <span className="text-white font-semibold text-lg font-sans">Menu</span>
                     <button
                       onClick={() => setMobileMenuOpen(false)}
-                      className="p-2 text-white hover:text-[#D4A017] transition-colors"
+                      className="p-2 text-white hover:text-gold transition-colors"
                       aria-label="Close menu"
                     >
                       <X className="h-6 w-6" />
@@ -129,7 +129,7 @@ export default function HeaderV2() {
                       <Link
                         key={item.label}
                         href={item.href}
-                        className="block w-full px-6 py-4 text-white hover:text-[#D4A017] hover:bg-[#7A1C2A]/30 active:bg-[#7A1C2A]/50 transition-colors font-medium text-body-large min-h-[48px] flex items-center touch-manipulation border-b border-[#7A1C2A]/30 last:border-b-0 font-sans"
+                        className="block w-full px-6 py-4 text-white hover:text-gold hover:bg-brand-red-dark/30 active:bg-brand-red-dark/50 transition-colors font-medium text-body-large min-h-[48px] flex items-center touch-manipulation border-b border-brand-red-dark/30 last:border-b-0 font-sans"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {item.label}
@@ -142,7 +142,7 @@ export default function HeaderV2() {
         </div>
       </header>
       {/* Gold border at bottom */}
-      <div className="h-1 bg-[#D4A017]" />
+      <div className="h-1 bg-gold" />
     </>
   );
 }

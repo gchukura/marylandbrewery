@@ -5,7 +5,7 @@ import type { Brewery } from '@/types/brewery';
 
 function MapSkeleton() {
   return (
-    <div className="w-full h-[500px] bg-gray-200 rounded-lg animate-pulse" />
+    <div className="w-full h-[500px] bg-line rounded-lg animate-pulse" />
   );
 }
 

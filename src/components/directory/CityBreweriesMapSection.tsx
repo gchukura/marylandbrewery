@@ -7,8 +7,8 @@ import { Brewery } from '@/types/brewery';
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), {
   ssr: false,
   loading: () => (
-    <div className="h-[500px] bg-gray-200 rounded-lg flex items-center justify-center">
-      <div className="text-gray-500">Loading map...</div>
+    <div className="h-[500px] bg-line rounded-lg flex items-center justify-center">
+      <div className="text-muted">Loading map...</div>
     </div>
   ),
 });
@@ -27,7 +27,7 @@ export default function CityBreweriesMapSection({
   }
 
   return (
-    <div className="h-[500px] rounded-lg overflow-hidden border border-[#E8E6E1]">
+    <div className="h-[500px] rounded-lg overflow-hidden border border-line">
       <GoogleMap 
         breweries={breweries} 
         height="100%" 

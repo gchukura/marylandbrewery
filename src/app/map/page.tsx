@@ -41,7 +41,7 @@ export default async function MapPage() {
   const hasMapHeroImage = existsSync(mapHeroImageFile);
 
   return (
-    <div className="bg-[#FAF9F6] min-h-screen">
+    <div className="bg-paper min-h-screen">
       <JsonLd data={breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Brewery Map', path: '/map' }])} />
       <PageHero
         h1="Brewery Map"
@@ -50,7 +50,7 @@ export default async function MapPage() {
         heroImage={hasMapHeroImage ? mapHeroImagePath : null}
       />
       <div className="container mx-auto px-4 py-8 md:py-10">
-        <Suspense fallback={<div className="text-center py-8 text-base font-sans text-[#6B6B6B]">Loading map...</div>}>
+        <Suspense fallback={<div className="text-center py-8 text-base font-sans text-muted">Loading map...</div>}>
           <MapWithListClient breweries={breweries} />
         </Suspense>
       </div>

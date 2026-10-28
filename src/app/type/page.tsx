@@ -124,10 +124,10 @@ export default async function TypesIndexPage() {
   const hasTypesHeroImage = existsSync(typesHeroImageFile);
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6]">
+    <div className="min-h-screen bg-paper">
       <JsonLd data={breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Brewery Types', path: '/type' }])} />
       {/* Hero Section */}
-      <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
+      <section className="bg-white border-b-4 border-brand-red relative overflow-hidden">
         {/* Hero Image Background */}
         {hasTypesHeroImage && (
           <div className="absolute inset-0">
@@ -153,11 +153,11 @@ export default async function TypesIndexPage() {
         <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
           {/* Breadcrumbs */}
           <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className={`flex items-center flex-wrap gap-2 text-sm ${hasTypesHeroImage ? 'text-white/90' : ''}`} style={{ color: hasTypesHeroImage ? undefined : '#6B6B6B' }}>
+            <ol className={`flex items-center flex-wrap gap-2 text-sm ${hasTypesHeroImage ? 'text-white/90' : ''}`} style={{ color: hasTypesHeroImage ? undefined : 'var(--color-muted)' }}>
               <li>
                 <Link 
                   href="/" 
-                  className={`transition-colors ${hasTypesHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-[#9B2335]'}`}
+                  className={`transition-colors ${hasTypesHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-brand-red'}`}
                 >
                   Maryland Breweries
                 </Link>
@@ -166,7 +166,7 @@ export default async function TypesIndexPage() {
               <li>
                 <Link 
                   href="/type" 
-                  className={`font-medium transition-colors ${hasTypesHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-[#1C1C1C] hover:text-[#9B2335]'}`}
+                  className={`font-medium transition-colors ${hasTypesHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-ink hover:text-brand-red'}`}
                 >
                   Brewery Types
                 </Link>
@@ -179,7 +179,7 @@ export default async function TypesIndexPage() {
             className={`font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${
               hasTypesHeroImage 
                 ? 'text-white drop-shadow-lg' 
-                : 'text-[#1C1C1C]'
+                : 'text-ink'
             }`} style={{ textShadow: hasTypesHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
           >
             Maryland Brewery Types
@@ -190,7 +190,7 @@ export default async function TypesIndexPage() {
             className={`text-lg md:text-xl max-w-3xl leading-relaxed ${
               hasTypesHeroImage 
                 ? 'text-white/95 drop-shadow-md' 
-                : 'text-[#6B6B6B]'
+                : 'text-muted'
             }`}
           >
             From intimate nano breweries to full-service brewpubs, Maryland's craft beer scene offers something for everyone. Explore {totalBreweries} breweries across {totalTypes} different types and find your perfect spot.
@@ -199,17 +199,17 @@ export default async function TypesIndexPage() {
       </section>
 
       {/* Brewery Types with Definitions */}
-      <section className="bg-white py-12 md:py-16 border-b border-[#E8E6E1]">
+      <section className="bg-white py-12 md:py-16 border-b border-line">
         <div className="container mx-auto px-4">
           <div className="mb-10">
             <div className="section-divider mb-4" />
             <h2 
-              className="font-display text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-3"
+              className="font-display text-3xl md:text-4xl font-bold text-ink mb-3"
             >
               Explore Breweries by Type
             </h2>
             <p 
-              className="text-lg text-[#6B6B6B]"
+              className="text-lg text-muted"
             >
               Each brewery type offers a unique experience. Whether you're looking for a casual hangout, a dinner destination, or a hidden gem, we've got you covered.
             </p>
@@ -225,35 +225,35 @@ export default async function TypesIndexPage() {
                 <Link
                   key={item.slug}
                   href={item.url}
-                  className="group bg-[#FAF9F6] border border-[#E8E6E1] rounded-lg p-6 md:p-8 hover:border-[#9B2335] hover:shadow-lg transition-all duration-300"
+                  className="group bg-paper border border-line rounded-lg p-6 md:p-8 hover:border-brand-red hover:shadow-lg transition-all duration-300"
                 >
                   {/* Header with Icon and Count */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[#9B2335]/10 flex items-center justify-center group-hover:bg-[#9B2335] transition-colors">
-                        <IconComponent className="w-6 h-6 text-[#9B2335] group-hover:text-white transition-colors" />
+                      <div className="w-12 h-12 rounded-full bg-brand-red/10 flex items-center justify-center group-hover:bg-brand-red transition-colors">
+                        <IconComponent className="w-6 h-6 text-brand-red group-hover:text-white transition-colors" />
                       </div>
                       <div>
                         <h3 
-                          className="font-display text-xl md:text-2xl font-bold text-[#1C1C1C] group-hover:text-[#9B2335] transition-colors"
+                          className="font-display text-xl md:text-2xl font-bold text-ink group-hover:text-brand-red transition-colors"
                         >
                           {item.name}
                         </h3>
                         <span 
-                          className="text-sm font-medium text-[#9B2335]"
+                          className="text-sm font-medium text-brand-red"
                         >
                           {item.count} {item.count === 1 ? 'brewery' : 'breweries'} in Maryland
                         </span>
                       </div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-[#9B2335] opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ChevronRight className="w-5 h-5 text-brand-red opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
 
                   {/* Definition */}
                   {typeDef && (
                     <>
                       <p 
-                        className="text-[#6B6B6B] mb-4 leading-relaxed"
+                        className="text-muted mb-4 leading-relaxed"
                       >
                         {typeDef.definition}
                       </p>
@@ -263,9 +263,9 @@ export default async function TypesIndexPage() {
                         {typeDef.characteristics.map((char, idx) => (
                           <li 
                             key={idx}
-                            className="text-sm text-[#6B6B6B] flex items-center gap-2"
+                            className="text-sm text-muted flex items-center gap-2"
                           >
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#D4A017] flex-shrink-0" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0" />
                             {char}
                           </li>
                         ))}
@@ -274,9 +274,9 @@ export default async function TypesIndexPage() {
                   )}
 
                   {/* CTA */}
-                  <div className="mt-6 pt-4 border-t border-[#E8E6E1]">
+                  <div className="mt-6 pt-4 border-t border-line">
                     <span 
-                      className="text-[#9B2335] font-semibold group-hover:text-[#D4A017] transition-colors inline-flex items-center gap-2"
+                      className="text-brand-red font-semibold group-hover:text-brand-red-dark transition-colors inline-flex items-center gap-2"
                     >
                       View All {item.name} Breweries
                       <ChevronRight className="w-4 h-4" />
@@ -290,15 +290,15 @@ export default async function TypesIndexPage() {
       </section>
 
       {/* About Section */}
-      <section className="bg-white py-12 md:py-16 border-t border-[#E8E6E1]">
+      <section className="bg-white py-12 md:py-16 border-t border-line">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 
-            className="font-display text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-6"
+            className="font-display text-3xl md:text-4xl font-bold text-ink mb-6"
           >
             About Maryland Brewery Directory
           </h2>
           <div 
-            className="prose prose-lg text-[#6B6B6B] space-y-4"
+            className="prose prose-lg text-muted space-y-4"
           >
             <p>
               Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 
@@ -306,8 +306,8 @@ export default async function TypesIndexPage() {
               hours, amenities, and beer selections.
             </p>
             <p>
-              <strong className="text-[#1C1C1C]">Brewery Owners:</strong> Want to list your brewery or update 
-              your information? <Link href="/contact" className="text-[#9B2335] hover:text-[#D4A017] transition-colors underline">
+              <strong className="text-ink">Brewery Owners:</strong> Want to list your brewery or update 
+              your information? <Link href="/contact" className="text-brand-red hover:text-brand-red-dark transition-colors underline">
                 Contact us
               </Link> to get started.
             </p>

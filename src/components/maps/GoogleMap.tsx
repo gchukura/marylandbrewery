@@ -196,24 +196,24 @@ function MapContent({
           onCloseClick={() => setSelectedBrewery(null)}
         >
           <div className="p-2 max-w-xs">
-            <h3 className="font-bold text-lg text-gray-900 mb-1">
+            <h3 className="font-bold text-lg text-ink mb-1">
               {selectedBrewery.name}
             </h3>
-            <p className="text-base text-gray-600 mb-1">
+            <p className="text-base text-muted mb-1">
               {selectedBrewery.city}, {selectedBrewery.state}
             </p>
             {selectedBrewery.street && (
-              <p className="text-sm text-gray-500 mb-1">
+              <p className="text-sm text-muted mb-1">
                 {selectedBrewery.street}
               </p>
             )}
             {selectedBrewery.phone && (
-              <p className="text-sm text-blue-600 mb-2">{selectedBrewery.phone}</p>
+              <p className="text-sm text-brand-red mb-2">{selectedBrewery.phone}</p>
             )}
             <div className="mt-2">
               <a
                 href={`/breweries/${selectedBrewery.slug || selectedBrewery.id}`}
-                className="inline-block bg-red-600 text-white text-sm px-3 py-1.5 rounded hover:bg-red-700 transition-colors font-medium"
+                className="inline-block bg-brand-red text-white text-sm px-3 py-1.5 rounded hover:bg-brand-red-dark transition-colors font-medium"
               >
                 View Details
               </a>
@@ -222,12 +222,12 @@ function MapContent({
         </InfoWindow>
       )}
       {mapError && (
-        <div className="absolute top-4 left-4 right-4 z-10 bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg">
-          <h4 className="font-bold text-red-800 mb-2">⚠️ Google Maps API Error</h4>
-          <p className="text-sm text-red-700 mb-2">
+        <div className="absolute top-4 left-4 right-4 z-10 bg-cream border border-line-strong rounded-lg p-4 shadow-lg">
+          <h4 className="font-bold text-brand-red-dark mb-2">⚠️ Google Maps API Error</h4>
+          <p className="text-sm text-brand-red mb-2">
             The map cannot load due to an API key authentication issue.
           </p>
-          <div className="text-xs text-red-600 space-y-1">
+          <div className="text-xs text-brand-red space-y-1">
             <p><strong>Common fixes:</strong></p>
             <ol className="list-decimal list-inside space-y-1 ml-2">
               <li>Enable <strong>Maps JavaScript API</strong> in Google Cloud Console</li>
@@ -238,7 +238,7 @@ function MapContent({
           </div>
           <button
             onClick={() => setMapError(null)}
-            className="mt-2 text-xs text-red-600 hover:text-red-800 underline"
+            className="mt-2 text-xs text-brand-red hover:text-brand-red-dark underline"
           >
             Dismiss
           </button>
@@ -286,7 +286,7 @@ export default function GoogleMap({
   if (!apiKey) {
     return (
       <div className="w-full" style={{ height }}>
-        <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center text-sm text-gray-600 px-4">
+        <div className="h-full w-full bg-cream rounded-lg flex items-center justify-center text-sm text-muted px-4">
           Map is unavailable: missing Google Maps API key. Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY and redeploy.
         </div>
       </div>

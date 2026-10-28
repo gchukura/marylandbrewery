@@ -11,8 +11,8 @@ import { amenityByDbValue } from '@/lib/amenities';
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
   ssr: false, 
   loading: () => (
-    <div className="h-full w-full bg-gray-200 rounded-lg flex items-center justify-center">
-      <div className="text-gray-500 text-sm">Loading map...</div>
+    <div className="h-full w-full bg-line rounded-lg flex items-center justify-center">
+      <div className="text-muted text-sm">Loading map...</div>
     </div>
   )
 });
@@ -113,26 +113,26 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
             return (
               <div key={i} className="relative h-4 w-4 flex-shrink-0">
                 {/* Base empty star */}
-                <Star className="h-4 w-4 absolute text-gray-300" />
+                <Star className="h-4 w-4 absolute text-line-strong" />
                 {/* Full star overlay */}
                 {isFull && (
-                  <Star className="h-4 w-4 absolute fill-[#D4A017] text-[#D4A017]" />
+                  <Star className="h-4 w-4 absolute fill-gold text-gold" />
                 )}
                 {/* Half star overlay */}
                 {isHalf && (
                   <div className="absolute overflow-hidden" style={{ width: '50%' }}>
-                    <Star className="h-4 w-4 fill-[#D4A017] text-[#D4A017]" />
+                    <Star className="h-4 w-4 fill-gold text-gold" />
                   </div>
                 )}
               </div>
             );
           })}
         </div>
-        <span className="text-sm font-semibold text-gray-700">
+        <span className="text-sm font-semibold text-muted">
           {rating.toFixed(1)}
         </span>
         {reviewCount !== undefined && reviewCount > 0 && (
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-muted">
             ({reviewCount})
           </span>
         )}
@@ -148,7 +148,7 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
         <div className="w-full lg:w-1/2 space-y-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
             <input
               type="text"
               placeholder={`Search ${amenityLabel.toLowerCase()} breweries in ${cityName}...`}
@@ -157,7 +157,7 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                 setSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9B2335] focus:border-transparent transition-all"
+              className="w-full pl-10 pr-10 py-3 rounded-lg border border-line-strong focus:ring-2 focus:ring-brand-red focus:border-transparent transition-all"
             />
             {search && (
               <button
@@ -165,7 +165,7 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                   setSearch('');
                   setCurrentPage(1);
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-muted"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -173,7 +173,7 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
           </div>
 
           {/* Results count */}
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-muted">
             Showing {filtered.length} {filtered.length === 1 ? 'brewery' : 'breweries'}
             {search && ` matching "${search}"`}
           </div>
@@ -206,7 +206,7 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
               return (
                 <div 
                   key={brewery.id || brewerySlug}
-                  className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
+                  className="bg-white rounded-lg border border-line p-4 hover:shadow-md transition-shadow"
                 >
                   <div className="flex gap-4">
                     {/* Logo */}
@@ -223,7 +223,7 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                     <div className="flex-1 min-w-0">
                       <Link 
                         href={`/breweries/${brewerySlug}`}
-                        className="font-display text-lg font-semibold text-[#1a1a1a] hover:text-[#9B2335] transition-colors line-clamp-1"
+                        className="font-display text-lg font-semibold text-ink hover:text-brand-red transition-colors line-clamp-1"
                       >
                         {brewery.name}
                       </Link>
@@ -237,19 +237,19 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                       
                       {/* Address */}
                       {brewery.address && (
-                        <div className="flex items-start gap-1.5 mt-2 text-sm text-gray-600">
-                          <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                        <div className="flex items-start gap-1.5 mt-2 text-sm text-muted">
+                          <MapPin className="h-4 w-4 text-muted flex-shrink-0 mt-0.5" />
                           <span className="line-clamp-2">{brewery.address}</span>
                         </div>
                       )}
                       
                       {/* Phone */}
                       {brewery.phone && (
-                        <div className="flex items-center gap-1.5 mt-1 text-sm text-gray-600">
-                          <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        <div className="flex items-center gap-1.5 mt-1 text-sm text-muted">
+                          <Phone className="h-4 w-4 text-muted flex-shrink-0" />
                           <a 
                             href={`tel:${brewery.phone}`}
-                            className="hover:text-[#9B2335] transition-colors"
+                            className="hover:text-brand-red transition-colors"
                           >
                             {brewery.phone}
                           </a>
@@ -273,7 +273,7 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                                   key={amenity}
                                   href={`/amenities/${amenitySlug}`}
                                   onClick={(e) => e.stopPropagation()}
-                                  className="inline-flex items-center justify-center text-xs text-[#9B2335] bg-white border border-[#9B2335] hover:bg-[#9B2335] hover:text-white px-2 py-1 rounded transition-colors font-medium whitespace-nowrap"
+                                  className="inline-flex items-center justify-center text-xs text-brand-red bg-white border border-brand-red hover:bg-brand-red hover:text-white px-2 py-1 rounded transition-colors font-medium whitespace-nowrap"
                                 >
                                   {amenity}
                                 </Link>
@@ -289,8 +289,8 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
             })}
 
             {filtered.length === 0 && (
-              <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-                <p className="text-gray-500">
+              <div className="text-center py-12 bg-white rounded-lg border border-line">
+                <p className="text-muted">
                   No breweries found matching your search.
                 </p>
               </div>
@@ -299,16 +299,16 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="p-3 sm:p-4 border-t border-gray-200 bg-gray-50">
+            <div className="p-3 sm:p-4 border-t border-line bg-cream">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
-                <div className="text-xs sm:text-sm text-gray-600 order-2 sm:order-1 whitespace-nowrap">
+                <div className="text-xs sm:text-sm text-muted order-2 sm:order-1 whitespace-nowrap">
                   Page {currentPage} of {totalPages}
                 </div>
                 <div className="flex items-center gap-1.5 sm:gap-2 order-1 sm:order-2">
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="p-2.5 sm:p-2 border border-gray-300 rounded-lg hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation"
+                    className="p-2.5 sm:p-2 border border-line-strong rounded-lg hover:bg-cream active:bg-line disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation"
                     aria-label="Previous page"
                   >
                     <ChevronLeft className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -334,7 +334,7 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                       
                       return range.map((page, idx) => {
                         if (typeof page !== 'number') {
-                          return <span key={idx} className="px-2 text-gray-400 hidden sm:inline">...</span>;
+                          return <span key={idx} className="px-2 text-muted hidden sm:inline">...</span>;
                         }
                         
                         const isVisibleOnMobile = mobilePages.includes(page);
@@ -346,8 +346,8 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                               isVisibleOnMobile ? 'flex' : 'hidden sm:flex'
                             } ${
                               currentPage === page
-                                ? 'bg-[#9B2335] text-white border-[#9B2335]'
-                                : 'border-gray-300 hover:bg-gray-100 active:bg-gray-200'
+                                ? 'bg-brand-red text-white border-brand-red'
+                                : 'border-line-strong hover:bg-cream active:bg-line'
                             }`}
                           >
                             {page}
@@ -360,7 +360,7 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="p-2.5 sm:p-2 border border-gray-300 rounded-lg hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation"
+                    className="p-2.5 sm:p-2 border border-line-strong rounded-lg hover:bg-cream active:bg-line disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation"
                     aria-label="Next page"
                   >
                     <ChevronRight className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -374,7 +374,7 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
         {/* Right: Map */}
         <div className="w-full lg:w-1/2">
           <div className="sticky top-4">
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden" style={{ height: '600px' }}>
+            <div className="bg-white rounded-lg border border-line overflow-hidden" style={{ height: '600px' }}>
               <GoogleMap
                 breweries={breweriesWithCoords}
                 center={mapCenter}
@@ -387,19 +387,19 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
       </div>
 
       {/* About Section */}
-      <div className="bg-[#FAF9F6] rounded-xl p-6 md:p-8 border border-gray-200">
+      <div className="bg-paper rounded-xl p-6 md:p-8 border border-line">
         <h2 
-          className="font-display text-2xl font-bold text-[#1a1a1a] mb-4"
+          className="font-display text-2xl font-bold text-ink mb-4"
         >
           About {amenityLabel} Breweries in {cityName}
         </h2>
         <div className="prose prose-gray max-w-none">
-          <p className="text-gray-700 leading-relaxed">
+          <p className="text-muted leading-relaxed">
             {cityName} offers {breweries.length} {breweries.length === 1 ? 'brewery' : 'breweries'} with {amenityLabel.toLowerCase()}, 
             providing excellent options for craft beer enthusiasts seeking this specific amenity. 
             These breweries enhance the local craft beer scene by combining quality beer with {amenityLabel.toLowerCase()}.
           </p>
-          <p className="text-gray-700 leading-relaxed mt-4">
+          <p className="text-muted leading-relaxed mt-4">
             When visiting breweries with {amenityLabel.toLowerCase()} in {cityName}, you can expect 
             a welcoming atmosphere that caters to a variety of visitors. Each brewery offers its own 
             unique take on this amenity, so we encourage you to explore multiple spots to find your favorite.
@@ -408,19 +408,19 @@ export default function CityAmenityMapClient({ breweries, cityName, amenityLabel
       </div>
 
       {/* About Maryland Brewery Directory */}
-      <div className="bg-white rounded-xl p-6 md:p-8 border border-gray-200">
+      <div className="bg-white rounded-xl p-6 md:p-8 border border-line">
         <h2 
-          className="font-display text-2xl font-bold text-[#1a1a1a] mb-4"
+          className="font-display text-2xl font-bold text-ink mb-4"
         >
           About Maryland Brewery Directory
         </h2>
         <div className="prose prose-gray max-w-none">
-          <p className="text-gray-700 leading-relaxed">
+          <p className="text-muted leading-relaxed">
             Maryland Brewery Directory is your comprehensive guide to the craft beer scene across Maryland. 
             We feature detailed information about breweries, taprooms, and brewpubs throughout the state, 
             helping you discover new favorites and plan your next brewery adventure.
           </p>
-          <p className="text-gray-700 leading-relaxed mt-4">
+          <p className="text-muted leading-relaxed mt-4">
             Whether you're a local looking for your next taproom visit or a visitor exploring Maryland's 
             craft beer offerings, our directory provides up-to-date information including hours, locations, 
             amenities, and more to help you make the most of your brewery experiences.

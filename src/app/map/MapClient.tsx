@@ -4,8 +4,8 @@ import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 
 const MapFallback = () => (
-  <div className="h-full w-full bg-gray-200 rounded-lg flex items-center justify-center">
-    <div className="text-gray-500 text-sm">Loading map...</div>
+  <div className="h-full w-full bg-line rounded-lg flex items-center justify-center">
+    <div className="text-muted text-sm">Loading map...</div>
   </div>
 );
 
@@ -46,11 +46,11 @@ export default function MapClient({ breweries }: { breweries: any[] }) {
           value={amenity}
           onChange={(e) => setAmenity(e.target.value)}
         />
-        <div className="text-sm text-gray-600 ml-2">Showing {filtered.length} breweries</div>
+        <div className="text-sm text-muted ml-2">Showing {filtered.length} breweries</div>
       </div>
       <div className="flex-1 min-h-[400px]">
         {apiKeyMissing ? (
-          <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center text-sm text-gray-600 px-4">
+          <div className="h-full w-full bg-cream rounded-lg flex items-center justify-center text-sm text-muted px-4">
             Map is unavailable: missing Google Maps API key. Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY and redeploy.
           </div>
         ) : (

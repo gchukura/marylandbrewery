@@ -30,21 +30,21 @@ export default function ValuePropsV2() {
             >
               {/* Icon Container */}
               <div className="relative inline-flex mb-6">
-                <div className="relative w-16 h-16 flex items-center justify-center bg-[#FAF9F6] border-2 border-[#E8E6E1] rounded-full">
-                  <prop.icon className="h-7 w-7 text-[#9B2335]" strokeWidth={1.5} />
+                <div className="relative w-16 h-16 flex items-center justify-center bg-paper border-2 border-line rounded-full">
+                  <prop.icon className="h-7 w-7 text-brand-red" strokeWidth={1.5} />
                 </div>
               </div>
               
               {/* Title */}
               <h3 
-                className="text-h3 font-semibold text-[#1C1C1C] mb-3 font-display"
+                className="text-h3 font-semibold text-ink mb-3 font-display"
               >
                 {prop.title}
               </h3>
               
               {/* Description */}
               <p 
-                className="text-body text-[#6B6B6B] leading-loose font-sans"
+                className="text-body text-muted leading-loose font-sans"
               >
                 {prop.description}
               </p>

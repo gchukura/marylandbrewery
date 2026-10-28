@@ -131,10 +131,10 @@ export default async function CityAmenityPage({ params }: { params: Promise<{ ci
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6]">
+    <div className="min-h-screen bg-paper">
       <JsonLd data={jsonLd} />
       {/* Hero Section */}
-      <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
+      <section className="bg-white border-b-4 border-brand-red relative overflow-hidden">
         {/* City Hero Image Background */}
         {cityHeroImage && (
           <div className="absolute inset-0">

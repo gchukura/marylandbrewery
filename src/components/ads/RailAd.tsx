@@ -1,39 +1,52 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { ADSENSE_CLIENT, requestAd } from '@/lib/ads';
+import { useAdsAllowed } from './useAdsAllowed';
 
 const SLOT = process.env.NEXT_PUBLIC_ADSENSE_RAIL_SLOT?.trim();
 
 /**
  * The brewery page's 300x250 unit (CLAUDE.md: one rail slot, reserved height, no ad-block
- * detection). Renders nothing until NEXT_PUBLIC_ADSENSE_RAIL_SLOT names an AdSense unit.
+ * detection). Desktop only: the rail is a column from lg up, and on phones it would sit
+ * mid-content. Renders nothing until NEXT_PUBLIC_ADSENSE_RAIL_SLOT names an AdSense unit.
  */
 export default function RailAd() {
+  const allowed = useAdsAllowed();
+  const [desktop, setDesktop] = useState(false);
+
   useEffect(() => {
-    if (!SLOT) return;
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch {
-      // The script isn't loaded (blocked, or still loading); the space stays reserved
-    }
+    const query = window.matchMedia('(min-width: 1024px)');
+    const update = () => setDesktop(query.matches);
+    update();
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
   }, []);
 
-  if (!SLOT) return null;
+  const show = Boolean(SLOT) && allowed && desktop;
+  useEffect(() => {
+    if (show) requestAd();
+  }, [show]);
+
+  if (!SLOT || !allowed) return null;
+  // The space is reserved at lg+ from the first render; the unit itself mounts once we know it's desktop
   return (
     <aside
       aria-label="Advertisement"
-      className="flex flex-col items-center gap-1"
+      className="hidden flex-col items-center gap-1 lg:flex"
     >
       <span className="text-[11px] uppercase tracking-[0.12em] text-muted">
         Advertisement
       </span>
       <div className="h-[250px] w-[300px]">
-        <ins
-          className="adsbygoogle"
-          style={{ display: 'inline-block', width: 300, height: 250 }}
-          data-ad-client="ca-pub-4357894821158922"
-          data-ad-slot={SLOT}
-        />
+        {show && (
+          <ins
+            className="adsbygoogle"
+            style={{ display: 'inline-block', width: 300, height: 250 }}
+            data-ad-client={ADSENSE_CLIENT}
+            data-ad-slot={SLOT}
+          />
+        )}
       </div>
     </aside>
   );

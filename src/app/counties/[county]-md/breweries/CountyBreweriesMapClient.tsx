@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { MapPin, Phone, Search, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import BreweryLogo from '@/components/brewery/BreweryLogo';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
   ssr: false, 
@@ -123,7 +123,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
           ) : (
             <div className="divide-y divide-gray-200">
               {paginatedBreweries.map((brewery) => {
-                const slug = (brewery as any).slug || brewery.id;
+                const slug = brewery.slug || brewery.id;
                 return (
                   <div
                     key={brewery.id}
@@ -175,22 +175,22 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                           {(() => {
                             // Calculate the rating to display - use combined average if both Google and Yelp exist
                             const hasGoogle = brewery.googleRating && brewery.googleRating > 0 && brewery.googleRatingCount && brewery.googleRatingCount > 0;
-                            const hasYelp = (brewery as any).yelpRating && (brewery as any).yelpRating > 0 && (brewery as any).yelpRatingCount && (brewery as any).yelpRatingCount > 0;
+                            const hasYelp = brewery.yelpRating && brewery.yelpRating > 0 && brewery.yelpRatingCount && brewery.yelpRatingCount > 0;
                             
                             let displayRating: number | null = null;
                             let totalReviewCount = 0;
                             
                             if (hasGoogle && hasYelp) {
                               // Calculate combined weighted average
-                              const totalReviews = brewery.googleRatingCount! + (brewery as any).yelpRatingCount!;
-                              displayRating = (brewery.googleRating! * brewery.googleRatingCount! + (brewery as any).yelpRating! * (brewery as any).yelpRatingCount!) / totalReviews;
+                              const totalReviews = brewery.googleRatingCount! + brewery.yelpRatingCount!;
+                              displayRating = (brewery.googleRating! * brewery.googleRatingCount! + brewery.yelpRating! * brewery.yelpRatingCount!) / totalReviews;
                               totalReviewCount = totalReviews;
                             } else if (hasGoogle) {
                               displayRating = brewery.googleRating!;
-                              totalReviewCount = (brewery as any).actualReviewCount || brewery.googleRatingCount || 0;
+                              totalReviewCount = brewery.actualReviewCount || brewery.googleRatingCount || 0;
                             } else if (hasYelp) {
-                              displayRating = (brewery as any).yelpRating!;
-                              totalReviewCount = (brewery as any).yelpRatingCount || 0;
+                              displayRating = brewery.yelpRating!;
+                              totalReviewCount = brewery.yelpRatingCount || 0;
                             }
                             
                             if (!displayRating) return null;
@@ -267,7 +267,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                     
                     {/* Amenities spanning full width below both columns - outside the Link to avoid nested anchors */}
                     {(() => {
-                      const amenityList = (brewery.amenities || brewery.features || []) as string[];
+                      const amenityList = (brewery.amenities ?? []) as string[];
                       if (!amenityList || amenityList.length === 0) return null;
                       
                       // Sort amenities alphabetically
@@ -387,7 +387,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
             <div className="flex-1 min-h-0 relative">
               {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
                 <GoogleMap 
-                  breweries={filtered as any} 
+                  breweries={filtered} 
                   height="100%" 
                   showClusters={true}
                   zoom={9}

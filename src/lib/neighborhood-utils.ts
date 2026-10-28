@@ -5,9 +5,9 @@
  * Leverages enriched neighborhood data (city field) for accurate matching
  */
 
-import { deslugify } from '@/lib/data-utils';
+import { deslugify } from '@/lib/slug';
 import { getNeighborhoodsByCity, getNeighborhoodBySlug } from '@/lib/db';
-import { DatabaseNeighborhood } from '@/lib/db';
+import type { Tables } from '@/lib/db';
 
 /**
  * Check if a slug matches the neighborhood pattern
@@ -48,7 +48,7 @@ export function isCitySlug(slug: string): boolean {
  */
 export async function parseNeighborhoodSlug(
   slug: string
-): Promise<{ neighborhood: DatabaseNeighborhood; cityName: string; citySlug: string } | null> {
+): Promise<{ neighborhood: Tables<'maryland_neighborhoods'>; cityName: string; citySlug: string } | null> {
   // Validation: must match neighborhood pattern
   if (!isNeighborhoodSlug(slug)) {
     return null;

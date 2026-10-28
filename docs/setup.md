@@ -44,7 +44,12 @@ To use the CLI against the hosted project (needed to apply migrations or generat
 npx supabase login
 npx supabase link --project-ref <project-ref>   # the ref is in the project URL: https://<ref>.supabase.co
 npx supabase db push                             # applies pending migrations
+npm run db:types                                 # regenerate src/lib/db/database.types.ts
 ```
+
+Regenerate the types after every migration; the clients in `src/lib/db/client.ts` are typed with them.
+
+Before the first `db push`, check what the remote history already records with `npx supabase migration list`, and mark migrations that production already has as applied, e.g. `npx supabase migration repair --status applied 20240101000000`.
 
 Review a migration before pushing it; it runs against production data.
 

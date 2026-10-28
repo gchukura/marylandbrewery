@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Search, XCircle } from 'lucide-react';
 
-interface SuggestBrewery { type: 'brewery'; id: string; name: string; city: string }
+interface SuggestBrewery { type: 'brewery'; id: string; slug: string; name: string; city: string }
 interface SuggestCity { type: 'city'; name: string; count: number }
 interface SuggestAmenity { type: 'amenity'; name: string }
 
@@ -78,7 +78,7 @@ export default function HeroSearchBar() {
       if (item) {
         if (item.type === 'brewery') {
           saveRecent(item.name);
-          window.location.href = `/breweries/${(item as any).slug || item.id}`;
+          window.location.href = `/breweries/${item.slug}`;
         } else if (item.type === 'city') {
           saveRecent(item.name);
                     window.location.href = `/cities/${item.name.toLowerCase().replace(/\s+/g, '-')}/breweries`;
@@ -151,14 +151,14 @@ export default function HeroSearchBar() {
 
             {!loading && items.map((item, idx) => (
               <div
-                key={(item as any).id || `${item.type}-${(item as any).name}-${idx}`}
+                key={item.type === 'brewery' ? item.id : `${item.type}-${item.name}-${idx}`}
                 className={`px-3 py-2 cursor-pointer ${idx === highlight ? 'bg-gray-100' : ''}`}
                 onMouseEnter={() => setHighlight(idx)}
                 onMouseDown={(e) => {
                   e.preventDefault();
                   if (item.type === 'brewery') {
                     saveRecent(item.name);
-                    window.location.href = `/breweries/${(item as any).slug || item.id}`;
+                    window.location.href = `/breweries/${item.slug}`;
                   } else if (item.type === 'city') {
                     saveRecent(item.name);
                     window.location.href = `/cities/${item.name.toLowerCase().replace(/\s+/g, '-')}/breweries`;

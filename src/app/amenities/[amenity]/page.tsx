@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getProcessedBreweryData, getAllAmenities } from '@/lib/db';
-import { slugify, deslugify } from '@/lib/data-utils';
+import { slugify, deslugify } from '@/lib/slug';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
@@ -130,7 +130,7 @@ export async function generateMetadata({ params }: { params: Promise<{ amenity: 
   
   const amenityKey = matchedAmenity.toLowerCase();
   const breweries = processed.breweries.filter(
-    (b) => ((b as any).amenities || (b as any).features || []).some((a: string) => 
+    (b) => (b.amenities ?? []).some((a: string) => 
       a.toLowerCase() === amenityKey || a.toLowerCase().includes(amenityKey) || amenityKey.includes(a.toLowerCase())
     )
   );
@@ -187,7 +187,7 @@ export default async function AmenityPage({ params }: { params: Promise<{ amenit
 
   // Filter breweries by amenity
   const breweries = processed.breweries.filter(
-    (b) => ((b as any).amenities || (b as any).features || []).some((a: string) => 
+    (b) => (b.amenities ?? []).some((a: string) => 
       a.toLowerCase() === amenityKey || a.toLowerCase().includes(amenityKey) || amenityKey.includes(a.toLowerCase())
     )
   );

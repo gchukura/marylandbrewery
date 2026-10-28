@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { getAllCities, getBreweriesByCity, getProcessedBreweryData } from '@/lib/db';
-import { slugify, deslugify } from '@/lib/data-utils';
+import { slugify, deslugify } from '@/lib/slug';
 import { generateCityTitle, generateCityDescription } from '@/lib/seo-utils';
 import { getNeighborhoodsByCity } from '@/lib/db';
 import Link from 'next/link';
@@ -14,37 +14,9 @@ import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTab
 
 // Build all city pages (no limit)
 export async function generateStaticParams() {
-  try {
-    let cities: string[];
-    try {
-      cities = await getAllCities();
-    } catch (error) {
-      // Fallback: get cities directly from processed data if getAllCities fails
-      console.warn('getAllCities failed, falling back to direct fetch:', error);
-      const processed = await getProcessedBreweryData();
-      const citySet = new Set<string>();
-      processed.breweries.forEach((brewery: any) => {
-        if (brewery.city) {
-          citySet.add(brewery.city);
-        }
-      });
-      cities = Array.from(citySet).sort();
-    }
-    
-    if (!cities || cities.length === 0) {
-      console.warn('No cities found, returning empty array');
-      return [];
-    }
-    
-    const params = cities
-      .filter((city: string) => city && city.trim().length > 0)
-      .map((city: string) => ({ city: slugify(city) }));
-    
-    return params;
-  } catch (error) {
-    console.error('Error generating static params for cities:', error);
-    return [];
-  }
+  // No try/catch: a data error here should fail the build, not ship zero city pages
+  const cities = await getAllCities();
+  return cities.filter((city) => city.trim().length > 0).map((city) => ({ city: slugify(city) }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ city: string }> }): Promise<Metadata> {

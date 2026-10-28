@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import IndexPageTemplate from '@/components/directory/IndexPageTemplate';
-import { slugify } from '@/lib/data-utils';
-import { getProcessedBreweryData } from '@/lib/db';
+import { slugify } from '@/lib/slug';
+import { breweriesInRegion, getProcessedBreweryData, getRegions } from '@/lib/db';
 import { existsSync } from 'fs';
 import { join } from 'path';
 
@@ -25,48 +25,12 @@ export const metadata: Metadata = {
   },
 };
 
-const MARYLAND_REGIONS = [
-  {
-    name: 'Eastern Shore',
-    slug: 'eastern-shore',
-    counties: ['Talbot', 'Dorchester', 'Wicomico', 'Worcester', 'Somerset', 'Caroline', 'Kent', "Queen Anne's", 'Cecil'],
-    description: "Maryland's Eastern Shore offers a relaxed, rural brewery experience with scenic waterfront locations.",
-  },
-  {
-    name: 'Western Maryland',
-    slug: 'western-maryland',
-    counties: ['Allegany', 'Garrett', 'Washington'],
-    description: 'The mountains of Western Maryland are home to breweries celebrating natural beauty and outdoor recreation.',
-  },
-  {
-    name: 'Central Maryland',
-    slug: 'central-maryland',
-    counties: ['Baltimore City', 'Baltimore County', 'Howard', 'Carroll', 'Harford'],
-    description: "The heart of Maryland's craft beer scene with the highest concentration of breweries.",
-  },
-  {
-    name: 'Southern Maryland',
-    slug: 'southern-maryland',
-    counties: ['Calvert', 'Charles', "St. Mary's"],
-    description: "Waterfront breweries combining craft beer with Chesapeake Bay culture and historic charm.",
-  },
-  {
-    name: 'Capital Region',
-    slug: 'capital-region',
-    counties: ['Montgomery', "Prince George's"],
-    description: 'Diverse brewery experiences in the DC suburbs, from upscale taprooms to community brewpubs.',
-  },
-];
-
 export default async function RegionsIndexPage() {
   const processed = await getProcessedBreweryData();
   
-  const items = MARYLAND_REGIONS.map((region) => {
-    const breweries = processed.breweries.filter((b: any) =>
-      region.counties.some(county => 
-        b.county && b.county.toLowerCase() === county.toLowerCase()
-      )
-    );
+  const regions = await getRegions();
+  const items = regions.map((region) => {
+    const breweries = breweriesInRegion(region, processed.breweries);
     
     return {
       name: region.name,

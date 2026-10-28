@@ -148,7 +148,7 @@ export interface Brewery {
   name: string;
   slug: string;
   description?: string;
-  type: string | string[];
+  type: string[]; // normalized: always an array, e.g. ['Microbrewery', 'Taproom']
   
   // Location information
   street: string;
@@ -179,7 +179,6 @@ export interface Brewery {
   beers?: Beer[];
   
   // Articles
-  articles?: Article[];
   
   // Additional fields from Google Sheets
   food?: string;
@@ -199,7 +198,6 @@ export interface Brewery {
   
   // Metadata
   openedDate?: string;
-  openingDate?: string;
   lastUpdated: string;
   
   // Google Reviews summary
@@ -218,7 +216,6 @@ export interface Brewery {
   reviewThemes?: ReviewThemes;
   
   // Raw data for debugging
-  rawData?: Record<string, any>;
 }
 
 /**

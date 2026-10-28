@@ -22,15 +22,11 @@
 
 import { config } from 'dotenv';
 import { resolve } from 'path';
+import { getAdminClient } from '@/lib/db/client';
+import { toJson } from '@/lib/db/json';
 config({ path: resolve(process.cwd(), '.env.local') });
 
-import { supabaseAdmin } from '../src/lib/db/client';
-
-if (!supabaseAdmin) {
-  throw new Error('Supabase admin client not available');
-}
-
-const client = supabaseAdmin;
+const client = getAdminClient();
 
 // ============================================
 // THEME PATTERN DEFINITIONS
@@ -359,7 +355,7 @@ async function analyzeAndStoreThemes() {
       // Update brewery with themes
       const { error: updateError } = await client
         .from('breweries')
-        .update({ review_themes: themes })
+        .update({ review_themes: toJson(themes) })
         .eq('id', brewery.id);
 
       if (updateError) {

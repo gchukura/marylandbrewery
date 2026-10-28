@@ -201,7 +201,7 @@ export function generateCityDescription(
   const landmarks = cityData.landmarks.slice(0, 2).join(' and ');
   const economicFact = cityData.economic_facts[0];
 
-  const breweryTypes = [...new Set(breweries.map(b => (b as any).type || 'brewery'))];
+  const breweryTypes = [...new Set(breweries.map(b => b.type || 'brewery'))];
   const typeText = breweryTypes.length > 1 
     ? `${breweryTypes.slice(0, 2).join(' and ')} breweries`
     : `${breweryTypes[0]} breweries`;

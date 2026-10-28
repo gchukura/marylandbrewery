@@ -28,11 +28,11 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
 
+import { getAdminClient } from '@/lib/db/client';
 // Load .env.local file
 config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
-import { supabaseAdmin, DatabaseBrewery } from '../src/lib/db/client';
 
 // Check if admin client is available
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -45,7 +45,7 @@ if (!apiKey) {
 }
 
 // Get admin client
-const adminClient = supabaseAdmin;
+const adminClient = getAdminClient();
 if (!adminClient) {
   throw new Error('Failed to initialize Supabase admin client. Check your SUPABASE_SERVICE_ROLE_KEY.');
 }

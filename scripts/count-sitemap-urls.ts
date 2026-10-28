@@ -3,16 +3,18 @@
  * Run with: npx tsx scripts/count-sitemap-urls.ts
  */
 
-import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities } from '../src/lib/db/brewery-data';
-import { slugify, deslugify, ALL_MD_COUNTIES, normalizeCountyName } from '../src/lib/data-utils';
-import { supabase } from '../src/lib/db/client';
+import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities } from '@/lib/db/brewery-data';
+import { normalizeCountyName } from '@/lib/data-utils';
+import { slugify, deslugify } from '@/lib/slug';
+import { MARYLAND_COUNTIES } from '@/types/brewery';
+import { getSupabase } from '@/lib/db/client';
 
 const BASE_URL = 'https://www.marylandbrewery.com';
 const MARYLAND_REGIONS = ['eastern-shore', 'western-maryland', 'central-maryland', 'southern-maryland', 'capital-region'];
 
 async function getAllNeighborhoods() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('maryland_neighborhoods')
       .select('slug, city, name')
       .not('city', 'is', null)
@@ -42,7 +44,7 @@ async function main() {
   const rawCounties = Array.from(new Set(processed.breweries.map((b) => (b as any).county).filter(Boolean))) as string[];
   const counties = rawCounties.filter(county => {
     const slug = slugify(county);
-    return normalizeCountyName(slug) !== null || ALL_MD_COUNTIES.some(c => c.toLowerCase() === county.toLowerCase());
+    return normalizeCountyName(slug) !== null || MARYLAND_COUNTIES.some(c => c.toLowerCase() === county.toLowerCase());
   });
   
   const amenitySlugs = allAmenities.map(amenity => slugify(amenity));

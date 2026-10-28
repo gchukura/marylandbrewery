@@ -9,6 +9,7 @@ export default tseslint.config(
       '.next/**',
       'node_modules/**',
       'next-env.d.ts',
+      'src/lib/db/database.types.ts', // generated: npm run db:types
       'scripts/archived/**',
       'lib/archived/**',
       'docs/**',

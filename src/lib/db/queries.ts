@@ -4,158 +4,124 @@
  * Provides the same interface as google-sheets.ts but uses Supabase
  */
 
-import { supabase, supabaseAdmin, DatabaseBrewery, DatabaseBeer, DatabaseNewsletterSubscriber, DatabaseBreweryArticle, DatabaseNeighborhood } from './client';
+import { getAdminClient, getSupabase } from './client';
+import type { Json, Tables } from './client';
+import { jsonArray, jsonObject, jsonStringArray } from './json';
 import { Brewery, Beer, SocialMedia, OperatingHours, Membership, ReviewThemes } from '@/types/brewery';
-import { normalizeCountyName, slugify } from '@/lib/data-utils';
+import { normalizeCountyName } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
+
+import { isProductionBuild, throwDuringBuild } from './build';
+/** The type column holds a string or (for one brewery) an array; always return a non-empty array. */
+function normalizeTypes(value: Json | null): string[] {
+  const types = (Array.isArray(value) ? jsonStringArray(value) : typeof value === 'string' ? value.split(',') : [])
+    .map((t) => t.trim())
+    .filter(Boolean);
+  return types.length > 0 ? types : ['Microbrewery'];
+}
 
 /**
  * Convert database brewery to application brewery type
  */
-function dbBreweryToBrewery(dbBrewery: DatabaseBrewery, beers: Beer[] = []): Brewery {
+function dbBreweryToBrewery(dbBrewery: Tables<'breweries'>, beers: Beer[] = []): Brewery {
   return {
     id: dbBrewery.id,
     name: dbBrewery.name,
     slug: dbBrewery.slug,
-    description: dbBrewery.description,
-    type: dbBrewery.type || 'Microbrewery',
-    
+    description: dbBrewery.description ?? undefined,
+    type: normalizeTypes(dbBrewery.type),
+
     // Location
     street: dbBrewery.street,
     city: dbBrewery.city,
     state: dbBrewery.state,
-    zip: dbBrewery.zip,
+    zip: dbBrewery.zip ?? '',
     // Canonical county name, e.g. "Saint Marys" in the table becomes "St. Mary's"
-    county: (dbBrewery.county && normalizeCountyName(slugify(dbBrewery.county))) || dbBrewery.county,
+    county: (dbBrewery.county && normalizeCountyName(slugify(dbBrewery.county))) || dbBrewery.county || '',
     latitude: dbBrewery.latitude,
     longitude: dbBrewery.longitude,
-    
+
     // Contact
-    phone: dbBrewery.phone,
-    website: dbBrewery.website,
-    socialMedia: (dbBrewery.social_media || {}) as SocialMedia,
-    
+    phone: dbBrewery.phone ?? undefined,
+    website: dbBrewery.website ?? undefined,
+    socialMedia: jsonObject<SocialMedia>(dbBrewery.social_media) ?? {},
+
     // Hours
-    hours: (dbBrewery.hours || {}) as OperatingHours,
-    
+    hours: jsonObject<OperatingHours>(dbBrewery.hours) ?? {},
+
     // Features
-    amenities: dbBrewery.amenities || [],
-    allowsVisitors: dbBrewery.allows_visitors || false,
-    offersTours: dbBrewery.offers_tours || false,
-    beerToGo: dbBrewery.beer_to_go || false,
-    hasMerch: dbBrewery.has_merch || false,
-    memberships: (dbBrewery.memberships || []) as Membership[],
-    
+    amenities: jsonStringArray(dbBrewery.amenities),
+    allowsVisitors: dbBrewery.allows_visitors ?? false,
+    offersTours: dbBrewery.offers_tours ?? false,
+    beerToGo: dbBrewery.beer_to_go ?? false,
+    hasMerch: dbBrewery.has_merch ?? false,
+    memberships: jsonArray<Membership>(dbBrewery.memberships),
+
     // Additional fields
-    food: dbBrewery.food,
-    otherDrinks: dbBrewery.other_drinks,
-    parking: dbBrewery.parking,
-    dogFriendly: dbBrewery.dog_friendly || false,
-    outdoorSeating: dbBrewery.outdoor_seating || false,
-    logo: dbBrewery.logo,
-    photoUrl: dbBrewery.photo_url,
-    photos: dbBrewery.photos || [],
-    featured: dbBrewery.featured || false,
-    specialEvents: dbBrewery.special_events || [],
-    awards: dbBrewery.awards || [],
-    certifications: dbBrewery.certifications || [],
-    
+    food: dbBrewery.food ?? undefined,
+    otherDrinks: dbBrewery.other_drinks ?? undefined,
+    parking: dbBrewery.parking ?? undefined,
+    dogFriendly: dbBrewery.dog_friendly ?? false,
+    outdoorSeating: dbBrewery.outdoor_seating ?? false,
+    logo: dbBrewery.logo ?? undefined,
+    photoUrl: dbBrewery.photo_url ?? undefined,
+    photos: jsonStringArray(dbBrewery.photos),
+    featured: dbBrewery.featured ?? false,
+    specialEvents: jsonStringArray(dbBrewery.special_events),
+    awards: jsonStringArray(dbBrewery.awards),
+    certifications: jsonStringArray(dbBrewery.certifications),
+
     // Metadata
-    openedDate: dbBrewery.opened_date,
+    openedDate: dbBrewery.opened_date ?? undefined,
     lastUpdated: dbBrewery.updated_at || new Date().toISOString(),
-    
+
     // Google Reviews summary
-    googleRating: dbBrewery.google_rating,
-    googleRatingCount: dbBrewery.google_rating_count,
-    googleReviewsLastUpdated: dbBrewery.google_reviews_last_updated,
-    placeId: dbBrewery.place_id,
-    
+    googleRating: dbBrewery.google_rating ?? undefined,
+    googleRatingCount: dbBrewery.google_rating_count ?? undefined,
+    googleReviewsLastUpdated: dbBrewery.google_reviews_last_updated ?? undefined,
+    placeId: dbBrewery.place_id ?? undefined,
+
     // Yelp Reviews summary
-    yelpBusinessId: dbBrewery.yelp_business_id,
-    yelpRating: dbBrewery.yelp_rating,
-    yelpRatingCount: dbBrewery.yelp_rating_count,
-    yelpReviewsLastUpdated: dbBrewery.yelp_reviews_last_updated,
-    
+    yelpBusinessId: dbBrewery.yelp_business_id ?? undefined,
+    yelpRating: dbBrewery.yelp_rating ?? undefined,
+    yelpRatingCount: dbBrewery.yelp_rating_count ?? undefined,
+    yelpReviewsLastUpdated: dbBrewery.yelp_reviews_last_updated ?? undefined,
+
     // Review themes
-    reviewThemes: dbBrewery.review_themes as ReviewThemes | undefined,
-    
+    reviewThemes: jsonObject<ReviewThemes>(dbBrewery.review_themes),
+
     // Beer data
     beers: beers.length > 0 ? beers : undefined,
   };
 }
 
 /**
- * Convert application brewery to database brewery type
- */
-function breweryToDbBrewery(brewery: Brewery): DatabaseBrewery {
-  return {
-    id: brewery.id,
-    name: brewery.name,
-    slug: brewery.slug,
-    description: brewery.description,
-    type: brewery.type,
-    
-    // Location
-    street: brewery.street,
-    city: brewery.city,
-    state: brewery.state,
-    zip: brewery.zip,
-    county: brewery.county,
-    latitude: brewery.latitude,
-    longitude: brewery.longitude,
-    
-    // Contact
-    phone: brewery.phone,
-    website: brewery.website,
-    social_media: brewery.socialMedia as Record<string, string>,
-    
-    // Hours
-    hours: brewery.hours,
-    
-    // Features
-    amenities: brewery.amenities,
-    allows_visitors: brewery.allowsVisitors,
-    offers_tours: brewery.offersTours,
-    beer_to_go: brewery.beerToGo,
-    has_merch: brewery.hasMerch,
-    memberships: brewery.memberships,
-    
-    // Additional fields
-    food: brewery.food,
-    other_drinks: brewery.otherDrinks,
-    parking: brewery.parking,
-    dog_friendly: brewery.dogFriendly,
-    outdoor_seating: brewery.outdoorSeating,
-    logo: brewery.logo,
-    photo_url: brewery.photoUrl,
-    photos: brewery.photos || [],
-    featured: brewery.featured,
-    special_events: brewery.specialEvents,
-    awards: brewery.awards,
-    certifications: brewery.certifications,
-    
-    // Metadata
-    opened_date: brewery.openedDate,
-    
-    // Google Reviews summary
-    google_rating: brewery.googleRating,
-    google_rating_count: brewery.googleRatingCount,
-    google_reviews_last_updated: brewery.googleReviewsLastUpdated,
-    place_id: brewery.placeId,
-  };
-}
-
-/**
  * Fetch all brewery data from Supabase
  */
-export async function getBreweryDataFromSupabase(): Promise<Brewery[]> {
+// Every breweries column except review_themes, which only brewery pages use (~100 KB of the list)
+const LIST_COLUMNS = [
+  'id', 'name', 'slug', 'description', 'type', 'street', 'city', 'state', 'zip', 'county', 'latitude', 'longitude',
+  'phone', 'website', 'social_media', 'hours', 'amenities', 'allows_visitors', 'offers_tours', 'beer_to_go', 'has_merch',
+  'memberships', 'food', 'other_drinks', 'parking', 'dog_friendly', 'outdoor_seating', 'logo', 'featured',
+  'special_events', 'awards', 'certifications', 'opened_date', 'created_at', 'updated_at', 'google_rating',
+  'google_rating_count', 'google_reviews_last_updated', 'place_id', 'photo_url', 'photos', 'yelp_business_id',
+  'yelp_rating', 'yelp_rating_count', 'yelp_reviews_last_updated', 'articles_last_updated',
+].join(',');
+
+/**
+ * All breweries. With detail: false (the site's cached list) it skips review_themes and beers;
+ * the default returns everything, which scripts rely on.
+ */
+export async function getBreweryDataFromSupabase({ detail = true }: { detail?: boolean } = {}): Promise<Brewery[]> {
   const startTime = Date.now();
 
   try {
     // Fetch breweries
-    const { data: breweriesData, error: breweriesError } = await supabase
+    const { data: breweriesData, error: breweriesError } = await getSupabase()
       .from('breweries')
-      .select('*')
-      .order('name');
+      .select(detail ? '*' : LIST_COLUMNS)
+      .order('name')
+      .returns<Tables<'breweries'>[]>();
 
     if (breweriesError) {
       const errorMessage = breweriesError.message || breweriesError.toString() || 'Unknown error';
@@ -165,16 +131,18 @@ export async function getBreweryDataFromSupabase(): Promise<Brewery[]> {
     }
 
     if (!breweriesData || breweriesData.length === 0) {
+      // An empty table during a build is a failed read, not real data
+      if (isProductionBuild()) throw new Error('Supabase returned no breweries during the build');
       if (process.env.NODE_ENV === 'development') {
         console.warn('No breweries found in Supabase');
       }
       return [];
     }
 
-    // Fetch all beers
-    const { data: beersData, error: beersError } = await supabase
-      .from('beers')
-      .select('*');
+    // Fetch all beers (detail only; brewery pages load their own through fetchBreweryBySlug)
+    const { data: beersData, error: beersError } = detail
+      ? await getSupabase().from('beers').select('*')
+      : { data: [] as Tables<'beers'>[], error: null };
 
     if (beersError && process.env.NODE_ENV === 'development') {
       console.warn(`Failed to fetch beers: ${beersError.message}`);
@@ -183,7 +151,7 @@ export async function getBreweryDataFromSupabase(): Promise<Brewery[]> {
     // Group beers by brewery_id
     const beersByBrewery = new Map<string, Beer[]>();
     if (beersData) {
-      beersData.forEach((beer: DatabaseBeer) => {
+      beersData.forEach((beer: Tables<'beers'>) => {
         if (!beersByBrewery.has(beer.brewery_id)) {
           beersByBrewery.set(beer.brewery_id, []);
         }
@@ -197,7 +165,7 @@ export async function getBreweryDataFromSupabase(): Promise<Brewery[]> {
     }
 
     // Convert database breweries to application breweries
-    const breweries: Brewery[] = breweriesData.map((dbBrewery: DatabaseBrewery) => {
+    const breweries: Brewery[] = breweriesData.map((dbBrewery: Tables<'breweries'>) => {
       const beers = beersByBrewery.get(dbBrewery.id) || [];
       return dbBreweryToBrewery(dbBrewery, beers);
     });
@@ -230,53 +198,13 @@ export async function getBreweryDataFromSupabase(): Promise<Brewery[]> {
 }
 
 /**
- * Fetch beer data from Supabase
- * Returns a map of brewery_id to beers array
+ * Check if an email is already subscribed
  */
-export async function getBeerDataFromSupabase(): Promise<Record<string, Beer[]>> {
-  try {
-    const { data: beersData, error } = await supabase
-      .from('beers')
-      .select('*');
-
-    if (error) {
-      console.error('Error fetching beer data from Supabase:', error);
-      return {};
-    }
-
-    if (!beersData) {
-      return {};
-    }
-
-    const beerData: Record<string, Beer[]> = {};
-
-    beersData.forEach((beer: DatabaseBeer) => {
-      if (!beerData[beer.brewery_id]) {
-        beerData[beer.brewery_id] = [];
-      }
-      beerData[beer.brewery_id].push({
-        name: beer.name,
-        style: beer.style || '',
-        abv: beer.abv || '',
-        availability: beer.availability || '',
-      });
-    });
-
-    return beerData;
-  } catch (error) {
-    console.error('Error fetching beer data from Supabase:', error);
-    return {};
-  }
-}
-
-/**
- * Check if email already exists in newsletter subscribers
- */
-export async function checkEmailExists(email: string): Promise<boolean> {
+async function checkEmailExists(email: string): Promise<boolean> {
   try {
     const normalizedEmail = email.toLowerCase().trim();
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('newsletter_subscribers')
       .select('email')
       .eq('email', normalizedEmail)
@@ -307,7 +235,7 @@ export async function addNewsletterSubscriber(email: string, metadata: any = {})
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('newsletter_subscribers')
       .insert({
         email: normalizedEmail,
@@ -332,85 +260,26 @@ export async function addNewsletterSubscriber(email: string, metadata: any = {})
 }
 
 /**
- * Test connection to Supabase
- */
-export async function testSupabaseConnection(): Promise<boolean> {
-  try {
-    const { data, error } = await supabase
-      .from('breweries')
-      .select('count')
-      .limit(1);
-
-    if (error) {
-      console.error('Supabase connection test failed:', error);
-      return false;
-    }
-
-    console.log('Supabase connection test successful');
-    return true;
-  } catch (error) {
-    console.error('Supabase connection test failed:', error);
-    return false;
-  }
-}
-
-/**
- * Get brewery by ID
- */
-export async function getBreweryById(id: string): Promise<Brewery | null> {
-  try {
-    const { data: breweryData, error } = await supabase
-      .from('breweries')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error || !breweryData) {
-      return null;
-    }
-
-    // Fetch beers for this brewery
-    const { data: beersData } = await supabase
-      .from('beers')
-      .select('*')
-      .eq('brewery_id', id);
-
-    const beers: Beer[] = (beersData || []).map((beer: DatabaseBeer) => ({
-      name: beer.name,
-      style: beer.style || '',
-      abv: beer.abv || '',
-      availability: beer.availability || '',
-    }));
-
-    return dbBreweryToBrewery(breweryData, beers);
-  } catch (error) {
-    console.error('Error fetching brewery by ID:', error);
-    return null;
-  }
-}
-
-/**
  * Get brewery by slug
  */
-export async function getBreweryBySlug(slug: string): Promise<Brewery | null> {
+export async function fetchBreweryBySlug(slug: string): Promise<Brewery | null> {
   try {
-    const { data: breweryData, error } = await supabase
+    const { data: breweryData, error } = await getSupabase()
       .from('breweries')
       .select('*')
       .eq('slug', slug)
-      .single();
+      .maybeSingle();
 
-    if (error || !breweryData) {
-      return null;
-    }
+    if (error) throw error;
+    if (!breweryData) return null;
 
     // Fetch beers for this brewery
-    const { data: beersData } = await supabase
+    const { data: beersData } = await getSupabase()
       .from('beers')
       .select('*')
       .eq('brewery_id', breweryData.id);
 
-    const beers: Beer[] = (beersData || []).map((beer: DatabaseBeer) => ({
+    const beers: Beer[] = (beersData || []).map((beer: Tables<'beers'>) => ({
       name: beer.name,
       style: beer.style || '',
       abv: beer.abv || '',
@@ -419,116 +288,10 @@ export async function getBreweryBySlug(slug: string): Promise<Brewery | null> {
 
     return dbBreweryToBrewery(breweryData, beers);
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Error fetching brewery by slug:', error);
     return null;
   }
-}
-
-/**
- * Search breweries using full-text search
- */
-export async function searchBreweries(query: string): Promise<Brewery[]> {
-  try {
-    const { data, error } = await supabase
-      .from('breweries')
-      .select('*')
-      .textSearch('name,description', query, {
-        type: 'websearch',
-        config: 'english',
-      })
-      .limit(50);
-
-    if (error) {
-      console.error('Error searching breweries:', error);
-      return [];
-    }
-
-    if (!data) {
-      return [];
-    }
-
-    return data.map((dbBrewery: DatabaseBrewery) => dbBreweryToBrewery(dbBrewery));
-  } catch (error) {
-    console.error('Error searching breweries:', error);
-    return [];
-  }
-}
-
-/**
- * Get nearby breweries using PostGIS (if enabled)
- * Falls back to client-side calculation if PostGIS is not available
- */
-export async function getNearbyBreweries(
-  latitude: number,
-  longitude: number,
-  radiusMiles: number = 10
-): Promise<Brewery[]> {
-  try {
-    // Convert miles to meters (PostGIS uses meters)
-    const radiusMeters = radiusMiles * 1609.34;
-
-    // Use PostGIS if available, otherwise fetch all and filter client-side
-    let data: DatabaseBrewery[] | null = null;
-    let error: any = null;
-    
-    try {
-      const result = await supabase.rpc('get_nearby_breweries', {
-        lat: latitude,
-        lng: longitude,
-        radius_meters: radiusMeters,
-      });
-      data = result.data;
-      error = result.error;
-    } catch (rpcError) {
-      // RPC function doesn't exist, fall through to client-side filtering
-      error = rpcError;
-    }
-
-    if (error) {
-      // If RPC doesn't exist, fetch all and filter client-side
-      const { data: allBreweries } = await supabase.from('breweries').select('*');
-      if (!allBreweries) return [];
-
-      // Filter by distance
-      return allBreweries
-        .map((dbBrewery: DatabaseBrewery) => {
-          const distance = calculateDistance(
-            latitude,
-            longitude,
-            dbBrewery.latitude,
-            dbBrewery.longitude
-          );
-          return { brewery: dbBrewery, distance };
-        })
-        .filter((item) => item.distance <= radiusMiles)
-        .sort((a, b) => a.distance - b.distance)
-        .map((item) => dbBreweryToBrewery(item.brewery));
-    }
-
-    if (!data) {
-      return [];
-    }
-
-    return data.map((dbBrewery: DatabaseBrewery) => dbBreweryToBrewery(dbBrewery));
-  } catch (error) {
-    console.error('Error fetching nearby breweries:', error);
-    return [];
-  }
-}
-
-/**
- * Calculate distance between two coordinates (Haversine formula)
- */
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 3959; // Earth's radius in miles
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
 }
 
 /**
@@ -550,16 +313,13 @@ export async function writeReviewsToSupabase(
   source: 'google' | 'yelp' = 'google'
 ): Promise<void> {
   try {
-    if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not available');
-    }
 
     if (!reviews || reviews.length === 0) {
       return;
     }
 
     // Get existing reviews for this brewery to check for duplicates
-    const { data: existingReviews } = await supabaseAdmin
+    const { data: existingReviews } = await getAdminClient()
       .from('reviews')
       .select('review_timestamp, reviewer_name, review_text')
       .eq('brewery_id', breweryId)
@@ -612,11 +372,16 @@ export async function writeReviewsToSupabase(
       return;
     }
 
-    const { error } = await supabaseAdmin
+    // Upsert on the reviews unique constraint (migration 20261027000000_reviews_unique.sql)
+    const { error } = await getAdminClient()
       .from('reviews')
-      .insert(newReviewRecords);
+      .upsert(newReviewRecords, { onConflict: REVIEW_CONFLICT_COLUMNS, ignoreDuplicates: true });
 
-    if (error) {
+    if (error?.code === '42P10') {
+      // The constraint isn't applied yet; the records above are already de-duplicated, so insert
+      const { error: insertError } = await getAdminClient().from('reviews').insert(newReviewRecords);
+      if (insertError) throw insertError;
+    } else if (error) {
       throw error;
     }
   } catch (error) {
@@ -634,11 +399,8 @@ export async function updateReviewSummaryInSupabase(
   ratingCount: number
 ): Promise<void> {
   try {
-    if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not available');
-    }
 
-    const { error } = await supabaseAdmin
+    const { error } = await getAdminClient()
       .from('breweries')
       .update({
         google_rating: rating,
@@ -664,11 +426,8 @@ export async function storePlaceIdInSupabase(
   placeId: string
 ): Promise<void> {
   try {
-    if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not available');
-    }
 
-    const { error } = await supabaseAdmin
+    const { error } = await getAdminClient()
       .from('breweries')
       .update({ place_id: placeId })
       .eq('id', breweryId);
@@ -691,11 +450,8 @@ export async function updateYelpReviewSummaryInSupabase(
   ratingCount: number
 ): Promise<void> {
   try {
-    if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not available');
-    }
 
-    const { error } = await supabaseAdmin
+    const { error } = await getAdminClient()
       .from('breweries')
       .update({
         yelp_rating: rating,
@@ -721,11 +477,8 @@ export async function storeYelpBusinessIdInSupabase(
   yelpBusinessId: string
 ): Promise<void> {
   try {
-    if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not available');
-    }
 
-    const { error } = await supabaseAdmin
+    const { error } = await getAdminClient()
       .from('breweries')
       .update({ yelp_business_id: yelpBusinessId })
       .eq('id', breweryId);
@@ -747,11 +500,8 @@ export async function updateBreweryLogoInSupabase(
   logoPath: string
 ): Promise<void> {
   try {
-    if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not available');
-    }
 
-    const { error } = await supabaseAdmin
+    const { error } = await getAdminClient()
       .from('breweries')
       .update({ logo: logoPath })
       .eq('id', breweryId);
@@ -768,81 +518,56 @@ export async function updateBreweryLogoInSupabase(
 /**
  * Review interface matching Supabase schema
  */
-export interface DatabaseReview {
-  id: string;
-  brewery_id: string;
-  brewery_name: string;
-  source: string; // 'google' or 'yelp'
-  reviewer_name: string | null;
-  rating: number | null;
-  review_text: string | null;
-  review_date: string | null;
-  review_timestamp: number | null;
-  reviewer_url: string | null;
-  profile_photo_url: string | null;
-  language: string;
-  fetched_at: string;
-  created_at: string;
+
+const REVIEW_CONFLICT_COLUMNS = 'brewery_id,source,review_timestamp,reviewer_name';
+
+function reviewKey(review: Tables<'reviews'>): string {
+  return `${review.brewery_id}|${review.source}|${review.review_timestamp ?? 0}|${(review.reviewer_name || '').toLowerCase().trim()}`;
 }
 
 /**
- * Fetch reviews for a brewery from Supabase
+ * One page of a brewery's reviews, newest first, with the total count.
+ * Paginated in the database. Copies within the page are dropped as a safety net until the
+ * reviews unique constraint is applied (then there are none to drop).
  */
 export async function getBreweryReviews(
   breweryId: string,
   limit: number = 10,
   offset: number = 0
-): Promise<{ reviews: DatabaseReview[]; total: number }> {
+): Promise<{ reviews: Tables<'reviews'>[]; total: number }> {
   try {
-    // Get all reviews for this brewery to properly deduplicate and count
-    const { data: allReviews, error: fetchError } = await supabase
+    const { data, count, error } = await getSupabase()
       .from('reviews')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('brewery_id', breweryId)
-      .order('review_timestamp', { ascending: false, nullsFirst: false });
+      .order('review_timestamp', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: true })
+      .range(offset, offset + limit - 1);
 
-    if (fetchError) {
-      throw fetchError;
+    if (error) {
+      throw error;
     }
 
-    // Deduplicate by content (brewery_id + review_timestamp + reviewer_name + review_text) in case of duplicates in database
-    // Use review_text as part of the key since timestamp might be 0 for many reviews
-    const uniqueReviewsMap = new Map<string, DatabaseReview>();
-    
-    (allReviews || []).forEach((review: DatabaseReview) => {
-      const timestamp = review.review_timestamp || 0;
-      const reviewerName = (review.reviewer_name || '').toLowerCase().trim();
-      // Use first 100 chars of review text as part of key to better identify unique reviews
-      const reviewTextSnippet = (review.review_text || '').substring(0, 100).toLowerCase().trim();
-      // Create a more robust duplicate key that includes review text
-      const duplicateKey = `${review.brewery_id}|${timestamp}|${reviewerName}|${reviewTextSnippet}`;
-      
-      // Only add if we haven't seen this exact review before
-      if (!uniqueReviewsMap.has(duplicateKey)) {
-        uniqueReviewsMap.set(duplicateKey, review);
-      }
+    const rows = (data || []) as Tables<'reviews'>[];
+    const seen = new Set<string>();
+    const reviews = rows.filter((review) => {
+      const key = reviewKey(review);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
     });
 
-    // Convert map to array and get total count
-    const allUniqueReviews = Array.from(uniqueReviewsMap.values());
-    const total = allUniqueReviews.length;
-
-    // Apply pagination to deduplicated reviews
-    const paginatedReviews = allUniqueReviews.slice(offset, offset + limit);
-
-    return {
-      reviews: paginatedReviews,
-      total: total,
-    };
+    return { reviews, total: (count ?? rows.length) - (rows.length - reviews.length) };
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Failed to fetch reviews from Supabase:', error);
     return { reviews: [], total: 0 };
   }
 }
 
-export async function getBreweryArticles(breweryId: string, limit: number = 5): Promise<DatabaseBreweryArticle[]> {
+export async function getBreweryArticles(breweryId: string, limit: number = 5): Promise<Tables<'brewery_articles'>[]> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('brewery_articles')
       .select('*')
       .eq('brewery_id', breweryId)
@@ -850,13 +575,11 @@ export async function getBreweryArticles(breweryId: string, limit: number = 5): 
       .order('relevance_score', { ascending: false })
       .limit(limit);
     
-    if (error) {
-      console.error('Error fetching brewery articles:', error);
-      return [];
-    }
+    if (error) throw error;
     
     return data || [];
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Failed to fetch brewery articles from Supabase:', error);
     return [];
   }
@@ -865,44 +588,19 @@ export async function getBreweryArticles(breweryId: string, limit: number = 5): 
 /**
  * Get neighborhoods by city
  */
-export async function getNeighborhoodsByCity(city: string): Promise<DatabaseNeighborhood[]> {
+export async function getNeighborhoodsByCity(city: string): Promise<Tables<'maryland_neighborhoods'>[]> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('maryland_neighborhoods')
       .select('*')
       .ilike('city', city)
       .order('name', { ascending: true });
     
-    if (error) {
-      console.error('Error fetching neighborhoods by city:', error);
-      return [];
-    }
+    if (error) throw error;
     
     return data || [];
   } catch (error) {
-    console.error('Failed to fetch neighborhoods from Supabase:', error);
-    return [];
-  }
-}
-
-/**
- * Get neighborhoods by county
- */
-export async function getNeighborhoodsByCounty(county: string): Promise<DatabaseNeighborhood[]> {
-  try {
-    const { data, error } = await supabase
-      .from('maryland_neighborhoods')
-      .select('*')
-      .ilike('county', county)
-      .order('name', { ascending: true });
-    
-    if (error) {
-      console.error('Error fetching neighborhoods by county:', error);
-      return [];
-    }
-    
-    return data || [];
-  } catch (error) {
+    throwDuringBuild(error);
     console.error('Failed to fetch neighborhoods from Supabase:', error);
     return [];
   }
@@ -911,70 +609,78 @@ export async function getNeighborhoodsByCounty(county: string): Promise<Database
 /**
  * Get neighborhood by slug
  */
-export async function getNeighborhoodBySlug(slug: string): Promise<DatabaseNeighborhood | null> {
+export async function getNeighborhoodBySlug(slug: string): Promise<Tables<'maryland_neighborhoods'> | null> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('maryland_neighborhoods')
       .select('*')
       .eq('slug', slug)
-      .single();
+      .maybeSingle();
     
-    if (error) {
-      console.error('Error fetching neighborhood by slug:', error);
-      return null;
-    }
+    if (error) throw error;
     
     return data;
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Failed to fetch neighborhood from Supabase:', error);
     return null;
   }
 }
 
-
 /**
  * Get every neighborhood (used for static params and the sitemap)
  */
-export async function getAllNeighborhoods(): Promise<DatabaseNeighborhood[]> {
+export async function getAllNeighborhoods(): Promise<Tables<'maryland_neighborhoods'>[]> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('maryland_neighborhoods')
       .select('*')
       .order('name', { ascending: true })
       .range(0, 4999);
 
-    if (error) {
-      console.error('Error fetching neighborhoods:', error);
-      return [];
-    }
+    if (error) throw error;
 
     return data || [];
   } catch (error) {
+    throwDuringBuild(error);
     console.error('Failed to fetch neighborhoods:', error);
     return [];
   }
 }
 
+export interface Region {
+  slug: string;
+  name: string;
+  /** Canonical county names, matching breweries.county */
+  counties: string[];
+  description: string;
+}
+
+/** The regions table says "Baltimore County" where breweries say "Baltimore"; map to the canonical name. */
+function canonicalCounty(name: string): string {
+  return normalizeCountyName(slugify(name.replace(/ County$/i, ''))) ?? name;
+}
+
 /**
- * Get the beer list for one brewery
+ * Get the Maryland regions from the maryland_regions table
  */
-export async function getBeersForBrewery(
-  breweryId: string
-): Promise<Pick<DatabaseBeer, 'name' | 'style' | 'abv' | 'availability'>[]> {
+export async function fetchRegions(): Promise<Region[]> {
   try {
-    const { data, error } = await supabase
-      .from('beers')
-      .select('name, style, abv, availability')
-      .eq('brewery_id', breweryId);
+    const { data, error } = await getSupabase()
+      .from('maryland_regions')
+      .select('region_slug, region_name, counties, description')
+      .order('created_at', { ascending: true });
+    if (error) throw error;
 
-    if (error) {
-      console.error('Error fetching beers for brewery:', error);
-      return [];
-    }
-
-    return data || [];
+    return (data || []).map((row: { region_slug: string; region_name: string; counties: string[] | null; description: string | null }) => ({
+      slug: row.region_slug,
+      name: row.region_name,
+      counties: (row.counties || []).map(canonicalCounty),
+      description: row.description || '',
+    }));
   } catch (error) {
-    console.error('Failed to fetch beers from Supabase:', error);
+    throwDuringBuild(error);
+    console.error('Failed to fetch regions from Supabase:', error);
     return [];
   }
 }

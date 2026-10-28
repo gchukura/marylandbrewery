@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { getProcessedBreweryData } from '@/lib/db';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
@@ -36,12 +36,6 @@ export const metadata: Metadata = {
     images: ['/opengraph-image'],
   },
 };
-
-const ALL_MD_COUNTIES = [
-  'Allegany', 'Anne Arundel', 'Baltimore', 'Calvert', 'Caroline', 'Carroll', 'Cecil', 'Charles',
-  'Dorchester', 'Frederick', 'Garrett', 'Harford', 'Howard', 'Kent', 'Montgomery',
-  'Prince Georges', 'Queen Annes', 'Somerset', 'St Marys', 'Talbot', 'Washington', 'Wicomico', 'Worcester'
-];
 
 export const revalidate = 3600;
 

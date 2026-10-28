@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { getAllCities, getProcessedBreweryData } from '@/lib/db';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 import Link from 'next/link';
 import { ChevronRight, MapPin } from 'lucide-react';
 import Image from 'next/image';
@@ -98,7 +98,6 @@ export default async function CitiesIndexPage() {
   if (otherCities.length > 0) {
     grouped['Other Cities'] = otherCities;
   }
-
 
   // Check for cities index hero image
   const citiesHeroImagePath = '/cities-hero.jpg';

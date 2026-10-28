@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { getProcessedBreweryData } from '@/lib/db';
-import { slugify, deslugify } from '@/lib/data-utils';
+import { slugify, deslugify } from '@/lib/slug';
 import Link from 'next/link';
 import { ChevronRight, Beer, Store, Warehouse, Leaf, FlaskConical } from 'lucide-react';
 import Image from 'next/image';
@@ -122,10 +122,7 @@ export default async function TypesIndexPage() {
   // Calculate counts for each type
   const items = TYPES.map((type) => {
     const breweries = processed.breweries.filter((b) => {
-      if (Array.isArray(b.type)) {
-        return b.type.some(t => t.toLowerCase() === type);
-      }
-      return b.type?.toLowerCase() === type;
+      return b.type.some((t) => t.toLowerCase() === type);
     });
     
     return {

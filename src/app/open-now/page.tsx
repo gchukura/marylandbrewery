@@ -2,7 +2,8 @@ import { Metadata } from 'next';
 import { getProcessedBreweryData } from '@/lib/db';
 import PageHero from '@/components/directory/PageHero';
 import Link from 'next/link';
-import { slugify } from '@/lib/data-utils';
+import { isOpenAt } from '@/lib/hours';
+import { slugify } from '@/lib/slug';
 
 export const revalidate = 3600; // ISR hourly
 
@@ -35,33 +36,12 @@ export const metadata: Metadata = {
   },
 };
 
-function isOpenNow(hours?: Record<string, string>): { open: boolean; closeTime?: string } {
-  if (!hours) return { open: false };
-  const now = new Date();
-  const day = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const current = now.toTimeString().slice(0,5);
-  const today = hours[day as keyof typeof hours];
-  if (!today || /closed/i.test(today)) return { open: false };
-  const m = today.match(/(\d{1,2}:\d{2}\s*(?:AM|PM)?)[\s-]+(\d{1,2}:\d{2}\s*(?:AM|PM)?)/i);
-  if (!m) return { open: false };
-  const to24 = (t: string) => {
-    const [h, m] = t.replace(/\s*(AM|PM)/i,'').split(':').map(Number);
-    const isPM = /PM/i.test(t);
-    const hh = isPM && h !== 12 ? h + 12 : (!isPM && h === 12 ? 0 : h);
-    return `${String(hh).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-  };
-  const open = to24(m[1]);
-  const close = to24(m[2]);
-  const inRange = open <= current && current <= close;
-  return { open: inRange, closeTime: inRange ? m[2] : undefined };
-}
-
 export default async function OpenNowPage() {
   const processed = await getProcessedBreweryData();
   const openBreweries = processed.breweries
-    .map(b => ({ b, status: isOpenNow(b.hours as any) }))
+    .map(b => ({ b, status: isOpenAt(b.hours) }))
     .filter(x => x.status.open)
-    .map(x => ({ ...x.b, closeTime: x.status.closeTime })) as any[];
+    .map(x => ({ ...x.b, closeTime: x.status.closesAt }));
 
   // Group by city
   const byCity = new Map<string, any[]>();

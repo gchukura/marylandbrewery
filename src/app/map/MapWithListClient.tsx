@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { MapPin, Phone, Globe, Search, Filter, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import BreweryLogo from '@/components/brewery/BreweryLogo';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
   ssr: false, 
@@ -140,7 +140,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
           ) : (
             <div className="divide-y divide-[#E8E6E1]">
               {paginatedBreweries.map((brewery) => {
-                const slug = (brewery as any).slug || brewery.id;
+                const slug = brewery.slug || brewery.id;
                 return (
                   <div key={brewery.id} className="p-4 font-body">
                     <Link
@@ -225,7 +225,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                     {/* Amenities spanning full width below both columns - outside the Link to avoid nested anchors */}
                     {(() => {
                       // Get amenities from either amenities or features field, handle various data formats
-                      const amenities = brewery.amenities || brewery.features;
+                      const amenities = brewery.amenities;
                       let amenityList: string[] = [];
                       
                       if (Array.isArray(amenities)) {
@@ -358,7 +358,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
         <div className="flex-1 min-h-0 relative">
           {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
             <GoogleMap 
-              breweries={filtered as any} 
+              breweries={filtered} 
               height="100%" 
               showClusters={true}
               zoom={9}

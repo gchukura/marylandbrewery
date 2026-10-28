@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
-import { getProcessedBreweryData, getBreweriesByCity } from '@/lib/db';
-import { slugify, deslugify, normalizeCountyName, isValidCountySlug } from '@/lib/data-utils';
+import { getProcessedBreweryData, getBreweriesByCity, getRegions } from '@/lib/db';
+import { normalizeCountyName, isValidCountySlug } from '@/lib/data-utils';
+import { slugify, deslugify } from '@/lib/slug';
 import { bestBreweriesCityPath, hasBestBreweriesPage } from '@/lib/best-breweries';
 import { parseNeighborhoodSlug } from '@/lib/neighborhood-utils';
 import { neighborhoodPath } from '@/lib/neighborhoods';
@@ -16,9 +17,6 @@ import CityBreweriesMapClient from '../../cities/[city]/breweries/CityBreweriesM
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
 
-// Region slugs match /region/[region]
-const MARYLAND_REGION_SLUGS = ['eastern-shore', 'western-maryland', 'central-maryland', 'southern-maryland', 'capital-region'];
-
 function calculateBreweryScore(brewery: any): number {
   const rating = brewery.googleRating || 0;
   const reviewCount = brewery.googleRatingCount || 0;
@@ -28,15 +26,11 @@ function calculateBreweryScore(brewery: any): number {
 }
 
 export async function generateStaticParams() {
-  try {
-    const processed = await getProcessedBreweryData();
-    return Array.from(processed.byCity.entries())
-      .filter(([, breweries]) => hasBestBreweriesPage(breweries.length))
-      .map(([city]) => ({ slug: slugify(city) }));
-  } catch (error) {
-    console.error('Error fetching cities for generateStaticParams:', error);
-    return [];
-  }
+  // No try/catch: a data error here should fail the build
+  const processed = await getProcessedBreweryData();
+  return Array.from(processed.byCity.entries())
+    .filter(([, breweries]) => hasBestBreweriesPage(breweries.length))
+    .map(([city]) => ({ slug: slugify(city) }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -306,7 +300,7 @@ export default async function BestBreweriesSlugPage({ params }: { params: Promis
     }
   }
 
-  if (MARYLAND_REGION_SLUGS.includes(slugWithoutMd)) {
+  if ((await getRegions()).some((r) => r.slug === slugWithoutMd)) {
     permanentRedirect(`/region/${slugWithoutMd}`);
   }
 

@@ -5,9 +5,10 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MapPin, Phone, Search, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 import BreweryLogo from '@/components/brewery/BreweryLogo';
 
+import { calculateDistance } from '@/lib/geo';
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
   ssr: false, 
   loading: () => (
@@ -18,18 +19,18 @@ const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), {
 });
 
 interface Neighborhood {
-  id?: string;
+  id?: string | null;
   name: string;
   slug: string;
-  description?: string;
-  city?: string;
-  county?: string;
+  description?: string | null;
+  city?: string | null;
+  county?: string | null;
   state: string;
-  url?: string;
-  homes_url?: string;
-  latitude?: number;
-  longitude?: number;
-  place_id?: string;
+  url?: string | null;
+  homes_url?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  place_id?: string | null;
 }
 
 interface CityBreweriesMapClientProps {
@@ -38,19 +39,6 @@ interface CityBreweriesMapClientProps {
   neighborhoods: Neighborhood[];
   neighborhood?: Neighborhood | null;
   showNeighborhoods?: boolean;
-}
-
-// Helper function to calculate distance between two points (Haversine formula)
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 3959; // Earth's radius in miles
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
 }
 
 export default function CityBreweriesMapClient({ breweries, cityName, neighborhoods, neighborhood, showNeighborhoods = true }: CityBreweriesMapClientProps) {
@@ -160,7 +148,7 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
           ) : (
             <div className="divide-y divide-gray-200">
               {paginatedBreweries.map((brewery) => {
-                const slug = (brewery as any).slug || brewery.id;
+                const slug = brewery.slug || brewery.id;
                 return (
                   <div
                     key={brewery.id}
@@ -253,7 +241,7 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
                     {/* Amenities spanning full width below both columns - outside the Link to avoid nested anchors */}
                     {(() => {
                       // Get amenities from either amenities or features field, handle various data formats
-                      const amenities = brewery.amenities || brewery.features;
+                      const amenities = brewery.amenities;
                       let amenityList: string[] = [];
                       
                       if (Array.isArray(amenities)) {
@@ -388,7 +376,7 @@ export default function CityBreweriesMapClient({ breweries, cityName, neighborho
             <div className="flex-1 min-h-0 relative">
               {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
                 <GoogleMap 
-                  breweries={filtered as any} 
+                  breweries={filtered} 
                   height="100%" 
                   showClusters={true}
                   zoom={11}

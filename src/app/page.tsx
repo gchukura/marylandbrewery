@@ -3,7 +3,7 @@ import { getProcessedBreweryData } from '@/lib/db';
 import HeroV2 from '@/components/home-v2/HeroV2';
 import ValuePropsV2 from '@/components/home-v2/ValuePropsV2';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
-import { slugify } from '@/lib/data-utils';
+import { slugify } from '@/lib/slug';
 
 export const metadata: Metadata = {
   title: 'Maryland Brewery Directory | Craft Breweries Across Maryland',

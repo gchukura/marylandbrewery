@@ -1,112 +1,67 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { getProcessedBreweryData } from '@/lib/db';
-import PageHero from '@/components/directory/PageHero';
-import Link from 'next/link';
-import { isOpenOnDay } from '@/lib/hours';
+import { DAYS, isOpenOnDay } from '@/lib/hours';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { openOnDayMeta } from '@/lib/seo/page-meta';
-import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import { collectionPage } from '@/lib/seo/jsonld';
 import JsonLd from '@/components/seo/JsonLd';
-import { slugify } from '@/lib/slug';
+import ListingPage from '@/components/listing/ListingPage';
 
 export const revalidate = 3600; // ISR hourly
+// Only the seven days; anything else is a 404
+export const dynamicParams = false;
 
-const DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'] as const;
+export function generateStaticParams() {
+  return DAYS.map((day) => ({ day }));
+}
+
+const label = (day: string) => day.charAt(0).toUpperCase() + day.slice(1);
+
+async function breweriesOpenOn(day: string) {
+  const processed = await getProcessedBreweryData();
+  return processed.breweries.filter((b) => isOpenOnDay(b.hours, day));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ day: string }> }): Promise<Metadata> {
-  const { day: dayParam } = await params;
-  const day = dayParam.charAt(0).toUpperCase() + dayParam.slice(1);
-  const processed = await getProcessedBreweryData();
-  const list = processed.breweries.filter((b) => isOpenOnDay(b.hours, dayParam.toLowerCase()));
-  return buildMetadata({ ...openOnDayMeta(day, list.length), path: `/open/${dayParam.toLowerCase()}` });
+  const { day } = await params;
+  const list = await breweriesOpenOn(day);
+  return buildMetadata({ ...openOnDayMeta(day, list.length), path: `/open/${day}` });
 }
 
-export async function generateStaticParams() {
-  return DAYS.map((d) => ({ day: d }));
-}
-
-export default async function OpenDayPage({ params }: { params: Promise<{ day: string }> }) {
-  const { day: dayParam } = await params;
-  const day = (dayParam || '').toLowerCase();
-  const processed = await getProcessedBreweryData();
-  const list = processed.breweries.filter((b) => isOpenOnDay(b.hours, day));
-
-  const groups = new Map<string, any[]>();
-  for (const b of list) {
-    if (!groups.has(b.city)) groups.set(b.city, []);
-    groups.get(b.city)!.push(b);
-  }
-  const sorted = Array.from(groups.entries()).sort((a,b) => a[0].localeCompare(b[0]));
-
-  const dayCapitalized = day.charAt(0).toUpperCase() + day.slice(1);
-  const breadcrumbs = [
-    { name: 'Maryland Breweries', url: '/', isActive: false },
-    { name: 'Open Now', url: '/open-now', isActive: false },
-    { name: `Open on ${dayCapitalized}`, url: `/open/${dayParam}`, isActive: true },
-  ];
-
-  // Related pages for internal linking
-  const relatedPages = [
-    { title: 'Open Now', url: '/open-now', count: processed.breweries.length },
-    { title: 'Interactive Map', url: '/map', count: processed.breweries.length },
-    { title: 'All Cities', url: '/cities', count: processed.cities.length },
-  ];
-
-  const jsonLd = [
-    collectionPage({ name: `Breweries Open ${dayCapitalized} in Maryland`, path: `/open/${day}`, breweries: list }),
-    breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Open Now', path: '/open-now' }, { name: dayCapitalized, path: `/open/${day}` }]),
-  ];
+export default async function OpenOnDayPage({ params }: { params: Promise<{ day: string }> }) {
+  const { day } = await params;
+  const list = await breweriesOpenOn(day);
+  const Day = label(day);
+  const path = `/open/${day}`;
 
   return (
-    <div className="bg-cream min-h-screen">
-      <JsonLd data={jsonLd} />
-      <PageHero
-        h1={`Breweries Open on ${dayCapitalized}`}
-        introText={`Find ${list.length} Maryland breweries open on ${dayCapitalized}s. Complete list of craft breweries, taprooms, and brewpubs with hours for ${dayCapitalized}. Plan your ${dayCapitalized} brewery tour across Baltimore, Annapolis, Frederick, and more cities.`}
-        breadcrumbs={breadcrumbs}
+    <>
+      <JsonLd data={collectionPage({ name: `Breweries Open ${Day} in Maryland`, path, breweries: list })} />
+      <ListingPage
+        scope="day"
+        title={`Breweries open on ${Day}`}
+        breadcrumbs={[
+          { name: 'Home', path: '/' },
+          { name: 'Open Now', path: '/open-now' },
+          { name: Day, path },
+        ]}
+        breweries={list}
+        context={`open ${Day}s`}
+        related={[
+          {
+            title: 'Open on another day',
+            links: DAYS.filter((d) => d !== day).map((d) => ({ label: label(d), href: `/open/${d}` })),
+          },
+          {
+            title: 'Browse',
+            links: [
+              { label: 'Open right now', href: '/open-now' },
+              { label: 'Brewery map', href: '/map' },
+              { label: 'All cities', href: '/cities' },
+            ],
+          },
+        ]}
       />
-      
-      <div className="container mx-auto px-4 py-10">
-
-      {sorted.length === 0 && (
-        <div className="text-muted">No breweries listed as open on this day.</div>
-      )}
-
-      <div className="space-y-10">
-        {sorted.map(([city, items]) => (
-          <section key={city}>
-            <h2 className="text-2xl font-semibold mb-4">{city}</h2>
-            <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {items.map((b) => (
-                <li key={b.id} className="border rounded-md p-4">
-                  <div className="font-medium text-ink">{b.name}</div>
-                  <div className="text-sm text-muted">{b.city}, {b.state}</div>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
-      </div>
-
-      {/* Related Links Section */}
-      <section className="container mx-auto px-4 py-8 border-t border-line mt-12">
-        <h2 className="text-2xl font-bold text-ink mb-4">Explore More</h2>
-        <div className="grid md:grid-cols-3 gap-4">
-          {relatedPages.map((page) => (
-            <Link
-              key={page.url}
-              href={page.url}
-              className="bg-white rounded-lg p-4 border border-line hover:border-brand-red hover:shadow-md transition-all"
-            >
-              <div className="font-semibold text-ink">{page.title}</div>
-              {page.count > 0 && (
-                <div className="text-sm text-muted mt-1">{page.count} {page.count === 1 ? 'brewery' : 'breweries'}</div>
-              )}
-            </Link>
-          ))}
-        </div>
-      </section>
-      </div>
-    </div>
+    </>
   );
 }

@@ -1,5 +1,9 @@
 # Purging old images from git history
 
+> **Done on 2026-10-28.** History was rewritten and force-pushed: the pack went from 607 MB to 34 MB,
+> and `main` moved from `df418e1` to `6b2017e` (same tree). Don't run this again. A clone made before
+> that date has the old history: re-clone it instead of pulling.
+
 `public/photos` (1,454 JPEGs, ~600 MB) and `public/logos` were committed to git. Even after they
 are deleted, every clone still downloads them: the packed repo is ~594 MB. Once the images live in
 Supabase Storage, this runbook removes them from history.

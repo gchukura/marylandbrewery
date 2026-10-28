@@ -73,8 +73,8 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
   links to redirects and broken links. Launch QA results and post-deploy steps: `docs/launch.md`. `npx knip` must stay clean (`knip.json`).
 - `cn()` is plain clsx (no tailwind-merge): never pass a class that conflicts with a component's base class;
   add a variant instead.
-- Brewery photos and logos are in Storage; `public/photos` and `public/logos` are deleted but still in git
-  history (`docs/runbooks/rewrite-history.md`). `public/cities/`, `counties/`, `regions/` remain.
+- Brewery photos and logos are in Storage; `public/photos` and `public/logos` were purged from git history on
+  2026-10-28 (`docs/runbooks/rewrite-history.md`). `public/cities/`, `counties/`, `regions/` remain.
 - Logo assets are generated from `docs/design/mark.svg` with `npm run icons`.
 - All shared helpers exist. Metadata: `buildMetadata` + `src/lib/seo/page-meta.ts` (titles ≤ 60 with the
   ' | Maryland Brewery' suffix, tested over real names); JSON-LD: `src/lib/seo/jsonld.ts`.

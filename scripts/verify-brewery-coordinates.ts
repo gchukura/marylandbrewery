@@ -29,9 +29,10 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
-import { supabaseAdmin, DatabaseBrewery } from '@/lib/db/client';
+import type { Tables } from '@/lib/db/client';
 
 import { calculateDistance } from '@/lib/geo';
+import { getAdminClient } from '@/lib/db/client';
 // Check if admin client is available
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required. Please set it in .env.local');
@@ -43,7 +44,7 @@ if (!apiKey) {
 }
 
 // Get admin client
-const adminClient = supabaseAdmin;
+const adminClient = getAdminClient();
 if (!adminClient) {
   throw new Error('Failed to initialize Supabase admin client. Check your SUPABASE_SERVICE_ROLE_KEY.');
 }
@@ -124,7 +125,7 @@ async function geocodeAddress(address: string): Promise<{ lat: number; lng: numb
 /**
  * Verify a single brewery's coordinates
  */
-async function verifyBrewery(brewery: DatabaseBrewery): Promise<void> {
+async function verifyBrewery(brewery: Tables<'breweries'>): Promise<void> {
   console.log(`\n📍 Verifying: ${brewery.name}`);
   console.log(`   Address: ${buildAddress(brewery)}`);
   console.log(`   Stored coordinates: ${brewery.latitude}, ${brewery.longitude}`);

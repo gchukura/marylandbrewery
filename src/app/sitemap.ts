@@ -9,7 +9,6 @@ import { isIndexableNeighborhood, neighborhoodPath } from '../lib/neighborhoods'
 
 const BASE_URL = 'https://www.marylandbrewery.com';
 
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const processed = await getProcessedBreweryData();
   const cities = await getAllCities();

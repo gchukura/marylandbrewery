@@ -7,14 +7,14 @@ import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities } f
 import { normalizeCountyName } from '@/lib/data-utils';
 import { slugify, deslugify } from '@/lib/slug';
 import { MARYLAND_COUNTIES } from '@/types/brewery';
-import { supabase } from '@/lib/db/client';
+import { getSupabase } from '@/lib/db/client';
 
 const BASE_URL = 'https://www.marylandbrewery.com';
 const MARYLAND_REGIONS = ['eastern-shore', 'western-maryland', 'central-maryland', 'southern-maryland', 'capital-region'];
 
 async function getAllNeighborhoods() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('maryland_neighborhoods')
       .select('slug, city, name')
       .not('city', 'is', null)

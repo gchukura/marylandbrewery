@@ -31,7 +31,8 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
-import { supabaseAdmin, DatabaseAttraction } from '@/lib/db/client';
+import { getAdminClient } from '@/lib/db/client';
+import type { TablesInsert } from '@/lib/db/client';
 import { getBreweryDataFromSupabase } from '@/lib/db/queries';
 import { slugify } from '@/lib/slug';
 
@@ -268,9 +269,9 @@ function determineAttractionType(googleTypes: string[]): string {
 }
 
 /**
- * Convert Google Places result to DatabaseAttraction
+ * Convert Google Places result to TablesInsert<'maryland_attractions'>
  */
-async function convertPlaceToAttraction(place: any, placeDetails?: any): Promise<DatabaseAttraction | null> {
+async function convertPlaceToAttraction(place: any, placeDetails?: any): Promise<TablesInsert<'maryland_attractions'> | null> {
   try {
     const details = placeDetails || await getPlaceDetails(place.place_id);
     if (!details) {
@@ -305,7 +306,7 @@ async function convertPlaceToAttraction(place: any, placeDetails?: any): Promise
     // Extract county (we'll leave it empty for now, can be enriched later)
     const county = location.city ? undefined : undefined;
     
-    const attraction: DatabaseAttraction = {
+    const attraction: TablesInsert<'maryland_attractions'> = {
       place_id: details.place_id || place.place_id,
       name,
       slug,
@@ -339,18 +340,15 @@ async function convertPlaceToAttraction(place: any, placeDetails?: any): Promise
 /**
  * Upsert attraction to Supabase
  */
-async function upsertAttraction(attraction: DatabaseAttraction): Promise<boolean> {
+async function upsertAttraction(attraction: TablesInsert<'maryland_attractions'>): Promise<boolean> {
   if (DRY_RUN) {
     console.log(`  [DRY RUN] Would upsert: ${attraction.name} (${attraction.type})`);
     return true;
   }
   
-  if (!supabaseAdmin) {
-    throw new Error('Supabase admin client not available');
-  }
   
   try {
-    const { error } = await supabaseAdmin
+    const { error } = await getAdminClient()
       .from('maryland_attractions')
       .upsert(attraction, {
         onConflict: 'place_id',

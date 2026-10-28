@@ -19,18 +19,18 @@ const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), {
 });
 
 interface Neighborhood {
-  id?: string;
+  id?: string | null;
   name: string;
   slug: string;
-  description?: string;
-  city?: string;
-  county?: string;
+  description?: string | null;
+  city?: string | null;
+  county?: string | null;
   state: string;
-  url?: string;
-  homes_url?: string;
-  latitude?: number;
-  longitude?: number;
-  place_id?: string;
+  url?: string | null;
+  homes_url?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  place_id?: string | null;
 }
 
 interface CityBreweriesMapClientProps {

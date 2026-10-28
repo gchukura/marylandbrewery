@@ -18,17 +18,17 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
-import { supabaseAdmin } from '@/lib/db/client';
-import { DatabaseReview } from '@/lib/db/queries';
+import { getAdminClient } from '@/lib/db/client';
+import type { Tables } from '@/lib/db/client';
 
 interface DuplicateGroup {
   key: string;
-  reviews: DatabaseReview[];
+  reviews: Tables<'reviews'>[];
   keepId: string;
   deleteIds: string[];
 }
 
-function getDuplicateKey(review: DatabaseReview): string {
+function getDuplicateKey(review: Tables<'reviews'>): string {
   // Same columns as the reviews unique constraint (brewery_id, source, review_timestamp, reviewer_name)
   const timestamp = review.review_timestamp || 0;
   const reviewerName = (review.reviewer_name || '').toLowerCase().trim();
@@ -38,16 +38,13 @@ function getDuplicateKey(review: DatabaseReview): string {
 const PAGE_SIZE = 1000; // Supabase returns at most 1,000 rows per request
 
 async function findDuplicates(): Promise<DuplicateGroup[]> {
-  if (!supabaseAdmin) {
-    throw new Error('Supabase admin client not available');
-  }
 
   console.log('📥 Fetching all reviews from Supabase...');
   
   // Fetch all reviews, a page at a time
-  const allReviews: DatabaseReview[] = [];
+  const allReviews: Tables<'reviews'>[] = [];
   for (let from = 0; ; from += PAGE_SIZE) {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getAdminClient()
       .from('reviews')
       .select('*')
       .order('created_at', { ascending: true })
@@ -57,7 +54,7 @@ async function findDuplicates(): Promise<DuplicateGroup[]> {
     if (error) {
       throw new Error(`Failed to fetch reviews: ${error.message}`);
     }
-    allReviews.push(...((data || []) as DatabaseReview[]));
+    allReviews.push(...((data || []) as Tables<'reviews'>[]));
     if (!data || data.length < PAGE_SIZE) break;
   }
 
@@ -69,7 +66,7 @@ async function findDuplicates(): Promise<DuplicateGroup[]> {
   console.log(`   ✓ Fetched ${allReviews.length} reviews\n`);
 
   // Group reviews by duplicate key
-  const reviewMap = new Map<string, DatabaseReview[]>();
+  const reviewMap = new Map<string, Tables<'reviews'>[]>();
   
   for (const review of allReviews) {
     const key = getDuplicateKey(review);
@@ -158,9 +155,6 @@ async function removeDuplicates(dryRun: boolean = false): Promise<void> {
   }
 
   // Delete duplicates
-  if (!supabaseAdmin) {
-    throw new Error('Supabase admin client not available');
-  }
 
   console.log('🗑️  Deleting duplicate reviews...\n');
 
@@ -174,7 +168,7 @@ async function removeDuplicates(dryRun: boolean = false): Promise<void> {
   for (let i = 0; i < allDeleteIds.length; i += batchSize) {
     const batch = allDeleteIds.slice(i, i + batchSize);
     
-    const { error } = await supabaseAdmin
+    const { error } = await getAdminClient()
       .from('reviews')
       .delete()
       .in('id', batch);

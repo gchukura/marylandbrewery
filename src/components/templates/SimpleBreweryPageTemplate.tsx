@@ -816,7 +816,6 @@ export default function SimpleBreweryPageTemplate({
                 </div>
               )}
 
-
               {/* Social Media */}
               <div>
                 <h3 
@@ -930,7 +929,6 @@ export default function SimpleBreweryPageTemplate({
                       </div>
                     </div>
                   )}
-
 
               {/* Opening Date */}
               {brewery.openedDate && (

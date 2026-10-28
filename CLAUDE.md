@@ -50,12 +50,12 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
 - Images are still in `public/` (`logos/`, `photos/`, `cities/`, `counties/`, `regions/`).
 - `geo.ts`, `hours.ts`, `slug.ts`, `format.ts` exist; `amenities.ts` and `seo/` do not yet.
 - No `as any` in `src`; about 100 `: any` parameter annotations remain.
-- Hand-written row types (`DatabaseBrewery` etc. in `src/lib/db/client.ts`) until generated types land.
 - The regions table puts Frederick and Anne Arundel in no region (24 breweries on no region page).
 
 ## Conventions
 - Server components by default. `"use client"` only for interactive islands, kept small.
 - All Supabase access goes through `src/lib/db`; import from `@/lib/db` only (ESLint enforces it).
+  Row types are generated (`Tables<'breweries'>`); run `npm run db:types` after any migration.
   The raw clients are private to that folder. Scripts in `scripts/` import its files directly.
 - No `as any`. No hex colors in className; use theme tokens.
 - Shared helpers live in one place: `src/lib/geo.ts`, `hours.ts`, `slug.ts`, `amenities.ts`, `seo/`.

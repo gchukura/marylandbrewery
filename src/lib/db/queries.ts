@@ -4,15 +4,17 @@
  * Provides the same interface as google-sheets.ts but uses Supabase
  */
 
-import { supabase, supabaseAdmin, DatabaseBrewery, DatabaseBeer, DatabaseNewsletterSubscriber, DatabaseBreweryArticle, DatabaseNeighborhood } from './client';
+import { getAdminClient, getSupabase } from './client';
+import type { Json, Tables } from './client';
+import { jsonArray, jsonObject, jsonStringArray } from './json';
 import { Brewery, Beer, SocialMedia, OperatingHours, Membership, ReviewThemes } from '@/types/brewery';
 import { normalizeCountyName } from '@/lib/data-utils';
 import { slugify } from '@/lib/slug';
 
 import { isProductionBuild, throwDuringBuild } from './build';
 /** The type column holds a string or (for one brewery) an array; always return a non-empty array. */
-function normalizeTypes(value: string | string[] | null | undefined): string[] {
-  const types = (Array.isArray(value) ? value : (value || '').split(','))
+function normalizeTypes(value: Json | null): string[] {
+  const types = (Array.isArray(value) ? jsonStringArray(value) : typeof value === 'string' ? value.split(',') : [])
     .map((t) => t.trim())
     .filter(Boolean);
   return types.length > 0 ? types : ['Microbrewery'];
@@ -21,73 +23,73 @@ function normalizeTypes(value: string | string[] | null | undefined): string[] {
 /**
  * Convert database brewery to application brewery type
  */
-function dbBreweryToBrewery(dbBrewery: DatabaseBrewery, beers: Beer[] = []): Brewery {
+function dbBreweryToBrewery(dbBrewery: Tables<'breweries'>, beers: Beer[] = []): Brewery {
   return {
     id: dbBrewery.id,
     name: dbBrewery.name,
     slug: dbBrewery.slug,
-    description: dbBrewery.description,
+    description: dbBrewery.description ?? undefined,
     type: normalizeTypes(dbBrewery.type),
-    
+
     // Location
     street: dbBrewery.street,
     city: dbBrewery.city,
     state: dbBrewery.state,
-    zip: dbBrewery.zip,
+    zip: dbBrewery.zip ?? '',
     // Canonical county name, e.g. "Saint Marys" in the table becomes "St. Mary's"
-    county: (dbBrewery.county && normalizeCountyName(slugify(dbBrewery.county))) || dbBrewery.county,
+    county: (dbBrewery.county && normalizeCountyName(slugify(dbBrewery.county))) || dbBrewery.county || '',
     latitude: dbBrewery.latitude,
     longitude: dbBrewery.longitude,
-    
+
     // Contact
-    phone: dbBrewery.phone,
-    website: dbBrewery.website,
-    socialMedia: (dbBrewery.social_media || {}) as SocialMedia,
-    
+    phone: dbBrewery.phone ?? undefined,
+    website: dbBrewery.website ?? undefined,
+    socialMedia: jsonObject<SocialMedia>(dbBrewery.social_media) ?? {},
+
     // Hours
-    hours: (dbBrewery.hours || {}) as OperatingHours,
-    
+    hours: jsonObject<OperatingHours>(dbBrewery.hours) ?? {},
+
     // Features
-    amenities: dbBrewery.amenities || [],
-    allowsVisitors: dbBrewery.allows_visitors || false,
-    offersTours: dbBrewery.offers_tours || false,
-    beerToGo: dbBrewery.beer_to_go || false,
-    hasMerch: dbBrewery.has_merch || false,
-    memberships: (dbBrewery.memberships || []) as Membership[],
-    
+    amenities: jsonStringArray(dbBrewery.amenities),
+    allowsVisitors: dbBrewery.allows_visitors ?? false,
+    offersTours: dbBrewery.offers_tours ?? false,
+    beerToGo: dbBrewery.beer_to_go ?? false,
+    hasMerch: dbBrewery.has_merch ?? false,
+    memberships: jsonArray<Membership>(dbBrewery.memberships),
+
     // Additional fields
-    food: dbBrewery.food,
-    otherDrinks: dbBrewery.other_drinks,
-    parking: dbBrewery.parking,
-    dogFriendly: dbBrewery.dog_friendly || false,
-    outdoorSeating: dbBrewery.outdoor_seating || false,
-    logo: dbBrewery.logo,
-    photoUrl: dbBrewery.photo_url,
-    photos: dbBrewery.photos || [],
-    featured: dbBrewery.featured || false,
-    specialEvents: dbBrewery.special_events || [],
-    awards: dbBrewery.awards || [],
-    certifications: dbBrewery.certifications || [],
-    
+    food: dbBrewery.food ?? undefined,
+    otherDrinks: dbBrewery.other_drinks ?? undefined,
+    parking: dbBrewery.parking ?? undefined,
+    dogFriendly: dbBrewery.dog_friendly ?? false,
+    outdoorSeating: dbBrewery.outdoor_seating ?? false,
+    logo: dbBrewery.logo ?? undefined,
+    photoUrl: dbBrewery.photo_url ?? undefined,
+    photos: jsonStringArray(dbBrewery.photos),
+    featured: dbBrewery.featured ?? false,
+    specialEvents: jsonStringArray(dbBrewery.special_events),
+    awards: jsonStringArray(dbBrewery.awards),
+    certifications: jsonStringArray(dbBrewery.certifications),
+
     // Metadata
-    openedDate: dbBrewery.opened_date,
+    openedDate: dbBrewery.opened_date ?? undefined,
     lastUpdated: dbBrewery.updated_at || new Date().toISOString(),
-    
+
     // Google Reviews summary
-    googleRating: dbBrewery.google_rating,
-    googleRatingCount: dbBrewery.google_rating_count,
-    googleReviewsLastUpdated: dbBrewery.google_reviews_last_updated,
-    placeId: dbBrewery.place_id,
-    
+    googleRating: dbBrewery.google_rating ?? undefined,
+    googleRatingCount: dbBrewery.google_rating_count ?? undefined,
+    googleReviewsLastUpdated: dbBrewery.google_reviews_last_updated ?? undefined,
+    placeId: dbBrewery.place_id ?? undefined,
+
     // Yelp Reviews summary
-    yelpBusinessId: dbBrewery.yelp_business_id,
-    yelpRating: dbBrewery.yelp_rating,
-    yelpRatingCount: dbBrewery.yelp_rating_count,
-    yelpReviewsLastUpdated: dbBrewery.yelp_reviews_last_updated,
-    
+    yelpBusinessId: dbBrewery.yelp_business_id ?? undefined,
+    yelpRating: dbBrewery.yelp_rating ?? undefined,
+    yelpRatingCount: dbBrewery.yelp_rating_count ?? undefined,
+    yelpReviewsLastUpdated: dbBrewery.yelp_reviews_last_updated ?? undefined,
+
     // Review themes
-    reviewThemes: dbBrewery.review_themes as ReviewThemes | undefined,
-    
+    reviewThemes: jsonObject<ReviewThemes>(dbBrewery.review_themes),
+
     // Beer data
     beers: beers.length > 0 ? beers : undefined,
   };
@@ -115,11 +117,11 @@ export async function getBreweryDataFromSupabase({ detail = true }: { detail?: b
 
   try {
     // Fetch breweries
-    const { data: breweriesData, error: breweriesError } = await supabase
+    const { data: breweriesData, error: breweriesError } = await getSupabase()
       .from('breweries')
       .select(detail ? '*' : LIST_COLUMNS)
       .order('name')
-      .returns<DatabaseBrewery[]>();
+      .returns<Tables<'breweries'>[]>();
 
     if (breweriesError) {
       const errorMessage = breweriesError.message || breweriesError.toString() || 'Unknown error';
@@ -139,8 +141,8 @@ export async function getBreweryDataFromSupabase({ detail = true }: { detail?: b
 
     // Fetch all beers (detail only; brewery pages load their own through fetchBreweryBySlug)
     const { data: beersData, error: beersError } = detail
-      ? await supabase.from('beers').select('*')
-      : { data: [] as DatabaseBeer[], error: null };
+      ? await getSupabase().from('beers').select('*')
+      : { data: [] as Tables<'beers'>[], error: null };
 
     if (beersError && process.env.NODE_ENV === 'development') {
       console.warn(`Failed to fetch beers: ${beersError.message}`);
@@ -149,7 +151,7 @@ export async function getBreweryDataFromSupabase({ detail = true }: { detail?: b
     // Group beers by brewery_id
     const beersByBrewery = new Map<string, Beer[]>();
     if (beersData) {
-      beersData.forEach((beer: DatabaseBeer) => {
+      beersData.forEach((beer: Tables<'beers'>) => {
         if (!beersByBrewery.has(beer.brewery_id)) {
           beersByBrewery.set(beer.brewery_id, []);
         }
@@ -163,7 +165,7 @@ export async function getBreweryDataFromSupabase({ detail = true }: { detail?: b
     }
 
     // Convert database breweries to application breweries
-    const breweries: Brewery[] = breweriesData.map((dbBrewery: DatabaseBrewery) => {
+    const breweries: Brewery[] = breweriesData.map((dbBrewery: Tables<'breweries'>) => {
       const beers = beersByBrewery.get(dbBrewery.id) || [];
       return dbBreweryToBrewery(dbBrewery, beers);
     });
@@ -202,7 +204,7 @@ async function checkEmailExists(email: string): Promise<boolean> {
   try {
     const normalizedEmail = email.toLowerCase().trim();
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('newsletter_subscribers')
       .select('email')
       .eq('email', normalizedEmail)
@@ -233,7 +235,7 @@ export async function addNewsletterSubscriber(email: string, metadata: any = {})
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('newsletter_subscribers')
       .insert({
         email: normalizedEmail,
@@ -262,7 +264,7 @@ export async function addNewsletterSubscriber(email: string, metadata: any = {})
  */
 export async function fetchBreweryBySlug(slug: string): Promise<Brewery | null> {
   try {
-    const { data: breweryData, error } = await supabase
+    const { data: breweryData, error } = await getSupabase()
       .from('breweries')
       .select('*')
       .eq('slug', slug)
@@ -272,12 +274,12 @@ export async function fetchBreweryBySlug(slug: string): Promise<Brewery | null> 
     if (!breweryData) return null;
 
     // Fetch beers for this brewery
-    const { data: beersData } = await supabase
+    const { data: beersData } = await getSupabase()
       .from('beers')
       .select('*')
       .eq('brewery_id', breweryData.id);
 
-    const beers: Beer[] = (beersData || []).map((beer: DatabaseBeer) => ({
+    const beers: Beer[] = (beersData || []).map((beer: Tables<'beers'>) => ({
       name: beer.name,
       style: beer.style || '',
       abv: beer.abv || '',
@@ -311,16 +313,13 @@ export async function writeReviewsToSupabase(
   source: 'google' | 'yelp' = 'google'
 ): Promise<void> {
   try {
-    if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not available');
-    }
 
     if (!reviews || reviews.length === 0) {
       return;
     }
 
     // Get existing reviews for this brewery to check for duplicates
-    const { data: existingReviews } = await supabaseAdmin
+    const { data: existingReviews } = await getAdminClient()
       .from('reviews')
       .select('review_timestamp, reviewer_name, review_text')
       .eq('brewery_id', breweryId)
@@ -374,13 +373,13 @@ export async function writeReviewsToSupabase(
     }
 
     // Upsert on the reviews unique constraint (migration 20261027000000_reviews_unique.sql)
-    const { error } = await supabaseAdmin
+    const { error } = await getAdminClient()
       .from('reviews')
       .upsert(newReviewRecords, { onConflict: REVIEW_CONFLICT_COLUMNS, ignoreDuplicates: true });
 
     if (error?.code === '42P10') {
       // The constraint isn't applied yet; the records above are already de-duplicated, so insert
-      const { error: insertError } = await supabaseAdmin.from('reviews').insert(newReviewRecords);
+      const { error: insertError } = await getAdminClient().from('reviews').insert(newReviewRecords);
       if (insertError) throw insertError;
     } else if (error) {
       throw error;
@@ -400,11 +399,8 @@ export async function updateReviewSummaryInSupabase(
   ratingCount: number
 ): Promise<void> {
   try {
-    if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not available');
-    }
 
-    const { error } = await supabaseAdmin
+    const { error } = await getAdminClient()
       .from('breweries')
       .update({
         google_rating: rating,
@@ -430,11 +426,8 @@ export async function storePlaceIdInSupabase(
   placeId: string
 ): Promise<void> {
   try {
-    if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not available');
-    }
 
-    const { error } = await supabaseAdmin
+    const { error } = await getAdminClient()
       .from('breweries')
       .update({ place_id: placeId })
       .eq('id', breweryId);
@@ -457,11 +450,8 @@ export async function updateYelpReviewSummaryInSupabase(
   ratingCount: number
 ): Promise<void> {
   try {
-    if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not available');
-    }
 
-    const { error } = await supabaseAdmin
+    const { error } = await getAdminClient()
       .from('breweries')
       .update({
         yelp_rating: rating,
@@ -487,11 +477,8 @@ export async function storeYelpBusinessIdInSupabase(
   yelpBusinessId: string
 ): Promise<void> {
   try {
-    if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not available');
-    }
 
-    const { error } = await supabaseAdmin
+    const { error } = await getAdminClient()
       .from('breweries')
       .update({ yelp_business_id: yelpBusinessId })
       .eq('id', breweryId);
@@ -513,11 +500,8 @@ export async function updateBreweryLogoInSupabase(
   logoPath: string
 ): Promise<void> {
   try {
-    if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not available');
-    }
 
-    const { error } = await supabaseAdmin
+    const { error } = await getAdminClient()
       .from('breweries')
       .update({ logo: logoPath })
       .eq('id', breweryId);
@@ -534,26 +518,10 @@ export async function updateBreweryLogoInSupabase(
 /**
  * Review interface matching Supabase schema
  */
-export interface DatabaseReview {
-  id: string;
-  brewery_id: string;
-  brewery_name: string;
-  source: string; // 'google' or 'yelp'
-  reviewer_name: string | null;
-  rating: number | null;
-  review_text: string | null;
-  review_date: string | null;
-  review_timestamp: number | null;
-  reviewer_url: string | null;
-  profile_photo_url: string | null;
-  language: string;
-  fetched_at: string;
-  created_at: string;
-}
 
 const REVIEW_CONFLICT_COLUMNS = 'brewery_id,source,review_timestamp,reviewer_name';
 
-function reviewKey(review: DatabaseReview): string {
+function reviewKey(review: Tables<'reviews'>): string {
   return `${review.brewery_id}|${review.source}|${review.review_timestamp ?? 0}|${(review.reviewer_name || '').toLowerCase().trim()}`;
 }
 
@@ -566,9 +534,9 @@ export async function getBreweryReviews(
   breweryId: string,
   limit: number = 10,
   offset: number = 0
-): Promise<{ reviews: DatabaseReview[]; total: number }> {
+): Promise<{ reviews: Tables<'reviews'>[]; total: number }> {
   try {
-    const { data, count, error } = await supabase
+    const { data, count, error } = await getSupabase()
       .from('reviews')
       .select('*', { count: 'exact' })
       .eq('brewery_id', breweryId)
@@ -580,7 +548,7 @@ export async function getBreweryReviews(
       throw error;
     }
 
-    const rows = (data || []) as DatabaseReview[];
+    const rows = (data || []) as Tables<'reviews'>[];
     const seen = new Set<string>();
     const reviews = rows.filter((review) => {
       const key = reviewKey(review);
@@ -597,9 +565,9 @@ export async function getBreweryReviews(
   }
 }
 
-export async function getBreweryArticles(breweryId: string, limit: number = 5): Promise<DatabaseBreweryArticle[]> {
+export async function getBreweryArticles(breweryId: string, limit: number = 5): Promise<Tables<'brewery_articles'>[]> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('brewery_articles')
       .select('*')
       .eq('brewery_id', breweryId)
@@ -620,9 +588,9 @@ export async function getBreweryArticles(breweryId: string, limit: number = 5): 
 /**
  * Get neighborhoods by city
  */
-export async function getNeighborhoodsByCity(city: string): Promise<DatabaseNeighborhood[]> {
+export async function getNeighborhoodsByCity(city: string): Promise<Tables<'maryland_neighborhoods'>[]> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('maryland_neighborhoods')
       .select('*')
       .ilike('city', city)
@@ -641,9 +609,9 @@ export async function getNeighborhoodsByCity(city: string): Promise<DatabaseNeig
 /**
  * Get neighborhood by slug
  */
-export async function getNeighborhoodBySlug(slug: string): Promise<DatabaseNeighborhood | null> {
+export async function getNeighborhoodBySlug(slug: string): Promise<Tables<'maryland_neighborhoods'> | null> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('maryland_neighborhoods')
       .select('*')
       .eq('slug', slug)
@@ -662,9 +630,9 @@ export async function getNeighborhoodBySlug(slug: string): Promise<DatabaseNeigh
 /**
  * Get every neighborhood (used for static params and the sitemap)
  */
-export async function getAllNeighborhoods(): Promise<DatabaseNeighborhood[]> {
+export async function getAllNeighborhoods(): Promise<Tables<'maryland_neighborhoods'>[]> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('maryland_neighborhoods')
       .select('*')
       .order('name', { ascending: true })
@@ -698,7 +666,7 @@ function canonicalCounty(name: string): string {
  */
 export async function fetchRegions(): Promise<Region[]> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('maryland_regions')
       .select('region_slug, region_name, counties, description')
       .order('created_at', { ascending: true });

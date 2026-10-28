@@ -23,8 +23,6 @@ export interface Beer {
   style: string;
   abv: string;
   availability: string;
-  /** When this row was last written (beer lists aren't refreshed automatically) */
-  updatedAt?: string;
 }
 
 /**

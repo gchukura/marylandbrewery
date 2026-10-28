@@ -231,14 +231,6 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
     .join(', ');
   // Only a real check counts: updated_at moves on every bulk data fix
   const hoursChecked = monthYear(brewery.hoursVerifiedAt);
-  // Beer rows are imported once and not refreshed, so they're dated and sent to the live tap list
-  const beersAsOf = monthYear(
-    beers
-      .map((b) => b.updatedAt ?? '')
-      .sort()
-      .at(-1)
-  );
-  const untappd = externalUrl(brewery.socialMedia?.untappd);
 
   return (
     <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-7 px-4 pb-16 pt-6 sm:px-6">
@@ -498,7 +490,7 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
         )}
 
         {beers.length > 0 && (
-          <Section id="beers" title="Beers">
+          <Section id="on-tap" title="On tap">
             <div className="overflow-x-auto rounded-card border border-line bg-white">
               <table className="table w-full min-w-[520px] border-collapse text-left text-[15px]">
                 <thead className="bg-cream text-[12px] uppercase tracking-[0.08em] text-muted">
@@ -540,40 +532,6 @@ export default async function BreweryPage({ params }: BreweryPageProps) {
                 </tbody>
               </table>
             </div>
-            <p className="m-0 text-[13px] text-muted">
-              {beersAsOf
-                ? `Lineup as of ${beersAsOf}; it may have changed.`
-                : 'This lineup may have changed.'}
-              {untappd && (
-                <>
-                  {' '}
-                  <a
-                    href={untappd}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold text-brand-red hover:text-brand-red-dark"
-                  >
-                    See what&apos;s pouring now on Untappd →
-                  </a>
-                </>
-              )}
-            </p>
-          </Section>
-        )}
-
-        {beers.length === 0 && untappd && (
-          <Section id="on-tap" title="On tap">
-            <p className="m-0 text-[15px] text-ink">
-              {brewery.name} keeps its current tap list on Untappd.{' '}
-              <a
-                href={untappd}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-brand-red hover:text-brand-red-dark"
-              >
-                See what&apos;s on tap →
-              </a>
-            </p>
           </Section>
         )}
 

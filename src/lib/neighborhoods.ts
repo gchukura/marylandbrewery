@@ -1,4 +1,5 @@
 import { sortByDistance, type LatLng } from '@/lib/geo';
+import { slugify } from '@/lib/slug';
 
 /** A neighborhood page is indexed only if a brewery is within this distance. */
 export const NEIGHBORHOOD_INDEX_RADIUS_MILES = 3;
@@ -9,6 +10,14 @@ const NEIGHBORHOOD_MIN_BREWERIES = 5;
 
 export function neighborhoodPath(slug: string): string {
   return `/neighborhoods/${slug}`;
+}
+
+/**
+ * The slug the old sitemap gave a neighborhood under /best-breweries: "{slug}-{city}-md"
+ * (e.g. "canton-baltimore-md"). Null when the row has no city.
+ */
+export function legacyNeighborhoodSlug(neighborhood: { slug: string; city: string | null }): string | null {
+  return neighborhood.city ? `${neighborhood.slug}-${slugify(neighborhood.city)}-md` : null;
 }
 
 /**

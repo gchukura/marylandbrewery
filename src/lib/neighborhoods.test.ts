@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { distanceMiles, sortByDistance } from './geo';
-import { breweriesNearNeighborhood, isIndexableNeighborhood, isListedAttraction, neighborhoodPath } from './neighborhoods';
+import {
+  breweriesNearNeighborhood,
+  isIndexableNeighborhood,
+  isListedAttraction,
+  legacyNeighborhoodSlug,
+  neighborhoodPath,
+} from './neighborhoods';
 
 const canton = { latitude: 39.2779, longitude: -76.5759 };
 // ~0.07° of latitude is ~4.8 miles
@@ -46,5 +52,17 @@ describe('neighborhoods', () => {
     expect(isListedAttraction({ type: 'landmark', googleTypes: ['point_of_interest', 'tourist_attraction'] })).toBe(true);
     expect(isListedAttraction({ type: 'landmark', googleTypes: ['point_of_interest', 'shopping_mall'] })).toBe(false);
     expect(isListedAttraction({ type: 'landmark' })).toBe(false);
+  });
+});
+
+describe('legacyNeighborhoodSlug', () => {
+  it('rebuilds the old {neighborhood}-{city}-md slug', () => {
+    expect(legacyNeighborhoodSlug({ slug: 'canton', city: 'Baltimore' })).toBe('canton-baltimore-md');
+    expect(legacyNeighborhoodSlug({ slug: 'woodside', city: 'Silver Spring' })).toBe('woodside-silver-spring-md');
+    expect(legacyNeighborhoodSlug({ slug: 'temple-hills', city: 'Temple Hills' })).toBe('temple-hills-temple-hills-md');
+  });
+
+  it('has no old slug without a city', () => {
+    expect(legacyNeighborhoodSlug({ slug: 'canton', city: null })).toBeNull();
   });
 });

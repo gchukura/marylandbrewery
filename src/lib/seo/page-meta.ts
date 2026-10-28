@@ -15,7 +15,7 @@ export interface PageMeta {
  * first comma, and quotes. "Fort McHenry National Monument and Historic Shrine" is unchanged;
  * "Chesapeake Bay Maritime Museum - NORTH GATE" -> "Chesapeake Bay Maritime Museum".
  */
-export function shortName(name: string): string {
+function shortName(name: string): string {
   return name
     .replace(/\s*\([^)]*\)\s*/g, ' ')
     .split(/\s+[-–—|]\s+|\s*\/\s*|,\s*/)[0]
@@ -25,7 +25,7 @@ export function shortName(name: string): string {
 }
 
 /** Last resort for a title that still doesn't fit: cut at a word boundary, no ellipsis. */
-export function clipTitle(text: string): string {
+function clipTitle(text: string): string {
   if (text.length <= MAX_PAGE_TITLE_LENGTH) return text;
   const cut = text.slice(0, MAX_PAGE_TITLE_LENGTH + 1);
   return cut.slice(0, cut.lastIndexOf(' ')).replace(/[\s,;:&–-]+$/, '');

@@ -3,7 +3,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
-export const chipVariants = cva(
+const chipVariants = cva(
   'tap inline-flex items-center gap-1.5 whitespace-nowrap rounded-chip px-3.5 py-2 font-sans text-[13px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red',
   {
     variants: {
@@ -23,18 +23,6 @@ interface ChipProps extends VariantProps<typeof chipVariants> {
   className?: string;
   /** Renders a link when given, otherwise a span */
   href?: string;
-}
-
-/** A pill that links somewhere ("Open now · 61", "Dog-friendly") or just labels something. */
-export function Chip({ children, className, href, tone }: ChipProps) {
-  const classes = cn(chipVariants({ tone }), className);
-  return href ? (
-    <Link href={href} className={classes}>
-      {children}
-    </Link>
-  ) : (
-    <span className={classes}>{children}</span>
-  );
 }
 
 interface FilterChipProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'aria-pressed'> {

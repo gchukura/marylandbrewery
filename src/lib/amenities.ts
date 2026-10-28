@@ -84,7 +84,7 @@ export const AMENITY_ALIASES: Readonly<Record<string, string | null>> = {
 };
 
 /** City x amenity pages with fewer breweries are noindex and left out of the sitemap. */
-export const MIN_BREWERIES_FOR_CITY_AMENITY_INDEX = 3;
+const MIN_BREWERIES_FOR_CITY_AMENITY_INDEX = 3;
 
 export function getAmenity(slug: string): AmenityDefinition | undefined {
   return AMENITIES.find((a) => a.slug === slug);

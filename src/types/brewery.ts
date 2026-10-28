@@ -4,18 +4,6 @@
  */
 
 /**
- * Enum for different types of breweries
- */
-export enum BreweryType {
-  MICROBREWERY = 'microbrewery',
-  BREWPUB = 'brewpub',
-  TAPROOM = 'taproom',
-  PRODUCTION = 'production',
-  NANO = 'nano',
-  REGIONAL = 'regional'
-}
-
-/**
  * Social media links for a brewery
  */
 export interface SocialMedia {
@@ -35,31 +23,6 @@ export interface Beer {
   style: string;
   abv: string;
   availability: string;
-}
-
-/**
- * Article information
- */
-export interface Article {
-  title: string;
-  url: string;
-}
-
-/**
- * Brewery news article from Google News RSS
- */
-export interface BreweryArticle {
-  id: string;
-  breweryId: string;
-  title: string;
-  description?: string;
-  url: string;
-  source?: string;
-  author?: string;
-  imageUrl?: string;
-  publishedAt?: string;
-  fetchedAt: string;
-  relevanceScore?: number;
 }
 
 /**
@@ -272,59 +235,3 @@ export const MARYLAND_COUNTIES = [
   'Worcester'
 ] as const;
 
-/**
- * Common brewery amenities
- */
-export const COMMON_AMENITIES = [
-  'Food',
-  'Outdoor Seating',
-  'Live Music',
-  'Games',
-  'Parking',
-  'Pet Friendly',
-  'Wheelchair Accessible',
-  'Private Events',
-  'Growler Fills',
-  'Crowler Machine',
-  'Merchandise',
-  'Tours',
-  'Tastings',
-  'Food Trucks',
-  'WiFi',
-  'TVs',
-  'Pool Table',
-  'Dart Board',
-  'Cornhole',
-  'Fire Pit',
-  'Heated Patio',
-  'Covered Patio',
-  'Family Friendly',
-  'Date Night',
-  'Group Friendly'
-] as const;
-
-/**
- * Type for amenity values
- */
-export type Amenity = typeof COMMON_AMENITIES[number];
-
-/**
- * Type for Maryland county values
- */
-export type MarylandCounty = typeof MARYLAND_COUNTIES[number];
-
-/**
- * Brewery filter options
- */
-export interface BreweryFilters {
-  city?: string;
-  county?: string;
-  type?: string;
-  amenity?: string;
-  search?: string;
-}
-
-/**
- * Brewery sort options
- */
-export type BrewerySortOptions = 'name' | 'city' | 'type' | 'distance';

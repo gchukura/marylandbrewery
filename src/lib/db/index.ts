@@ -11,4 +11,4 @@ export type { Database, Json, Tables } from './client';
 export * from './queries';
 export * from './attractions';
 export * from './brewery-data';
-export { isProductionBuild, throwDuringBuild } from './build';
+export { throwDuringBuild } from './build';

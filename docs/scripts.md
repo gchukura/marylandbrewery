@@ -1,6 +1,6 @@
 # Scripts
 
-The maintenance scripts live in `scripts/*.ts` and run with `tsx` through the npm scripts in `package.json`. Older one-off scripts are in `scripts/archived/` (see the last section); they have no npm script.
+The maintenance scripts live in `scripts/*.ts` and run with `tsx` through the npm scripts in `package.json`. Older one-off scripts were removed on 2026-10-28 (they are in git history; see the last section).
 
 ## Before you run anything
 
@@ -243,67 +243,6 @@ What it does: Builds the route list from `page.tsx` / `page.ts` files under `src
 
 ---
 
-## Archived scripts
+## Removed scripts
 
-These are in `scripts/archived/`. They have no npm script, are not typechecked, and are kept for reference only. Several of them write to the production database, so read one before you run it.
-
-- `capitalize-microbrewery.ts`: one-off rename of `breweries.type` from "microbrewery" to "Microbrewery".
-- `check-nano-breweries.ts`: read-only listing of breweries whose `type` contains "nano".
-- `cleanup-memberships.ts`: one-off removal of `description` and `benefits` from each `breweries.memberships` entry.
-- `combine-logo-with-text.ts`: sharp image tool that built `public/logo.png` from `public/logo-beer-mug.png` plus text.
-- `create-text-logo.ts`: sharp image tool that generated a text-only `public/logo.png`.
-- `enrich-ba-memberships-selenium.ts`: Selenium version of the Brewers Association membership scrape.
-- `enrich-ba-memberships.ts`: scraped Brewers Association membership and Independent Craft seal data into `breweries.memberships`.
-- `enrich-mbam-memberships.ts`: scraped Brewers Association of Maryland membership (marylandbeer.org) into `breweries.memberships`.
-- `enrich-neighborhoods-city-county.ts`: reverse-geocoded missing city and county on `maryland_neighborhoods`.
-- `fetch-city-images.ts`: downloaded city hero images from the Pexels API to `public/cities/` (needed `PEXELS_API_KEY`).
-- `fetch-county-images.ts`: downloaded county hero images from Pexels to `public/counties/`.
-- `fetch-index-hero-images.ts`: downloaded brewery-themed hero images for index pages.
-- `fetch-region-images.ts`: downloaded region hero images from Pexels.
-- `import-neighborhoods-csv.ts`: imported a hand-made `neighborhoods.csv` into `maryland_neighborhoods`. This was the manual fallback after homes.com blocked scraping.
-- `migrate-neighborhoods-csv.ts`: imported neighborhoods from CSV, inferred city from descriptions, geocoded them, and upserted into `maryland_neighborhoods`.
-- `migrate-to-supabase.ts`: the original Google Sheets to Supabase migration.
-- `preview-amenities-migration.sql`: SQL preview for the amenities column migration.
-- `scrape-maryland-neighborhoods.ts`: Playwright scrape of homes.com's Maryland neighborhood list into `maryland_neighborhoods` (blocked by homes.com).
-- `scrape-maryland-neighborhoods-fetch.ts`: fetch-based version of the same scrape.
-- `split-logo.ts`: sharp image tool that split `public/logo.png` into separate pieces.
-- `sync-logos-to-supabase.ts`: synced `breweries.logo` from the old Google Sheet (the Sheet is no longer used).
-- `update-micro-to-microbrewery.ts`: one-off rename of `breweries.type` from "micro" to "microbrewery".
-- `update-nano-to-nanobrewery.ts`: one-off type rename from "Nano" to "Nanobrewery".
-- `verify-md-pages.ts`: checked the routing logic for `-md`-suffixed pages without building them.
-
-### `npm run seo:check`
-
-File: `scripts/check-sitemap.ts`. Fetches `/sitemap.xml` from a base URL (default `http://localhost:3000`, so run `npm run build && npm start` first, or pass a preview URL: `npm run seo:check -- https://marylandbrewery-rdni.vercel.app`) and requests every URL. Reports any status other than 200, any redirect, a canonical that isn't the URL itself, a noindex page, a missing title or description, a title over 60 or a description over 155 characters, and duplicate sitemap URLs. Exits 1 on any problem. Reads no env vars; writes nothing. Run before SEO-related PRs and after deploys.
-
-### `npm run seo:fixture`
-
-File: `scripts/dump-seo-fixture.ts`. Writes `src/lib/seo/__fixtures__/real-names.json`: the brewery, city, county, region, type, indexable neighborhood and indexable attraction names that `src/lib/seo/page-meta.test.ts` checks titles against. Reads Supabase with the anon key; writes no data. Run after large data changes (new attractions, neighborhoods or breweries) and commit the result.
-
-### `npm run media:migrate`
-
-File: `scripts/migrate-media-to-storage.ts`. One-time move of `public/photos` and `public/logos` into the `brewery-media` bucket. For every brewery row it reads the local files the row references, detects the real format (some `.jpg` files are PNGs), converts them with the same processing as `data:photos` / `data:logos`, uploads them to `photos/<slug>/<n>.webp` and `logos/<slug>.webp`, and then updates `photos` and `logo` to the public Storage URLs. Re-runs skip objects whose size already matches. A row is only updated after all its uploads succeeded; an unreadable logo (one `.ico` saved as `.png`) is left as it is and listed.
-
-- Dry run (default): processes every image and prints the summary; uploads and writes nothing. `--limit N` stops after N breweries.
-- `--apply`: uploads and updates rows. Needs `SUPABASE_SERVICE_ROLE_KEY` and the bucket (migration `20261028010000_brewery_media_bucket.sql`).
-- Files in `public/` that no row references (the three deleted breweries) are listed, not migrated.
-- Run once. Then delete `public/photos` and `public/logos` and follow `docs/runbooks/rewrite-history.md`.
-
-### `npm run data:check-websites`
-
-File: `scripts/check-brewery-websites.ts`. Read-only. Fetches every brewery's `website` (8 at a time, 15 s timeout, following redirects) and flags it when it fails to load, redirects to another domain, looks parked or spammy, or neither its domain nor its page title contains a distinctive word of the brewery's name (`scripts/lib/brewery-site.ts`). It also lists `social_media` links that aren't profiles (share buttons, tracking pixels such as `facebook.com/2008` and `facebook.com/tr`, single posts). `--all` prints every row; `--json` writes `scripts/output/brewery-websites.json` (gitignored).
-
-Flags are leads, not verdicts. Expect noise from sites behind bot protection (`403 Just a moment...`), Facebook pages (`HTTP 400`) and breweries whose domain doesn't spell their name. Check the rest by hand, ideally against Google Places, and fix `breweries.website` directly. Run it every few months: brewery domains expire and get picked up by spam sites.
-
-With `GOOGLE_MAPS_API_KEY` set, it also asks Google Places for each brewery's `business_status` (flags anything not `OPERATIONAL`, such as `CLOSED_PERMANENTLY`) and the website Google lists, when that differs from ours. Without the key it skips that and says so.
-
-`data:logos` uses the same name check and skips a brewery's website when the page doesn't mention the brewery.
-
-### `npm run map:counties`
-
-File: `scripts/generate-county-map.ts`. Builds `src/components/home/maryland-counties.svg` (the homepage county map) from the US Census cartographic boundary file `cb_2023_us_county_500k` (public domain): downloads it into `scripts/output/census/` (gitignored) if missing, keeps Maryland (STATEFP 24, 24 shapes), simplifies it with mapshaper, projects it with Maryland State Plane parameters and fails if the result isn't 24 counties under 60 KB. Also writes an unsimplified `scripts/output/census/maryland-counties.geojson` for point-in-county lookups. Writes to Supabase: no.
-
-### `npm run home:blur`
-
-File: `scripts/generate-home-blur.ts`. After editing `HERO_PHOTOS` in `src/config/home.ts`, fetches each photo and writes its tiny blurred preview (`blurDataURL`) back into that file. Writes to Supabase: no.
-
+The 25 one-off scripts that lived in `scripts/archived/` (membership enrichment, CSV imports, image fetchers, logo tools, early data fixes) were deleted on 2026-10-28 as part of the launch dead-code pass. Nothing ran them. To read one, look in git history, e.g. `git log --diff-filter=D --name-only -- scripts/archived`.

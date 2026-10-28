@@ -1,0 +1,30 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "scripts/*.ts",
+    "e2e/**/*.ts",
+    "lighthouserc.cjs"
+  ],
+  "ignore": [
+    "docs/**",
+    "src/lib/db/database.types.ts"
+  ],
+  "ignoreDependencies": [
+    "eslint-config-next",
+    "lightningcss",
+    "mapshaper",
+    "postcss"
+  ],
+  "ignoreBinaries": [
+    "google.com",
+    "facebook.com",
+    "instagram.com",
+    "twitter.com",
+    "yelp.com",
+    "untappd.com"
+  ],
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  }
+}

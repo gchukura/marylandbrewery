@@ -21,6 +21,7 @@ export type ListingScope =
   | 'city-amenity'
   | 'best'
   | 'open-now'
+  | 'day'
   | 'neighborhood'
   | 'state';
 

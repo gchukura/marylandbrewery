@@ -10,32 +10,6 @@ import { getNeighborhoodsByCity, getNeighborhoodBySlug } from '@/lib/db';
 import type { Tables } from '@/lib/db';
 
 /**
- * Check if a slug matches the neighborhood pattern
- * Neighborhood slugs: 4+ parts ending with -md (neighborhood + city + md)
- * Example: "edgemoor-bethesda-md" (3 parts min: neighborhood-city-md)
- * Note: Since cities can have up to 3 words, neighborhoods need at least 4 parts
- */
-export function isNeighborhoodSlug(slug: string): boolean {
-  const parts = slug.split('-');
-  // {neighborhood}-{city}-md has at least 3 parts (e.g. "canton-baltimore-md").
-  // City slugs like "havre-de-grace-md" also pass; parseNeighborhoodSlug returns null for
-  // them because no neighborhood matches, and callers fall through to city handling.
-  return parts.length >= 3 && slug.endsWith('-md');
-}
-
-/**
- * Check if a slug matches the city pattern
- * City slugs: 1-3 parts, optionally ending with -md
- * Examples: "bethesda", "bethesda-md", "silver-spring", "havre-de-grace"
- */
-export function isCitySlug(slug: string): boolean {
-  const slugWithoutMd = slug.endsWith('-md') ? slug.substring(0, slug.length - 3) : slug;
-  const partsWithoutMd = slugWithoutMd.split('-');
-  // Allow up to 3-word city names (e.g., "havre-de-grace", "prince-fredericktown")
-  return partsWithoutMd.length <= 3;
-}
-
-/**
  * Parse a neighborhood slug and return neighborhood data
  * 
  * Pattern: [neighborhood-slug]-[city-slug]-md
@@ -126,3 +100,11 @@ export async function parseNeighborhoodSlug(
   return null;
 }
 
+/** Whether a slug has the old {neighborhood}-{city}-md shape. */
+function isNeighborhoodSlug(slug: string): boolean {
+  const parts = slug.split('-');
+  // {neighborhood}-{city}-md has at least 3 parts (e.g. "canton-baltimore-md").
+  // City slugs like "havre-de-grace-md" also pass; parseNeighborhoodSlug returns null for
+  // them because no neighborhood matches, and callers fall through to city handling.
+  return parts.length >= 3 && slug.endsWith('-md');
+}

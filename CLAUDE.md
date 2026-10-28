@@ -36,7 +36,6 @@ Docs live in docs/ (setup, scripts, troubleshooting, seo-audit-2026, adsense). W
 ## Current state (gaps between the code and the decisions above)
 These describe the code as of 2026-10-27. Fix them in their own PRs, not incidentally.
 - `src/app/api/contact/route.ts` still appends to a Google Sheet via `googleapis`.
-  `lib/archived/google-sheets.ts` is the retired Sheets layer.
 - Neighborhood rules (radii, noindex, attraction filter) live in `src/lib/neighborhoods.ts`; the 5+
   best-of rule lives in `src/lib/best-breweries.ts`. Old `{neighborhood}-{city}-md` URLs under
   `/best-breweries`, `/best-breweries/near` and `/cities/near` redirect to `/neighborhoods/[slug]`.
@@ -66,6 +65,9 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
   `google-adsense-account` meta tag. Ad units must be fixed-size (no `data-ad-format`): AdSense collapses the
   parents of unfilled responsive units with inline `!important` styles.
 - Accessibility: `e2e/a11y.spec.ts` (axe) must stay at zero serious/critical violations.
+- Internal links: the footer links every region, amenity, type and eligible best-of city; `/neighborhoods` and `/near`
+  index every indexed neighborhood and attraction. `npm run seo:check` also crawls from `/` and fails on orphans,
+  links to redirects and broken links. Launch QA results and post-deploy steps: `docs/launch.md`. `npx knip` must stay clean (`knip.json`).
 - `cn()` is plain clsx (no tailwind-merge): never pass a class that conflicts with a component's base class;
   add a variant instead.
 - Brewery photos and logos are in Storage; `public/photos` and `public/logos` are deleted but still in git

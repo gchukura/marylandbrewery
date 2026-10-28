@@ -51,7 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Home and indexes change whenever any brewery does
   add('/', 1.0, siteUpdated);
-  for (const path of ['/map', '/cities', '/counties', '/region', '/type', '/amenities', '/best-breweries', '/open-now']) {
+  for (const path of ['/map', '/cities', '/counties', '/region', '/type', '/amenities', '/best-breweries', '/open-now', '/neighborhoods', '/near']) {
     add(path, 0.8, siteUpdated);
   }
   add('/contact', 0.5);

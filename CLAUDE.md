@@ -44,11 +44,13 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
 - Redirects: pattern-only ones (-md, amenity aliases) are 301s in `src/middleware.ts`; ones that need data
   (city size, neighborhoods, brewery ids) use `permanentRedirect()` in the page, which sends 308.
 - `/blog` temporarily redirects to `/`.
-- Fonts are Playfair Display + Source Sans 3 via `next/font/google` in `src/app/layout.tsx`;
-  `globals.css` also names `'Source Sans 3'` directly. Design tokens from `docs/design/tokens.css`
-  are not yet in `globals.css`.
-- `tailwind.config.ts` exists but is not loaded (no `@config`).
-- Images are still in `public/` (`logos/`, `photos/`, `cities/`, `counties/`, `regions/`).
+- Design system is in place: tokens in `@theme` in `globals.css`, Fraunces + Inter via next/font
+  (`font-display`, `font-sans`), shared UI in `src/components/ui/` (Button, Chip/FilterChip, StatusBadge,
+  BreweryCard, BreweryListRow, Breadcrumbs, CheckerBand, SectionHeading, Logo), header/footer in
+  `src/components/layout/`. Page layouts are still the old ones and adopt these components page by page.
+- Brewery photos and logos are in Storage; `public/photos` and `public/logos` are deleted but still in git
+  history (`docs/runbooks/rewrite-history.md`). `public/cities/`, `counties/`, `regions/` remain.
+- Logo assets are generated from `docs/design/mark.svg` with `npm run icons`.
 - All shared helpers exist. Metadata: `buildMetadata` + `src/lib/seo/page-meta.ts` (titles ≤ 60 with the
   ' | Maryland Brewery' suffix, tested over real names); JSON-LD: `src/lib/seo/jsonld.ts`.
   `npm run seo:check` crawls the sitemap of a running build and must report 0 problems.

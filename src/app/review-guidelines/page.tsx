@@ -1,131 +1,111 @@
 import { Metadata } from 'next';
 import { createPageMetadata } from '@/lib/layout-utils';
-import PageHero from '@/components/directory/PageHero';
+import ContentPage from '@/components/layout/ContentPage';
+import { buttonVariants } from '@/components/ui/button';
 
 export const metadata: Metadata = createPageMetadata({
   title: 'Review Guidelines',
-  description: 'Guidelines for writing helpful and honest reviews of Maryland breweries. Learn how to share your brewery experience effectively.',
+  description:
+    'Guidelines for writing helpful and honest reviews of Maryland breweries. Learn how to share your brewery experience effectively.',
   path: '/review-guidelines',
-  keywords: ['brewery reviews', 'review guidelines', 'Maryland brewery reviews'],
+  keywords: [
+    'brewery reviews',
+    'review guidelines',
+    'Maryland brewery reviews',
+  ],
 });
 
 export default function ReviewGuidelinesPage() {
-  const breadcrumbs = [
-    { name: 'Maryland Breweries', url: '/', isActive: false },
-    { name: 'Review Guidelines', url: '/review-guidelines', isActive: true },
-  ];
-
   return (
-    <div className="bg-cream min-h-screen">
-      <PageHero
-        h1="Review Guidelines"
-        introText="Help fellow craft beer enthusiasts discover great breweries by writing helpful, honest reviews."
-        breadcrumbs={breadcrumbs}
-        heroImage="/cities-hero.jpg"
-      />
-      
-      <div className="max-w-3xl mx-auto px-4 py-12">
-        <div className="bg-white rounded-lg shadow-sm border border-line p-8 space-y-6">
-          <section>
-            <h2 className="text-2xl font-bold text-ink mb-4">Writing Great Reviews</h2>
-            <p className="text-muted mb-4">
-              Your reviews help others discover amazing breweries and make informed decisions. Here's how to write reviews that are helpful and authentic.
-            </p>
-          </section>
+    <ContentPage
+      breadcrumbs={[
+        { name: 'Home', path: '/' },
+        { name: 'Review Guidelines', path: '/review-guidelines' },
+      ]}
+      title="Review Guidelines"
+      intro="Help fellow craft beer enthusiasts discover great breweries by writing helpful, honest reviews."
+    >
+      <section>
+        <h2>Writing Great Reviews</h2>
+        <p>
+          Your reviews help others discover amazing breweries and make informed
+          decisions. Here's how to write reviews that are helpful and authentic.
+        </p>
+      </section>
 
-          <section>
-            <h3 className="text-xl font-semibold text-ink mb-3">What to Include</h3>
-            <ul className="space-y-2 text-muted">
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span><strong>Beer Quality:</strong> Share your thoughts on the beer selection, quality, and unique offerings.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span><strong>Atmosphere:</strong> Describe the vibe, ambiance, and overall experience.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span><strong>Service:</strong> Comment on staff friendliness, knowledge, and attentiveness.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span><strong>Food & Amenities:</strong> Mention food options, outdoor seating, parking, and other amenities.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span><strong>Value:</strong> Share your perspective on pricing and overall value.</span>
-              </li>
-            </ul>
-          </section>
+      <section>
+        <h3>What to Include</h3>
+        <ul>
+          <li>
+            <strong>Beer Quality:</strong> Share your thoughts on the beer
+            selection, quality, and unique offerings.
+          </li>
+          <li>
+            <strong>Atmosphere:</strong> Describe the vibe, ambiance, and
+            overall experience.
+          </li>
+          <li>
+            <strong>Service:</strong> Comment on staff friendliness, knowledge,
+            and attentiveness.
+          </li>
+          <li>
+            <strong>Food & Amenities:</strong> Mention food options, outdoor
+            seating, parking, and other amenities.
+          </li>
+          <li>
+            <strong>Value:</strong> Share your perspective on pricing and
+            overall value.
+          </li>
+        </ul>
+      </section>
 
-          <section>
-            <h3 className="text-xl font-semibold text-ink mb-3">Best Practices</h3>
-            <ul className="space-y-2 text-muted">
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span><strong>Be Honest:</strong> Share your genuine experience, both positive and negative.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span><strong>Be Specific:</strong> Provide concrete details rather than vague statements.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span><strong>Be Respectful:</strong> Critique the experience, not the people. Keep it professional.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span><strong>Be Recent:</strong> Review based on recent visits to ensure accuracy.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span><strong>Be Helpful:</strong> Focus on information that helps others make decisions.</span>
-              </li>
-            </ul>
-          </section>
+      <section>
+        <h3>Best Practices</h3>
+        <ul>
+          <li>
+            <strong>Be Honest:</strong> Share your genuine experience, both
+            positive and negative.
+          </li>
+          <li>
+            <strong>Be Specific:</strong> Provide concrete details rather than
+            vague statements.
+          </li>
+          <li>
+            <strong>Be Respectful:</strong> Critique the experience, not the
+            people. Keep it professional.
+          </li>
+          <li>
+            <strong>Be Recent:</strong> Review based on recent visits to ensure
+            accuracy.
+          </li>
+          <li>
+            <strong>Be Helpful:</strong> Focus on information that helps others
+            make decisions.
+          </li>
+        </ul>
+      </section>
 
-          <section>
-            <h3 className="text-xl font-semibold text-ink mb-3">What to Avoid</h3>
-            <ul className="space-y-2 text-muted">
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span>Personal attacks or offensive language</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span>False or misleading information</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span>Reviews for breweries you haven't visited</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span>Promotional content or spam</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-brand-red mr-2">•</span>
-                <span>Conflicts of interest (e.g., reviewing your own brewery)</span>
-              </li>
-            </ul>
-          </section>
+      <section>
+        <h3>What to Avoid</h3>
+        <ul>
+          <li>Personal attacks or offensive language</li>
+          <li>False or misleading information</li>
+          <li>Reviews for breweries you haven't visited</li>
+          <li>Promotional content or spam</li>
+          <li>Conflicts of interest (e.g., reviewing your own brewery)</li>
+        </ul>
+      </section>
 
-          <section className="bg-paper border border-line rounded-lg p-6">
-            <h3 className="text-xl font-semibold text-ink mb-3">Ready to Write a Review?</h3>
-            <p className="text-muted mb-4">
-              Find your favorite brewery and share your experience with the Maryland craft beer community.
-            </p>
-            <a
-              href="/map"
-              className="inline-block bg-brand-red text-white font-semibold px-6 py-2 rounded hover:bg-brand-red-dark transition-colors"
-            >
-              Browse Breweries
-            </a>
-          </section>
-        </div>
-      </div>
-    </div>
+      <section className="rounded-panel bg-cream p-6">
+        <h3>Ready to Write a Review?</h3>
+        <p>
+          Find your favorite brewery and share your experience with the Maryland
+          craft beer community.
+        </p>
+        <a href="/map" className={buttonVariants()}>
+          Browse Breweries
+        </a>
+      </section>
+    </ContentPage>
   );
 }
-

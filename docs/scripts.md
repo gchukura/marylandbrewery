@@ -21,8 +21,9 @@ The maintenance scripts live in `scripts/*.ts` and run with `tsx` through the np
 | `data:reviews:dedupe` | Delete duplicate rows from `reviews` | yes (deletes) |
 | `data:reviews:counts` | Report review counts per brewery | no |
 | `data:news` | Fetch Google News RSS articles into `brewery_articles` | yes |
-| `data:logos` | Download logos to `public/logos/` and set `breweries.logo` | yes |
-| `data:photos` | Download Google Places photos to `public/photos/` and set `breweries.photos` | yes |
+| `data:logos` | Fetch logos, upload them to Storage (`brewery-media/logos/`) and set `breweries.logo` | yes |
+| `data:photos` | Download Google Places photos, upload them to Storage (`brewery-media/photos/`) and set `breweries.photos` | yes |
+| `media:migrate` | Move existing `public/photos` and `public/logos` into Storage and repoint the rows (dry run unless `--apply`) | with `--apply` |
 | `data:geocode` | Re-geocode every brewery and overwrite lat/lng that moved by more than 0.01 degrees | yes |
 | `data:verify-coordinates` | Compare stored coordinates with Google geocoding and report differences | no |
 | `data:enrich` | Fill missing social links (from brewery websites) and hours (from Google) | yes |
@@ -119,10 +120,10 @@ What it does: For each brewery it queries Google News RSS for `"<name>" Maryland
 
 File: `scripts/fetch-brewery-logos.ts`
 
-What it does: Finds breweries whose `logo` is empty or an external `http(s)` URL. External URLs are downloaded to `public/logos/<slugified-name>.<ext>`. For breweries with no logo, it scrapes the Brewers Association of Maryland members page (`marylandbeer.org/brewing-companies/current-members/`) and matches names exactly, then by partial match, then after stripping "Brewing/Brewery/Company" suffixes. If that fails, it looks for a logo on the brewery's own website. It sets `breweries.logo` to the local path (`/logos/...`). Breweries it could not resolve are listed in `scripts/output/brewery-logos-missing.md` (gitignored). It overwrites existing files with the same name.
+What it does: Finds breweries whose `logo` is empty or an external `http(s)` URL. External URLs (other than our own Storage bucket) are downloaded, converted to WebP (max 512px, keeping transparency) and uploaded to `brewery-media/logos/<slug>.webp`. For breweries with no logo, it scrapes the Brewers Association of Maryland members page (`marylandbeer.org/brewing-companies/current-members/`) and matches names exactly, then by partial match, then after stripping "Brewing/Brewery/Company" suffixes. If that fails, it looks for a logo on the brewery's own website. It sets `breweries.logo` to the Storage URL. Breweries it could not resolve are listed in `scripts/output/brewery-logos-missing.md` (gitignored). It replaces an existing object at the same path.
 
 - Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (brewery read), `SUPABASE_SERVICE_ROLE_KEY` (writes).
-- Writes to Supabase: **yes**. Updates `breweries.logo`. It also writes files under `public/logos/`, which you need to review and commit, and a report in `scripts/output/` (gitignored).
+- Writes to Supabase: **yes**. Updates `breweries.logo`. It also uploads to Supabase Storage and writes a report in `scripts/output/` (gitignored). Needs `SUPABASE_SERVICE_ROLE_KEY` and the `brewery-media` bucket.
 - Flags: none.
 - How often: after adding breweries.
 
@@ -130,10 +131,10 @@ What it does: Finds breweries whose `logo` is empty or an external `http(s)` URL
 
 File: `scripts/download-google-photos.ts`
 
-What it does: For every brewery it uses `place_id`, or finds it with Text Search and saves it. It then gets the photo references from Place Details and downloads up to 11 photos per brewery (1600px wide) to `public/photos/`, named by brewery ID and index. Files that already exist are not downloaded again. The new paths are merged into `breweries.photos` without removing the old ones. It calls Place Details for every brewery on every run, even if all its photos are already on disk.
+What it does: For every brewery it uses `place_id`, or finds it with Text Search and saves it. It then gets the photo references from Place Details and downloads up to 11 photos per brewery, converts them to WebP (max 1600px, quality 80) and uploads them to `brewery-media/photos/<slug>/<n>.webp`. Photos already in Storage are not downloaded again. The new URLs are merged into `breweries.photos` without removing the old ones. It calls Place Details for every brewery on every run, even if all its photos are already in Storage.
 
 - Env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (all reads and writes use the admin client), `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY` (required).
-- Writes to Supabase: **yes**. Updates `breweries.place_id` and `breweries.photos`. It also writes image files under `public/photos/`.
+- Writes to Supabase: **yes**. Updates `breweries.place_id` and `breweries.photos`. It also uploads to Supabase Storage. Needs `SUPABASE_SERVICE_ROLE_KEY` and the `brewery-media` bucket.
 - Flags: none.
 - How often: after adding breweries. Each run costs Google Places calls for every brewery.
 
@@ -276,4 +277,13 @@ File: `scripts/check-sitemap.ts`. Fetches `/sitemap.xml` from a base URL (defaul
 ### `npm run seo:fixture`
 
 File: `scripts/dump-seo-fixture.ts`. Writes `src/lib/seo/__fixtures__/real-names.json`: the brewery, city, county, region, type, indexable neighborhood and indexable attraction names that `src/lib/seo/page-meta.test.ts` checks titles against. Reads Supabase with the anon key; writes no data. Run after large data changes (new attractions, neighborhoods or breweries) and commit the result.
+
+### `npm run media:migrate`
+
+File: `scripts/migrate-media-to-storage.ts`. One-time move of `public/photos` and `public/logos` into the `brewery-media` bucket. For every brewery row it reads the local files the row references, detects the real format (some `.jpg` files are PNGs), converts them with the same processing as `data:photos` / `data:logos`, uploads them to `photos/<slug>/<n>.webp` and `logos/<slug>.webp`, and then updates `photos` and `logo` to the public Storage URLs. Re-runs skip objects whose size already matches. A row is only updated after all its uploads succeeded; an unreadable logo (one `.ico` saved as `.png`) is left as it is and listed.
+
+- Dry run (default): processes every image and prints the summary; uploads and writes nothing. `--limit N` stops after N breweries.
+- `--apply`: uploads and updates rows. Needs `SUPABASE_SERVICE_ROLE_KEY` and the bucket (migration `20261028010000_brewery_media_bucket.sql`).
+- Files in `public/` that no row references (the three deleted breweries) are listed, not migrated.
+- Run once. Then delete `public/photos` and `public/logos` and follow `docs/runbooks/rewrite-history.md`.
 

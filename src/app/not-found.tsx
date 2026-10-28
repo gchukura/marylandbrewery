@@ -1,99 +1,50 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Metadata } from 'next';
+import SearchCombobox from '@/components/search/SearchCombobox';
+import NoAds from '@/components/ads/NoAds';
 
 export const metadata: Metadata = {
   title: 'Page Not Found',
   robots: { index: false, follow: false },
-  description: 'The page you are looking for could not be found. Explore Maryland breweries, browse by city, or use the interactive map.',
 };
+
+const SUGGESTIONS = [
+  { label: 'Brewery map', href: '/map' },
+  { label: 'Open now', href: '/open-now' },
+  { label: 'Cities', href: '/cities' },
+  { label: 'Counties', href: '/counties' },
+  { label: 'Best breweries', href: '/best-breweries' },
+];
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-paper flex flex-col items-center justify-center px-4 py-12">
-      {/* Large 404 */}
-      <div className="text-center mb-8">
-        <h1 
-          className="font-display text-8xl md:text-9xl font-bold text-brand-red mb-4"
-        >
-          404
-        </h1>
-        <h2 
-          className="font-display text-2xl md:text-3xl font-semibold text-ink mb-4"
-        >
-          Page Not Found
-        </h2>
-        <p 
-          className="text-lg text-muted max-w-md mx-auto mb-8"
-        >
-          Looks like this page wandered off to the taproom. Let's get you back on track to discover Maryland's best craft breweries.
-        </p>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-12">
-        <Link
-          href="/"
-          className="inline-flex items-center justify-center px-6 py-3 bg-brand-red text-white font-medium rounded-md hover:bg-brand-red-dark transition-colors"
-        >
-          Back to Homepage
-        </Link>
-        <Link
-          href="/map"
-          className="inline-flex items-center justify-center px-6 py-3 border-2 border-brand-red text-brand-red font-medium rounded-md hover:bg-brand-red hover:text-white transition-colors"
-        >
-          Explore the Map
-        </Link>
-      </div>
-
-      {/* Popular Links */}
-      <div className="w-full max-w-2xl">
-        <h3 
-          className="font-display text-lg font-semibold text-ink text-center mb-6"
-        >
-          Popular Destinations
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Link
-            href="/cities"
-            className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-          >
-            <span className="text-2xl mb-2 block">🏙️</span>
-            <span className="text-sm font-medium text-ink">Browse Cities</span>
-          </Link>
-          <Link
-            href="/counties"
-            className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-          >
-            <span className="text-2xl mb-2 block">🗺️</span>
-            <span className="text-sm font-medium text-ink">Browse Counties</span>
-          </Link>
-          <Link
-            href="/type"
-            className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-          >
-            <span className="text-2xl mb-2 block">🍺</span>
-            <span className="text-sm font-medium text-ink">Brewery Types</span>
-          </Link>
-          <Link
-            href="/amenities"
-            className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-          >
-            <span className="text-2xl mb-2 block">✨</span>
-            <span className="text-sm font-medium text-ink">Amenities</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Search suggestion */}
-      <p 
-        className="mt-12 text-sm text-muted"
-      >
-        Looking for a specific brewery?{' '}
-        <Link href="/map" className="text-brand-red hover:underline">
-          Try the interactive map
-        </Link>
+    <div className="mx-auto flex w-full max-w-[720px] flex-col gap-6 px-4 py-16 sm:px-6 md:py-24">
+      <NoAds />
+      <p className="m-0 text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+        404
       </p>
+      <h1 className="m-0 font-display text-[32px] font-bold leading-[1.05] text-ink md:text-[44px]">
+        We can&apos;t find that page
+      </h1>
+      <p className="m-0 text-[17px] leading-[1.6] text-muted">
+        It may have moved, or the brewery may have closed. Search for a brewery,
+        city or county instead:
+      </p>
+      <SearchCombobox submitLabel="Search" />
+      <nav aria-label="Popular pages">
+        <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
+          {SUGGESTIONS.map((s) => (
+            <li key={s.href}>
+              <Link
+                href={s.href}
+                className="tap inline-flex items-center rounded-chip border-[1.5px] border-line-strong bg-white px-3.5 py-2 text-[13px] font-semibold text-ink hover:border-ink hover:text-ink"
+              >
+                {s.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </div>
   );
 }
-

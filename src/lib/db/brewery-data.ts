@@ -6,6 +6,8 @@
 import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
 import { fetchBreweryBySlug, fetchRegions, getBreweryDataFromSupabase, type Region } from './queries';
+import { fetchAttractionSummaries, type AttractionSummary } from './attractions';
+import { isIndexableAttraction } from '@/lib/attractions';
 import { 
   Brewery, 
   ProcessedBreweryData, 
@@ -252,3 +254,16 @@ export async function getNearbyBreweries(latitude: number, longitude: number, ra
     .filter((b) => b.distance <= radiusMiles)
     .map(({ distance: _distance, ...brewery }) => brewery);
 }
+
+/** All attractions (slug, name, type, location), cached like the brewery list. */
+export const getAttractionSummaries = unstable_cache(
+  async (): Promise<AttractionSummary[]> => fetchAttractionSummaries(),
+  ['attraction-summaries'],
+  CACHE
+);
+
+/** Attractions whose /near page is indexed: real sights with a brewery within 3 miles. */
+export const getIndexableAttractions = cache(async (): Promise<AttractionSummary[]> => {
+  const [attractions, { breweries }] = await Promise.all([getAttractionSummaries(), getProcessedBreweryData()]);
+  return attractions.filter((a) => isIndexableAttraction(a, sortByDistance(a, breweries)[0]?.distance));
+});

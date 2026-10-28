@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
-import { getProcessedBreweryData } from '@/lib/db';
+import { getIndexableAttractions, getProcessedBreweryData } from '@/lib/db';
 import { slugify } from '@/lib/slug';
 import { getAttractionBySlug } from '@/lib/db';
 
@@ -9,11 +9,9 @@ import { buildMetadata } from '@/lib/seo/metadata';
 import { attractionMeta } from '@/lib/seo/page-meta';
 import { isIndexableAttraction } from '@/lib/attractions';
 import { calculateDistance } from '@/lib/geo';
+// Prerender the indexed attraction pages (the same list as the sitemap); others render on demand
 export async function generateStaticParams() {
-  // For now, return empty array - pages will be generated on-demand
-  // In production, you could pre-generate for high-value attractions
-  // This avoids expensive distance calculations during build
-  return [];
+  return (await getIndexableAttractions()).map((a) => ({ slug: a.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {

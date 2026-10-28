@@ -52,7 +52,7 @@ export default function MarketingTipsPage() {
   ];
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-cream min-h-screen">
       <PageHero
         h1="Marketing Tips for Brewery Owners"
         introText="Practical marketing strategies to help your Maryland brewery grow and reach more craft beer enthusiasts."
@@ -61,39 +61,39 @@ export default function MarketingTipsPage() {
       />
       
       <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Growing Your Brewery Business</h2>
-          <p className="text-gray-700 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-line p-8 mb-8">
+          <h2 className="text-2xl font-bold text-ink mb-4">Growing Your Brewery Business</h2>
+          <p className="text-muted mb-6">
             Effective marketing helps your brewery stand out in Maryland's competitive craft beer scene. Here are proven strategies to attract and retain customers.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           {tips.map((tip, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">{tip.title}</h3>
-              <p className="text-gray-700">{tip.description}</p>
+            <div key={index} className="bg-white rounded-lg shadow-sm border border-line p-6">
+              <h3 className="text-xl font-semibold text-ink mb-3">{tip.title}</h3>
+              <p className="text-muted">{tip.description}</p>
             </div>
           ))}
         </div>
 
-        <div className="bg-[#FAF9F6] border border-[#E8E6E1] rounded-lg p-6">
-          <h3 className="text-xl font-semibold text-gray-900 mb-3">Additional Resources</h3>
-          <ul className="space-y-2 text-gray-700">
+        <div className="bg-paper border border-line rounded-lg p-6">
+          <h3 className="text-xl font-semibold text-ink mb-3">Additional Resources</h3>
+          <ul className="space-y-2 text-muted">
             <li>
-              <Link href="/become-featured" className="text-[#9B2335] hover:text-[#7A1C2A] underline">
+              <Link href="/become-featured" className="text-brand-red hover:text-brand-red-dark underline">
                 Become a Featured Listing
               </Link>
               {' '}— Increase your visibility in our directory
             </li>
             <li>
-              <Link href="/customer-reviews" className="text-[#9B2335] hover:text-[#7A1C2A] underline">
+              <Link href="/customer-reviews" className="text-brand-red hover:text-brand-red-dark underline">
                 Customer Reviews
               </Link>
               {' '}— Learn how reviews can help your business
             </li>
             <li>
-              <Link href="/contact" className="text-[#9B2335] hover:text-[#7A1C2A] underline">
+              <Link href="/contact" className="text-brand-red hover:text-brand-red-dark underline">
                 Contact Us
               </Link>
               {' '}— Get personalized marketing advice

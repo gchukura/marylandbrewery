@@ -49,7 +49,7 @@ export default async function OpenNowPage() {
   ];
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-cream min-h-screen">
       <JsonLd data={jsonLd} />
       <PageHero
         h1="Breweries Open Now"
@@ -61,7 +61,7 @@ export default async function OpenNowPage() {
       <div className="container mx-auto px-4 py-10">
 
       {groups.length === 0 && (
-        <div className="text-gray-600">No breweries are currently open.</div>
+        <div className="text-muted">No breweries are currently open.</div>
       )}
 
       <div className="space-y-10">
@@ -71,8 +71,8 @@ export default async function OpenNowPage() {
             <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {list.map((b) => (
                 <li key={b.id} className="border rounded-md p-4">
-                  <div className="font-medium text-gray-900">{b.name}</div>
-                  <div className="text-sm text-gray-600">{b.city}, {b.state}</div>
+                  <div className="font-medium text-ink">{b.name}</div>
+                  <div className="text-sm text-muted">{b.city}, {b.state}</div>
                   {b.closeTime && (
                     <div className="text-sm text-green-700 mt-1">Open until {b.closeTime}</div>
                   )}
@@ -84,18 +84,18 @@ export default async function OpenNowPage() {
       </div>
 
       {/* Related Links Section */}
-      <section className="container mx-auto px-4 py-8 border-t border-gray-200 mt-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Explore More</h2>
+      <section className="container mx-auto px-4 py-8 border-t border-line mt-12">
+        <h2 className="text-2xl font-bold text-ink mb-4">Explore More</h2>
         <div className="grid md:grid-cols-3 gap-4">
           {relatedPages.map((page) => (
             <Link
               key={page.url}
               href={page.url}
-              className="bg-white rounded-lg p-4 border border-gray-200 hover:border-red-500 hover:shadow-md transition-all"
+              className="bg-white rounded-lg p-4 border border-line hover:border-brand-red hover:shadow-md transition-all"
             >
-              <div className="font-semibold text-gray-900">{page.title}</div>
+              <div className="font-semibold text-ink">{page.title}</div>
               {page.count > 0 && (
-                <div className="text-sm text-gray-600 mt-1">{page.count} {page.count === 1 ? 'brewery' : 'breweries'}</div>
+                <div className="text-sm text-muted mt-1">{page.count} {page.count === 1 ? 'brewery' : 'breweries'}</div>
               )}
             </Link>
           ))}

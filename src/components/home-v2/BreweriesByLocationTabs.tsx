@@ -58,49 +58,49 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
     <section className="relative pt-8 md:pt-10 pb-8 md:pb-10 bg-white">
       <div className="container mx-auto px-4">
         {/* Card wrapper with shadow */}
-        <div className="bg-white rounded-lg shadow-md border border-[#E8E6E1] p-6 md:p-8 max-w-7xl mx-auto">
+        <div className="bg-white rounded-lg shadow-md border border-line p-6 md:p-8 max-w-7xl mx-auto">
           {/* Tabs - Bold, distinctive design */}
           <div className="flex items-center justify-center gap-0 mb-8 sm:mb-10 max-w-5xl mx-auto px-2">
-            <div className="relative flex bg-white/80 backdrop-blur-sm rounded-t-xl border-2 border-[#E8E6E1] shadow-lg overflow-hidden w-full sm:w-auto">
+            <div className="relative flex bg-white/80 backdrop-blur-sm rounded-t-xl border-2 border-line shadow-lg overflow-hidden w-full sm:w-auto">
             {/* Active tab indicator background */}
             <div 
-              className={`absolute top-0 h-full bg-gradient-to-br from-[#9B2335] to-[#7A1C2A] transition-all duration-500 ease-out rounded-t-xl ${
+              className={`absolute top-0 h-full bg-gradient-to-br from-brand-red to-brand-red-dark transition-all duration-500 ease-out rounded-t-xl ${
                 activeTab === 'city' ? 'left-0 w-1/2' : 'left-1/2 w-1/2'
               }`}
             />
             
             <button
               onClick={() => setActiveTab('city')}
-              className={`relative z-10 py-4 sm:py-5 px-6 sm:px-12 text-center font-semibold transition-all duration-300 flex-1 sm:flex-none min-h-[48px] sm:min-h-0 text-xs sm:text-sm uppercase tracking-wide font-body whitespace-nowrap ${
+              className={`relative z-10 py-4 sm:py-5 px-6 sm:px-12 text-center font-semibold transition-all duration-300 flex-1 sm:flex-none min-h-[48px] sm:min-h-0 text-xs sm:text-sm uppercase tracking-wide font-sans whitespace-nowrap ${
                 activeTab === 'city'
                   ? 'text-white'
-                  : 'text-[#6B6B6B] hover:text-[#1C1C1C]'
+                  : 'text-muted hover:text-ink'
               }`}
             >
               <span className="relative inline-block w-full sm:w-auto">
                 <span className="hidden sm:inline">Breweries by City</span>
                 <span className="sm:hidden">By City</span>
                 {activeTab === 'city' && (
-                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#D4A017] animate-pulse" style={{ width: '100%' }} />
+                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gold animate-pulse" style={{ width: '100%' }} />
                 )}
               </span>
             </button>
             
-            <div className="w-px h-8 bg-[#E8E6E1] my-auto hidden sm:block" />
+            <div className="w-px h-8 bg-line my-auto hidden sm:block" />
             
             <button
               onClick={() => setActiveTab('county')}
-              className={`relative z-10 py-4 sm:py-5 px-6 sm:px-12 text-center font-semibold transition-all duration-300 flex-1 sm:flex-none min-h-[48px] sm:min-h-0 text-xs sm:text-sm uppercase tracking-wide font-body whitespace-nowrap ${
+              className={`relative z-10 py-4 sm:py-5 px-6 sm:px-12 text-center font-semibold transition-all duration-300 flex-1 sm:flex-none min-h-[48px] sm:min-h-0 text-xs sm:text-sm uppercase tracking-wide font-sans whitespace-nowrap ${
                 activeTab === 'county'
                   ? 'text-white'
-                  : 'text-[#6B6B6B] hover:text-[#1C1C1C]'
+                  : 'text-muted hover:text-ink'
               }`}
             >
               <span className="relative inline-block w-full sm:w-auto">
                 <span className="hidden sm:inline">Breweries by County</span>
                 <span className="sm:hidden">By County</span>
                 {activeTab === 'county' && (
-                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#D4A017] animate-pulse" style={{ width: '100%' }} />
+                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gold animate-pulse" style={{ width: '100%' }} />
                 )}
               </span>
             </button>
@@ -123,14 +123,14 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
                     <Link
                       key={city.slug}
                       href={`/cities/${city.slug}/breweries`}
-                      className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-base border-b border-gray-200 last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm font-body font-medium"
+                      className="group relative py-3 px-0 text-ink hover:text-brand-red transition-colors duration-300 text-base border-b border-line last:border-b-0 hover:bg-paper/50 rounded-sm font-sans font-medium"
                     >
                       <span className="relative inline-block">
                         {city.name}
-                        <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gradient-to-r from-[#9B2335] to-[#D4A017] group-hover:w-full transition-all duration-300" />
+                        <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gradient-to-r from-brand-red to-gold group-hover:w-full transition-all duration-300" />
                       </span>
                       {/* Subtle hover accent */}
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0 h-4 bg-[#D4A017]/20 group-hover:w-1 transition-all duration-300 rounded-r" />
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0 h-4 bg-gold/20 group-hover:w-1 transition-all duration-300 rounded-r" />
                     </Link>
                   ))}
                 </div>
@@ -150,14 +150,14 @@ export default function BreweriesByLocationTabs({ cities, counties }: BreweriesB
                     <Link
                       key={county.slug}
                       href={`/counties/${county.slug}/breweries`}
-                      className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-base border-b border-gray-200 last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm font-body font-medium"
+                      className="group relative py-3 px-0 text-ink hover:text-brand-red transition-colors duration-300 text-base border-b border-line last:border-b-0 hover:bg-paper/50 rounded-sm font-sans font-medium"
                     >
                       <span className="relative inline-block">
                         {county.name.replace(/\s+County$/i, '')}
-                        <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gradient-to-r from-[#9B2335] to-[#D4A017] group-hover:w-full transition-all duration-300" />
+                        <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gradient-to-r from-brand-red to-gold group-hover:w-full transition-all duration-300" />
                       </span>
                       {/* Subtle hover accent */}
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0 h-4 bg-[#D4A017]/20 group-hover:w-1 transition-all duration-300 rounded-r" />
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0 h-4 bg-gold/20 group-hover:w-1 transition-all duration-300 rounded-r" />
                     </Link>
                   ))}
                 </div>

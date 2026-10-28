@@ -9,24 +9,21 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-paper flex flex-col items-center justify-center px-4 py-12">
       {/* Large 404 */}
       <div className="text-center mb-8">
         <h1 
-          className="text-8xl md:text-9xl font-bold text-[#9B2335] mb-4"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          className="font-display text-8xl md:text-9xl font-bold text-brand-red mb-4"
         >
           404
         </h1>
         <h2 
-          className="text-2xl md:text-3xl font-semibold text-[#1C1C1C] mb-4"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          className="font-display text-2xl md:text-3xl font-semibold text-ink mb-4"
         >
           Page Not Found
         </h2>
         <p 
-          className="text-lg text-[#6B6B6B] max-w-md mx-auto mb-8"
-          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+          className="text-lg text-muted max-w-md mx-auto mb-8"
         >
           Looks like this page wandered off to the taproom. Let's get you back on track to discover Maryland's best craft breweries.
         </p>
@@ -36,15 +33,13 @@ export default function NotFound() {
       <div className="flex flex-col sm:flex-row gap-4 mb-12">
         <Link
           href="/"
-          className="inline-flex items-center justify-center px-6 py-3 bg-[#9B2335] text-white font-medium rounded-md hover:bg-[#7A1C2A] transition-colors"
-          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+          className="inline-flex items-center justify-center px-6 py-3 bg-brand-red text-white font-medium rounded-md hover:bg-brand-red-dark transition-colors"
         >
           Back to Homepage
         </Link>
         <Link
           href="/map"
-          className="inline-flex items-center justify-center px-6 py-3 border-2 border-[#9B2335] text-[#9B2335] font-medium rounded-md hover:bg-[#9B2335] hover:text-white transition-colors"
-          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+          className="inline-flex items-center justify-center px-6 py-3 border-2 border-brand-red text-brand-red font-medium rounded-md hover:bg-brand-red hover:text-white transition-colors"
         >
           Explore the Map
         </Link>
@@ -53,8 +48,7 @@ export default function NotFound() {
       {/* Popular Links */}
       <div className="w-full max-w-2xl">
         <h3 
-          className="text-lg font-semibold text-[#1C1C1C] text-center mb-6"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          className="font-display text-lg font-semibold text-ink text-center mb-6"
         >
           Popular Destinations
         </h3>
@@ -64,39 +58,38 @@ export default function NotFound() {
             className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
           >
             <span className="text-2xl mb-2 block">🏙️</span>
-            <span className="text-sm font-medium text-[#1C1C1C]">Browse Cities</span>
+            <span className="text-sm font-medium text-ink">Browse Cities</span>
           </Link>
           <Link
             href="/counties"
             className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
           >
             <span className="text-2xl mb-2 block">🗺️</span>
-            <span className="text-sm font-medium text-[#1C1C1C]">Browse Counties</span>
+            <span className="text-sm font-medium text-ink">Browse Counties</span>
           </Link>
           <Link
             href="/type"
             className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
           >
             <span className="text-2xl mb-2 block">🍺</span>
-            <span className="text-sm font-medium text-[#1C1C1C]">Brewery Types</span>
+            <span className="text-sm font-medium text-ink">Brewery Types</span>
           </Link>
           <Link
             href="/amenities"
             className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
           >
             <span className="text-2xl mb-2 block">✨</span>
-            <span className="text-sm font-medium text-[#1C1C1C]">Amenities</span>
+            <span className="text-sm font-medium text-ink">Amenities</span>
           </Link>
         </div>
       </div>
 
       {/* Search suggestion */}
       <p 
-        className="mt-12 text-sm text-[#6B6B6B]"
-        style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+        className="mt-12 text-sm text-muted"
       >
         Looking for a specific brewery?{' '}
-        <Link href="/map" className="text-[#9B2335] hover:underline">
+        <Link href="/map" className="text-brand-red hover:underline">
           Try the interactive map
         </Link>
       </p>

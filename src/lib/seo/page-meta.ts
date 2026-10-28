@@ -173,7 +173,7 @@ export function openOnDayMeta(day: string, count: number): PageMeta {
   return {
     title: pickTitle([`Breweries Open ${Day} in Maryland`, `Breweries Open ${Day}`]),
     description: pickDescription([
-      `${breweries(count)} in Maryland open on ${Day}s, grouped by city, with each brewery's hours for the day.`,
+      `${breweries(count)} in Maryland open on ${Day}s, on a map, with each one's hours.`,
     ]),
   };
 }

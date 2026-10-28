@@ -11,6 +11,8 @@ import '@/components/home-v2/styles.css';
 import CityBreweriesMapClient from './CityBreweriesMapClient';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { cityMeta } from '@/lib/seo/page-meta';
+import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 // Build all city pages (no limit)
@@ -148,8 +150,16 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
   });
   const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
 
+  const displayCity = sortedBreweries[0]?.city ?? cityName;
+  const pagePath = `/cities/${citySlug}/breweries`;
+  const jsonLd = [
+    collectionPage({ name: `Breweries in ${displayCity}, MD`, path: pagePath, breweries: sortedBreweries }),
+    breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Cities', path: '/cities' }, { name: `${displayCity}, MD`, path: pagePath }]),
+  ];
+
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
+      <JsonLd data={jsonLd} />
       {/* Hero Section */}
       <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
         {/* City Hero Image Background */}

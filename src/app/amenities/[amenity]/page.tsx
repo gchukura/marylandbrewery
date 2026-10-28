@@ -12,6 +12,8 @@ import '@/components/home-v2/styles.css';
 import AmenityBreweriesMapClient from './AmenityBreweriesMapClient';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { amenityMeta } from '@/lib/seo/page-meta';
+import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 export async function generateStaticParams() {
@@ -99,8 +101,15 @@ export default async function AmenityPage({ params }: { params: Promise<{ amenit
   });
   const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
 
+  const pagePath = `/amenities/${amenityDef.slug}`;
+  const jsonLd = [
+    collectionPage({ name: `${displayName} Breweries in Maryland`, path: pagePath, breweries: sortedBreweries }),
+    breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Amenities', path: '/amenities' }, { name: displayName, path: pagePath }]),
+  ];
+
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
+      <JsonLd data={jsonLd} />
       {/* Hero Section */}
       <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
         {/* Hero Image Background */}

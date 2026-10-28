@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { isOpenOnDay } from '@/lib/hours';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { openOnDayMeta } from '@/lib/seo/page-meta';
+import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import { slugify } from '@/lib/slug';
 
 export const revalidate = 3600; // ISR hourly
@@ -50,8 +52,14 @@ export default async function OpenDayPage({ params }: { params: Promise<{ day: s
     { title: 'All Cities', url: '/cities', count: processed.cities.length },
   ];
 
+  const jsonLd = [
+    collectionPage({ name: `Breweries Open ${dayCapitalized} in Maryland`, path: `/open/${day}`, breweries: list }),
+    breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Open Now', path: '/open-now' }, { name: dayCapitalized, path: `/open/${day}` }]),
+  ];
+
   return (
     <div className="bg-gray-50 min-h-screen">
+      <JsonLd data={jsonLd} />
       <PageHero
         h1={`Breweries Open on ${dayCapitalized}`}
         introText={`Find ${list.length} Maryland breweries open on ${dayCapitalized}s. Complete list of craft breweries, taprooms, and brewpubs with hours for ${dayCapitalized}. Plan your ${dayCapitalized} brewery tour across Baltimore, Annapolis, Frederick, and more cities.`}

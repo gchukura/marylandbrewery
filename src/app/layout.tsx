@@ -93,28 +93,21 @@ export const viewport = {
   ],
 };
 
-// WebSite schema for sitelinks search box in Google
+// WebSite schema. No SearchAction: Google retired the sitelinks search box (Nov 2024) and
+// /map does not read ?search=
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'Maryland Brewery Directory',
+  name: 'Maryland Brewery',
   url: 'https://www.marylandbrewery.com',
-  description: 'Your complete guide to craft breweries across Maryland',
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: {
-      '@type': 'EntryPoint',
-      urlTemplate: 'https://www.marylandbrewery.com/map?search={search_term_string}'
-    },
-    'query-input': 'required name=search_term_string',
-  },
+  description: 'Every craft brewery in Maryland',
 };
 
 // Organization schema for brand recognition
 const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'Maryland Brewery Directory',
+  name: 'Maryland Brewery',
   url: 'https://www.marylandbrewery.com',
   logo: 'https://www.marylandbrewery.com/logo.png',
   sameAs: [

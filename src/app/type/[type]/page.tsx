@@ -11,6 +11,9 @@ import '@/components/home-v2/styles.css';
 import TypeBreweriesMapClient from './TypeBreweriesMapClient';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { typeMeta } from '@/lib/seo/page-meta';
+import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
+import { typePlural } from '@/lib/seo/page-meta';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 // Brewery type definitions
@@ -155,8 +158,15 @@ export default async function TypePage({ params }: { params: Promise<{ type: str
   });
   const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
 
+  const pagePath = `/type/${type}`;
+  const jsonLd = [
+    collectionPage({ name: `${typePlural(typeLabel)} in Maryland`, path: pagePath, breweries: sortedBreweries }),
+    breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Brewery Types', path: '/type' }, { name: typePlural(typeLabel), path: pagePath }]),
+  ];
+
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
+      <JsonLd data={jsonLd} />
       {/* Hero Section */}
       <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
         {/* Hero Image Background */}

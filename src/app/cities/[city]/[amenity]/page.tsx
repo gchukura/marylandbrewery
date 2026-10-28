@@ -13,6 +13,8 @@ import '@/components/home-v2/styles.css';
 import CityAmenityMapClient from './CityAmenityMapClient';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { cityAmenityMeta } from '@/lib/seo/page-meta';
+import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
 
 function cityAmenityBreweries(breweries: Brewery[], cityName: string, amenityDef: AmenityDefinition): Brewery[] {
@@ -116,8 +118,21 @@ export default async function CityAmenityPage({ params }: { params: Promise<{ ci
   });
   const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
 
+  const displayCity = sortedBreweries[0]?.city ?? cityName;
+  const pagePath = `/cities/${city}/${amenity}`;
+  const jsonLd = [
+    collectionPage({ name: `${amenityLabel} Breweries in ${displayCity}, MD`, path: pagePath, breweries: sortedBreweries }),
+    breadcrumbList([
+      { name: 'Home', path: '/' },
+      { name: 'Cities', path: '/cities' },
+      { name: `${displayCity}, MD`, path: `/cities/${city}/breweries` },
+      { name: amenityLabel, path: pagePath },
+    ]),
+  ];
+
   return (
     <div className="min-h-screen bg-[#FAF9F6]">
+      <JsonLd data={jsonLd} />
       {/* Hero Section */}
       <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
         {/* City Hero Image Background */}

@@ -4,6 +4,8 @@ import PageHero from '@/components/directory/PageHero';
 import Link from 'next/link';
 import { isOpenAt } from '@/lib/hours';
 import { buildMetadata } from '@/lib/seo/metadata';
+import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import JsonLd from '@/components/seo/JsonLd';
 import { slugify } from '@/lib/slug';
 
 export const revalidate = 3600; // ISR hourly
@@ -41,8 +43,14 @@ export default async function OpenNowPage() {
     { title: 'Browse by Amenity', url: '/amenities', count: 0 },
   ];
 
+  const jsonLd = [
+    collectionPage({ name: 'Breweries Open Now in Maryland', path: '/open-now', breweries: openBreweries }),
+    breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Open Now', path: '/open-now' }]),
+  ];
+
   return (
     <div className="bg-gray-50 min-h-screen">
+      <JsonLd data={jsonLd} />
       <PageHero
         h1="Breweries Open Now"
         introText="Find Maryland breweries currently open right now. Real-time list of breweries open across the state with current hours and closing times. Updated hourly."

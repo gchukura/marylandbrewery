@@ -72,6 +72,9 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
 - Tailwind v4 ignores `tailwind.config.ts` unless `@config` is used; tokens go in `@theme` in `globals.css`.
 - Hours strings use an en-dash and often omit AM/PM on the opening time; parse only with `src/lib/hours.ts`,
   which also evaluates "now" in Maryland time (the server runs in UTC).
+- Two Google keys: `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is the domain-restricted browser key (maps only; a 403 from
+  any server, including `/_next/image`). Scripts use only the server key `GOOGLE_MAPS_API_KEY` via `scripts/lib/google.ts`;
+  `npm run google:check` tests it. Never put the server key in a stored URL.
 - Data reads return []/null at runtime but must throw during `next build` (`throwDuringBuild`), or a
   Supabase outage ships empty pages. `server-only` is imported in `src/lib/db/index.ts`, not `client.ts`,
   because scripts import the db files directly.

@@ -16,7 +16,8 @@ const nextConfig: NextConfig = {
       ...(supabaseHost
         ? [{ protocol: 'https' as const, hostname: supabaseHost, pathname: '/storage/v1/object/public/**' }]
         : []),
-      // Google Places photos (breweries.photo_url)
+      // Google Places photos (breweries.photo_url). Allowed, but canOptimizeImage() keeps them a plain <img>:
+      // they carry the domain-restricted browser key, so the server-side fetch would get a 403
       { protocol: 'https', hostname: 'maps.googleapis.com' },
     ],
     formats: ['image/webp', 'image/avif'],

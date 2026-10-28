@@ -19,8 +19,10 @@ config({ path: resolve(process.cwd(), '.env.local') });
 import { getSupabase } from '@/lib/db/client';
 import { getBreweryDataFromSupabase } from '@/lib/db/queries';
 
+import { optionalGoogleServerKey } from './lib/google';
 import { getAdminClient } from '@/lib/db/client';
-const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
+// Google is optional here: without a server key, hours just aren't looked up
+const apiKey = optionalGoogleServerKey();
 
 interface SocialMediaData {
   facebook?: string;

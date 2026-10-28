@@ -302,7 +302,12 @@ function ListingView({
             {geo.status === 'locating' ? 'Locating…' : 'Near me'}
           </Button>
         </div>
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Filters">
+        {/* One sideways-scrolling row on phones (Mobile.html), wrapping from sm up */}
+        <div
+          className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&>*]:shrink-0"
+          role="group"
+          aria-label="Filters"
+        >
           {!defaults.open && (
             <FilterChip
               pressed={filters.open}

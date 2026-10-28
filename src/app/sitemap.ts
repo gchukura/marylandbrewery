@@ -1,9 +1,10 @@
 import type { MetadataRoute } from 'next';
-import { getProcessedBreweryData, getAllCities, getAllTypes, getAllAmenities, getAllNeighborhoods, getAttractionBySlug, getRegions, breweriesInRegion } from '@/lib/db';
+import { getProcessedBreweryData, getAllCities, getAllTypes, getAllNeighborhoods, getAttractionBySlug, getRegions, breweriesInRegion } from '@/lib/db';
 import { normalizeCountyName } from '../lib/data-utils';
 import { slugify, deslugify } from '@/lib/slug';
 import { MARYLAND_COUNTIES } from '@/types/brewery';
 import { hasBestBreweriesPage } from '../lib/best-breweries';
+import { AMENITIES, hasAmenity, isIndexableCityAmenity } from '../lib/amenities';
 import { sortByDistance } from '../lib/geo';
 import { isIndexableNeighborhood, neighborhoodPath } from '../lib/neighborhoods';
 
@@ -12,7 +13,6 @@ const BASE_URL = 'https://www.marylandbrewery.com';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const processed = await getProcessedBreweryData();
   const cities = await getAllCities();
-  const allAmenities = await getAllAmenities();
   const allTypes = await getAllTypes();
   const neighborhoods = await getAllNeighborhoods();
   
@@ -23,8 +23,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return normalizeCountyName(slug) !== null || MARYLAND_COUNTIES.some(c => c.toLowerCase() === county.toLowerCase());
   });
   
-  // Convert amenity names to slugs
-  const amenitySlugs = allAmenities.map(amenity => slugify(amenity));
   // Convert type names to slugs
   const typeSlugs = allTypes.map(type => slugify(type));
 
@@ -128,47 +126,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  // Amenity pages - only include amenities that have breweries
-  for (const amenitySlug of amenitySlugs) {
-    const amenityLabel = deslugify(amenitySlug).replace(/\bWifi\b/i, 'WiFi').toLowerCase();
-    const amenityBreweries = processed.breweries.filter(
-      (b) => (b.amenities ?? []).some((a: string) => 
-        a.toLowerCase() === amenityLabel || a.toLowerCase().includes(amenityLabel) || amenityLabel.includes(a.toLowerCase())
-      )
-    );
-    
-    // Only add to sitemap if there are breweries with this amenity
-    if (amenityBreweries.length > 0) {
-      urls.push({ url: `${BASE_URL}/amenities/${amenitySlug}`, lastModified: lastMod, priority: 0.6 });
-    }
-  }
+  // Amenity pages, and city x amenity pages with 3+ breweries (smaller ones are noindex)
+  for (const amenityDef of AMENITIES) {
+    const withAmenity = processed.breweries.filter((b) => hasAmenity(b, amenityDef));
+    if (withAmenity.length === 0) continue;
+    urls.push({ url: `${BASE_URL}/amenities/${amenityDef.slug}`, lastModified: lastMod, priority: 0.6 });
 
-  // Combination pages: city + amenity (only include combinations that have breweries)
-  // Use the same logic as generateStaticParams to ensure consistency
-  for (const amenitySlug of amenitySlugs) {
-    // Normalize amenity label for matching (same as normalizeAmenityLabel in city/[amenity]/page.tsx)
-    const amenityLabel = deslugify(amenitySlug).replace(/\bWifi\b/i, 'WiFi').toLowerCase();
-    
-    // Find all cities that have at least one brewery with this amenity
-    const citiesWithAmenity = new Set<string>();
-    
-    for (const brewery of processed.breweries) {
-      if (!brewery.city) continue;
-      
-      const amenities = brewery.amenities ?? [];
-      const hasAmenity = amenities.some((a: string) => 
-        a.toLowerCase().includes(amenityLabel)
-      );
-      
-      if (hasAmenity) {
-        citiesWithAmenity.add(brewery.city);
+    const countByCity = new Map<string, number>();
+    for (const b of withAmenity) countByCity.set(slugify(b.city), (countByCity.get(slugify(b.city)) ?? 0) + 1);
+    for (const [citySlug, count] of countByCity) {
+      if (isIndexableCityAmenity(count)) {
+        urls.push({ url: `${BASE_URL}/cities/${citySlug}/${amenityDef.slug}`, lastModified: lastMod, priority: 0.5 });
       }
-    }
-    
-    // Only add sitemap URLs for city+amenity combinations that have breweries
-    for (const city of citiesWithAmenity) {
-      const citySlug = slugify(city);
-      urls.push({ url: `${BASE_URL}/cities/${citySlug}/${amenitySlug}`, lastModified: lastMod, priority: 0.5 });
     }
   }
 

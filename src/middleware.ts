@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { AMENITY_ALIASES } from '@/lib/amenities';
 
 /**
- * Permanent (301) redirects that need no data: old "-md" city and county URLs.
+ * Permanent (301) redirects that need no data: old "-md" city and county URLs and amenity aliases.
  * Redirects that depend on data (city size, neighborhoods, brewery ids) live in their pages.
  */
 export function middleware(request: NextRequest) {
@@ -11,6 +12,20 @@ export function middleware(request: NextRequest) {
   const md = pathname.match(/^\/(cities|counties)\/([^/]+)-md(\/.*)?$/);
   if (md && md[2] !== 'near') {
     return redirect(request, `/${md[1]}/${md[2]}${md[3] ?? ''}`);
+  }
+
+  // /amenities/{alias} -> canonical amenity, or the index when the amenity has no page
+  const amenity = pathname.match(/^\/amenities\/([^/]+)$/);
+  if (amenity && Object.hasOwn(AMENITY_ALIASES, amenity[1])) {
+    const target = AMENITY_ALIASES[amenity[1]];
+    return redirect(request, target ? `/amenities/${target}` : '/amenities');
+  }
+
+  // /cities/{city}/{alias} -> canonical amenity, or the city listing when it has no page
+  const cityAmenity = pathname.match(/^\/cities\/([^/]+)\/([^/]+)$/);
+  if (cityAmenity && Object.hasOwn(AMENITY_ALIASES, cityAmenity[2])) {
+    const target = AMENITY_ALIASES[cityAmenity[2]];
+    return redirect(request, `/cities/${cityAmenity[1]}/${target ?? 'breweries'}`);
   }
 
   return NextResponse.next();
@@ -23,5 +38,5 @@ function redirect(request: NextRequest, pathname: string) {
 }
 
 export const config = {
-  matcher: ['/cities/:path*', '/counties/:path*'],
+  matcher: ['/cities/:path*', '/counties/:path*', '/amenities/:path*'],
 };

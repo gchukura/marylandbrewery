@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { getProcessedBreweryData } from '@/lib/db';
 import DirectoryPageTemplate from '@/components/directory/DirectoryPageTemplate';
+import { amenityByDbValue, amenityPath } from '@/lib/amenities';
 import { slugify } from '@/lib/slug';
 
 export const metadata: Metadata = {
@@ -120,18 +121,20 @@ export default async function BestBreweriesPage() {
   breweriesWithScores.forEach((brewery: any) => {
     const amenities = brewery.amenities ?? [];
     amenities.forEach((a: string) => {
-      const key = a.trim().toLowerCase();
+      const key = a.trim(); // stored value, matched exactly by amenityByDbValue
       amenityCounts.set(key, (amenityCounts.get(key) || 0) + 1);
     });
   });
 
   const topAmenities = Array.from(amenityCounts.entries())
-    .sort((a, b) => b[1] - a[1])
+    .map(([amenity, count]) => ({ page: amenityByDbValue(amenity), count }))
+    .filter((x): x is { page: NonNullable<typeof x.page>; count: number } => x.page !== undefined)
+    .sort((a, b) => b.count - a.count)
     .slice(0, 3)
-    .map(([amenity]) => ({
-      title: `Best ${amenity.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} Breweries`,
-      url: `/amenities/${slugify(amenity)}`,
-      count: amenityCounts.get(amenity),
+    .map(({ page, count }) => ({
+      title: `Best ${page.label} Breweries`,
+      url: amenityPath(page),
+      count,
     }));
 
   const relatedPages = [

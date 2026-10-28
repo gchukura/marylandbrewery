@@ -6,8 +6,8 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { MapPin, Phone, Globe, Search, Filter, X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import BreweryLogo from '@/components/brewery/BreweryLogo';
-import { slugify } from '@/lib/slug';
 
+import { amenityByDbValue } from '@/lib/amenities';
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
   ssr: false, 
   loading: () => (
@@ -252,7 +252,9 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                         <div className="flex flex-wrap gap-x-1.5 gap-y-1 mt-6">
                           {sortedAmenities.map((a: string) => {
                             if (!a || !a.trim()) return null;
-                            const amenitySlug = slugify(a.trim());
+                            const amenityPage = amenityByDbValue(a.trim());
+                            if (!amenityPage) return null; // no page for this value
+                            const amenitySlug = amenityPage.slug;
                             return (
                               <Link
                                 key={a}

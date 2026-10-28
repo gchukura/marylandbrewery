@@ -6,6 +6,7 @@ import {
   isListedAttraction,
   legacyNeighborhoodSlug,
   neighborhoodPath,
+  neighborhoodPlace,
 } from './neighborhoods';
 
 const canton = { latitude: 39.2779, longitude: -76.5759 };
@@ -64,5 +65,13 @@ describe('legacyNeighborhoodSlug', () => {
 
   it('has no old slug without a city', () => {
     expect(legacyNeighborhoodSlug({ slug: 'canton', city: null })).toBeNull();
+  });
+});
+
+describe('neighborhoodPlace', () => {
+  it('names the city only when it differs from the neighborhood', () => {
+    expect(neighborhoodPlace('Canton', 'Baltimore')).toBe('Canton, Baltimore');
+    expect(neighborhoodPlace('Gaithersburg', 'Gaithersburg')).toBe('Gaithersburg');
+    expect(neighborhoodPlace('Bel Air', 'bel air')).toBe('Bel Air');
   });
 });

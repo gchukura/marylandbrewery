@@ -391,8 +391,8 @@ function ListingView({
       <div className="flex flex-wrap items-start gap-6">
         <div
           className={cn(
-            'flex min-w-0 flex-[999_1_560px] flex-col gap-3.5',
-            view === 'map' && 'hidden lg:flex'
+            'min-w-0 flex-[999_1_560px] flex-col gap-3.5',
+            view === 'map' ? 'hidden lg:flex' : 'flex'
           )}
         >
           <div aria-live="polite" className="text-[13px] text-muted">

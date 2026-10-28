@@ -19,9 +19,11 @@ export default function SiteHeader() {
         <div className="mx-auto flex h-16 max-w-[1240px] items-center justify-between gap-6 px-4 sm:h-[72px] sm:px-6">
           <Logo size="md" />
           <NavLinks className="hidden lg:block" />
-          <ButtonLink href="/add-brewery" variant="secondary" size="sm" className="hidden h-10 px-4 lg:inline-flex">
-            Add a brewery
-          </ButtonLink>
+          <div className="hidden lg:block">
+            <ButtonLink href="/add-brewery" variant="secondary" size="sm">
+              Add a brewery
+            </ButtonLink>
+          </div>
           <MobileMenu className="lg:hidden" />
         </div>
       </header>

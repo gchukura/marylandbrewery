@@ -182,6 +182,15 @@ function ListingView({
     );
   };
 
+  // ?near=1 (the homepage's Near me chip) asks for the location once on arrival; the param is
+  // dropped from the URL when the distance sort is written
+  const askedNear = useRef(false);
+  useEffect(() => {
+    if (askedNear.current || params?.get('near') !== '1') return;
+    askedNear.current = true;
+    locateMe();
+  });
+
   const sortOptions =
     origin && !sorts.includes('distance')
       ? [...sorts, 'distance' as const]

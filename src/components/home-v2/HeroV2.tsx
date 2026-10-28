@@ -1,27 +1,11 @@
-'use client';
-
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Search, MapPin } from 'lucide-react';
+import SearchCombobox from '@/components/search/SearchCombobox';
 
 export default function HeroV2() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const router = useRouter();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/map?search=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      router.push('/map');
-    }
-  };
-
   return (
     <section className="relative overflow-hidden">
       {/* Subtle Pattern Background */}
       <div className="absolute inset-0 opacity-[0.03]">
-        <div 
+        <div
           className="absolute inset-0"
           style={{
             backgroundImage: `
@@ -36,55 +20,30 @@ export default function HeroV2() {
           }}
         />
       </div>
-      
+
       <div className="relative bg-gradient-to-b from-paper to-white pt-12 md:pt-16 pb-6 md:pb-8">
         <div className="container mx-auto px-4">
-
           {/* Main Headline */}
-          <h1 
-            className="text-center text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-ink mb-6 leading-[1.1] font-display"
-          >
+          <h1 className="text-center text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-ink mb-6 leading-[1.1] font-display">
             Discover Maryland's
             <br />
             <span className="text-brand-red">Craft Brewery</span> Scene
           </h1>
 
           {/* Subtitle */}
-          <p 
-            className="text-center text-body-large md:text-xl text-muted max-w-2xl mx-auto mb-10 font-sans"
-          >
-            A local curated directory of craft breweries in the state of Maryland. Find a brewery for your next event, outing, or place to hang with family and friends.
+          <p className="text-center text-body-large md:text-xl text-muted max-w-2xl mx-auto mb-10 font-sans">
+            A local curated directory of craft breweries in the state of
+            Maryland. Find a brewery for your next event, outing, or place to
+            hang with family and friends.
           </p>
 
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-0">
-            <div className="relative">
-              <div className="relative flex flex-col sm:flex-row bg-white rounded-lg shadow-lg border border-line">
-                <div className="flex items-center pl-4 sm:pl-5 flex-1 min-w-0">
-                  <Search className="h-5 w-5 text-muted flex-shrink-0" />
-                  <input
-                    type="search"
-                    inputMode="search"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by brewery name, city, or county..."
-                    className="flex-1 px-3 sm:px-4 py-4 sm:py-5 text-base sm:text-lg bg-transparent border-0 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-inset text-ink placeholder-muted min-w-0 font-sans"
-                    autoComplete="off"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="m-2 px-6 sm:px-8 py-3 sm:py-3 bg-brand-red hover:bg-brand-red-dark active:bg-brand-red-dark text-white font-medium rounded-md transition-colors duration-200 flex items-center justify-center gap-2 min-h-[48px] touch-manipulation font-sans"
-                >
-                  <MapPin className="h-4 w-4 flex-shrink-0" />
-                  <span className="whitespace-nowrap">Find Breweries</span>
-                </button>
-              </div>
-            </div>
-          </form>
+          {/* Search with suggestions */}
+          <SearchCombobox
+            className="mx-auto max-w-2xl"
+            submitLabel="Find breweries"
+          />
         </div>
       </div>
     </section>
   );
 }
-

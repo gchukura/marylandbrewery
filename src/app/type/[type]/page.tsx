@@ -2,247 +2,134 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getProcessedBreweryData, getAllTypes } from '@/lib/db';
 import { slugify, deslugify } from '@/lib/slug';
-import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
-import Image from 'next/image';
-import { existsSync } from 'fs';
-import { join } from 'path';
-import TypeBreweriesMapClient from './TypeBreweriesMapClient';
 import { buildMetadata } from '@/lib/seo/metadata';
-import { typeMeta } from '@/lib/seo/page-meta';
-import { breadcrumbList, collectionPage } from '@/lib/seo/jsonld';
+import { typeMeta, typePlural } from '@/lib/seo/page-meta';
+import { collectionPage } from '@/lib/seo/jsonld';
 import JsonLd from '@/components/seo/JsonLd';
-import { typePlural } from '@/lib/seo/page-meta';
-import BreweriesByLocationTabs from '@/components/home-v2/BreweriesByLocationTabs';
+import ListingPage, { byRating } from '@/components/listing/ListingPage';
+import { typeLinks } from '@/lib/listing-links';
 
-// Brewery type definitions
 const BREWERY_TYPE_DEFINITIONS: Record<string, string> = {
-  'microbrewery': 'These are the heart of Maryland\'s craft beer movement. Microbreweries focus on quality over quantity, brewing smaller batches with care and creativity. Most of their beer heads out to local bars, restaurants, and bottle shops—though many have cozy tasting rooms where you can sample the latest creations straight from the source.',
-  'brewpub': 'The best of both worlds—a restaurant and brewery under one roof. Brewpubs serve their house-brewed beers alongside a full food menu, making them perfect for a complete night out. The kitchen often creates dishes designed to pair perfectly with the beers being poured just feet away.',
-  'taproom': 'Taprooms put the beer front and center. These spaces are all about the drinking experience—think rotating taps, knowledgeable staff, and a relaxed atmosphere. Food is usually minimal (think snacks or food trucks), so you can focus on what matters: exploring great craft beer with friends.',
-  'production': 'These are Maryland\'s brewing powerhouses. Production breweries have the capacity to brew large quantities and distribute their beer across the region—and sometimes beyond. Many still welcome visitors to their facilities, offering tours and taprooms where you can see brewing in action.',
-  'nano': 'The smallest of the small, nano breweries are often passion projects run by dedicated brewers. With tiny batch sizes, they can experiment freely and create beers you won\'t find anywhere else. If you love discovering something truly unique, nano breweries are where the magic happens.',
-  'farm-brewery': 'Farm breweries bring the farm-to-glass movement to Maryland\'s craft beer scene. Located on working farms, these breweries often grow their own hops, barley, or other ingredients. The result? Beer with a true sense of place, plus the chance to enjoy a beautiful rural setting while you sip.',
+  microbrewery:
+    "These are the heart of Maryland's craft beer movement. Microbreweries focus on quality over quantity, brewing smaller batches with care and creativity. Most of their beer heads out to local bars, restaurants, and bottle shops—though many have cozy tasting rooms where you can sample the latest creations straight from the source.",
+  brewpub:
+    'The best of both worlds—a restaurant and brewery under one roof. Brewpubs serve their house-brewed beers alongside a full food menu, making them perfect for a complete night out. The kitchen often creates dishes designed to pair perfectly with the beers being poured just feet away.',
+  taproom:
+    'Taprooms put the beer front and center. These spaces are all about the drinking experience—think rotating taps, knowledgeable staff, and a relaxed atmosphere. Food is usually minimal (think snacks or food trucks), so you can focus on what matters: exploring great craft beer with friends.',
+  production:
+    "These are Maryland's brewing powerhouses. Production breweries have the capacity to brew large quantities and distribute their beer across the region—and sometimes beyond. Many still welcome visitors to their facilities, offering tours and taprooms where you can see brewing in action.",
+  nano: "The smallest of the small, nano breweries are often passion projects run by dedicated brewers. With tiny batch sizes, they can experiment freely and create beers you won't find anywhere else. If you love discovering something truly unique, nano breweries are where the magic happens.",
+  'farm-brewery':
+    "Farm breweries bring the farm-to-glass movement to Maryland's craft beer scene. Located on working farms, these breweries often grow their own hops, barley, or other ingredients. The result? Beer with a true sense of place, plus the chance to enjoy a beautiful rural setting while you sip.",
 };
-
-/**
- * Get all unique brewery types from the data and generate slugs
- */
-async function getAllTypeSlugs(): Promise<string[]> {
-  const types = await getAllTypes();
-  return types.map(type => slugify(type));
-}
 
 /**
  * Normalize type name from slug - handles variations
  */
 function normalizeTypeName(slug: string, allTypes: string[]): string | null {
   const slugLower = slug.toLowerCase();
-  
+
   // Try exact match first
-  const exactMatch = allTypes.find(t => slugify(t).toLowerCase() === slugLower);
+  const exactMatch = allTypes.find(
+    (t) => slugify(t).toLowerCase() === slugLower
+  );
   if (exactMatch) return exactMatch;
-  
+
   // Try case-insensitive match
-  const caseInsensitiveMatch = allTypes.find(t => t.toLowerCase() === slugLower);
+  const caseInsensitiveMatch = allTypes.find(
+    (t) => t.toLowerCase() === slugLower
+  );
   if (caseInsensitiveMatch) return caseInsensitiveMatch;
-  
+
   // Try deslugify and match
   const deslugified = deslugify(slug);
-  const deslugifiedMatch = allTypes.find(t => t.toLowerCase() === deslugified.toLowerCase());
+  const deslugifiedMatch = allTypes.find(
+    (t) => t.toLowerCase() === deslugified.toLowerCase()
+  );
   if (deslugifiedMatch) return deslugifiedMatch;
-  
+
   return null;
 }
 
 export async function generateStaticParams() {
-  const typeSlugs = await getAllTypeSlugs();
-  return typeSlugs.map((slug) => ({ type: slug }));
+  return (await getAllTypes()).map((type) => ({ type: slugify(type) }));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ type: string }> }): Promise<Metadata> {
-  const { type } = await params;
+async function loadType(slug: string) {
   const processed = await getProcessedBreweryData();
-  const allTypes = processed.types;
-  
-  const normalizedType = normalizeTypeName(type, allTypes);
-  if (!normalizedType) {
+  const type = normalizeTypeName(slug, processed.types);
+  if (!type) return null;
+  const key = type.toLowerCase();
+  return {
+    type,
+    breweries: processed.breweries.filter((b) =>
+      b.type.some((t) => t.toLowerCase() === key)
+    ),
+    all: processed.breweries,
+  };
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ type: string }>;
+}): Promise<Metadata> {
+  const { type } = await params;
+  const data = await loadType(type);
+  if (!data)
     return {
       title: 'Brewery Type Not Found',
       robots: { index: false, follow: false },
     };
-  }
-  
-  const typeKey = normalizedType.toLowerCase();
-  const breweries = processed.breweries.filter((b) => {
-    return b.type.some((t) => t.toLowerCase() === typeKey);
+  return buildMetadata({
+    ...typeMeta(data.type, data.breweries.length),
+    path: `/type/${type}`,
   });
-  
-  const typeLabel = normalizedType;
-  const typeLabelLower = typeLabel.toLowerCase();
-  return buildMetadata({ ...typeMeta(typeLabel, breweries.length), path: `/type/${type}` });
 }
 
-export default async function TypePage({ params }: { params: Promise<{ type: string }> }) {
+export default async function TypePage({
+  params,
+}: {
+  params: Promise<{ type: string }>;
+}) {
   const { type } = await params;
-  const processed = await getProcessedBreweryData();
-  const allTypes = processed.types;
-  
-  // Normalize type name from slug
-  const normalizedType = normalizeTypeName(type, allTypes);
-  if (!normalizedType) {
-    notFound();
-  }
-  
-  const typeKey = normalizedType.toLowerCase();
-  const typeLabel = normalizedType;
-  
-  // Filter breweries by type
-  const breweries = processed.breweries.filter((b) => {
-    return b.type.some((t) => t.toLowerCase() === typeKey);
-  });
-  
-  // Return 404 if no breweries found
-  if (breweries.length === 0) {
-    notFound();
-  }
+  const data = await loadType(type);
+  if (!data || data.breweries.length === 0) notFound();
+  const { breweries, all } = data;
 
-  // Sort breweries by rating (highest first), then by name
-  const sortedBreweries = [...breweries].sort((a: any, b: any) => {
-    const aRating = a.googleRating || a.yelpRating || 0;
-    const bRating = b.googleRating || b.yelpRating || 0;
-    if (bRating !== aRating) return bRating - aRating;
-    return (a.name || '').localeCompare(b.name || '');
-  });
-
-  // Get hero image - use cities-hero as fallback
-  const heroImagePath = '/cities-hero.jpg';
-  const heroImageFile = join(process.cwd(), 'public', 'cities-hero.jpg');
-  const hasHeroImage = existsSync(heroImageFile);
-
-  // Calculate stats
-  const totalBreweries = breweries.length;
-
-  // Get type definition
-  const typeDefinition = BREWERY_TYPE_DEFINITIONS[type] || BREWERY_TYPE_DEFINITIONS[typeKey];
-
-  // Prepare data for BreweriesByLocationTabs
-  // Process cities - get unique cities with counts
-  const cityCounts = new Map<string, { name: string; slug: string; count: number }>();
-  processed.breweries.forEach((brewery: any) => {
-    if (brewery.city) {
-      const slug = slugify(brewery.city);
-      const existing = cityCounts.get(slug);
-      if (existing) {
-        existing.count++;
-      } else {
-        cityCounts.set(slug, { name: brewery.city, slug, count: 1 });
-      }
-    }
-  });
-  const cities = Array.from(cityCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
-
-  // Process counties - get unique counties with counts
-  const countyCounts = new Map<string, { name: string; slug: string; count: number }>();
-  processed.breweries.forEach((brewery: any) => {
-    if (brewery.county) {
-      const slug = slugify(brewery.county);
-      const existing = countyCounts.get(slug);
-      if (existing) {
-        existing.count++;
-      } else {
-        countyCounts.set(slug, { name: `${brewery.county} County`, slug, count: 1 });
-      }
-    }
-  });
-  const counties = Array.from(countyCounts.values()).sort((a, b) => a.name.localeCompare(b.name));
-
+  const plural = typePlural(data.type);
+  const definition =
+    BREWERY_TYPE_DEFINITIONS[type] ??
+    BREWERY_TYPE_DEFINITIONS[data.type.toLowerCase()];
   const pagePath = `/type/${type}`;
-  const jsonLd = [
-    collectionPage({ name: `${typePlural(typeLabel)} in Maryland`, path: pagePath, breweries: sortedBreweries }),
-    breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Brewery Types', path: '/type' }, { name: typePlural(typeLabel), path: pagePath }]),
-  ];
-
   return (
-    <div className="min-h-screen bg-paper">
-      <JsonLd data={jsonLd} />
-      {/* Hero Section */}
-      <section className="bg-white border-b-4 border-brand-red relative overflow-hidden">
-        {/* Hero Image Background */}
-        {hasHeroImage && (
-          <div className="absolute inset-0">
-            <Image
-              src={heroImagePath}
-              alt={`${typeLabel} breweries`}
-              fill
-              className="object-cover"
-              sizes="100vw"
-              priority
-              unoptimized={false}
-            />
-            {/* Dark overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-          </div>
-        )}
-        
-        {/* Pattern overlay (only if no hero image) */}
-        {!hasHeroImage && (
-          <div className="absolute inset-0 md-pattern-bg pointer-events-none" />
-        )}
-        
-        <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
-          {/* Breadcrumbs */}
-          <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className="flex items-center flex-wrap gap-2 text-sm text-white/90">
-              <li>
-                <Link href="/" className="hover:text-white transition-colors drop-shadow-md">
-                  Maryland Breweries
-                </Link>
-              </li>
-              <li><ChevronRight className="h-4 w-4 mx-2 text-white/70" /></li>
-              <li>
-                <Link href="/type" className="hover:text-white transition-colors drop-shadow-md">
-                  Types
-                </Link>
-              </li>
-              <li><ChevronRight className="h-4 w-4 mx-2 text-white/70" /></li>
-              <li>
-                <Link href={`/type/${type}`} className="text-white font-medium drop-shadow-md hover:text-white transition-colors">
-                  {typeLabel}
-                </Link>
-              </li>
-            </ol>
-          </nav>
-
-          {/* H1 Title */}
-          <h1 
-            className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
-          >
-            {typeLabel} Breweries in Maryland
-          </h1>
-
-          {/* Count Display */}
-          <p 
-            className="text-lg md:text-xl text-white/95 mb-6 drop-shadow-md"
-          >
-            <strong className="text-white font-semibold">{totalBreweries}</strong> {totalBreweries === 1 ? 'brewery' : 'breweries'} found.
-          </p>
-        </div>
-      </section>
-
-      {/* Map and List Layout */}
-      <section className="bg-white py-8 md:py-12">
-        <div className="container mx-auto px-4">
-          <TypeBreweriesMapClient 
-            breweries={sortedBreweries} 
-            typeName={typeLabel} 
-            typeDefinition={typeDefinition}
-          />
-        </div>
-      </section>
-
-      {/* Breweries by Location Tabs */}
-      <BreweriesByLocationTabs cities={cities} counties={counties} />
-    </div>
+    <>
+      <JsonLd
+        data={collectionPage({
+          name: `${plural} in Maryland`,
+          path: pagePath,
+          breweries: byRating(breweries),
+        })}
+      />
+      <ListingPage
+        scope="type"
+        title={`${plural} in Maryland`}
+        breadcrumbs={[
+          { name: 'Home', path: '/' },
+          { name: 'Brewery Types', path: '/type' },
+          { name: plural, path: pagePath },
+        ]}
+        breweries={breweries}
+        context={`${new Set(breweries.map((b) => b.city)).size} cities`}
+        intro={definition ? <p className="m-0">{definition}</p> : undefined}
+        locked={{ type: slugify(data.type) }}
+        related={[
+          {
+            title: 'Other brewery types',
+            links: typeLinks(all, slugify(data.type)),
+          },
+        ]}
+      />
+    </>
   );
 }

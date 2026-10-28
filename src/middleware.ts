@@ -25,7 +25,20 @@ export function middleware(request: NextRequest) {
   const cityAmenity = pathname.match(/^\/cities\/([^/]+)\/([^/]+)$/);
   if (cityAmenity && Object.hasOwn(AMENITY_ALIASES, cityAmenity[2])) {
     const target = AMENITY_ALIASES[cityAmenity[2]];
-    return redirect(request, `/cities/${cityAmenity[1]}/${target ?? 'breweries'}`);
+    return redirect(
+      request,
+      `/cities/${cityAmenity[1]}/${target ?? 'breweries'}`
+    );
+  }
+
+  // /map?search=x (old links and the retired SearchAction) -> /map?q=x
+  if (pathname === '/map' && request.nextUrl.searchParams.has('search')) {
+    const url = request.nextUrl.clone();
+    const query = url.searchParams.get('search') ?? '';
+    url.searchParams.delete('search');
+    if (query.trim() && !url.searchParams.has('q'))
+      url.searchParams.set('q', query.trim());
+    return NextResponse.redirect(url, 301);
   }
 
   return NextResponse.next();
@@ -38,5 +51,5 @@ function redirect(request: NextRequest, pathname: string) {
 }
 
 export const config = {
-  matcher: ['/cities/:path*', '/counties/:path*', '/amenities/:path*'],
+  matcher: ['/cities/:path*', '/counties/:path*', '/amenities/:path*', '/map'],
 };

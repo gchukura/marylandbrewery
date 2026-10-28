@@ -47,7 +47,13 @@ These describe the code as of 2026-10-27. Fix them in their own PRs, not inciden
 - Design system is in place: tokens in `@theme` in `globals.css`, Fraunces + Inter via next/font
   (`font-display`, `font-sans`), shared UI in `src/components/ui/` (Button, Chip/FilterChip, StatusBadge,
   BreweryCard, BreweryListRow, Breadcrumbs, CheckerBand, SectionHeading, Logo), header/footer in
-  `src/components/layout/`. Page layouts are still the old ones and adopt these components page by page.
+  `src/components/layout/`. Brewery listings use them (below); the home, brewery and static pages don't yet.
+- Every brewery listing (cities, counties, regions, amenities, types, city x amenity, best-of, open now,
+  neighborhoods, /near, /map) is `src/components/listing/ListingPage.tsx` (server) + `BreweryListMap.tsx`
+  (client island). Filters live in the URL and run in the browser on the static list (`src/lib/listing.ts`);
+  canonical URLs stay unfiltered. The one map is `src/components/maps/BreweryMap.tsx` (load it via
+  `BreweryMapLazy`); it needs `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID`. Site search: `/search-index.json` +
+  `src/components/search/SearchCombobox.tsx`.
 - Brewery photos and logos are in Storage; `public/photos` and `public/logos` are deleted but still in git
   history (`docs/runbooks/rewrite-history.md`). `public/cities/`, `counties/`, `regions/` remain.
 - Logo assets are generated from `docs/design/mark.svg` with `npm run icons`.

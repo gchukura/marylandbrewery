@@ -95,21 +95,21 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ s
       <section className="border-b bg-white">
         <div className="container mx-auto px-4 py-10 md:py-14">
           <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className="flex flex-wrap items-center gap-1 text-sm text-gray-600">
+            <ol className="flex flex-wrap items-center gap-1 text-sm text-muted">
               <li><Link href="/" className="hover:underline">Maryland Breweries</Link></li>
               <li aria-hidden="true"><ChevronRight className="h-4 w-4" /></li>
               <li><Link href="/cities" className="hover:underline">Cities</Link></li>
               <li aria-hidden="true"><ChevronRight className="h-4 w-4" /></li>
               <li><Link href={`/cities/${citySlug}/breweries`} className="hover:underline">{city}, MD</Link></li>
               <li aria-hidden="true"><ChevronRight className="h-4 w-4" /></li>
-              <li aria-current="page" className="font-medium text-gray-900">{neighborhood.name}</li>
+              <li aria-current="page" className="font-medium text-ink">{neighborhood.name}</li>
             </ol>
           </nav>
 
-          <h1 className="mb-4 font-[family-name:var(--font-playfair-display)] text-4xl font-bold leading-tight text-gray-900 md:text-5xl">
+          <h1 className="mb-4 font-display text-4xl font-bold leading-tight text-ink md:text-5xl">
             Breweries near {neighborhood.name}, {city}, MD
           </h1>
-          <p className="text-lg text-gray-700">
+          <p className="text-lg text-muted">
             {nearestMiles === undefined
               ? 'No breweries found nearby.'
               : withinIndexRadius > 0
@@ -135,7 +135,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ s
       {attractions.length > 0 && (
         <section className="border-t py-8 md:py-12">
           <div className="container mx-auto px-4">
-            <h2 className="mb-6 font-[family-name:var(--font-playfair-display)] text-2xl font-bold text-gray-900 md:text-3xl">
+            <h2 className="mb-6 font-display text-2xl font-bold text-ink md:text-3xl">
               Things to do near {neighborhood.name}
             </h2>
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -145,11 +145,11 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ s
                     href={`/near/${attraction.slug}`}
                     className="block h-full rounded-lg border bg-white p-4 transition-shadow hover:shadow-md"
                   >
-                    <p className="font-semibold text-gray-900">{attraction.name}</p>
-                    <p className="text-sm capitalize text-gray-600">
+                    <p className="font-semibold text-ink">{attraction.name}</p>
+                    <p className="text-sm capitalize text-muted">
                       {attraction.type.replace(/_/g, ' ')} · {attraction.distance.toFixed(1)} mi
                     </p>
-                    <p className="mt-2 text-sm text-gray-700">Breweries near {attraction.name} →</p>
+                    <p className="mt-2 text-sm text-muted">Breweries near {attraction.name} →</p>
                   </Link>
                 </li>
               ))}

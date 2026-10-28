@@ -83,7 +83,7 @@ export default function BreweryPhotoGallery({
         >
           {/* Close button */}
           <button
-            className="absolute top-4 right-4 text-white text-3xl font-bold hover:text-gray-300 z-10 w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+            className="absolute top-4 right-4 text-white text-3xl font-bold hover:text-white/70 z-10 w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
             onClick={() => setSelectedPhoto(null)}
             aria-label="Close"
           >
@@ -94,7 +94,7 @@ export default function BreweryPhotoGallery({
           {displayPhotos.length > 1 && (
             <>
               <button
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl font-bold hover:text-gray-300 z-10 w-12 h-12 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl font-bold hover:text-white/70 z-10 w-12 h-12 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   navigatePhoto('prev');
@@ -104,7 +104,7 @@ export default function BreweryPhotoGallery({
                 ‹
               </button>
               <button
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl font-bold hover:text-gray-300 z-10 w-12 h-12 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl font-bold hover:text-white/70 z-10 w-12 h-12 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   navigatePhoto('next');

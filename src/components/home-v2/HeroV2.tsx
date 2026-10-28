@@ -27,32 +27,31 @@ export default function HeroV2() {
             backgroundImage: `
               repeating-linear-gradient(
                 45deg,
-                var(--color-red-primary) 0px,
-                var(--color-red-primary) 10px,
-                var(--color-gold-primary) 10px,
-                var(--color-gold-primary) 20px
+                var(--color-brand-red) 0px,
+                var(--color-brand-red) 10px,
+                var(--color-gold) 10px,
+                var(--color-gold) 20px
               )
             `,
           }}
         />
       </div>
       
-      <div className="relative bg-gradient-to-b from-[#FAF9F6] to-white pt-12 md:pt-16 pb-6 md:pb-8">
+      <div className="relative bg-gradient-to-b from-paper to-white pt-12 md:pt-16 pb-6 md:pb-8">
         <div className="container mx-auto px-4">
 
           {/* Main Headline */}
           <h1 
-            className="text-center text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-[#1C1C1C] mb-6 leading-[1.1] font-display"
-            style={{ fontFamily: "var(--font-playfair-display), Georgia, serif" }}
+            className="text-center text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-ink mb-6 leading-[1.1] font-display"
           >
             Discover Maryland's
             <br />
-            <span className="text-[#9B2335]">Craft Brewery</span> Scene
+            <span className="text-brand-red">Craft Brewery</span> Scene
           </h1>
 
           {/* Subtitle */}
           <p 
-            className="text-center text-body-large md:text-xl text-[#6B6B6B] max-w-2xl mx-auto mb-10 font-body"
+            className="text-center text-body-large md:text-xl text-muted max-w-2xl mx-auto mb-10 font-sans"
           >
             A local curated directory of craft breweries in the state of Maryland. Find a brewery for your next event, outing, or place to hang with family and friends.
           </p>
@@ -60,22 +59,22 @@ export default function HeroV2() {
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-0">
             <div className="relative">
-              <div className="relative flex flex-col sm:flex-row bg-white rounded-lg shadow-lg border border-[#E8E6E1]">
+              <div className="relative flex flex-col sm:flex-row bg-white rounded-lg shadow-lg border border-line">
                 <div className="flex items-center pl-4 sm:pl-5 flex-1 min-w-0">
-                  <Search className="h-5 w-5 text-[#6B6B6B] flex-shrink-0" />
+                  <Search className="h-5 w-5 text-muted flex-shrink-0" />
                   <input
                     type="search"
                     inputMode="search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search by brewery name, city, or county..."
-                    className="flex-1 px-3 sm:px-4 py-4 sm:py-5 text-base sm:text-lg bg-transparent border-0 focus:outline-none focus:ring-2 focus:ring-[#9B2335] focus:ring-inset text-[#1C1C1C] placeholder-gray-400 min-w-0 font-body"
+                    className="flex-1 px-3 sm:px-4 py-4 sm:py-5 text-base sm:text-lg bg-transparent border-0 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-inset text-ink placeholder-muted min-w-0 font-sans"
                     autoComplete="off"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="m-2 px-6 sm:px-8 py-3 sm:py-3 bg-[#9B2335] hover:bg-[#7A1C2A] active:bg-[#7A1C2A] text-white font-medium rounded-md transition-colors duration-200 flex items-center justify-center gap-2 min-h-[48px] touch-manipulation font-body"
+                  className="m-2 px-6 sm:px-8 py-3 sm:py-3 bg-brand-red hover:bg-brand-red-dark active:bg-brand-red-dark text-white font-medium rounded-md transition-colors duration-200 flex items-center justify-center gap-2 min-h-[48px] touch-manipulation font-sans"
                 >
                   <MapPin className="h-4 w-4 flex-shrink-0" />
                   <span className="whitespace-nowrap">Find Breweries</span>

@@ -9,7 +9,6 @@ import { join } from 'path';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { breadcrumbList } from '@/lib/seo/jsonld';
 import JsonLd from '@/components/seo/JsonLd';
-import '@/components/home-v2/styles.css';
 
 export const metadata: Metadata = buildMetadata({
   title: "Maryland Breweries by Amenity",
@@ -274,10 +273,10 @@ export default async function AmenitiesIndexPage() {
   const hasAmenitiesHeroImage = existsSync(amenitiesHeroImageFile);
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6]">
+    <div className="min-h-screen bg-paper">
       <JsonLd data={breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Amenities', path: '/amenities' }])} />
       {/* Hero Section */}
-      <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
+      <section className="bg-white border-b-4 border-brand-red relative overflow-hidden">
         {/* Hero Image Background */}
         {hasAmenitiesHeroImage && (
           <div className="absolute inset-0">
@@ -303,11 +302,11 @@ export default async function AmenitiesIndexPage() {
         <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
           {/* Breadcrumbs */}
           <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className={`flex items-center flex-wrap gap-2 text-sm ${hasAmenitiesHeroImage ? 'text-white/90' : ''}`} style={{ fontFamily: "'Source Sans 3', sans-serif", color: hasAmenitiesHeroImage ? undefined : '#6B6B6B' }}>
+            <ol className={`flex items-center flex-wrap gap-2 text-sm ${hasAmenitiesHeroImage ? 'text-white/90' : ''}`} style={{ color: hasAmenitiesHeroImage ? undefined : 'var(--color-muted)' }}>
               <li>
                 <Link 
                   href="/" 
-                  className={`transition-colors ${hasAmenitiesHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-[#9B2335]'}`}
+                  className={`transition-colors ${hasAmenitiesHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-brand-red'}`}
                 >
                   Maryland Breweries
                 </Link>
@@ -316,7 +315,7 @@ export default async function AmenitiesIndexPage() {
               <li>
                 <Link 
                   href="/amenities" 
-                  className={`font-medium transition-colors ${hasAmenitiesHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-[#1C1C1C] hover:text-[#9B2335]'}`}
+                  className={`font-medium transition-colors ${hasAmenitiesHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-ink hover:text-brand-red'}`}
                 >
                   Amenities
                 </Link>
@@ -326,12 +325,11 @@ export default async function AmenitiesIndexPage() {
 
           {/* H1 Title */}
           <h1 
-            className={`text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${
+            className={`font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${
               hasAmenitiesHeroImage 
                 ? 'text-white drop-shadow-lg' 
-                : 'text-[#1C1C1C]'
-            }`}
-            style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: hasAmenitiesHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
+                : 'text-ink'
+            }`} style={{ textShadow: hasAmenitiesHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
           >
             Brewery Amenities & Features
           </h1>
@@ -341,9 +339,8 @@ export default async function AmenitiesIndexPage() {
             className={`text-lg md:text-xl max-w-3xl leading-relaxed ${
               hasAmenitiesHeroImage 
                 ? 'text-white/95 drop-shadow-md' 
-                : 'text-[#6B6B6B]'
+                : 'text-muted'
             }`}
-            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
             Find the perfect brewery for your next visit. Browse {totalBreweries} Maryland breweries by {totalAmenities} different amenities—from outdoor seating to live music venues.
           </p>
@@ -351,19 +348,17 @@ export default async function AmenitiesIndexPage() {
       </section>
 
       {/* Amenities with Definitions */}
-      <section className="bg-white py-12 md:py-16 border-b border-[#E8E6E1]">
+      <section className="bg-white py-12 md:py-16 border-b border-line">
         <div className="container mx-auto px-4">
           <div className="mb-10">
             <div className="section-divider mb-4" />
             <h2 
-              className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-3"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-display text-3xl md:text-4xl font-bold text-ink mb-3"
             >
               Explore Breweries by Amenity
             </h2>
             <p 
-              className="text-lg text-[#6B6B6B]"
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+              className="text-lg text-muted"
             >
               Whether you're looking for a casual hangout with your dog, a dinner destination, or a place with games and live music—we've got you covered.
             </p>
@@ -379,38 +374,35 @@ export default async function AmenitiesIndexPage() {
                 <Link
                   key={item.slug}
                   href={item.url}
-                  className="group bg-[#FAF9F6] border border-[#E8E6E1] rounded-lg p-6 md:p-8 hover:border-[#9B2335] hover:shadow-lg transition-all duration-300"
+                  className="group bg-paper border border-line rounded-lg p-6 md:p-8 hover:border-brand-red hover:shadow-lg transition-all duration-300"
                 >
                   {/* Header with Icon and Count */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[#9B2335]/10 flex items-center justify-center group-hover:bg-[#9B2335] transition-colors">
-                        <IconComponent className="w-6 h-6 text-[#9B2335] group-hover:text-white transition-colors" />
+                      <div className="w-12 h-12 rounded-full bg-brand-red/10 flex items-center justify-center group-hover:bg-brand-red transition-colors">
+                        <IconComponent className="w-6 h-6 text-brand-red group-hover:text-white transition-colors" />
                       </div>
                       <div>
                         <h3 
-                          className="text-xl md:text-2xl font-bold text-[#1C1C1C] group-hover:text-[#9B2335] transition-colors"
-                          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                          className="font-display text-xl md:text-2xl font-bold text-ink group-hover:text-brand-red transition-colors"
                         >
                           {item.name}
                         </h3>
                         <span 
-                          className="text-sm font-medium text-[#9B2335]"
-                          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                          className="text-sm font-medium text-brand-red"
                         >
                           {item.count} {item.count === 1 ? 'brewery' : 'breweries'} in Maryland
                         </span>
                       </div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-[#9B2335] opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ChevronRight className="w-5 h-5 text-brand-red opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
 
                   {/* Definition */}
                   {amenityDef && (
                     <>
                       <p 
-                        className="text-[#6B6B6B] mb-4 leading-relaxed"
-                        style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                        className="text-muted mb-4 leading-relaxed"
                       >
                         {amenityDef.definition}
                       </p>
@@ -420,10 +412,9 @@ export default async function AmenitiesIndexPage() {
                         {amenityDef.characteristics.map((char, idx) => (
                           <li 
                             key={idx}
-                            className="text-sm text-[#6B6B6B] flex items-center gap-2"
-                            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                            className="text-sm text-muted flex items-center gap-2"
                           >
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#D4A017] flex-shrink-0" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0" />
                             {char}
                           </li>
                         ))}
@@ -432,10 +423,9 @@ export default async function AmenitiesIndexPage() {
                   )}
 
                   {/* CTA */}
-                  <div className="mt-6 pt-4 border-t border-[#E8E6E1]">
+                  <div className="mt-6 pt-4 border-t border-line">
                     <span 
-                      className="text-[#9B2335] font-semibold group-hover:text-[#D4A017] transition-colors inline-flex items-center gap-2"
-                      style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                      className="text-brand-red font-semibold group-hover:text-brand-red-dark transition-colors inline-flex items-center gap-2"
                     >
                       View All {item.name} Breweries
                       <ChevronRight className="w-4 h-4" />
@@ -449,17 +439,15 @@ export default async function AmenitiesIndexPage() {
       </section>
 
       {/* About Section */}
-      <section className="bg-white py-12 md:py-16 border-t border-[#E8E6E1]">
+      <section className="bg-white py-12 md:py-16 border-t border-line">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 
-            className="text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-6"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-display text-3xl md:text-4xl font-bold text-ink mb-6"
           >
             About Maryland Brewery Directory
           </h2>
           <div 
-            className="prose prose-lg text-[#6B6B6B] space-y-4"
-            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+            className="prose prose-lg text-muted space-y-4"
           >
             <p>
               Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 
@@ -467,8 +455,8 @@ export default async function AmenitiesIndexPage() {
               hours, amenities, and beer selections.
             </p>
             <p>
-              <strong className="text-[#1C1C1C]">Brewery Owners:</strong> Want to list your brewery or update 
-              your information? <Link href="/contact" className="text-[#9B2335] hover:text-[#D4A017] transition-colors underline">
+              <strong className="text-ink">Brewery Owners:</strong> Want to list your brewery or update 
+              your information? <Link href="/contact" className="text-brand-red hover:text-brand-red-dark transition-colors underline">
                 Contact us
               </Link> to get started.
             </p>

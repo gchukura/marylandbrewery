@@ -9,7 +9,6 @@ import { join } from 'path';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { breadcrumbList } from '@/lib/seo/jsonld';
 import JsonLd from '@/components/seo/JsonLd';
-import '@/components/home-v2/styles.css';
 
 export const metadata: Metadata = buildMetadata({
   title: "Maryland Breweries by City",
@@ -85,10 +84,10 @@ export default async function CitiesIndexPage() {
   const hasCitiesHeroImage = existsSync(citiesHeroImageFile);
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6]">
+    <div className="min-h-screen bg-paper">
       <JsonLd data={breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Cities', path: '/cities' }])} />
       {/* Hero Section */}
-      <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
+      <section className="bg-white border-b-4 border-brand-red relative overflow-hidden">
         {/* Cities Hero Image Background */}
         {hasCitiesHeroImage && (
           <div className="absolute inset-0">
@@ -114,20 +113,20 @@ export default async function CitiesIndexPage() {
         <div className="container mx-auto px-4 py-10 md:py-14 relative z-10">
           {/* Breadcrumbs */}
           <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className={`flex items-center flex-wrap gap-2 text-sm font-body ${hasCitiesHeroImage ? 'text-white/90' : 'text-[#6B6B6B]'}`}>
+            <ol className={`flex items-center flex-wrap gap-2 text-sm font-sans ${hasCitiesHeroImage ? 'text-white/90' : 'text-muted'}`}>
               <li>
                 <Link 
                   href="/" 
-                  className={`transition-colors ${hasCitiesHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-[#9B2335]'}`}
+                  className={`transition-colors ${hasCitiesHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-brand-red'}`}
                 >
                   Maryland Breweries
                 </Link>
               </li>
-              <li><ChevronRight className={`h-4 w-4 mx-2 ${hasCitiesHeroImage ? 'text-white/70' : 'text-[#6B6B6B]'}`} /></li>
+              <li><ChevronRight className={`h-4 w-4 mx-2 ${hasCitiesHeroImage ? 'text-white/70' : 'text-muted'}`} /></li>
               <li>
                 <Link 
                   href="/cities" 
-                  className={`font-medium transition-colors ${hasCitiesHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-[#1C1C1C] hover:text-[#9B2335]'}`}
+                  className={`font-medium transition-colors ${hasCitiesHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-ink hover:text-brand-red'}`}
                 >
                   Cities
                 </Link>
@@ -140,7 +139,7 @@ export default async function CitiesIndexPage() {
             className={`text-h1 md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6 leading-snug font-display ${
               hasCitiesHeroImage 
                 ? 'text-white drop-shadow-lg' 
-                : 'text-[#1C1C1C]'
+                : 'text-ink'
             }`}
             style={hasCitiesHeroImage ? { textShadow: '2px 2px 4px rgba(0,0,0,0.5)' } : undefined}
           >
@@ -149,10 +148,10 @@ export default async function CitiesIndexPage() {
 
           {/* Intro Paragraph */}
           <p 
-            className={`text-body-large md:text-xl max-w-3xl leading-snug font-body ${
+            className={`text-body-large md:text-xl max-w-3xl leading-snug font-sans ${
               hasCitiesHeroImage 
                 ? 'text-white/95 drop-shadow-md' 
-                : 'text-[#6B6B6B]'
+                : 'text-muted'
             }`}
           >
             Browse all cities in Maryland with craft breweries. From Baltimore's historic neighborhoods to Annapolis' waterfront locations, discover breweries across the state organized by city.
@@ -161,12 +160,12 @@ export default async function CitiesIndexPage() {
       </section>
 
       {/* All Cities Listing - 5 columns like BimmerShops */}
-      <section className="bg-white py-10 md:py-14 border-b border-[#E8E6E1]">
+      <section className="bg-white py-10 md:py-14 border-b border-line">
         <div className="container mx-auto px-4">
           <div className="mb-8">
             <div className="section-divider mb-4" />
             <h2 
-              className="text-h2 md:text-3xl lg:text-4xl font-bold text-[#1C1C1C] mb-3 font-display"
+              className="text-h2 md:text-3xl lg:text-4xl font-bold text-ink mb-3 font-display"
             >
               Find Maryland Breweries in Your City
             </h2>
@@ -178,13 +177,13 @@ export default async function CitiesIndexPage() {
               <Link
                 key={city.slug}
                 href={city.url}
-                className="group relative py-3 px-0 text-[#1C1C1C] hover:text-[#9B2335] transition-colors duration-300 text-base border-b border-gray-200 last:border-b-0 hover:bg-[#FAF9F6]/50 rounded-sm font-body font-medium"
+                className="group relative py-3 px-0 text-ink hover:text-brand-red transition-colors duration-300 text-base border-b border-line last:border-b-0 hover:bg-paper/50 rounded-sm font-sans font-medium"
               >
                 <span className="relative inline-block">
                   {city.name}
-                  <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gradient-to-r from-[#9B2335] to-[#D4A017] group-hover:w-full transition-all duration-300" />
+                  <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gradient-to-r from-brand-red to-gold group-hover:w-full transition-all duration-300" />
                 </span>
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0 h-4 bg-[#D4A017]/20 group-hover:w-1 transition-all duration-300 rounded-r" />
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0 h-4 bg-gold/20 group-hover:w-1 transition-all duration-300 rounded-r" />
               </Link>
             ))}
           </div>
@@ -192,15 +191,15 @@ export default async function CitiesIndexPage() {
       </section>
 
       {/* About Section */}
-      <section className="bg-white py-10 md:py-14 border-t border-[#E8E6E1]">
+      <section className="bg-white py-10 md:py-14 border-t border-line">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 
-            className="text-h2 md:text-3xl lg:text-4xl font-bold text-[#1C1C1C] mb-6 font-display"
+            className="text-h2 md:text-3xl lg:text-4xl font-bold text-ink mb-6 font-display"
           >
             About Maryland Brewery Directory
           </h2>
           <div 
-            className="prose prose-lg text-[#6B6B6B] space-y-4 font-body"
+            className="prose prose-lg text-muted space-y-4 font-sans"
           >
             <p className="text-body leading-loose">
               Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 
@@ -208,8 +207,8 @@ export default async function CitiesIndexPage() {
               hours, amenities, and beer selections.
             </p>
             <p className="text-body leading-loose">
-              <strong className="text-[#1C1C1C]">Brewery Owners:</strong> Want to list your brewery or update 
-              your information? <Link href="/contact" className="text-[#9B2335] hover:text-[#D4A017] transition-colors underline">
+              <strong className="text-ink">Brewery Owners:</strong> Want to list your brewery or update 
+              your information? <Link href="/contact" className="text-brand-red hover:text-brand-red-dark transition-colors underline">
                 Contact us
               </Link> to get started.
             </p>

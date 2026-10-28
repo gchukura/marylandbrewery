@@ -159,17 +159,17 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
   };
 
   return (
-    <Card className="w-full border border-gray-200 shadow-sm">
-      <CardHeader className="border-b border-gray-200">
+    <Card className="w-full border border-line shadow-sm">
+      <CardHeader className="border-b border-line">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold text-gray-900">
-            Breweries <span className="text-red-600">({filteredBreweries.length})</span>
+          <CardTitle className="text-lg font-semibold text-ink">
+            Breweries <span className="text-brand-red">({filteredBreweries.length})</span>
           </CardTitle>
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+            className="flex items-center gap-2 border-line-strong text-brand-red hover:bg-cream hover:border-line-strong"
           >
             <Filter className="h-4 w-4" />
             Filters
@@ -183,7 +183,7 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
         <div className="space-y-4 mb-6">
           <div className="flex gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted" />
               <Input
                 placeholder="Search breweries..."
                 value={filters.search}
@@ -191,13 +191,13 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
                 className="w-full pl-10"
               />
             </div>
-            <Button variant="outline" onClick={clearFilters}>
+            <Button variant="secondary" onClick={clearFilters}>
               Clear
             </Button>
           </div>
 
           {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-cream rounded-lg">
               <div>
                 <label className="block text-sm font-medium mb-2">City</label>
                 <select
@@ -250,41 +250,41 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
+              <tr className="border-b border-line bg-cream">
                 <th 
-                  className="text-left p-4 cursor-pointer hover:bg-red-50 transition-colors font-medium text-gray-900"
+                  className="text-left p-4 cursor-pointer hover:bg-cream transition-colors font-medium text-ink"
                   onClick={() => handleSort('name')}
                 >
                   <div className="flex items-center gap-2">
                     Name
                     {filters.sortBy === 'name' && (
-                      <span className="text-red-600 text-sm">
+                      <span className="text-brand-red text-sm">
                         {filters.sortOrder === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
                   </div>
                 </th>
                 <th 
-                  className="text-left p-4 cursor-pointer hover:bg-red-50 transition-colors font-medium text-gray-900"
+                  className="text-left p-4 cursor-pointer hover:bg-cream transition-colors font-medium text-ink"
                   onClick={() => handleSort('city')}
                 >
                   <div className="flex items-center gap-2">
                     City
                     {filters.sortBy === 'city' && (
-                      <span className="text-red-600 text-sm">
+                      <span className="text-brand-red text-sm">
                         {filters.sortOrder === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
                   </div>
                 </th>
                 <th 
-                  className="text-left p-4 cursor-pointer hover:bg-red-50 transition-colors font-medium text-gray-900"
+                  className="text-left p-4 cursor-pointer hover:bg-cream transition-colors font-medium text-ink"
                   onClick={() => handleSort('type')}
                 >
                   <div className="flex items-center gap-2">
                     Type
                     {filters.sortBy === 'type' && (
-                      <span className="text-red-600 text-sm">
+                      <span className="text-brand-red text-sm">
                         {filters.sortOrder === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
@@ -294,23 +294,23 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
             </thead>
             <tbody>
               {paginatedBreweries.map((brewery, index) => (
-                <tr key={brewery.id} className={`border-b border-gray-200 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                <tr key={brewery.id} className={`border-b border-line hover:bg-cream transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-cream'}`}>
                   <td className="p-4">
                     <Link 
                       href={`/breweries/${brewery.slug}`}
-                      className="font-medium text-gray-900 hover:text-red-600 transition-colors"
+                      className="font-medium text-ink hover:text-brand-red transition-colors"
                     >
                       {brewery.name}
                     </Link>
                   </td>
                   <td className="p-4">
-                    <div className="flex items-center gap-1 text-sm text-gray-700">
-                      <MapPin className="h-4 w-4 text-red-500" />
+                    <div className="flex items-center gap-1 text-sm text-muted">
+                      <MapPin className="h-4 w-4 text-brand-red" />
                       {brewery.city}, {brewery.state}
                     </div>
                   </td>
                   <td className="p-4">
-                    <Badge className="capitalize bg-red-50 text-red-700 border border-red-200">
+                    <Badge className="capitalize">
                       {brewery.type}
                     </Badge>
                   </td>
@@ -323,12 +323,12 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-6">
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-muted">
               Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredBreweries.length)} of {filteredBreweries.length} breweries
             </div>
             <div className="flex gap-2">
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
@@ -339,7 +339,7 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
                 Page {currentPage} of {totalPages}
               </span>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
@@ -351,7 +351,7 @@ export default function BreweryTable({ breweries }: BreweryTableProps) {
         )}
 
         {filteredBreweries.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-muted">
             No breweries found matching your filters.
           </div>
         )}

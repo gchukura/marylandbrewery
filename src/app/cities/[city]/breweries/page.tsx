@@ -7,7 +7,6 @@ import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { existsSync } from 'fs';
 import { join } from 'path';
-import '@/components/home-v2/styles.css';
 import CityBreweriesMapClient from './CityBreweriesMapClient';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { cityMeta } from '@/lib/seo/page-meta';
@@ -55,10 +54,10 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
   if (!city) {
     // Return a not found page if city is missing
     return (
-      <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center">
+      <div className="min-h-screen bg-paper flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-4">City Not Found</h1>
-          <p className="text-lg text-gray-600">The requested city page could not be found.</p>
+          <p className="text-lg text-muted">The requested city page could not be found.</p>
         </div>
       </div>
     );
@@ -159,10 +158,10 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6]">
+    <div className="min-h-screen bg-paper">
       <JsonLd data={jsonLd} />
       {/* Hero Section */}
-      <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
+      <section className="bg-white border-b-4 border-brand-red relative overflow-hidden">
         {/* City Hero Image Background */}
         {cityHeroImage && (
           <div className="absolute inset-0">
@@ -197,7 +196,7 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
         <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
           {/* Breadcrumbs */}
           <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className="flex items-center flex-wrap gap-2 text-sm text-white/90" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+            <ol className="flex items-center flex-wrap gap-2 text-sm text-white/90">
               <li>
                 <Link href="/" className="hover:text-white transition-colors drop-shadow-md">
                   Maryland Breweries
@@ -220,8 +219,7 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
 
           {/* H1 Title */}
           <h1 
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-lg"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
+            className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
           >
             Breweries in {cityName}, MD
           </h1>
@@ -229,7 +227,6 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
           {/* Count Display */}
           <p 
             className="text-lg md:text-xl text-white/95 mb-6 drop-shadow-md"
-            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
             <strong className="text-white font-semibold">{totalBreweries}</strong> {totalBreweries === 1 ? 'brewery' : 'breweries'} found.
           </p>

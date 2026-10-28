@@ -11,8 +11,8 @@ import dynamic from 'next/dynamic';
 const DynamicGoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), {
   ssr: false,
   loading: () => (
-    <div className="h-[500px] bg-gray-200 rounded-lg flex items-center justify-center">
-      <div className="text-gray-500">Loading map...</div>
+    <div className="h-[500px] bg-line rounded-lg flex items-center justify-center">
+      <div className="text-muted">Loading map...</div>
     </div>
   ),
 });
@@ -62,7 +62,7 @@ export default function IndexPageTemplate({
   const displayGroups = groupedItems || { 'All': items };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-cream">
       <JsonLd data={breadcrumbList(breadcrumbs.map((crumb) => ({ name: crumb.name, path: crumb.url })))} />
       {/* 1. Hero Section */}
       <PageHero h1={h1} introText={introText} breadcrumbs={breadcrumbs} heroImage={heroImage} />
@@ -76,10 +76,10 @@ export default function IndexPageTemplate({
       {showMap && allBreweries && allBreweries.length > 0 && (
         <section className="bg-white py-8 md:py-12">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-ink mb-6">
               Interactive Map
             </h2>
-            <div className="h-[400px] md:h-[500px] rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+            <div className="h-[400px] md:h-[500px] rounded-lg overflow-hidden border border-line shadow-sm">
               <DynamicGoogleMap 
                 breweries={allBreweries} 
                 height="100%" 
@@ -92,33 +92,33 @@ export default function IndexPageTemplate({
       )}
 
       {/* 4. Directory Listing */}
-      <section className="bg-gray-50 py-8 md:py-12">
+      <section className="bg-cream py-8 md:py-12">
         <div className="container mx-auto px-4">
           <div className="space-y-10">
             {Object.entries(displayGroups).map(([groupName, groupItems]) => (
               <div key={groupName}>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl md:text-3xl font-bold text-ink mb-6">
                   {groupName}
                 </h2>
                 {groupItems.length === 0 ? (
-                  <p className="text-gray-500">No items in this category.</p>
+                  <p className="text-muted">No items in this category.</p>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {groupItems.map((item) => (
                       <Link
                         key={item.slug}
                         href={item.url}
-                        className="bg-white rounded-lg p-5 border border-gray-200 hover:border-red-500 hover:shadow-lg transition-all group"
+                        className="bg-white rounded-lg p-5 border border-line hover:border-brand-red hover:shadow-lg transition-all group"
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-semibold text-gray-900 group-hover:text-red-600 transition-colors">
+                          <h3 className="font-semibold text-ink group-hover:text-brand-red transition-colors">
                             {item.name}
                           </h3>
-                          <span className="text-sm font-medium text-red-600 bg-red-50 px-2 py-1 rounded">
+                          <span className="text-sm font-medium text-brand-red bg-cream px-2 py-1 rounded">
                             {item.count}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted">
                           {item.count === 1 ? '1 brewery' : `${item.count} breweries`}
                         </p>
                       </Link>

@@ -105,7 +105,7 @@ export default function FooterAd({ onVisibilityChange }: FooterAdProps) {
   }
 
   return (
-    <div ref={adRef} className="w-full bg-white border-t border-gray-200">
+    <div ref={adRef} className="w-full bg-white border-t border-line">
       <div className="container mx-auto px-4 py-1">
         <div className="flex justify-center items-center">
           <ins

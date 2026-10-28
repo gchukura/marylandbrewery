@@ -16,7 +16,7 @@
  * Make sure to set environment variables in .env.local:
  *   - NEXT_PUBLIC_SUPABASE_URL
  *   - SUPABASE_SERVICE_ROLE_KEY
- *   - NEXT_PUBLIC_GOOGLE_MAPS_API_KEY (or GOOGLE_MAPS_API_KEY)
+ *   - GOOGLE_MAPS_API_KEY: a server key, not the site's browser key (docs/setup.md#google-server-key)
  * 
  * Required APIs in Google Cloud Console:
  *   - Places API (Nearby Search)
@@ -34,13 +34,10 @@ config({ path: resolve(process.cwd(), '.env.local') });
 import { getAdminClient } from '@/lib/db/client';
 import type { TablesInsert } from '@/lib/db/client';
 import { getBreweryDataFromSupabase } from '@/lib/db/queries';
+import { googleServerKey } from './lib/google';
 import { slugify } from '@/lib/slug';
 
-const GOOGLE_PLACES_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
-
-if (!GOOGLE_PLACES_API_KEY) {
-  throw new Error('Google Maps API key is required. Please set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY or GOOGLE_MAPS_API_KEY in .env.local');
-}
+const GOOGLE_PLACES_API_KEY = googleServerKey();
 
 // Attraction types to search (Google Places types)
 const ATTRACTION_TYPES = [

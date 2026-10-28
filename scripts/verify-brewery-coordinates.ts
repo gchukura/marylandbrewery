@@ -18,7 +18,7 @@
  * Make sure to set environment variables in .env.local:
  *   - NEXT_PUBLIC_SUPABASE_URL
  *   - SUPABASE_SERVICE_ROLE_KEY (for admin operations)
- *   - NEXT_PUBLIC_GOOGLE_MAPS_API_KEY (or GOOGLE_MAPS_API_KEY)
+ *   - GOOGLE_MAPS_API_KEY: a server key, not the site's browser key (docs/setup.md#google-server-key)
  */
 
 // Load environment variables from .env.local BEFORE any other imports
@@ -32,16 +32,14 @@ config({ path: resolve(process.cwd(), '.env.local') });
 import type { Tables } from '@/lib/db/client';
 
 import { calculateDistance } from '@/lib/geo';
+import { googleServerKey } from './lib/google';
 import { getAdminClient } from '@/lib/db/client';
 // Check if admin client is available
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required. Please set it in .env.local');
 }
 
-const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
-if (!apiKey) {
-  throw new Error('Google Maps API key is required. Please set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY or GOOGLE_MAPS_API_KEY in .env.local');
-}
+const apiKey = googleServerKey();
 
 // Get admin client
 const adminClient = getAdminClient();

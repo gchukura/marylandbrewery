@@ -14,7 +14,7 @@
  * Make sure to set environment variables in .env.local:
  *   - NEXT_PUBLIC_SUPABASE_URL
  *   - SUPABASE_SERVICE_ROLE_KEY
- *   - NEXT_PUBLIC_GOOGLE_MAPS_API_KEY (or GOOGLE_MAPS_API_KEY)
+ *   - GOOGLE_MAPS_API_KEY: a server key, not the site's browser key (docs/setup.md#google-server-key)
  * 
  * Required APIs in Google Cloud Console:
  *   - Places API (Text Search) - for finding Place IDs
@@ -30,12 +30,10 @@ config({ path: resolve(process.cwd(), '.env.local') });
 
 // Now import other modules
 import { getBreweryDataFromSupabase } from '@/lib/db/queries';
+import { googleServerKey } from './lib/google';
 import { writeReviewsToSupabase, updateReviewSummaryInSupabase, storePlaceIdInSupabase } from '@/lib/db/queries';
 
-const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
-if (!apiKey) {
-  throw new Error('Google Maps API key is required. Please set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY or GOOGLE_MAPS_API_KEY in .env.local');
-}
+const apiKey = googleServerKey();
 
 /**
  * Google Review interface matching Places API response
@@ -334,7 +332,7 @@ async function fetchGoogleReviews() {
               console.error(`2. Create a NEW API key for server-side use`);
               console.error(`3. Set "Application restrictions" to "None"`);
               console.error(`4. Set "API restrictions" to only: Places API (Text Search) and Places API (Place Details)`);
-              console.error(`5. Run with it: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_new_key npm run data:reviews:google`);
+              console.error(`5. Run with it: GOOGLE_MAPS_API_KEY=your_new_key npm run data:reviews:google`);
               console.error(`\nSee docs/troubleshooting.md for detailed instructions.\n`);
               throw new Error('API key has referer restrictions - cannot be used for server-side scripts. Please create a server-side API key without referer restrictions.');
             }
@@ -383,7 +381,7 @@ async function fetchGoogleReviews() {
             console.error(`2. Create a NEW API key for server-side use`);
             console.error(`3. Set "Application restrictions" to "None"`);
             console.error(`4. Set "API restrictions" to only: Places API (Text Search) and Places API (Place Details)`);
-            console.error(`5. Run with it: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_new_key npm run data:reviews:google`);
+            console.error(`5. Run with it: GOOGLE_MAPS_API_KEY=your_new_key npm run data:reviews:google`);
             console.error(`\nSee docs/troubleshooting.md for detailed instructions.\n`);
             throw new Error('API key has referer restrictions - cannot be used for server-side scripts. Please create a server-side API key without referer restrictions.');
           }

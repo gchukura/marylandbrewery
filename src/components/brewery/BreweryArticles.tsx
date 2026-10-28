@@ -50,14 +50,14 @@ export default function BreweryArticles({ articles, breweryName }: BreweryArticl
   return (
     <div>
       <div className="mb-4">
-        <h2 className="text-xl md:text-2xl font-semibold text-[#1C1C1C] font-display">
+        <h2 className="text-xl md:text-2xl font-semibold text-ink font-display">
           News & Articles
         </h2>
       </div>
 
       <div className="space-y-6">
         {displayArticles.map((article) => (
-          <div key={article.id} className="pb-6 border-b border-[#E8E6E1] last:border-b-0 last:pb-0">
+          <div key={article.id} className="pb-6 border-b border-line last:border-b-0 last:pb-0">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <h3 className="text-xl font-semibold mb-2 font-sans">
@@ -65,13 +65,13 @@ export default function BreweryArticles({ articles, breweryName }: BreweryArticl
                     href={article.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#9B2335] hover:text-[#7A1C2A] hover:underline"
+                    className="text-brand-red hover:text-brand-red-dark hover:underline"
                   >
                     {article.title}
                   </a>
                 </h3>
                 {(article.publishedAt || article.source) && (
-                  <div className="text-body text-[#6B6B6B] mb-3 font-sans">
+                  <div className="text-body text-muted mb-3 font-sans">
                     {article.publishedAt && formatDate(article.publishedAt)}
                     {article.source && (
                       <span>
@@ -82,7 +82,7 @@ export default function BreweryArticles({ articles, breweryName }: BreweryArticl
                   </div>
                 )}
                 {article.description && (
-                  <p className="text-[#1C1C1C] line-clamp-2 text-body font-sans">{article.description}</p>
+                  <p className="text-ink line-clamp-2 text-body font-sans">{article.description}</p>
                 )}
               </div>
               {article.imageUrl && (
@@ -104,7 +104,7 @@ export default function BreweryArticles({ articles, breweryName }: BreweryArticl
         <div className="mt-8 text-center">
           <button
             onClick={() => setShowAll(!showAll)}
-            className="border border-[#E8E6E1] text-[#1C1C1C] hover:bg-[#FAF9F6] hover:border-[#9B2335] px-6 py-3 rounded-md transition-colors font-medium text-body font-sans"
+            className="border border-line text-ink hover:bg-paper hover:border-brand-red px-6 py-3 rounded-md transition-colors font-medium text-body font-sans"
           >
             {showAll ? 'Show Less' : `Show More (${articles.length - INITIAL_DISPLAY_COUNT} more)`}
           </button>

@@ -61,7 +61,7 @@ export default function BreweryLogo({
   return (
     <div className={`${sizeClasses[size]} flex-shrink-0 relative flex items-center justify-center ${className}`} style={{ maxWidth: '100%', maxHeight: '100%' }}>
       {imageLoading && (
-        <div className={`absolute inset-0 bg-gray-100 animate-pulse rounded ${sizeClasses[size]}`} />
+        <div className={`absolute inset-0 bg-cream animate-pulse rounded ${sizeClasses[size]}`} />
       )}
       {isExternal ? (
         // Hosts outside next.config remotePatterns can't go through next/image

@@ -171,10 +171,10 @@ export default async function BestBreweriesSlugPage({ params }: { params: Promis
     ];
 
     return (
-      <div className="min-h-screen bg-[#FAF9F6]">
+      <div className="min-h-screen bg-paper">
         <JsonLd data={jsonLd} />
         {/* Hero Section */}
-        <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
+        <section className="bg-white border-b-4 border-brand-red relative overflow-hidden">
           {/* City Hero Image Background */}
           {cityHeroImage && (
             <div className="absolute inset-0">
@@ -249,19 +249,19 @@ export default async function BestBreweriesSlugPage({ params }: { params: Promis
         {/* The ranking: what makes this page different from the city listing */}
         <section className="border-b bg-white py-8 md:py-12">
           <div className="container mx-auto px-4">
-            <h2 className="mb-2 font-display text-2xl font-bold text-gray-900 md:text-3xl">
+            <h2 className="mb-2 font-display text-2xl font-bold text-ink md:text-3xl">
               The {sortedBreweries.length} best breweries in {cityName}, ranked
             </h2>
-            <p className="mb-6 max-w-3xl text-sm text-gray-600">{SCORE_EXPLANATION}</p>
+            <p className="mb-6 max-w-3xl text-sm text-muted">{SCORE_EXPLANATION}</p>
             <ol className="grid gap-3 md:grid-cols-2">
               {sortedBreweries.map((brewery, index) => (
                 <li key={brewery.id} className="flex gap-3 rounded-lg border p-3">
-                  <span className="w-8 shrink-0 text-right text-lg font-bold text-gray-500">{index + 1}</span>
+                  <span className="w-8 shrink-0 text-right text-lg font-bold text-muted">{index + 1}</span>
                   <div>
-                    <Link href={`/breweries/${brewery.slug}`} className="font-semibold text-gray-900 hover:underline">
+                    <Link href={`/breweries/${brewery.slug}`} className="font-semibold text-ink hover:underline">
                       {brewery.name}
                     </Link>
-                    <p className="text-sm text-gray-600">{rankingReason(brewery)}</p>
+                    <p className="text-sm text-muted">{rankingReason(brewery)}</p>
                   </div>
                 </li>
               ))}

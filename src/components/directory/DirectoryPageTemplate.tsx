@@ -14,8 +14,8 @@ import BreweryTable from '@/components/home/BreweryTable';
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), {
   ssr: false,
   loading: () => (
-    <div className="h-[500px] bg-gray-200 rounded-lg flex items-center justify-center">
-      <div className="text-gray-500">Loading map...</div>
+    <div className="h-[500px] bg-line rounded-lg flex items-center justify-center">
+      <div className="text-muted">Loading map...</div>
     </div>
   ),
 });
@@ -84,7 +84,7 @@ export default function DirectoryPageTemplate({
     <>
       <JsonLd data={structuredData} />
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-cream">
         {/* 1. Hero Section */}
         <PageHero h1={h1} introText={introText} breadcrumbs={breadcrumbs} heroImage={heroImage} />
 
@@ -97,10 +97,10 @@ export default function DirectoryPageTemplate({
         {showMap && breweries.length > 0 && (
           <section className="bg-white py-8 md:py-12">
             <div className="container mx-auto px-4">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-ink mb-6">
                 Interactive Map
               </h2>
-              <div className="h-[400px] md:h-[500px] rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+              <div className="h-[400px] md:h-[500px] rounded-lg overflow-hidden border border-line shadow-sm">
                 <GoogleMap 
                   breweries={breweries} 
                   height="100%" 
@@ -114,12 +114,12 @@ export default function DirectoryPageTemplate({
 
         {/* 4. Directory Table */}
         {showTable && breweries.length > 0 && (
-          <section className="bg-gray-50 py-8 md:py-12">
+          <section className="bg-cream py-8 md:py-12">
             <div className="container mx-auto px-4">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-ink mb-6">
                 All Breweries
               </h2>
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+              <div className="bg-white rounded-lg border border-line shadow-sm overflow-hidden">
                 <BreweryTable breweries={breweries} />
               </div>
             </div>
@@ -136,7 +136,7 @@ export default function DirectoryPageTemplate({
                     key={index}
                     title={block.title}
                     content={block.content}
-                    className={index < contentBlocks.length - 1 ? 'border-b border-gray-200 pb-12' : ''}
+                    className={index < contentBlocks.length - 1 ? 'border-b border-line pb-12' : ''}
                   />
                 ))}
               </div>

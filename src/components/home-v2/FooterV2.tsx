@@ -39,7 +39,7 @@ export default function FooterV2() {
       {/* AdSense Footer Ad */}
       <FooterAd onVisibilityChange={setIsAdVisible} />
       
-      <footer className="bg-[#1C1C1C] border-t border-[#2A2A2A]">
+      <footer className="bg-ink border-t border-ink">
         <div className="container mx-auto px-4 py-8">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
@@ -55,7 +55,7 @@ export default function FooterV2() {
                 <li key={link.href}>
                   <Link 
                     href={link.href} 
-                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm font-sans"
+                    className="text-muted hover:text-white transition-colors text-sm font-sans"
                   >
                     {link.name}
                   </Link>
@@ -76,7 +76,7 @@ export default function FooterV2() {
                 <li key={link.href}>
                   <Link 
                     href={link.href} 
-                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm font-sans"
+                    className="text-muted hover:text-white transition-colors text-sm font-sans"
                   >
                     {link.name}
                   </Link>
@@ -97,7 +97,7 @@ export default function FooterV2() {
                 <li key={link.href}>
                   <Link 
                     href={link.href} 
-                    className="text-[#9CA3AF] hover:text-white transition-colors text-sm font-sans"
+                    className="text-muted hover:text-white transition-colors text-sm font-sans"
                   >
                     {link.name}
                   </Link>
@@ -108,9 +108,9 @@ export default function FooterV2() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-[#2A2A2A] pt-4">
+        <div className="border-t border-ink pt-4">
           <div 
-            className="text-xs text-[#9CA3AF] text-center font-sans"
+            className="text-xs text-muted text-center font-sans"
           >
               <div className="mb-1">
                 MarylandBrewery.com is a copyright © {currentYear} of <Link href="https://bluestonebrands.com" className="text-white underline hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">BluestoneBrands.com</Link>

@@ -51,7 +51,7 @@ export default function BreweryReviews({
           <Star
             key={i}
             className={`w-4 h-4 ${
-              i < rating ? 'fill-[#D4A017] text-[#D4A017]' : 'fill-[#E8E6E1] text-[#E8E6E1]'
+              i < rating ? 'fill-gold text-gold' : 'fill-line text-line'
             }`}
           />
         ))}
@@ -119,26 +119,26 @@ export default function BreweryReviews({
 
   return (
     <div>
-      <h2 className="text-xl md:text-2xl font-semibold text-[#1C1C1C] mb-4 font-display">
+      <h2 className="text-xl md:text-2xl font-semibold text-ink mb-4 font-display">
         Reviews ({totalReviews})
       </h2>
 
       <div className="space-y-6">
         {paginatedReviews.map((review) => (
-          <div key={review.id} className="border-b border-[#E8E6E1] pb-6 last:border-b-0 last:pb-0">
+          <div key={review.id} className="border-b border-line pb-6 last:border-b-0 last:pb-0">
             <div className="flex items-center gap-3 mb-2">
-              <h3 className="font-semibold text-[#1C1C1C] font-sans">
+              <h3 className="font-semibold text-ink font-sans">
                 {formatReviewerName(review.reviewer_name)}
                 <span className="font-normal">{formatSource(review.source)}</span>
               </h3>
               {review.rating && renderStars(review.rating)}
             </div>
-            <div className="text-body text-[#6B6B6B] mb-3 font-sans">
+            <div className="text-body text-muted mb-3 font-sans">
               {formatDate(review.review_date, review.review_timestamp)}
             </div>
             {review.review_text && (
               <div>
-                <p className="text-[#1C1C1C] leading-relaxed text-body font-sans">
+                <p className="text-ink leading-relaxed text-body font-sans">
                   {expandedReviews.has(review.id) || !shouldTruncate(review.review_text)
                     ? review.review_text
                     : getPreviewText(review.review_text)}
@@ -146,7 +146,7 @@ export default function BreweryReviews({
                 {shouldTruncate(review.review_text) && (
                   <button
                     onClick={() => toggleReview(review.id)}
-                    className="mt-2 text-body text-[#9B2335] hover:text-[#7A1C2A] font-medium font-sans"
+                    className="mt-2 text-body text-brand-red hover:text-brand-red-dark font-medium font-sans"
                   >
                     {expandedReviews.has(review.id) ? 'Show less' : 'Read more'}
                   </button>
@@ -162,17 +162,17 @@ export default function BreweryReviews({
           <button
             onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
-            className="border border-[#E8E6E1] text-[#1C1C1C] hover:bg-[#FAF9F6] hover:border-[#9B2335] px-4 py-2 rounded-md transition-colors font-medium text-body font-sans disabled:opacity-50 disabled:cursor-not-allowed"
+            className="border border-line text-ink hover:bg-paper hover:border-brand-red px-4 py-2 rounded-md transition-colors font-medium text-body font-sans disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
           </button>
-          <span className="text-body text-[#6B6B6B] font-sans">
+          <span className="text-body text-muted font-sans">
             Page {currentPage} of {totalPages}
           </span>
           <button
             onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
-            className="border border-[#E8E6E1] text-[#1C1C1C] hover:bg-[#FAF9F6] hover:border-[#9B2335] px-4 py-2 rounded-md transition-colors font-medium text-body font-sans disabled:opacity-50 disabled:cursor-not-allowed"
+            className="border border-line text-ink hover:bg-paper hover:border-brand-red px-4 py-2 rounded-md transition-colors font-medium text-body font-sans disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
           </button>

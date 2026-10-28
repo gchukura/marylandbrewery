@@ -10,8 +10,8 @@ import { amenityByDbValue } from '@/lib/amenities';
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
   ssr: false, 
   loading: () => (
-    <div className="h-full w-full bg-gray-200 rounded-lg flex items-center justify-center">
-      <div className="text-gray-500 text-sm">Loading map...</div>
+    <div className="h-full w-full bg-line rounded-lg flex items-center justify-center">
+      <div className="text-muted text-sm">Loading map...</div>
     </div>
   )
 });
@@ -72,15 +72,15 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
     <div className="space-y-4">
       <div className="grid grid-cols-1 lg:grid-cols-[650px_1fr] gap-4 max-w-[1700px] mx-auto">
         {/* Left Side - Filterable List */}
-        <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[600px] lg:h-[700px]">
+        <div className="flex flex-col bg-white border border-line rounded-lg overflow-hidden h-[600px] lg:h-[700px]">
         {/* Filter Header */}
-        <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+        <div className="p-4 border-b border-line bg-cream flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Brewery Directory</h2>
+            <h2 className="text-xl font-bold text-ink">Brewery Directory</h2>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="text-sm text-red-600 hover:text-red-700 flex items-center gap-1"
+                className="text-sm text-brand-red hover:text-brand-red flex items-center gap-1"
               >
                 <X className="h-4 w-4" />
                 Clear Filters
@@ -90,18 +90,18 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
 
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted" />
             <input
               type="text"
               placeholder="Search breweries..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
+              className="w-full pl-10 pr-4 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent text-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
           {/* Results Count */}
-          <div className="mt-3 text-sm text-gray-600">
+          <div className="mt-3 text-sm text-muted">
             Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries in {isRegion ? countyName : `${countyName} County`}{isMdRoute ? (isRegion ? ', MD' : ', Maryland') : ''}
             {filtered.length !== breweries.length && ` (filtered from ${breweries.length} total)`}
           </div>
@@ -110,19 +110,19 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
         {/* Brewery List - Scrollable */}
         <div id="brewery-list" className="flex-1 overflow-y-auto min-h-0">
           {filtered.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-muted">
               <p>No breweries found matching your filters.</p>
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="mt-2 text-red-600 hover:text-red-700 text-sm"
+                  className="mt-2 text-brand-red hover:text-brand-red text-sm"
                 >
                   Clear filters to see all breweries
                 </button>
               )}
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-line">
               {paginatedBreweries.map((brewery) => {
                 const slug = brewery.slug || brewery.id;
                 return (
@@ -138,7 +138,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                       {/* Logo on the left */}
                       {brewery.logo ? (
                         <div className="flex-shrink-0">
-                          <div className="w-16 h-16 border-2 border-gray-300 rounded bg-white flex items-center justify-center p-1.5 shadow-sm">
+                          <div className="w-16 h-16 border-2 border-line-strong rounded bg-white flex items-center justify-center p-1.5 shadow-sm">
                             <BreweryLogo 
                               logo={brewery.logo} 
                               breweryName={brewery.name}
@@ -150,8 +150,8 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                       ) : (
                         // Placeholder for breweries without logos
                         <div className="flex-shrink-0">
-                          <div className="w-16 h-16 border-2 border-gray-200 rounded bg-gray-50 flex items-center justify-center">
-                            <div className="text-gray-400 text-xs font-semibold text-center px-1">
+                          <div className="w-16 h-16 border-2 border-line rounded bg-cream flex items-center justify-center">
+                            <div className="text-muted text-xs font-semibold text-center px-1">
                               {brewery.name?.substring(0, 2).toUpperCase() || 'BW'}
                             </div>
                           </div>
@@ -162,20 +162,20 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                       <div className="flex-1 min-w-0 grid grid-cols-2 gap-4">
                         {/* Name Column */}
                         <div className="min-w-0">
-                          <h3 className="font-semibold text-[#9B2335] text-base mb-1">
+                          <h3 className="font-semibold text-brand-red text-base mb-1">
                             {brewery.name}
                           </h3>
                           {/* Maryland Brewery in City, MD */}
                           {brewery.city && (
-                            <div className="text-sm font-bold text-gray-700 mt-0.5 mb-1">
+                            <div className="text-sm font-bold text-muted mt-0.5 mb-1">
                               Maryland Brewery in {brewery.city}, MD
                             </div>
                           )}
                           {/* Reviews below name */}
                           {brewery.googleRating && (
                             <div className="flex items-center gap-1 mt-1">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="text-sm text-gray-700">
+                              <Star className="h-4 w-4 fill-gold text-gold" />
+                              <span className="text-sm text-muted">
                                 {brewery.googleRating.toFixed(1)}{brewery.googleRatingCount ? ` - ${brewery.googleRatingCount} ${brewery.googleRatingCount === 1 ? 'review' : 'reviews'}` : ''}
                               </span>
                             </div>
@@ -183,7 +183,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                         </div>
                         
                         {/* Address Column */}
-                        <div className="min-w-0 text-sm text-gray-600">
+                        <div className="min-w-0 text-sm text-muted">
                           <div className="flex items-start mb-1">
                             <MapPin className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
@@ -246,7 +246,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                               <Link
                                 key={a}
                                 href={`/amenities/${amenitySlug}`}
-                                className="inline-flex items-center justify-center text-xs text-[#9B2335] bg-white border border-[#9B2335] hover:bg-[#9B2335] hover:text-white px-2 py-1 rounded transition-colors font-medium whitespace-nowrap"
+                                className="inline-flex items-center justify-center text-xs text-brand-red bg-white border border-brand-red hover:bg-brand-red hover:text-white px-2 py-1 rounded transition-colors font-medium whitespace-nowrap"
                               >
                                 {a.trim()}
                               </Link>
@@ -264,16 +264,16 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
 
         {/* Pagination */}
         {filtered.length > itemsPerPage && (
-          <div className="p-3 sm:p-4 border-t border-gray-200 bg-gray-50">
+          <div className="p-3 sm:p-4 border-t border-line bg-cream">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
-              <div className="text-xs sm:text-sm text-gray-600 order-2 sm:order-1 whitespace-nowrap">
+              <div className="text-xs sm:text-sm text-muted order-2 sm:order-1 whitespace-nowrap">
                 Page {currentPage} of {totalPages}
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2 order-1 sm:order-2">
                 <button
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="p-2.5 sm:p-2 border border-gray-300 rounded-lg hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation"
+                  className="p-2.5 sm:p-2 border border-line-strong rounded-lg hover:bg-cream active:bg-line disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation"
                   aria-label="Previous page"
                 >
                   <ChevronLeft className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -317,8 +317,8 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                             isVisibleOnMobile ? 'flex' : 'hidden sm:flex'
                           } ${
                             currentPage === pageNum
-                              ? 'bg-[#9B2335] text-white border-[#9B2335]'
-                              : 'border-gray-300 hover:bg-gray-100 active:bg-gray-200'
+                              ? 'bg-brand-red text-white border-brand-red'
+                              : 'border-line-strong hover:bg-cream active:bg-line'
                           }`}
                         >
                           {pageNum}
@@ -331,7 +331,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                 <button
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="p-2.5 sm:p-2 border border-gray-300 rounded-lg hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation"
+                  className="p-2.5 sm:p-2 border border-line-strong rounded-lg hover:bg-cream active:bg-line disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation"
                   aria-label="Next page"
                 >
                   <ChevronRight className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -344,7 +344,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
 
         {/* Right Side - Map */}
         <div className="flex flex-col space-y-4">
-          <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden h-[400px]">
+          <div className="flex flex-col bg-white border border-line rounded-lg overflow-hidden h-[400px]">
             <div className="flex-1 min-h-0 relative">
               {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
                 <GoogleMap 
@@ -354,7 +354,7 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                   zoom={9}
                 />
               ) : (
-                <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center text-sm text-gray-600 px-4">
+                <div className="h-full w-full bg-cream rounded-lg flex items-center justify-center text-sm text-muted px-4">
                   Map is unavailable: missing Google Maps API key. Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY and redeploy.
                 </div>
               )}
@@ -362,14 +362,14 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
           </div>
 
           {/* About Section */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 mt-4">
+          <div className="bg-white border border-line rounded-lg p-6 mt-4">
             <h2 
-              className="font-display text-3xl md:text-4xl font-bold text-[#1C1C1C] mb-6"
+              className="font-display text-3xl md:text-4xl font-bold text-ink mb-6"
             >
               About Maryland Brewery Directory
             </h2>
             <div 
-              className="prose prose-lg text-[#6B6B6B] space-y-4"
+              className="prose prose-lg text-muted space-y-4"
             >
               <p>
                 Maryland Brewery Directory is your complete guide to craft breweries across Maryland. 
@@ -377,8 +377,8 @@ export default function CountyBreweriesMapClient({ breweries, countyName, isMdRo
                 hours, amenities, and beer selections.
               </p>
               <p>
-                <strong className="text-[#1C1C1C]">Brewery Owners:</strong> Want to list your brewery or update 
-                your information? <Link href="/contact" className="text-[#9B2335] hover:text-[#D4A017] transition-colors underline">
+                <strong className="text-ink">Brewery Owners:</strong> Want to list your brewery or update 
+                your information? <Link href="/contact" className="text-brand-red hover:text-brand-red-dark transition-colors underline">
                   Contact us
                 </Link> to get started.
               </p>

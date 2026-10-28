@@ -54,10 +54,10 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
   if (!city) {
     // Return a not found page if city is missing
     return (
-      <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center">
+      <div className="min-h-screen bg-paper flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-4">City Not Found</h1>
-          <p className="text-lg text-gray-600">The requested city page could not be found.</p>
+          <p className="text-lg text-muted">The requested city page could not be found.</p>
         </div>
       </div>
     );
@@ -158,10 +158,10 @@ export default async function CityBreweriesPage({ params }: { params: Promise<{ 
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6]">
+    <div className="min-h-screen bg-paper">
       <JsonLd data={jsonLd} />
       {/* Hero Section */}
-      <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
+      <section className="bg-white border-b-4 border-brand-red relative overflow-hidden">
         {/* City Hero Image Background */}
         {cityHeroImage && (
           <div className="absolute inset-0">

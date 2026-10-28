@@ -154,10 +154,10 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6]">
+    <div className="min-h-screen bg-paper">
       <JsonLd data={jsonLd} />
       {/* Hero Section */}
-      <section className="bg-white border-b-4 border-[#9B2335] relative overflow-hidden">
+      <section className="bg-white border-b-4 border-brand-red relative overflow-hidden">
         {/* County Hero Image Background */}
         {countyHeroImage && (
           <div className="absolute inset-0">
@@ -183,11 +183,11 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
         <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
           {/* Breadcrumbs */}
           <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className={`flex items-center flex-wrap gap-2 text-sm ${countyHeroImage ? 'text-white/90' : ''}`} style={{ color: countyHeroImage ? undefined : '#6B6B6B' }}>
+            <ol className={`flex items-center flex-wrap gap-2 text-sm ${countyHeroImage ? 'text-white/90' : ''}`} style={{ color: countyHeroImage ? undefined : 'var(--color-muted)' }}>
               <li>
                 <Link 
                   href="/" 
-                  className={`transition-colors ${countyHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-[#9B2335]'}`}
+                  className={`transition-colors ${countyHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-brand-red'}`}
                 >
                   Maryland Breweries
                 </Link>
@@ -196,7 +196,7 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
               <li>
                 <Link 
                   href="/counties" 
-                  className={`transition-colors ${countyHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-[#9B2335]'}`}
+                  className={`transition-colors ${countyHeroImage ? 'hover:text-white drop-shadow-md' : 'hover:text-brand-red'}`}
                 >
                   Counties
                 </Link>
@@ -205,7 +205,7 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
               <li>
                 <Link 
                   href={`/counties/${county}/breweries`} 
-                  className={`font-medium transition-colors ${countyHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-[#1C1C1C] hover:text-[#9B2335]'}`}
+                  className={`font-medium transition-colors ${countyHeroImage ? 'text-white drop-shadow-md hover:text-white' : 'text-ink hover:text-brand-red'}`}
                 >
                   {isMdRoute ? `${countyName} County, Maryland` : `${countyName} County`}
                 </Link>
@@ -218,7 +218,7 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
             className={`font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight ${
               countyHeroImage 
                 ? 'text-white drop-shadow-lg' 
-                : 'text-[#1C1C1C]'
+                : 'text-ink'
             }`} style={{ textShadow: countyHeroImage ? '2px 2px 4px rgba(0,0,0,0.5)' : undefined }}
           >
             {isMdRoute ? `Breweries in ${countyName} County, Maryland` : `Breweries in ${countyName} County`}
@@ -229,10 +229,10 @@ export default async function CountyBreweriesPage({ params }: { params: Promise<
             className={`text-lg md:text-xl mb-6 ${
               countyHeroImage 
                 ? 'text-white/95 drop-shadow-md' 
-                : 'text-[#6B6B6B]'
+                : 'text-muted'
             }`}
           >
-            <strong className={countyHeroImage ? 'text-white font-semibold' : 'text-[#1C1C1C] font-semibold'}>{totalBreweries}</strong> {totalBreweries === 1 ? 'brewery' : 'breweries'} found.
+            <strong className={countyHeroImage ? 'text-white font-semibold' : 'text-ink font-semibold'}>{totalBreweries}</strong> {totalBreweries === 1 ? 'brewery' : 'breweries'} found.
           </p>
         </div>
       </section>

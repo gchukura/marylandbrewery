@@ -51,7 +51,7 @@ export default function FAQPage() {
   ];
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-cream min-h-screen">
       <PageHero
         h1="Frequently Asked Questions"
         introText="Find answers to common questions about Maryland breweries and using our directory."
@@ -62,21 +62,21 @@ export default function FAQPage() {
       <div className="max-w-3xl mx-auto px-4 py-12">
         <div className="space-y-4">
           {faqs.map((faq, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">{faq.question}</h3>
-              <p className="text-gray-700">{faq.answer}</p>
+            <div key={index} className="bg-white rounded-lg shadow-sm border border-line p-6">
+              <h3 className="text-xl font-semibold text-ink mb-3">{faq.question}</h3>
+              <p className="text-muted">{faq.answer}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-12 bg-[#FAF9F6] border border-[#E8E6E1] rounded-lg p-6 text-center">
-          <h3 className="text-xl font-semibold text-gray-900 mb-3">Still Have Questions?</h3>
-          <p className="text-gray-700 mb-4">
+        <div className="mt-12 bg-paper border border-line rounded-lg p-6 text-center">
+          <h3 className="text-xl font-semibold text-ink mb-3">Still Have Questions?</h3>
+          <p className="text-muted mb-4">
             Can't find what you're looking for? Contact us and we'll be happy to help.
           </p>
           <a
             href="/contact"
-            className="inline-block bg-[#9B2335] text-white font-semibold px-6 py-2 rounded hover:bg-[#7A1C2A] transition-colors"
+            className="inline-block bg-brand-red text-white font-semibold px-6 py-2 rounded hover:bg-brand-red-dark transition-colors"
           >
             Contact Us
           </a>

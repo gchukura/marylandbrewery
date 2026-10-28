@@ -12,8 +12,8 @@ export default function SectionHeader({ title, subtitle, actions, className = ''
     <div className={`mb-8 ${className}`}>
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h2 className="text-h2 font-bold text-gray-900">{title}</h2>
-          {subtitle && <p className="mt-1 text-small text-gray-600">{subtitle}</p>}
+          <h2 className="text-h2 font-bold text-ink">{title}</h2>
+          {subtitle && <p className="mt-1 text-small text-muted">{subtitle}</p>}
         </div>
         {actions && <div className="shrink-0">{actions}</div>}
       </div>

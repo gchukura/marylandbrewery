@@ -8,7 +8,7 @@ import dynamic from 'next/dynamic';
 const Tooltip = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <span className="group relative inline-flex items-center">
     {children}
-    <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+    <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-ink px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
       {label}
     </span>
   </span>
@@ -64,8 +64,8 @@ export default function AmenityIcons({
         const Icon = getLucide(iconName);
         return (
           <Tooltip key={key} label={key}>
-            <Suspense fallback={<span className="h-6 w-6 rounded bg-gray-200" />}> 
-              <span className="inline-flex items-center justify-center rounded-full bg-red-50 text-red-700 border border-red-100 p-1">
+            <Suspense fallback={<span className="h-6 w-6 rounded bg-line" />}> 
+              <span className="inline-flex items-center justify-center rounded-full bg-cream text-brand-red border border-line-strong p-1">
                 <Icon className={iconClassName} />
               </span>
             </Suspense>
@@ -74,7 +74,7 @@ export default function AmenityIcons({
       })}
 
       {amenities.length > max && (
-        <span className="text-xs text-gray-500">+{amenities.length - max} more</span>
+        <span className="text-xs text-muted">+{amenities.length - max} more</span>
       )}
     </div>
   );

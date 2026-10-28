@@ -11,8 +11,8 @@ import { amenityByDbValue } from '@/lib/amenities';
 const GoogleMap = dynamic(() => import('@/components/maps/GoogleMap'), { 
   ssr: false, 
   loading: () => (
-    <div className="h-full w-full bg-[#FAF9F6] rounded-lg flex items-center justify-center">
-      <div className="text-[#6B6B6B] text-sm font-sans">Loading map...</div>
+    <div className="h-full w-full bg-paper rounded-lg flex items-center justify-center">
+      <div className="text-muted text-sm font-sans">Loading map...</div>
     </div>
   )
 });
@@ -79,15 +79,15 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[650px_1fr] gap-4 max-w-[1700px] mx-auto">
       {/* Left Side - Filterable List */}
-      <div className="flex flex-col bg-white border border-[#E8E6E1] rounded-lg overflow-hidden h-[600px] lg:h-[1000px]">
+      <div className="flex flex-col bg-white border border-line rounded-lg overflow-hidden h-[600px] lg:h-[1000px]">
         {/* Filter Header */}
-        <div className="p-4 border-b border-[#E8E6E1] bg-[#FAF9F6] flex-shrink-0 font-sans">
+        <div className="p-4 border-b border-line bg-paper flex-shrink-0 font-sans">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-[#1C1C1C] font-display">Brewery Directory</h2>
+            <h2 className="text-xl font-bold text-ink font-display">Brewery Directory</h2>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="text-sm text-[#9B2335] hover:text-[#7A1C2A] flex items-center gap-1 font-sans"
+                className="text-sm text-brand-red hover:text-brand-red-dark flex items-center gap-1 font-sans"
               >
                 <X className="h-4 w-4" />
                 Clear Filters
@@ -97,18 +97,18 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
 
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6B6B6B]" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted" />
             <input
               type="text"
               placeholder="Search breweries..."
-              className="w-full pl-10 pr-4 py-2 border border-[#E8E6E1] rounded-lg focus:ring-2 focus:ring-[#9B2335] focus:border-transparent text-sm font-sans"
+              className="w-full pl-10 pr-4 py-2 border border-line rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent text-sm font-sans"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
           {/* Results Count */}
-          <div className="mt-3 text-sm text-[#6B6B6B] font-sans">
+          <div className="mt-3 text-sm text-muted font-sans">
             Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} breweries
             {filtered.length !== breweries.length && ` (filtered from ${breweries.length} total)`}
           </div>
@@ -117,28 +117,28 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
         {/* Brewery List - Scrollable */}
         <div id="brewery-list" className="flex-1 overflow-y-auto min-h-0">
           {filtered.length === 0 ? (
-            <div className="p-8 text-center text-[#6B6B6B] font-sans">
+            <div className="p-8 text-center text-muted font-sans">
               <p className="text-base font-medium mb-2">
                 {search.trim() 
                   ? `No breweries found matching "${search}"`
                   : 'No breweries found matching your filters.'}
               </p>
               {search.trim() && (
-                <p className="text-sm text-[#6B6B6B] mb-4">
+                <p className="text-sm text-muted mb-4">
                   Try searching by brewery name or a different city name.
                 </p>
               )}
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="mt-2 text-[#9B2335] hover:text-[#7A1C2A] text-sm font-medium font-sans"
+                  className="mt-2 text-brand-red hover:text-brand-red-dark text-sm font-medium font-sans"
                 >
                   Clear filters to see all breweries
                 </button>
               )}
             </div>
           ) : (
-            <div className="divide-y divide-[#E8E6E1]">
+            <div className="divide-y divide-line">
               {paginatedBreweries.map((brewery) => {
                 const slug = brewery.slug || brewery.id;
                 return (
@@ -151,7 +151,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                         {/* Logo on the left - square with border like inspiration */}
                         {brewery.logo ? (
                           <div className="flex-shrink-0">
-                            <div className="w-16 h-16 border-2 border-[#E8E6E1] rounded bg-white flex items-center justify-center p-1.5 shadow-sm">
+                            <div className="w-16 h-16 border-2 border-line rounded bg-white flex items-center justify-center p-1.5 shadow-sm">
                               <BreweryLogo 
                                 logo={brewery.logo} 
                                 breweryName={brewery.name}
@@ -163,8 +163,8 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                         ) : (
                           // Placeholder for breweries without logos
                           <div className="flex-shrink-0">
-                            <div className="w-16 h-16 border-2 border-[#E8E6E1] rounded bg-[#FAF9F6] flex items-center justify-center">
-                              <div className="text-[#6B6B6B] text-xs font-semibold text-center px-1 font-sans">
+                            <div className="w-16 h-16 border-2 border-line rounded bg-paper flex items-center justify-center">
+                              <div className="text-muted text-xs font-semibold text-center px-1 font-sans">
                                 {brewery.name?.substring(0, 2).toUpperCase() || 'BW'}
                               </div>
                             </div>
@@ -175,20 +175,20 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                         <div className="flex-1 min-w-0 grid grid-cols-2 gap-4">
                           {/* Name Column */}
                           <div className="min-w-0">
-                            <h3 className="font-semibold text-[#9B2335] text-base mb-1">
+                            <h3 className="font-semibold text-brand-red text-base mb-1">
                               {brewery.name}
                             </h3>
                             {/* Maryland Brewery in City, MD */}
                             {brewery.city && (
-                              <div className="text-sm font-bold text-[#1C1C1C] mb-1 font-sans">
+                              <div className="text-sm font-bold text-ink mb-1 font-sans">
                                 Maryland Brewery in {brewery.city}, MD
                               </div>
                             )}
                             {/* Reviews below name */}
                             {brewery.googleRating && (
                               <div className="flex items-center gap-1 mt-1">
-                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                <span className="text-sm text-[#1C1C1C] font-sans">
+                                <Star className="h-4 w-4 fill-gold text-gold" />
+                                <span className="text-sm text-ink font-sans">
                                   {brewery.googleRating.toFixed(1)}{brewery.googleRatingCount ? ` - ${brewery.googleRatingCount} ${brewery.googleRatingCount === 1 ? 'review' : 'reviews'}` : ''}
                                 </span>
                               </div>
@@ -196,7 +196,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                           </div>
                           
                           {/* Address Column */}
-                          <div className="min-w-0 text-sm text-[#6B6B6B] font-sans">
+                          <div className="min-w-0 text-sm text-muted font-sans">
                             <div className="flex items-start mb-1">
                               <MapPin className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
                               <div className="flex-1">
@@ -259,7 +259,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                               <Link
                                 key={a}
                                 href={`/amenities/${amenitySlug}`}
-                                className="inline-flex items-center justify-center text-xs text-[#9B2335] bg-white border border-[#9B2335] hover:bg-[#9B2335] hover:text-white px-2 py-1 rounded transition-colors font-medium whitespace-nowrap font-sans"
+                                className="inline-flex items-center justify-center text-xs text-brand-red bg-white border border-brand-red hover:bg-brand-red hover:text-white px-2 py-1 rounded transition-colors font-medium whitespace-nowrap font-sans"
                               >
                                 {a.trim()}
                               </Link>
@@ -277,16 +277,16 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
 
         {/* Pagination */}
         {filtered.length > itemsPerPage && (
-          <div className="p-3 sm:p-4 border-t border-[#E8E6E1] bg-[#FAF9F6]">
+          <div className="p-3 sm:p-4 border-t border-line bg-paper">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
-              <div className="text-xs sm:text-sm text-[#6B6B6B] order-2 sm:order-1 whitespace-nowrap font-sans">
+              <div className="text-xs sm:text-sm text-muted order-2 sm:order-1 whitespace-nowrap font-sans">
                 Page {currentPage} of {totalPages}
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2 order-1 sm:order-2">
                 <button
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="p-2.5 sm:p-2 border border-[#E8E6E1] rounded-lg hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation font-sans"
+                  className="p-2.5 sm:p-2 border border-line rounded-lg hover:bg-cream active:bg-line disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation font-sans"
                   aria-label="Previous page"
                 >
                   <ChevronLeft className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -330,8 +330,8 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                             isVisibleOnMobile ? 'flex' : 'hidden sm:flex'
                           } ${
                             currentPage === pageNum
-                              ? 'bg-[#9B2335] text-white border-[#9B2335] font-sans'
-                              : 'border-[#E8E6E1] hover:bg-gray-100 active:bg-gray-200 font-sans'
+                              ? 'bg-brand-red text-white border-brand-red font-sans'
+                              : 'border-line hover:bg-cream active:bg-line font-sans'
                           }`}
                         >
                           {pageNum}
@@ -344,7 +344,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
                 <button
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="p-2.5 sm:p-2 border border-[#E8E6E1] rounded-lg hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation font-sans"
+                  className="p-2.5 sm:p-2 border border-line rounded-lg hover:bg-cream active:bg-line disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] flex items-center justify-center touch-manipulation font-sans"
                   aria-label="Next page"
                 >
                   <ChevronRight className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -356,7 +356,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
       </div>
 
       {/* Right Side - Map */}
-      <div className="flex flex-col bg-white border border-[#E8E6E1] rounded-lg overflow-hidden h-[600px] lg:h-[1000px]">
+      <div className="flex flex-col bg-white border border-line rounded-lg overflow-hidden h-[600px] lg:h-[1000px]">
         <div className="flex-1 min-h-0 relative">
           {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
             <GoogleMap 
@@ -366,7 +366,7 @@ export default function MapWithListClient({ breweries }: MapWithListClientProps)
               zoom={9}
             />
           ) : (
-            <div className="h-full w-full bg-[#FAF9F6] rounded-lg flex items-center justify-center text-sm text-[#6B6B6B] px-4 font-sans">
+            <div className="h-full w-full bg-paper rounded-lg flex items-center justify-center text-sm text-muted px-4 font-sans">
               Map is unavailable: missing Google Maps API key. Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY and redeploy.
             </div>
           )}

@@ -16,6 +16,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { getBreweryDataFromSupabase } from '@/lib/db/queries';
 import { MEDIA_BUCKET, logoPath as mediaLogoPath, processLogo, publicMediaUrl, uploadIfChanged } from './lib/media';
 import { getAdminClient } from '@/lib/db/client';
+import { pageMatchesBrewery, pageTitle } from './lib/brewery-site';
 import { updateBreweryLogoInSupabase } from '@/lib/db/queries';
 
 // Load environment variables
@@ -185,7 +186,12 @@ async function findLogoOnWebsite(websiteUrl: string, breweryName: string): Promi
     }
     
     const html = await response.text();
-    const baseUrl = new URL(url).origin;
+    // A stale or hijacked domain would hand us another business's logo
+    if (!pageMatchesBrewery(breweryName, response.url || url, pageTitle(html))) {
+      console.log(`   ⚠️  ${response.url || url} ("${pageTitle(html).slice(0, 60)}") doesn't look like ${breweryName}; skipping`);
+      return null;
+    }
+    const baseUrl = new URL(response.url || url).origin;
     
     // Common logo patterns to search for
     const logoPatterns = [

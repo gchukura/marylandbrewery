@@ -27,6 +27,7 @@
     "data:reviews:counts": "tsx scripts/check-review-counts.ts",
     "data:news": "tsx scripts/fetch-brewery-news.ts",
     "data:logos": "tsx scripts/fetch-brewery-logos.ts",
+    "data:check-websites": "tsx scripts/check-brewery-websites.ts",
     "data:photos": "tsx scripts/download-google-photos.ts",
     "data:geocode": "tsx scripts/geocode-breweries.ts",
     "data:verify-coordinates": "tsx scripts/verify-brewery-coordinates.ts",

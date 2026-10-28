@@ -14,7 +14,7 @@ import {
   hasBestBreweriesPage,
   rankingReason,
 } from '@/lib/best-breweries';
-import { parseNeighborhoodSlug } from '@/lib/neighborhood-utils';
+import { resolveLegacyNeighborhoodSlug } from '@/lib/neighborhood-utils';
 import { neighborhoodPath } from '@/lib/neighborhoods';
 import Link from 'next/link';
 import { buildMetadata } from '@/lib/seo/metadata';
@@ -85,9 +85,9 @@ export default async function BestBreweriesSlugPage({
   }
 
   // Neighborhood pages moved to /neighborhoods/[slug]
-  const neighborhoodData = await parseNeighborhoodSlug(slug);
-  if (neighborhoodData) {
-    permanentRedirect(neighborhoodPath(neighborhoodData.neighborhood.slug));
+  const neighborhoodSlug = await resolveLegacyNeighborhoodSlug(slug);
+  if (neighborhoodSlug) {
+    permanentRedirect(neighborhoodPath(neighborhoodSlug));
   }
 
   // Handle both regular and -md suffixed routes

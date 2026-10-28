@@ -25,11 +25,10 @@ export default function CustomerReviewsPage() {
       <section>
         <h2>The Power of Customer Reviews</h2>
         <p>
-          Customer reviews are one of the most influential factors in a
-          consumer's decision to visit your brewery. Studies show that the
-          majority of customers read reviews before making a purchase decision,
-          and positive reviews can significantly increase foot traffic and
-          sales.
+          Many people read reviews before choosing a brewery to visit. On
+          Maryland Brewery, the rating, review count and review highlights on
+          your page come from your Google reviews, so the advice below applies
+          to how your brewery looks here too.
         </p>
       </section>
 
@@ -108,8 +107,9 @@ export default function CustomerReviewsPage() {
       <section className="rounded-panel bg-cream p-6">
         <h3>Learn More</h3>
         <p>
-          For more information about reviews and how they work on our platform,
-          check out our review guidelines.
+          Visitors can&apos;t post reviews on Maryland Brewery; everything shown
+          comes from Google. Our review guidelines explain where reviews come
+          from and how to write a helpful one.
         </p>
         <Link href="/review-guidelines" className={buttonVariants()}>
           Review Guidelines

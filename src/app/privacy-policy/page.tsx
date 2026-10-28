@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
     >
       <section>
         <p>
-          <strong>Last updated:</strong> January 6, 2026
+          <strong>Last updated:</strong> October 28, 2026
         </p>
         <p>
           MarylandBrewery.com ("we," "our," or "us") is committed to protecting
@@ -45,7 +45,6 @@ export default function PrivacyPolicyPage() {
             form
           </li>
           <li>Brewery information when you submit a brewery for listing</li>
-          <li>Reviews and comments you post on our site</li>
           <li>Newsletter subscription information</li>
         </ul>
 

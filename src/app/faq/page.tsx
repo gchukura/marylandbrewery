@@ -34,9 +34,9 @@ export default function FAQPage() {
         'Brewery owners can contact us through our contact form or use the "Add Your Brewery" link in the footer. We welcome updates to keep our directory accurate.',
     },
     {
-      question: 'Can I review breweries?',
+      question: 'Can I review breweries here?',
       answer:
-        'Yes! We encourage honest, helpful reviews. Please see our Review Guidelines for best practices on writing effective reviews.',
+        'Not on this site. The ratings and review excerpts on brewery pages come from Google reviews, so to review a brewery, leave your review on Google. Our Review Guidelines page has tips for writing a helpful one.',
     },
     {
       question: 'Is this site affiliated with the breweries listed?',

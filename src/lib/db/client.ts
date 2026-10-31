@@ -6,7 +6,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 
-export type { Database, Json, Tables, TablesInsert, TablesUpdate } from './database.types';
+export type { Database, Json, Tables, TablesInsert } from './database.types';
 
 export type TypedClient = SupabaseClient<Database>;
 

@@ -7,7 +7,7 @@
 import 'server-only';
 
 // The clients stay private to this folder; the generated row types are public: Tables<'breweries'> etc.
-export type { Database, Json, Tables } from './client';
+export type { Tables } from './client';
 export * from './queries';
 export * from './attractions';
 export * from './brewery-data';

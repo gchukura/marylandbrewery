@@ -12,16 +12,7 @@
   "ignoreDependencies": [
     "eslint-config-next",
     "lightningcss",
-    "mapshaper",
-    "postcss"
-  ],
-  "ignoreBinaries": [
-    "google.com",
-    "facebook.com",
-    "instagram.com",
-    "twitter.com",
-    "yelp.com",
-    "untappd.com"
+    "mapshaper"
   ],
   "ignoreExportsUsedInFile": {
     "interface": true,
